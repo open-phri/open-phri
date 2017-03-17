@@ -1,3 +1,5 @@
 -std=c++14
--Iinclude
+-Iinclude/RSCL
+-Iinclude/vrep-remote-api
 -I/usr/include/eigen3
+-Wno-pragma-once-outside-header
