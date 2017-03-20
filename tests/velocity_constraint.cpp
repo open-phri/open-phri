@@ -33,19 +33,19 @@ int main(int argc, char const *argv[]) {
 	// Step #1 : no velocity
 	safety_controller.updateTCPVelocity();
 
-	assert(("Step #1", tcp_velocity->isZero()));
+	assert_msg("Step #1", tcp_velocity->isZero());
 
 	// Step #2 : velocity 1 axis < max
 	(*constant_vel)(0) = 0.2;
 	safety_controller.updateTCPVelocity();
 
-	assert(("Step #2", tcp_velocity->isApprox(*total_velocity)));
+	assert_msg("Step #2", tcp_velocity->isApprox(*total_velocity));
 
 	// Step #3 : velocity 1 axis > max
 	(*constant_vel)(0) = 0.6;
 	safety_controller.updateTCPVelocity();
 
-	assert(("Step #3", isClose(translation_velocity.norm(), *maximum_velocity)));
+	assert_msg("Step #3", isClose(translation_velocity.norm(), *maximum_velocity));
 
 	// Step #4 : velocity 3 axes < max
 	(*constant_vel)(0) = 0.2;
@@ -53,7 +53,7 @@ int main(int argc, char const *argv[]) {
 	(*constant_vel)(2) = 0.3;
 	safety_controller.updateTCPVelocity();
 
-	assert(("Step #4", tcp_velocity->isApprox(*total_velocity)));
+	assert_msg("Step #4", tcp_velocity->isApprox(*total_velocity));
 
 	// Step #5 : velocity 3 axes > max
 	(*constant_vel)(0) = 0.5;
@@ -61,7 +61,7 @@ int main(int argc, char const *argv[]) {
 	(*constant_vel)(2) = 0.6;
 	safety_controller.updateTCPVelocity();
 
-	assert(("Step #5", isClose(translation_velocity.norm(), *maximum_velocity)));
+	assert_msg("Step #5", isClose(translation_velocity.norm(), *maximum_velocity));
 
 	// Step #6 : rotational velocity only
 	constant_vel->setZero();
@@ -70,7 +70,7 @@ int main(int argc, char const *argv[]) {
 	(*constant_vel)(5) = 0.6;
 	safety_controller.updateTCPVelocity();
 
-	assert(("Step #6", tcp_velocity->isApprox(*total_velocity)));
+	assert_msg("Step #6", tcp_velocity->isApprox(*total_velocity));
 
 	return 0;
 }

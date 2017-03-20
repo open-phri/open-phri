@@ -29,14 +29,14 @@ int main(int argc, char const *argv[]) {
 	// Step #1 : no velocity, no force
 	safety_controller.updateTCPVelocity();
 
-	assert(("Step #1", tcp_velocity->isZero()));
+	assert_msg("Step #1", tcp_velocity->isZero());
 
 	// Step #2 : velocity 1 axis, no force
 	(*constant_vel)(0) = 0.5;
 
 	safety_controller.updateTCPVelocity();
 
-	assert(("Step #2", isClose(tcp_velocity->norm(), 0.5)));
+	assert_msg("Step #2", isClose(tcp_velocity->norm(), 0.5));
 
 	// Step #3 : velocity 2 axes, no force
 	(*constant_vel)(0) = 1.;
@@ -44,7 +44,7 @@ int main(int argc, char const *argv[]) {
 
 	safety_controller.updateTCPVelocity();
 
-	assert(("Step #3", isClose(tcp_velocity->norm(), std::sqrt(2.))));
+	assert_msg("Step #3", isClose(tcp_velocity->norm(), std::sqrt(2.)));
 
 	// Step #4 : no velocity, force 1 axis
 	constant_vel->setZero();
@@ -52,7 +52,7 @@ int main(int argc, char const *argv[]) {
 
 	safety_controller.updateTCPVelocity();
 
-	assert(("Step #4", isClose(tcp_velocity->norm(), 2.)));
+	assert_msg("Step #4", isClose(tcp_velocity->norm(), 2.));
 
 	// Step #5 : no velocity, force 2 axes
 	(*constant_force)(2) = 10.;
@@ -60,7 +60,7 @@ int main(int argc, char const *argv[]) {
 
 	safety_controller.updateTCPVelocity();
 
-	assert(("Step #5", isClose(tcp_velocity->norm(), std::sqrt(2.))));
+	assert_msg("Step #5", isClose(tcp_velocity->norm(), std::sqrt(2.)));
 
 	// Step #6 : velocity 3 axes, force 3 axes, separate axes
 	constant_vel->setZero();
@@ -74,7 +74,7 @@ int main(int argc, char const *argv[]) {
 
 	safety_controller.updateTCPVelocity();
 
-	assert(("Step #6", isClose(tcp_velocity->norm(), std::sqrt(6.))));
+	assert_msg("Step #6", isClose(tcp_velocity->norm(), std::sqrt(6.)));
 
 	// Step #7 : velocity 3 axes, force 3 axes, mixed axes
 	constant_vel->setZero();
@@ -88,7 +88,7 @@ int main(int argc, char const *argv[]) {
 
 	safety_controller.updateTCPVelocity();
 
-	assert(("Step #7", isClose(tcp_velocity->norm(), std::sqrt(8.))));
+	assert_msg("Step #7", isClose(tcp_velocity->norm(), std::sqrt(8.)));
 
 	return 0;
 }

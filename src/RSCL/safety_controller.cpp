@@ -1,56 +1,79 @@
 #include <safety_controller.h>
-
 #include <default_constraint.h>
+
+#include <limits>
+#include <iostream>
 
 using namespace RSCL;
 
 SafetyController::SafetyController(
 	Matrix6dConstPtr damping_matrix) :
-	damping_matrix_(damping_matrix)
+	damping_matrix_(damping_matrix),
+	verbose_(false)
 {
 	tcp_velocity_ = std::make_shared<Vector6d>(Vector6d::Zero());
 	total_velocity_ = std::make_shared<Vector6d>(Vector6d::Zero());
 	total_force_ = std::make_shared<Vector6d>(Vector6d::Zero());
 
-	addConstraint("default", std::make_shared<Constraints::DefaultConstraint>(Constraints::ConstraintType::Minimum));
-	addConstraint("default", std::make_shared<Constraints::DefaultConstraint>(Constraints::ConstraintType::Multiplicative));
+	addConstraint("default min", std::make_shared<Constraints::DefaultConstraint>(Constraints::ConstraintType::Minimum));
+	addConstraint("default mult", std::make_shared<Constraints::DefaultConstraint>(Constraints::ConstraintType::Multiplicative));
 }
 
-void SafetyController::addConstraint(const std::string& name, ConstraintPtr constraint) {
-	if(constraint->getType() == Constraints::ConstraintType::Multiplicative) {
-		multiplicative_constraints_[name] = constraint;
-	}
-	else {
-		minimum_constraints_[name] = constraint;
-	}
+void SafetyController::setVerbose(bool on) {
+	verbose_ = on;
 }
 
-void SafetyController::addForceGenerator(const std::string& name, ForceGeneratorPtr generator) {
+bool SafetyController::addConstraint(const std::string& name, ConstraintPtr constraint, bool force) {
+	if((constraints_.find(name) != constraints_.end())and not force) {
+		if(verbose_) {
+			std::cerr << "In SafetyController::addConstraint: a constraint called \"" << name << "\" already exists. Not replaced (force = false)" << std::endl;
+		}
+		return false;
+	}
+	constraints_[name] = constraint;
+	return true;
+}
+
+bool SafetyController::addForceGenerator(const std::string& name, ForceGeneratorPtr generator, bool force) {
+	if((force_generators_.find(name) != force_generators_.end())and not force) {
+		if(verbose_) {
+			std::cerr << "In SafetyController::addForceGenerator: a generator called \"" << name << "\" already exists. Not replaced (force = false)" << std::endl;
+		}
+		return false;
+	}
 	force_generators_[name] = generator;
+	return true;
 }
 
-void SafetyController::addVelocityGenerator(const std::string& name, VelocityGeneratorPtr generator) {
+bool SafetyController::addVelocityGenerator(const std::string& name, VelocityGeneratorPtr generator, bool force) {
+	if((velocity_generators_.find(name) != velocity_generators_.end())and not force) {
+		if(verbose_) {
+			std::cerr << "In SafetyController::addVelocityGenerator: a generator called \"" << name << "\" already exists. Not replaced (force = false)" << std::endl;
+		}
+		return false;
+	}
 	velocity_generators_[name] = generator;
+	return true;
 }
 
 bool SafetyController::removeConstraint(const std::string& name) {
-	auto elem = multiplicative_constraints_.find(name);
-	if(elem == multiplicative_constraints_.end()) {
-		elem = minimum_constraints_.find(name);
-		if(elem == minimum_constraints_.end()) {
-			return false;
+	auto elem = constraints_.find(name);
+	if(elem == constraints_.end()) {
+		if(verbose_) {
+			std::cerr << "In SafetyController::removeConstraint: no constraint called \"" << name << "\"" << std::endl;
 		}
-		minimum_constraints_.erase(elem);
+		return false;
 	}
-	else {
-		multiplicative_constraints_.erase(elem);
-	}
+	constraints_.erase(elem);
 	return true;
 }
 
 bool SafetyController::removeForceGenerator(const std::string& name) {
 	auto elem = force_generators_.find(name);
 	if(elem == force_generators_.end()) {
+		if(verbose_) {
+			std::cerr << "In SafetyController::removeForceGenerator: no generator called \"" << name << "\"" << std::endl;
+		}
 		return false;
 	}
 	force_generators_.erase(elem);
@@ -60,6 +83,9 @@ bool SafetyController::removeForceGenerator(const std::string& name) {
 bool SafetyController::removeVelocityGenerator(const std::string& name) {
 	auto elem = velocity_generators_.find(name);
 	if(elem == velocity_generators_.end()) {
+		if(verbose_) {
+			std::cerr << "In SafetyController::removeVelocityGenerator: no generator called \"" << name << "\"" << std::endl;
+		}
 		return false;
 	}
 	velocity_generators_.erase(elem);
@@ -68,15 +94,12 @@ bool SafetyController::removeVelocityGenerator(const std::string& name) {
 
 ConstraintPtr SafetyController::getConstraint(const std::string& name) {
 	ConstraintPtr ptr;
-	auto elem = multiplicative_constraints_.find(name);
-	if(elem == multiplicative_constraints_.end()) {
-		elem = minimum_constraints_.find(name);
-		if(elem != minimum_constraints_.end()) {
-			ptr = elem->second;
-		}
-	}
-	else {
+	auto elem = constraints_.find(name);
+	if(elem != constraints_.end()) {
 		ptr = elem->second;
+	}
+	else if(verbose_) {
+		std::cerr << "In SafetyController::getConstraint: no constraint called \"" << name << "\"" << std::endl;
 	}
 	return ptr;
 }
@@ -87,6 +110,9 @@ ForceGeneratorPtr SafetyController::getForceGenerator(const std::string& name) {
 	if(elem != force_generators_.end()) {
 		ptr = elem->second;
 	}
+	else if(verbose_) {
+		std::cerr << "In SafetyController::getForceGenerator: no generator called \"" << name << "\"" << std::endl;
+	}
 	return ptr;
 }
 
@@ -95,6 +121,9 @@ VelocityGeneratorPtr SafetyController::getVelocityGenerator(const std::string& n
 	auto elem = velocity_generators_.find(name);
 	if(elem != velocity_generators_.end()) {
 		ptr = elem->second;
+	}
+	else if(verbose_) {
+		std::cerr << "In SafetyController::getVelocityGenerator: no generator called \"" << name << "\"" << std::endl;
 	}
 	return ptr;
 }
@@ -121,25 +150,20 @@ Vector6dConstPtr SafetyController::getTotalVelocity() const {
 }
 
 double SafetyController::computeConstraintValue() const {
-	double min_value;
+	double min_value = std::numeric_limits<double>::infinity();
 	double mult_value = 1.;
 
-	if(minimum_constraints_.empty()) {
-		min_value = 1.;
-	}
-	else {
-		// Get the first value
-		auto min_it = minimum_constraints_.begin();
-		min_value = min_it->second->compute();
-
-		// Search for the minimum
-		while(++min_it != minimum_constraints_.end()) {
-			min_value = std::min(min_value, min_it->second->compute());
+	for(const auto& constraint : constraints_) {
+		if(constraint.second->getType() == Constraints::ConstraintType::Minimum) {
+			min_value = std::min(min_value, constraint.second->compute());
+		}
+		else {
+			mult_value *= constraint.second->compute();
 		}
 	}
 
-	for(const auto& constraint : multiplicative_constraints_) {
-		mult_value *= constraint.second->compute();
+	if(min_value == std::numeric_limits<double>::infinity()) {
+		min_value = 1.;
 	}
 
 	return mult_value * min_value;

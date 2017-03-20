@@ -6,6 +6,9 @@
 
 namespace RSCL {
 
+#define assert_msg(msg,cond) assert(((void) msg, cond ))
+
+
 /***		Useful typedefs		***/
 using Matrix6d = Eigen::Matrix<double, 6, 6>;
 using Vector6d = Eigen::Matrix<double, 6, 1>;

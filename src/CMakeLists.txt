@@ -13,7 +13,7 @@ file(
 )
 
 add_library(RSCL SHARED ${rscl_source_files})
-set_property(TARGET RSCL PROPERTY CXX_STANDARD 11)
+set_property(TARGET RSCL PROPERTY CXX_STANDARD 14)
 
 
 ###				vrep_remote_api library				###
@@ -37,3 +37,17 @@ file(
 add_library(vrep_remote_api SHARED ${remote_api_lib_source_files})
 target_link_libraries(vrep_remote_api ${CMAKE_THREAD_LIBS_INIT})
 target_compile_definitions(vrep_remote_api PRIVATE ${VREP_CFLAGS})
+
+
+###				vrep_driver library				###
+set(VREP_DRIVER_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include/vrep_driver;${RSCL_INCLUDE_DIRS};${VREP_REMOTE_API_INCLUDE_DIRS}" CACHE INTERNAL "")
+include_directories(${VREP_DRIVER_INCLUDE_DIRS})
+file(
+    GLOB_RECURSE
+    vrep_driver_lib_source_files
+    ${CMAKE_CURRENT_SOURCE_DIR}/vrep_driver/*
+)
+
+add_library(vrep_driver SHARED ${vrep_driver_lib_source_files})
+target_link_libraries(vrep_driver vrep_remote_api)
+set_property(TARGET vrep_driver PROPERTY CXX_STANDARD 14)

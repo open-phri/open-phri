@@ -16,9 +16,11 @@ public:
 
 	~SafetyController() = default;
 
-	void addConstraint(const std::string& name, ConstraintPtr constraint);
-	void addForceGenerator(const std::string& name, ForceGeneratorPtr generator);
-	void addVelocityGenerator(const std::string& name, VelocityGeneratorPtr generator);
+	void setVerbose(bool on);
+
+	bool addConstraint(const std::string& name, ConstraintPtr constraint, bool force = false);
+	bool addForceGenerator(const std::string& name, ForceGeneratorPtr generator, bool force = false);
+	bool addVelocityGenerator(const std::string& name, VelocityGeneratorPtr generator, bool force = false);
 
 	bool removeConstraint(const std::string& name);
 	bool removeForceGenerator(const std::string& name);
@@ -37,13 +39,13 @@ public:
 	// Sum of all the generated forces. Updated during updateToolVelocity
 	Vector6dConstPtr getTotalForce() const;
 
+
 private:
 	double computeConstraintValue() const;
 	Vector6d computeForceSum() const;
 	Vector6d computeVelocitySum() const;
 
-	std::map<std::string, ConstraintPtr>           multiplicative_constraints_;
-	std::map<std::string, ConstraintPtr>           minimum_constraints_;
+	std::map<std::string, ConstraintPtr>           constraints_;
 	std::map<std::string, ForceGeneratorPtr>       force_generators_;
 	std::map<std::string, VelocityGeneratorPtr>    velocity_generators_;
 
@@ -51,6 +53,8 @@ private:
 	Vector6dPtr total_velocity_;
 	Vector6dPtr total_force_;
 	Matrix6dConstPtr damping_matrix_;
+
+	bool verbose_;
 };
 
 } // namespace RSCL
