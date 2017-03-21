@@ -11,6 +11,9 @@ class ForceConstraint : public Constraint {
 public:
 	/***		Constructor & destructor		***/
 	ForceConstraint(
+		Vector6dPtr external_force,
+		doublePtr maximum_force);
+	ForceConstraint(
 		Vector6dConstPtr external_force,
 		doubleConstPtr maximum_force);
 

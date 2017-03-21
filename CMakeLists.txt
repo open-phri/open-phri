@@ -10,3 +10,6 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/apps)
 
 # Unit tests
 add_subdirectory(${PROJECT_SOURCE_DIR}/tests)
+
+# Bindings
+add_subdirectory(${PROJECT_SOURCE_DIR}/bindings)

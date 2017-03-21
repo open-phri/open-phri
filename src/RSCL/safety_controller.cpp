@@ -7,10 +7,22 @@
 using namespace RSCL;
 
 SafetyController::SafetyController(
+	Matrix6dPtr damping_matrix) :
+	damping_matrix_(damping_matrix),
+	verbose_(false)
+{
+	create();
+}
+
+SafetyController::SafetyController(
 	Matrix6dConstPtr damping_matrix) :
 	damping_matrix_(damping_matrix),
 	verbose_(false)
 {
+	create();
+}
+
+void SafetyController::create() {
 	tcp_velocity_ = std::make_shared<Vector6d>(Vector6d::Zero());
 	total_velocity_ = std::make_shared<Vector6d>(Vector6d::Zero());
 	total_force_ = std::make_shared<Vector6d>(Vector6d::Zero());
@@ -147,6 +159,10 @@ Vector6dConstPtr SafetyController::getTCPVelocity() const {
 
 Vector6dConstPtr SafetyController::getTotalVelocity() const {
 	return total_velocity_;
+}
+
+Vector6dConstPtr SafetyController::getTotalForce() const {
+	return total_force_;
 }
 
 double SafetyController::computeConstraintValue() const {

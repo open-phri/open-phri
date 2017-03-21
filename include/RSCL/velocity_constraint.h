@@ -11,6 +11,9 @@ class VelocityConstraint : public Constraint {
 public:
 	/***		Constructor & destructor		***/
 	VelocityConstraint(
+		Vector6dPtr total_velocity,
+		doublePtr maximum_velocity);
+	VelocityConstraint(
 		Vector6dConstPtr total_velocity,
 		doubleConstPtr maximum_velocity);
 

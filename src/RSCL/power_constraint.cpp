@@ -6,6 +6,18 @@ using namespace Eigen;
 
 /***		Constructor & destructor		***/
 PowerConstraint::PowerConstraint(
+	Vector6dPtr total_velocity,
+	Vector6dPtr external_force,
+	doublePtr maximum_power) :
+	Constraint(ConstraintType::Minimum),
+	total_velocity_(total_velocity),
+	external_force_(external_force),
+	maximum_power_(maximum_power)
+{
+
+}
+
+PowerConstraint::PowerConstraint(
 	Vector6dConstPtr total_velocity,
 	Vector6dConstPtr external_force,
 	doubleConstPtr maximum_power) :

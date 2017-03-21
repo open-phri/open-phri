@@ -12,6 +12,7 @@ namespace RSCL {
 
 class SafetyController {
 public:
+	SafetyController(Matrix6dPtr damping_matrix);
 	SafetyController(Matrix6dConstPtr damping_matrix);
 
 	~SafetyController() = default;
@@ -41,6 +42,7 @@ public:
 
 
 private:
+	void create();
 	double computeConstraintValue() const;
 	Vector6d computeForceSum() const;
 	Vector6d computeVelocitySum() const;

@@ -8,6 +8,7 @@ namespace RSCL {
 class ConstantForceGenerator : public ForceGenerator {
 public:
 	ConstantForceGenerator(Vector6dConstPtr force);
+	ConstantForceGenerator(Vector6dPtr force);
 	~ConstantForceGenerator() = default;
 
 	virtual Vector6d compute() override;

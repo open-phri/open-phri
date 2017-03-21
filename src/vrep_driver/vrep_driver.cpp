@@ -48,12 +48,12 @@ void VREPDriver::init(const std::string& ip, int port) {
 	}
 	else {
 		simxFinish(client_id_);
-		throw std::runtime_error("VREPDriver::init, can't initialize the connection with V-REP");
+		throw std::runtime_error("VREPDriver::init: can't initialize the connection with V-REP");
 	}
 }
 
 void VREPDriver::init(int client_id) {
-	assert_msg("In VREPDriver::init, invalid client id", client_id >= 0);
+	assert_msg("In VREPDriver::init: invalid client id", client_id >= 0);
 	client_id_ = client_id;
 
 	bool all_ok = true;

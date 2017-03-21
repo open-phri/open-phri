@@ -7,6 +7,19 @@ using namespace Eigen;
 
 /***		Constructor & destructor		***/
 StopConstraint::StopConstraint(
+	Vector6dPtr external_force,
+	doublePtr activation_force_threshold,
+	doublePtr deactivation_force_threshold) :
+	Constraint(ConstraintType::Multiplicative),
+	external_force_(external_force),
+	activation_force_threshold_(activation_force_threshold),
+	deactivation_force_threshold_(deactivation_force_threshold),
+	previous_constraint_value_(1.)
+{
+
+}
+
+StopConstraint::StopConstraint(
 	Vector6dConstPtr external_force,
 	doubleConstPtr activation_force_threshold,
 	doubleConstPtr deactivation_force_threshold) :

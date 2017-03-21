@@ -11,6 +11,10 @@ class PowerConstraint : public Constraint {
 public:
 	/***		Constructor & destructor		***/
 	PowerConstraint(
+		Vector6dPtr total_velocity,
+		Vector6dPtr external_force,
+		doublePtr maximum_power);
+	PowerConstraint(
 		Vector6dConstPtr total_velocity,
 		Vector6dConstPtr external_force,
 		doubleConstPtr maximum_power);

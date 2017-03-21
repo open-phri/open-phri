@@ -13,13 +13,13 @@ enum class ConstraintType {
 
 class Constraint {
 public:
+	Constraint(ConstraintType type);
+	virtual ~Constraint() = default;
+
 	ConstraintType getType();
 	virtual double compute() = 0;
 
 protected:
-	Constraint(ConstraintType type);
-	virtual ~Constraint() = default;
-
 	ConstraintType type_;
 };
 

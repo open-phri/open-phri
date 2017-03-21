@@ -2,6 +2,11 @@
 
 using namespace RSCL;
 
+ConstantVelocityGenerator::ConstantVelocityGenerator(Vector6dPtr velocity) :
+	velocity_(velocity)
+{
+}
+
 ConstantVelocityGenerator::ConstantVelocityGenerator(Vector6dConstPtr velocity) :
 	velocity_(velocity)
 {
