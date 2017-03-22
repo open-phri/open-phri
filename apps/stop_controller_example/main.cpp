@@ -34,7 +34,6 @@ int main(int argc, char const *argv[]) {
 	auto stop_constraint = make_shared<Constraints::StopConstraint>(ext_force, activation_force_threshold, deactivation_force_threshold);
 
 	auto constant_vel = make_shared<Vector6d>(Vector6d::Zero());
-	// (*constant_vel)(0) = 0.05;
 	auto constant_velocity_generator = make_shared<ConstantVelocityGenerator>(constant_vel);
 	auto constant_force_generator = make_shared<ConstantForceGenerator>(ext_force);
 
