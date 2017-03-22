@@ -21,11 +21,8 @@ def setIdentity(mat):
 	for i in range(0,6):
 		mat[i,i] = 1
 
-damping_matrix = NewMatrix6dPtr()
-setIdentity(damping_matrix)
-damping_matrix *= 10
-maximum_velocity = NewDoublePtr()
-maximum_velocity.set(0.5)
+damping_matrix = NewMatrix6dPtr(Matrix6.Identity * 10)
+maximum_velocity = NewDoublePtr(0.5)
 
 safety_controller = NewSafetyController(damping_matrix)
 safety_controller.setVerbose(True)
@@ -37,8 +34,8 @@ velocity_constraint = NewVelocityConstraint(total_velocity, maximum_velocity)
 constant_vel = NewVector6dPtr()
 constant_velocity_generator = NewConstantVelocityGenerator(constant_vel)
 
-safety_controller.addConstraint("velocity constraint", velocity_constraint, False)
-safety_controller.addVelocityGenerator("const vel", constant_velocity_generator, False)
+safety_controller.addConstraint("velocity constraint", velocity_constraint)
+safety_controller.addVelocityGenerator("const vel", constant_velocity_generator)
 
 # Step #1 : no velocity
 safety_controller.updateTCPVelocity()

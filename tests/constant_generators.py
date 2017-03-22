@@ -30,8 +30,8 @@ safety_controller = NewSafetyController(damping_matrix)
 safety_controller.setVerbose(True)
 tcp_velocity = safety_controller.getTCPVelocity()
 
-safety_controller.addVelocityGenerator("const vel", constant_velocity_generator, False)
-safety_controller.addForceGenerator("const force", constant_force_generator, False)
+safety_controller.addVelocityGenerator("const vel", constant_velocity_generator)
+safety_controller.addForceGenerator("const force", constant_force_generator)
 
 # Step #1 : no velocity, no force
 safety_controller.updateTCPVelocity()

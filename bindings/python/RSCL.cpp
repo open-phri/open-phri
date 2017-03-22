@@ -20,6 +20,7 @@ T* get_pointer(std::shared_ptr<T> p)
 
 namespace RSCL {
 using namespace RSCL::Constraints;
+using namespace vrep;
 
 void assert_msg_py(std::string msg, bool cond) {
 	if(not cond) {
@@ -64,22 +65,29 @@ std::shared_ptr<SafetyController> NewSafetyController(Matrix6dPtr damping_matrix
 	return std::make_shared<SafetyController>(static_cast<Matrix6dConstPtr>(damping_matrix));
 }
 
-std::shared_ptr<Matrix6d> NewMatrix6dPtr()
+std::shared_ptr<VREPDriver> NewVREPDriver(double sample_time, const std::string& prefix = "", const std::string& suffix = "", const std::string& ip = "127.0.0.1", int port = 19997)
 {
-	return std::make_shared<Matrix6d>(Matrix6d::Zero());
+	return std::make_shared<VREPDriver>(sample_time, prefix, suffix, ip, port);
+}
+BOOST_PYTHON_FUNCTION_OVERLOADS(NewVREPDriver_overloads, NewVREPDriver, 1, 5)
+
+std::shared_ptr<Matrix6d> NewMatrix6dPtr(Matrix6d init_value = Matrix6d::Zero())
+{
+	return std::make_shared<Matrix6d>(init_value);
 }
 
-std::shared_ptr<Vector6d> NewVector6dPtr()
+std::shared_ptr<Vector6d> NewVector6dPtr(Vector6d init_value = Vector6d::Zero())
 {
-	return std::make_shared<Vector6d>(Vector6d::Zero());
+	return std::make_shared<Vector6d>(init_value);
 }
 
-
+BOOST_PYTHON_FUNCTION_OVERLOADS(NewMatrix6dPtr_overloads, NewMatrix6dPtr, 0, 1)
+BOOST_PYTHON_FUNCTION_OVERLOADS(NewVector6dPtr_overloads, NewVector6dPtr, 0, 1)
 
 // Primitive types need to be wrapped in order to use pointers on them in python
 struct DoubleWrap {
-	DoubleWrap() :
-		value(std::make_shared<double>(0.))
+	DoubleWrap(double init_value = 0.) :
+		value(std::make_shared<double>(init_value))
 	{
 	}
 
@@ -108,10 +116,17 @@ private:
 	std::shared_ptr<double> value;
 };
 
-std::shared_ptr<DoubleWrap> NewDoublePtr()
+std::shared_ptr<DoubleWrap> NewDoublePtr(double init_value = 0.)
 {
-	return std::make_shared<DoubleWrap>();
+	return std::make_shared<DoubleWrap>(init_value);
 }
+BOOST_PYTHON_FUNCTION_OVERLOADS(NewDoublePtr_overloads, NewDoublePtr, 0, 1)
+
+
+// Safety controller methods overloads
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SafetyController_addConstraint_overloads,        addConstraint,           2, 3)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SafetyController_addVelocityGenerator_overloads, addVelocityGenerator,    2, 3)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SafetyController_addForceGenerator_overloads,    addForceGenerator,       2, 3)
 
 } // namespace RSCL
 
@@ -123,9 +138,20 @@ BOOST_PYTHON_MODULE(PyRSCL) {
 
 	def("assert_msg",                &assert_msg_py,           "Call assert and print a message if it failts");
 
-	def("NewMatrix6dPtr",            &NewMatrix6dPtr,          "Create a new instance of a Matrix6d shared_ptr");
-	def("NewVector6dPtr",            &NewVector6dPtr,          "Create a new instance of a Vector6dPtr shared_ptr");
-	def("NewDoublePtr",              &NewDoublePtr,            "Create a new instance of a double shared_ptr");
+	def("NewMatrix6dPtr",
+	    NewMatrix6dPtr,
+	    NewMatrix6dPtr_overloads(
+			args("init_value"), "Create a new instance of a Matrix6d shared_ptr"));
+
+	def("NewVector6dPtr",
+	    NewVector6dPtr,
+	    NewVector6dPtr_overloads(
+			args("init_value"), "Create a new instance of a Vector6d shared_ptr"));
+
+	def("NewDoublePtr",
+	    NewDoublePtr,
+	    NewDoublePtr_overloads(
+			args("init_value"), "Create a new instance of a double shared_ptr"));
 
 	register_ptr_to_python<std::shared_ptr<Matrix6d>>();
 	register_ptr_to_python<std::shared_ptr<Vector6d>>();
@@ -162,7 +188,7 @@ BOOST_PYTHON_MODULE(PyRSCL) {
 
 		double compute()
 		{
-			this->get_override("compute")();
+			return this->get_override("compute")();
 		}
 	};
 
@@ -203,7 +229,7 @@ BOOST_PYTHON_MODULE(PyRSCL) {
 
 		Vector6d compute()
 		{
-			this->get_override("compute")();
+			return this->get_override("compute")();
 		}
 	};
 
@@ -219,7 +245,7 @@ BOOST_PYTHON_MODULE(PyRSCL) {
 
 		Vector6d compute()
 		{
-			this->get_override("compute")();
+			return this->get_override("compute")();
 		}
 	};
 
@@ -243,9 +269,9 @@ BOOST_PYTHON_MODULE(PyRSCL) {
 
 	class_<SafetyController, boost::noncopyable>("SafetyController", "Generates a tool velocity based on force and velocity inputs and a set of constraints", init<Matrix6dConstPtr>())
 	.def("setVerbose",              &SafetyController::setVerbose)
-	.def("addConstraint",           &SafetyController::addConstraint)
-	.def("addForceGenerator",       &SafetyController::addForceGenerator)
-	.def("addVelocityGenerator",    &SafetyController::addVelocityGenerator)
+	.def("addConstraint",           &SafetyController::addConstraint,           SafetyController_addConstraint_overloads(       args("name", "constraint", "force")))
+	.def("addForceGenerator",       &SafetyController::addForceGenerator,       SafetyController_addForceGenerator_overloads(   args("name", "generator", "force")))
+	.def("addVelocityGenerator",    &SafetyController::addVelocityGenerator,    SafetyController_addVelocityGenerator_overloads(args("name", "generator", "force")))
 	.def("removeConstraint",        &SafetyController::removeConstraint)
 	.def("removeForceGenerator",    &SafetyController::removeForceGenerator)
 	.def("removeVelocityGenerator", &SafetyController::removeVelocityGenerator)
@@ -267,6 +293,11 @@ BOOST_PYTHON_MODULE(PyRSCL) {
 	.value("Base", ReferenceFrame::Base)
 	.value("World", ReferenceFrame::World);
 
+	def("NewVREPDriver",
+	    NewVREPDriver,
+	    NewVREPDriver_overloads(
+			args("sample_time", "prefix", "suffix", "ip", "port"), "Create a new instance of a VREPDriver shared_ptr"));
+
 	class_<VREPDriver, boost::noncopyable>("VREPDriver", "Interface to the V-REP simulator", init<double, const std::string&, const std::string&, const std::string&, int>())
 	.def(init<double, int, const std::string&, const std::string&>())
 	.def("getClientID",           &VREPDriver::getClientID)
@@ -281,4 +312,6 @@ BOOST_PYTHON_MODULE(PyRSCL) {
 	.def("readTCPTargetPose",     &VREPDriver::readTCPTargetPose)
 	.def("sendTCPtargetVelocity", &VREPDriver::sendTCPtargetVelocity)
 	.def("readTCPWrench",         &VREPDriver::readTCPWrench);
+
+	register_ptr_to_python<std::shared_ptr<VREPDriver>>();
 }

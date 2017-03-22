@@ -44,8 +44,8 @@ int main(int argc, char const *argv[]) {
 	/***				V-REP driver				***/
 	VREPDriver driver(
 		SAMPLE_TIME,
-		"LBR4p_"        // Robot prefix
-		);
+		"LBR4p_");      // Robot prefix
+
 
 	driver.enableSynchonous(true);
 	driver.startSimulation();
