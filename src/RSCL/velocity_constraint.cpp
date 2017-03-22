@@ -6,23 +6,12 @@ using namespace Eigen;
 
 /***		Constructor & destructor		***/
 VelocityConstraint::VelocityConstraint(
-	Vector6dPtr total_velocity,
-	doublePtr maximum_velocity) :
-	Constraint(ConstraintType::Minimum),
-	total_velocity_(total_velocity),
-	maximum_velocity_(maximum_velocity)
-{
-
-}
-
-VelocityConstraint::VelocityConstraint(
 	Vector6dConstPtr total_velocity,
 	doubleConstPtr maximum_velocity) :
 	Constraint(ConstraintType::Minimum),
 	total_velocity_(total_velocity),
 	maximum_velocity_(maximum_velocity)
 {
-
 }
 
 /***		Algorithm		***/

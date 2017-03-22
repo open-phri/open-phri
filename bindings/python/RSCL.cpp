@@ -5,6 +5,7 @@
 #include <vrep_driver.h>
 
 #include <boost/python.hpp>
+#include <iostream>
 
 namespace boost {
 
@@ -20,35 +21,47 @@ T* get_pointer(std::shared_ptr<T> p)
 namespace RSCL {
 using namespace RSCL::Constraints;
 
+void assert_msg_py(std::string msg, bool cond) {
+	if(not cond) {
+		std::cout << "Failed: " << msg << std::endl;
+		exit(-1);
+	}
+}
+
 // Functions to create shared pointers to constraints
 std::shared_ptr<DefaultConstraint> NewDefaultConstraint(ConstraintType type)
 {
 	return std::make_shared<DefaultConstraint>(type);
 }
 
-std::shared_ptr<VelocityConstraint> NewVelocityConstraint(Vector6dConstPtr total_velocity, doubleConstPtr maximum_velocity)
+std::shared_ptr<VelocityConstraint> NewVelocityConstraint(Vector6dPtr total_velocity, doublePtr maximum_velocity)
 {
-	return std::make_shared<VelocityConstraint>(total_velocity, maximum_velocity);
+	return std::make_shared<VelocityConstraint>(static_cast<Vector6dConstPtr>(total_velocity), static_cast<doublePtr>(maximum_velocity));
 }
 
-std::shared_ptr<PowerConstraint> NewPowerConstraint(Vector6dConstPtr total_velocity, Vector6dConstPtr external_force, doubleConstPtr maximum_power)
+std::shared_ptr<PowerConstraint> NewPowerConstraint(Vector6dPtr total_velocity, Vector6dPtr external_force, doublePtr maximum_power)
 {
-	return std::make_shared<PowerConstraint>(total_velocity, external_force, maximum_power);
+	return std::make_shared<PowerConstraint>(static_cast<Vector6dConstPtr>(total_velocity), static_cast<Vector6dConstPtr>(external_force), static_cast<doublePtr>(maximum_power));
 }
 
-std::shared_ptr<StopConstraint> NewStopConstraint(Vector6dConstPtr external_force, doubleConstPtr activation_force_threshold, doubleConstPtr deactivation_force_threshold)
+std::shared_ptr<StopConstraint> NewStopConstraint(Vector6dPtr external_force, doublePtr activation_force_threshold, doublePtr deactivation_force_threshold)
 {
-	return std::make_shared<StopConstraint>(external_force, activation_force_threshold, deactivation_force_threshold);
+	return std::make_shared<StopConstraint>(static_cast<Vector6dConstPtr>(external_force), static_cast<doublePtr>(activation_force_threshold), static_cast<doublePtr>(deactivation_force_threshold));
 }
 
-std::shared_ptr<ConstantVelocityGenerator> NewConstantVelocityGenerator(Vector6dConstPtr velocity)
+std::shared_ptr<ConstantVelocityGenerator> NewConstantVelocityGenerator(Vector6dPtr velocity)
 {
-	return std::make_shared<ConstantVelocityGenerator>(velocity);
+	return std::make_shared<ConstantVelocityGenerator>(static_cast<Vector6dConstPtr>(velocity));
 }
 
-std::shared_ptr<ConstantForceGenerator> NewConstantForceGenerator(Vector6dConstPtr force)
+std::shared_ptr<ConstantForceGenerator> NewConstantForceGenerator(Vector6dPtr force)
 {
-	return std::make_shared<ConstantForceGenerator>(force);
+	return std::make_shared<ConstantForceGenerator>(static_cast<Vector6dConstPtr>(force));
+}
+
+std::shared_ptr<SafetyController> NewSafetyController(Matrix6dPtr damping_matrix)
+{
+	return std::make_shared<SafetyController>(static_cast<Matrix6dConstPtr>(damping_matrix));
 }
 
 std::shared_ptr<Matrix6d> NewMatrix6dPtr()
@@ -107,6 +120,8 @@ BOOST_PYTHON_MODULE(PyRSCL) {
 	using namespace RSCL::Constraints;
 	using namespace vrep;
 	using namespace boost::python;
+
+	def("assert_msg",                &assert_msg_py,           "Call assert and print a message if it failts");
 
 	def("NewMatrix6dPtr",            &NewMatrix6dPtr,          "Create a new instance of a Matrix6d shared_ptr");
 	def("NewVector6dPtr",            &NewVector6dPtr,          "Create a new instance of a Vector6dPtr shared_ptr");
@@ -223,7 +238,10 @@ BOOST_PYTHON_MODULE(PyRSCL) {
 	/*********************************************************************************/
 	/*                          SafetyController bindings                            */
 	/*********************************************************************************/
-	class_<SafetyController, boost::noncopyable>("SafetyController", "Generates a tool velocity based on force and velocity inputs and a set of constraints", init<Matrix6dPtr>())
+
+	def("NewSafetyController",       &NewSafetyController,     "Create a new instance of a SafetyController shared_ptr");
+
+	class_<SafetyController, boost::noncopyable>("SafetyController", "Generates a tool velocity based on force and velocity inputs and a set of constraints", init<Matrix6dConstPtr>())
 	.def("setVerbose",              &SafetyController::setVerbose)
 	.def("addConstraint",           &SafetyController::addConstraint)
 	.def("addForceGenerator",       &SafetyController::addForceGenerator)
@@ -239,6 +257,7 @@ BOOST_PYTHON_MODULE(PyRSCL) {
 	.def("getTotalVelocity",        &SafetyController::getTotalVelocity)
 	.def("getTotalForce",           &SafetyController::getTotalForce);
 
+	register_ptr_to_python<std::shared_ptr<SafetyController>>();
 
 	/*********************************************************************************/
 	/*                               VREPDriver bindings                             */

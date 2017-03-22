@@ -7,16 +7,6 @@ using namespace Eigen;
 
 /***		Constructor & destructor		***/
 ForceConstraint::ForceConstraint(
-	Vector6dPtr external_force,
-	doublePtr maximum_force) :
-	Constraint(ConstraintType::Minimum),
-	external_force_(external_force),
-	maximum_force_(maximum_force)
-{
-
-}
-
-ForceConstraint::ForceConstraint(
 	Vector6dConstPtr external_force,
 	doubleConstPtr maximum_force) :
 	Constraint(ConstraintType::Minimum),

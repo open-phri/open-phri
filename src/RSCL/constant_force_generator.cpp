@@ -1,17 +1,12 @@
-#include <constant_velocity_generator.h>
+#include <constant_force_generator.h>
 
 using namespace RSCL;
 
-ConstantVelocityGenerator::ConstantVelocityGenerator(Vector6dPtr velocity) :
-	velocity_(velocity)
+ConstantForceGenerator::ConstantForceGenerator(Vector6dConstPtr force) :
+	force_(force)
 {
 }
 
-ConstantVelocityGenerator::ConstantVelocityGenerator(Vector6dConstPtr velocity) :
-	velocity_(velocity)
-{
-}
-
-Vector6d ConstantVelocityGenerator::compute() {
-	return *velocity_;
+Vector6d ConstantForceGenerator::compute() {
+	return *force_;
 }

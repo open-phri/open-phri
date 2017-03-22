@@ -18,10 +18,6 @@ class StopConstraint : public Constraint {
 public:
 	/***		Constructor & destructor		***/
 	StopConstraint(
-		Vector6dPtr external_force,
-		doublePtr activation_force_threshold,
-		doublePtr deactivation_force_threshold);
-	StopConstraint(
 		Vector6dConstPtr external_force,
 		doubleConstPtr activation_force_threshold,
 		doubleConstPtr deactivation_force_threshold);

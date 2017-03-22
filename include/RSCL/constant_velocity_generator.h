@@ -7,7 +7,6 @@ namespace RSCL {
 
 class ConstantVelocityGenerator : public VelocityGenerator {
 public:
-	ConstantVelocityGenerator(Vector6dPtr velocity);
 	ConstantVelocityGenerator(Vector6dConstPtr velocity);
 	~ConstantVelocityGenerator() = default;
 
