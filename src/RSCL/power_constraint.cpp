@@ -1,7 +1,7 @@
 #include <power_constraint.h>
 
 using namespace RSCL;
-using namespace Constraints;
+
 using namespace Eigen;
 
 /***		Constructor & destructor		***/

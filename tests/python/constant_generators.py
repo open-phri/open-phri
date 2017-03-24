@@ -23,8 +23,8 @@ damping_matrix *= 10
 constant_vel = NewVector6dPtr()
 constant_force = NewVector6dPtr()
 
-constant_velocity_generator = NewConstantVelocityGenerator(constant_vel)
-constant_force_generator = NewConstantForceGenerator(constant_force)
+constant_velocity_generator = NewVelocityProxy(constant_vel)
+constant_force_generator = NewForceProxy(constant_force)
 
 safety_controller = NewSafetyController(damping_matrix)
 safety_controller.setVerbose(True)

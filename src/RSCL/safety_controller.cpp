@@ -15,8 +15,8 @@ SafetyController::SafetyController(
 	total_velocity_ = std::make_shared<Vector6d>(Vector6d::Zero());
 	total_force_ = std::make_shared<Vector6d>(Vector6d::Zero());
 
-	addConstraint("default min", std::make_shared<Constraints::DefaultConstraint>(Constraints::ConstraintType::Minimum));
-	addConstraint("default mult", std::make_shared<Constraints::DefaultConstraint>(Constraints::ConstraintType::Multiplicative));
+	addConstraint("default min", std::make_shared<DefaultConstraint>(ConstraintType::Minimum));
+	addConstraint("default mult", std::make_shared<DefaultConstraint>(ConstraintType::Multiplicative));
 }
 
 void SafetyController::setVerbose(bool on) {
@@ -158,7 +158,7 @@ double SafetyController::computeConstraintValue() const {
 	double mult_value = 1.;
 
 	for(const auto& constraint : constraints_) {
-		if(constraint.second->getType() == Constraints::ConstraintType::Minimum) {
+		if(constraint.second->getType() == ConstraintType::Minimum) {
 			min_value = std::min(min_value, constraint.second->compute());
 		}
 		else {

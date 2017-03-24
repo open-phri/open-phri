@@ -19,7 +19,7 @@ T* get_pointer(std::shared_ptr<T> p)
 } // namespace boost
 
 namespace RSCL {
-using namespace RSCL::Constraints;
+
 using namespace vrep;
 
 void assert_msg_py(std::string msg, bool cond) {
@@ -126,14 +126,14 @@ std::shared_ptr<StopConstraint> NewStopConstraint(Vector6dPtr external_force, do
 	return std::make_shared<StopConstraint>(static_cast<Vector6dConstPtr>(external_force), static_cast<doublePtr>(activation_force_threshold), static_cast<doublePtr>(deactivation_force_threshold));
 }
 
-std::shared_ptr<ConstantVelocityGenerator> NewConstantVelocityGenerator(Vector6dPtr velocity)
+std::shared_ptr<VelocityProxy> NewVelocityProxy(Vector6dPtr velocity)
 {
-	return std::make_shared<ConstantVelocityGenerator>(static_cast<Vector6dConstPtr>(velocity));
+	return std::make_shared<VelocityProxy>(static_cast<Vector6dConstPtr>(velocity));
 }
 
-std::shared_ptr<ConstantForceGenerator> NewConstantForceGenerator(Vector6dPtr force)
+std::shared_ptr<ForceProxy> NewForceProxy(Vector6dPtr force)
 {
-	return std::make_shared<ConstantForceGenerator>(static_cast<Vector6dConstPtr>(force));
+	return std::make_shared<ForceProxy>(static_cast<Vector6dConstPtr>(force));
 }
 
 std::shared_ptr<SafetyController> NewSafetyController(Matrix6dPtr damping_matrix)
@@ -177,7 +177,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SafetyController_addForceGenerator_overlo
 
 BOOST_PYTHON_MODULE(PyRSCL) {
 	using namespace RSCL;
-	using namespace RSCL::Constraints;
+	
 	using namespace vrep;
 	using namespace boost::python;
 
@@ -272,8 +272,8 @@ BOOST_PYTHON_MODULE(PyRSCL) {
 	/**********************************************************************************/
 	/*                                 Generators bindings                            */
 	/**********************************************************************************/
-	def("NewConstantVelocityGenerator",    &NewConstantVelocityGenerator,  "Create a new instance of a ConstantVelocityGenerator shared_ptr");
-	def("NewConstantForceGenerator",       &NewConstantForceGenerator,     "Create a new instance of a ConstantForceGenerator shared_ptr");
+	def("NewVelocityProxy",    &NewVelocityProxy,  "Create a new instance of a VelocityProxy shared_ptr");
+	def("NewForceProxy",       &NewForceProxy,     "Create a new instance of a ForceProxy shared_ptr");
 
 	struct VelocityGeneratorWrap : VelocityGenerator, wrapper<VelocityGenerator> {
 		using VelocityGenerator::VelocityGenerator;
@@ -287,8 +287,8 @@ BOOST_PYTHON_MODULE(PyRSCL) {
 	class_<VelocityGeneratorWrap, boost::noncopyable>("VelocityGenerator")
 	.def("compute", pure_virtual(&VelocityGenerator::compute));
 
-	class_<ConstantVelocityGenerator, boost::noncopyable>("ConstantVelocityGenerator", init<Vector6dConstPtr>())
-	.def("compute", pure_virtual(&ConstantVelocityGenerator::compute));
+	class_<VelocityProxy, boost::noncopyable>("VelocityProxy", init<Vector6dConstPtr>())
+	.def("compute", pure_virtual(&VelocityProxy::compute));
 
 
 	struct ForceGeneratorWrap : ForceGenerator, wrapper<ForceGenerator> {
@@ -303,14 +303,14 @@ BOOST_PYTHON_MODULE(PyRSCL) {
 	class_<ForceGeneratorWrap, boost::noncopyable>("ForceGenerator")
 	.def("compute", pure_virtual(&ForceGenerator::compute));
 
-	class_<ConstantForceGenerator, boost::noncopyable>("ConstantForceGenerator", init<Vector6dConstPtr>())
-	.def("compute", pure_virtual(&ConstantForceGenerator::compute));
+	class_<ForceProxy, boost::noncopyable>("ForceProxy", init<Vector6dConstPtr>())
+	.def("compute", pure_virtual(&ForceProxy::compute));
 
-	register_ptr_to_python<std::shared_ptr<ConstantVelocityGenerator>>();
-	register_ptr_to_python<std::shared_ptr<ConstantForceGenerator>>();
+	register_ptr_to_python<std::shared_ptr<VelocityProxy>>();
+	register_ptr_to_python<std::shared_ptr<ForceProxy>>();
 
-	implicitly_convertible<std::shared_ptr<ConstantVelocityGenerator>, std::shared_ptr<VelocityGenerator>>();
-	implicitly_convertible<std::shared_ptr<ConstantForceGenerator>,    std::shared_ptr<ForceGenerator>>();
+	implicitly_convertible<std::shared_ptr<VelocityProxy>, std::shared_ptr<VelocityGenerator>>();
+	implicitly_convertible<std::shared_ptr<ForceProxy>,    std::shared_ptr<ForceGenerator>>();
 
 	/*********************************************************************************/
 	/*                          SafetyController bindings                            */

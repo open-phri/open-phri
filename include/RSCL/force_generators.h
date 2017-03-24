@@ -1,3 +1,3 @@
 #pragma once
 
-#include <constant_force_generator.h>
+#include <force_proxy.h>

@@ -4,12 +4,10 @@
 
 namespace RSCL {
 
-namespace Constraints {
-
 class DefaultConstraint : public Constraint {
 public:
 	/***		Constructor & destructor		***/
-	DefaultConstraint(Constraints::ConstraintType type);
+	DefaultConstraint(ConstraintType type);
 
 	virtual ~DefaultConstraint() = default;
 
@@ -19,7 +17,5 @@ public:
 
 using DefaultConstraintPtr = std::shared_ptr<DefaultConstraint>;
 using DefaultConstraintConstPtr = std::shared_ptr<const DefaultConstraint>;
-
-} // namespace Constraints
 
 } // namespace RSCL

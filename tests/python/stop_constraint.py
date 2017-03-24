@@ -17,8 +17,8 @@ total_velocity = safety_controller.getTotalVelocity()
 stop_constraint = NewStopConstraint(ext_force, activation_force_threshold, deactivation_force_threshold)
 
 constant_vel = NewVector6dPtr()
-constant_velocity_generator = NewConstantVelocityGenerator(constant_vel)
-constant_force_generator = NewConstantForceGenerator(ext_force)
+constant_velocity_generator = NewVelocityProxy(constant_vel)
+constant_force_generator = NewForceProxy(ext_force)
 
 safety_controller.addConstraint("stop constraint", stop_constraint)
 safety_controller.addVelocityGenerator("const vel", constant_velocity_generator)

@@ -30,7 +30,7 @@ power_constraint_test = NewPowerConstraint(tcp_velocity, external_force, maximum
 power = power_constraint_test.getPower()
 
 constant_vel = NewVector6dPtr()
-constant_velocity_generator = NewConstantVelocityGenerator(constant_vel)
+constant_velocity_generator = NewVelocityProxy(constant_vel)
 
 safety_controller.addConstraint("power constraint", power_constraint)
 safety_controller.addVelocityGenerator("const vel", constant_velocity_generator)

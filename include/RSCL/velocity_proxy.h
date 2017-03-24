@@ -5,10 +5,10 @@
 
 namespace RSCL {
 
-class ConstantVelocityGenerator : public VelocityGenerator {
+class VelocityProxy : public VelocityGenerator {
 public:
-	ConstantVelocityGenerator(Vector6dConstPtr velocity);
-	~ConstantVelocityGenerator() = default;
+	VelocityProxy(Vector6dConstPtr velocity);
+	~VelocityProxy() = default;
 
 	virtual Vector6d compute() override;
 

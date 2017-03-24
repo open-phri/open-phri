@@ -1,11 +1,11 @@
 #include <default_constraint.h>
 
 using namespace RSCL;
-using namespace Constraints;
+
 
 /***		Constructor & destructor		***/
 DefaultConstraint::DefaultConstraint(
-	Constraints::ConstraintType type) :
+	ConstraintType type) :
 	Constraint(type)
 {
 }

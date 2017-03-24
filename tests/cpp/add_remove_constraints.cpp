@@ -2,7 +2,6 @@
 #include <constraints.h>
 
 using namespace RSCL;
-using namespace Constraints;
 using namespace std;
 
 int main(int argc, char const *argv[]) {

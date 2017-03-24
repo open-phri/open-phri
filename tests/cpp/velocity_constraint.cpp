@@ -4,7 +4,6 @@
 #include <constraints.h>
 
 using namespace RSCL;
-using namespace RSCL::Constraints;
 using namespace std;
 
 bool isClose(double v1, double v2, double eps = 1e-3) {
@@ -24,7 +23,7 @@ int main(int argc, char const *argv[]) {
 	auto velocity_constraint = make_shared<VelocityConstraint>(total_velocity, maximum_velocity);
 
 	auto constant_vel = make_shared<Vector6d>(Vector6d::Zero());
-	auto constant_velocity_generator = make_shared<ConstantVelocityGenerator>(constant_vel);
+	auto constant_velocity_generator = make_shared<VelocityProxy>(constant_vel);
 
 	safety_controller.addConstraint("velocity constraint", velocity_constraint);
 	safety_controller.addVelocityGenerator("const vel", constant_velocity_generator);

@@ -2,7 +2,7 @@
 #include <limits>
 
 using namespace RSCL;
-using namespace Constraints;
+
 using namespace Eigen;
 
 /***		Constructor & destructor		***/

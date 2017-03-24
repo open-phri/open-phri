@@ -5,8 +5,6 @@
 
 namespace RSCL {
 
-namespace Constraints {
-
 class VelocityConstraint : public Constraint {
 public:
 	/***		Constructor & destructor		***/
@@ -26,7 +24,5 @@ private:
 
 using VelocityConstraintPtr = std::shared_ptr<VelocityConstraint>;
 using VelocityConstraintConstPtr = std::shared_ptr<const VelocityConstraint>;
-
-} // namespace Constraints
 
 } // namespace RSCL

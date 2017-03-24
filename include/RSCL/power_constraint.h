@@ -5,8 +5,6 @@
 
 namespace RSCL {
 
-namespace Constraints {
-
 class PowerConstraint : public Constraint {
 public:
 	/***		Constructor & destructor		***/
@@ -32,7 +30,5 @@ private:
 
 using PowerConstraintPtr = std::shared_ptr<PowerConstraint>;
 using PowerConstraintConstPtr = std::shared_ptr<const PowerConstraint>;
-
-} // namespace Constraints
 
 } // namespace RSCL

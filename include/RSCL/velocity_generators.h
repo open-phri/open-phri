@@ -1,3 +1,3 @@
 #pragma once
 
-#include <constant_velocity_generator.h>
+#include <velocity_proxy.h>

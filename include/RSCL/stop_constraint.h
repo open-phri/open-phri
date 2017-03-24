@@ -8,12 +8,6 @@
 
 namespace RSCL {
 
-namespace Constraints {
-
-/* This must be the last constraint to be computed because 'force'
- * will be modified if 'external_force' norm exceed 'force_threshold' and left
- * untouched otherwise.
- */
 class StopConstraint : public Constraint {
 public:
 	/***		Constructor & destructor		***/
@@ -37,7 +31,5 @@ private:
 
 using StopConstraintPtr = std::shared_ptr<StopConstraint>;
 using StopConstraintConstPtr = std::shared_ptr<const StopConstraint>;
-
-} // namespace Constraints
 
 } // namespace RSCL

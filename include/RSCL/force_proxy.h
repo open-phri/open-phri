@@ -5,10 +5,10 @@
 
 namespace RSCL {
 
-class ConstantForceGenerator : public ForceGenerator {
+class ForceProxy : public ForceGenerator {
 public:
-	ConstantForceGenerator(Vector6dConstPtr force);
-	~ConstantForceGenerator() = default;
+	ForceProxy(Vector6dConstPtr force);
+	~ForceProxy() = default;
 
 	virtual Vector6d compute() override;
 

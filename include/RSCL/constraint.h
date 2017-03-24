@@ -4,8 +4,6 @@
 
 namespace RSCL {
 
-namespace Constraints {
-
 enum class ConstraintType {
 	Multiplicative,
 	Minimum
@@ -23,8 +21,7 @@ protected:
 	ConstraintType type_;
 };
 
+using ConstraintPtr = std::shared_ptr<Constraint>;
+using ConstraintConstPtr = std::shared_ptr<const Constraint>;
+
 } // namespace RSCL
-
-using ConstraintPtr = std::shared_ptr<Constraints::Constraint>;
-
-} // namespace Constraints

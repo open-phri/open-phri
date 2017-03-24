@@ -5,8 +5,6 @@
 
 namespace RSCL {
 
-namespace Constraints {
-
 class ForceConstraint : public Constraint {
 public:
 	/***		Constructor & destructor		***/
@@ -26,7 +24,5 @@ private:
 
 using ForceConstraintPtr = std::shared_ptr<ForceConstraint>;
 using ForceConstraintConstPtr = std::shared_ptr<const ForceConstraint>;
-
-} // namespace Constraints
 
 } // namespace RSCL

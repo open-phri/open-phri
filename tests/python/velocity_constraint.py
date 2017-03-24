@@ -27,7 +27,7 @@ total_velocity = safety_controller.getTotalVelocity()
 velocity_constraint = NewVelocityConstraint(total_velocity, maximum_velocity)
 
 constant_vel = NewVector6dPtr()
-constant_velocity_generator = NewConstantVelocityGenerator(constant_vel)
+constant_velocity_generator = NewVelocityProxy(constant_vel)
 
 safety_controller.addConstraint("velocity constraint", velocity_constraint)
 safety_controller.addVelocityGenerator("const vel", constant_velocity_generator)

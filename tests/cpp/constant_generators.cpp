@@ -17,8 +17,8 @@ int main(int argc, char const *argv[]) {
 	auto constant_vel = make_shared<Vector6d>(Vector6d::Zero());
 	auto constant_force = make_shared<Vector6d>(Vector6d::Zero());
 
-	auto constant_velocity_generator = make_shared<ConstantVelocityGenerator>(constant_vel);
-	auto constant_force_generator = make_shared<ConstantForceGenerator>(constant_force);
+	auto constant_velocity_generator = make_shared<VelocityProxy>(constant_vel);
+	auto constant_force_generator = make_shared<ForceProxy>(constant_force);
 
 	auto safety_controller = SafetyController(damping_matrix);
 	safety_controller.setVerbose(true);

@@ -31,11 +31,11 @@ int main(int argc, char const *argv[]) {
 	auto safety_controller = SafetyController(damping_matrix);
 	auto tcp_velocity = safety_controller.getTCPVelocity();
 
-	auto stop_constraint = make_shared<Constraints::StopConstraint>(ext_force, activation_force_threshold, deactivation_force_threshold);
+	auto stop_constraint = make_shared<StopConstraint>(ext_force, activation_force_threshold, deactivation_force_threshold);
 
 	auto constant_vel = make_shared<Vector6d>(Vector6d::Zero());
-	auto constant_velocity_generator = make_shared<ConstantVelocityGenerator>(constant_vel);
-	auto constant_force_generator = make_shared<ConstantForceGenerator>(ext_force);
+	auto constant_velocity_generator = make_shared<VelocityProxy>(constant_vel);
+	auto constant_force_generator = make_shared<ForceProxy>(ext_force);
 
 	safety_controller.addConstraint("stop constraint", stop_constraint);
 	safety_controller.addVelocityGenerator("const vel", constant_velocity_generator);
