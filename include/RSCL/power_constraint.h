@@ -20,10 +20,14 @@ public:
 	/***		Algorithm		***/
 	virtual double compute() override;
 
+	doubleConstPtr getPower() const;
+
 private:
 	Vector6dConstPtr total_velocity_;
 	Vector6dConstPtr external_force_;
 	doubleConstPtr maximum_power_;
+
+	doublePtr power_;
 };
 
 using PowerConstraintPtr = std::shared_ptr<PowerConstraint>;

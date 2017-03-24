@@ -17,6 +17,7 @@ int main(int argc, char const *argv[]) {
 	auto maximum_velocity = make_shared<double>(0.5);
 
 	auto safety_controller = SafetyController(damping_matrix);
+	safety_controller.setVerbose(true);
 	auto tcp_velocity = safety_controller.getTCPVelocity();
 	auto total_velocity = safety_controller.getTotalVelocity();
 

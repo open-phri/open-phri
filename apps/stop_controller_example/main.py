@@ -10,6 +10,7 @@ def sigint_handler(signal, frame):
     global stop
     stop = True
 
+###                 Controller configuration                ###
 damping_matrix = NewMatrix6dPtr(Matrix6.Identity * 500)
 ext_force = NewVector6dPtr()
 activation_force_threshold = NewDoublePtr(25)
@@ -28,6 +29,7 @@ safety_controller.addConstraint("stop constraint", stop_constraint)
 safety_controller.addVelocityGenerator("const vel", constant_velocity_generator)
 safety_controller.addForceGenerator("const force", constant_force_generator)
 
+###				         V-REP driver	       		  ###
 driver = NewVREPDriver(
     SAMPLE_TIME,
     "LBR4p_")      # Robot prefix

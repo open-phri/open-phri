@@ -29,61 +29,6 @@ void assert_msg_py(std::string msg, bool cond) {
 	}
 }
 
-// Functions to create shared pointers to constraints
-std::shared_ptr<DefaultConstraint> NewDefaultConstraint(ConstraintType type)
-{
-	return std::make_shared<DefaultConstraint>(type);
-}
-
-std::shared_ptr<VelocityConstraint> NewVelocityConstraint(Vector6dPtr total_velocity, doublePtr maximum_velocity)
-{
-	return std::make_shared<VelocityConstraint>(static_cast<Vector6dConstPtr>(total_velocity), static_cast<doublePtr>(maximum_velocity));
-}
-
-std::shared_ptr<PowerConstraint> NewPowerConstraint(Vector6dPtr total_velocity, Vector6dPtr external_force, doublePtr maximum_power)
-{
-	return std::make_shared<PowerConstraint>(static_cast<Vector6dConstPtr>(total_velocity), static_cast<Vector6dConstPtr>(external_force), static_cast<doublePtr>(maximum_power));
-}
-
-std::shared_ptr<StopConstraint> NewStopConstraint(Vector6dPtr external_force, doublePtr activation_force_threshold, doublePtr deactivation_force_threshold)
-{
-	return std::make_shared<StopConstraint>(static_cast<Vector6dConstPtr>(external_force), static_cast<doublePtr>(activation_force_threshold), static_cast<doublePtr>(deactivation_force_threshold));
-}
-
-std::shared_ptr<ConstantVelocityGenerator> NewConstantVelocityGenerator(Vector6dPtr velocity)
-{
-	return std::make_shared<ConstantVelocityGenerator>(static_cast<Vector6dConstPtr>(velocity));
-}
-
-std::shared_ptr<ConstantForceGenerator> NewConstantForceGenerator(Vector6dPtr force)
-{
-	return std::make_shared<ConstantForceGenerator>(static_cast<Vector6dConstPtr>(force));
-}
-
-std::shared_ptr<SafetyController> NewSafetyController(Matrix6dPtr damping_matrix)
-{
-	return std::make_shared<SafetyController>(static_cast<Matrix6dConstPtr>(damping_matrix));
-}
-
-std::shared_ptr<VREPDriver> NewVREPDriver(double sample_time, const std::string& prefix = "", const std::string& suffix = "", const std::string& ip = "127.0.0.1", int port = 19997)
-{
-	return std::make_shared<VREPDriver>(sample_time, prefix, suffix, ip, port);
-}
-BOOST_PYTHON_FUNCTION_OVERLOADS(NewVREPDriver_overloads, NewVREPDriver, 1, 5)
-
-std::shared_ptr<Matrix6d> NewMatrix6dPtr(Matrix6d init_value = Matrix6d::Zero())
-{
-	return std::make_shared<Matrix6d>(init_value);
-}
-
-std::shared_ptr<Vector6d> NewVector6dPtr(Vector6d init_value = Vector6d::Zero())
-{
-	return std::make_shared<Vector6d>(init_value);
-}
-
-BOOST_PYTHON_FUNCTION_OVERLOADS(NewMatrix6dPtr_overloads, NewMatrix6dPtr, 0, 1)
-BOOST_PYTHON_FUNCTION_OVERLOADS(NewVector6dPtr_overloads, NewVector6dPtr, 0, 1)
-
 // Primitive types need to be wrapped in order to use pointers on them in python
 struct DoubleWrap {
 	DoubleWrap(double init_value = 0.) :
@@ -116,6 +61,105 @@ private:
 	std::shared_ptr<double> value;
 };
 
+struct ConstDoubleWrap {
+	ConstDoubleWrap(std::shared_ptr<const double> ptr) :
+		value(ptr.get())
+	{
+	}
+
+	ConstDoubleWrap(const double* ptr) :
+		value(ptr)
+	{
+	}
+
+	operator std::shared_ptr<const double>() const {
+		return std::shared_ptr<const double>(value);
+	}
+
+	ConstDoubleWrap operator=(const double* ptr) {
+		value = ptr;
+		return *this;
+	}
+
+	double get() const {
+		return *value;
+	}
+
+private:
+	const double* value;
+};
+
+// Wrappers for classes returning pointers to double
+struct PowerConstraintWrap : public PowerConstraint {
+	PowerConstraintWrap(
+		Vector6dConstPtr total_velocity,
+		Vector6dConstPtr external_force,
+		doubleConstPtr maximum_power) :
+		PowerConstraint(total_velocity, external_force, maximum_power)
+	{
+	}
+
+	ConstDoubleWrap getPowerPy() {
+		return ConstDoubleWrap(getPower());
+	}
+};
+
+
+// Functions to create shared pointers to constraints
+std::shared_ptr<DefaultConstraint> NewDefaultConstraint(ConstraintType type)
+{
+	return std::make_shared<DefaultConstraint>(type);
+}
+
+std::shared_ptr<VelocityConstraint> NewVelocityConstraint(Vector6dPtr total_velocity, doublePtr maximum_velocity)
+{
+	return std::make_shared<VelocityConstraint>(static_cast<Vector6dConstPtr>(total_velocity), static_cast<doublePtr>(maximum_velocity));
+}
+
+std::shared_ptr<PowerConstraintWrap> NewPowerConstraint(Vector6dPtr total_velocity, Vector6dPtr external_force, doublePtr maximum_power)
+{
+	return std::make_shared<PowerConstraintWrap>(static_cast<Vector6dConstPtr>(total_velocity), static_cast<Vector6dConstPtr>(external_force), static_cast<doublePtr>(maximum_power));
+}
+
+std::shared_ptr<StopConstraint> NewStopConstraint(Vector6dPtr external_force, doublePtr activation_force_threshold, doublePtr deactivation_force_threshold)
+{
+	return std::make_shared<StopConstraint>(static_cast<Vector6dConstPtr>(external_force), static_cast<doublePtr>(activation_force_threshold), static_cast<doublePtr>(deactivation_force_threshold));
+}
+
+std::shared_ptr<ConstantVelocityGenerator> NewConstantVelocityGenerator(Vector6dPtr velocity)
+{
+	return std::make_shared<ConstantVelocityGenerator>(static_cast<Vector6dConstPtr>(velocity));
+}
+
+std::shared_ptr<ConstantForceGenerator> NewConstantForceGenerator(Vector6dPtr force)
+{
+	return std::make_shared<ConstantForceGenerator>(static_cast<Vector6dConstPtr>(force));
+}
+
+std::shared_ptr<SafetyController> NewSafetyController(Matrix6dPtr damping_matrix)
+{
+	return std::make_shared<SafetyController>(static_cast<Matrix6dConstPtr>(damping_matrix));
+}
+
+std::shared_ptr<VREPDriver> NewVREPDriver(double sample_time, const std::string& prefix = "", const std::string& suffix = "", const std::string& ip = "127.0.0.1", int port = 19997)
+{
+	return std::make_shared<VREPDriver>(sample_time, prefix, suffix, ip, port);
+}
+BOOST_PYTHON_FUNCTION_OVERLOADS(NewVREPDriver_overloads, NewVREPDriver, 1, 5)
+
+std::shared_ptr<Matrix6d> NewMatrix6dPtr(Matrix6d init_value = Matrix6d::Zero())
+{
+	return std::make_shared<Matrix6d>(init_value);
+}
+BOOST_PYTHON_FUNCTION_OVERLOADS(NewMatrix6dPtr_overloads, NewMatrix6dPtr, 0, 1)
+
+std::shared_ptr<Vector6d> NewVector6dPtr(Vector6d init_value = Vector6d::Zero())
+{
+	return std::make_shared<Vector6d>(init_value);
+}
+BOOST_PYTHON_FUNCTION_OVERLOADS(NewVector6dPtr_overloads, NewVector6dPtr, 0, 1)
+
+
 std::shared_ptr<DoubleWrap> NewDoublePtr(double init_value = 0.)
 {
 	return std::make_shared<DoubleWrap>(init_value);
@@ -127,6 +171,7 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(NewDoublePtr_overloads, NewDoublePtr, 0, 1)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SafetyController_addConstraint_overloads,        addConstraint,           2, 3)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SafetyController_addVelocityGenerator_overloads, addVelocityGenerator,    2, 3)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SafetyController_addForceGenerator_overloads,    addForceGenerator,       2, 3)
+
 
 } // namespace RSCL
 
@@ -158,17 +203,22 @@ BOOST_PYTHON_MODULE(PyRSCL) {
 	register_ptr_to_python<std::shared_ptr<DoubleWrap>>();
 	register_ptr_to_python<std::shared_ptr<const Matrix6d>>();
 	register_ptr_to_python<std::shared_ptr<const Vector6d>>();
-	register_ptr_to_python<std::shared_ptr<const DoubleWrap>>();
+	register_ptr_to_python<std::shared_ptr<ConstDoubleWrap>>();
 
 	implicitly_convertible<std::shared_ptr<Matrix6d>, std::shared_ptr<const Matrix6d>>();
 	implicitly_convertible<std::shared_ptr<Vector6d>, std::shared_ptr<const Vector6d>>();
 	implicitly_convertible<std::shared_ptr<double>, std::shared_ptr<const double>>();
 	implicitly_convertible<DoubleWrap, std::shared_ptr<double>>();
 	implicitly_convertible<std::shared_ptr<double>, DoubleWrap>();
+	implicitly_convertible<ConstDoubleWrap, std::shared_ptr<const double>>();
+	implicitly_convertible<std::shared_ptr<const double>, ConstDoubleWrap>();
 
 	class_<DoubleWrap, boost::noncopyable>("DoubleWrap")
 	.def("set", &DoubleWrap::set, "Set the internal value")
 	.def("get", &DoubleWrap::get, "Get the internal value");
+
+	class_<ConstDoubleWrap>("ConstDoubleWrap", init<doubleConstPtr>())
+	.def("get", &ConstDoubleWrap::get, "Get the internal value");
 
 
 	/**********************************************************************************/
@@ -202,20 +252,21 @@ BOOST_PYTHON_MODULE(PyRSCL) {
 	class_<VelocityConstraint, boost::noncopyable, bases<Constraint>>("VelocityConstraint", "Velocity constraint, limits the tool's maximum velocity", init<Vector6dConstPtr, doubleConstPtr>())
 	.def("compute", &VelocityConstraint::compute);
 
-	class_<PowerConstraint, boost::noncopyable, bases<Constraint>>("PowerConstraint", "Power constraint, limits the exchanged power between the tool and the environment", init<Vector6dConstPtr, Vector6dConstPtr, doubleConstPtr>())
-	.def("compute", &PowerConstraint::compute);
+	class_<PowerConstraintWrap, boost::noncopyable, bases<Constraint>>("PowerConstraint", "Power constraint, limits the exchanged power between the tool and the environment", init<Vector6dConstPtr, Vector6dConstPtr, doubleConstPtr>())
+	.def("compute", &PowerConstraintWrap::compute)
+	.def("getPower", &PowerConstraintWrap::getPowerPy);
 
 	class_<StopConstraint, boost::noncopyable, bases<Constraint>>("StopConstraint", "Stop constraint, stops the tool when the external force is above a given limit", init<Vector6dConstPtr, doubleConstPtr, doubleConstPtr>())
 	.def("compute", &StopConstraint::compute);
 
 	register_ptr_to_python<std::shared_ptr<DefaultConstraint>>();
 	register_ptr_to_python<std::shared_ptr<VelocityConstraint>>();
-	register_ptr_to_python<std::shared_ptr<PowerConstraint>>();
+	register_ptr_to_python<std::shared_ptr<PowerConstraintWrap>>();
 	register_ptr_to_python<std::shared_ptr<StopConstraint>>();
 
 	implicitly_convertible<std::shared_ptr<DefaultConstraint>,     std::shared_ptr<Constraint>>();
 	implicitly_convertible<std::shared_ptr<VelocityConstraint>,    std::shared_ptr<Constraint>>();
-	implicitly_convertible<std::shared_ptr<PowerConstraint>,       std::shared_ptr<Constraint>>();
+	implicitly_convertible<std::shared_ptr<PowerConstraintWrap>,   std::shared_ptr<Constraint>>();
 	implicitly_convertible<std::shared_ptr<StopConstraint>,        std::shared_ptr<Constraint>>();
 
 	/**********************************************************************************/

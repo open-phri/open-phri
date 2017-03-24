@@ -21,6 +21,7 @@ int main(int argc, char const *argv[]) {
 	auto constant_force_generator = make_shared<ConstantForceGenerator>(constant_force);
 
 	auto safety_controller = SafetyController(damping_matrix);
+	safety_controller.setVerbose(true);
 	auto tcp_velocity = safety_controller.getTCPVelocity();
 
 	safety_controller.addVelocityGenerator("const vel", constant_velocity_generator);

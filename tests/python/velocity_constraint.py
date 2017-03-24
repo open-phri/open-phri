@@ -16,11 +16,6 @@ def getTransVel(vec):
 		t[i] = vec[i]
 	return t
 
-
-def setIdentity(mat):
-	for i in range(0,6):
-		mat[i,i] = 1
-
 damping_matrix = NewMatrix6dPtr(Matrix6.Identity * 10)
 maximum_velocity = NewDoublePtr(0.5)
 
