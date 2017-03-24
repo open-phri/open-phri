@@ -33,7 +33,7 @@ constant_vel = NewVector6dPtr()
 constant_velocity_generator = NewVelocityProxy(constant_vel)
 
 safety_controller.addConstraint("power constraint", power_constraint)
-safety_controller.addVelocityGenerator("const vel", constant_velocity_generator)
+safety_controller.addVelocityGenerator("vel proxy", constant_velocity_generator)
 
 # Step #1 : no velocity
 safety_controller.updateTCPVelocity()

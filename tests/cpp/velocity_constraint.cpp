@@ -26,7 +26,7 @@ int main(int argc, char const *argv[]) {
 	auto constant_velocity_generator = make_shared<VelocityProxy>(constant_vel);
 
 	safety_controller.addConstraint("velocity constraint", velocity_constraint);
-	safety_controller.addVelocityGenerator("const vel", constant_velocity_generator);
+	safety_controller.addVelocityGenerator("vel proxy", constant_velocity_generator);
 
 	auto& translation_velocity = tcp_velocity->block<3,1>(0,0);
 
