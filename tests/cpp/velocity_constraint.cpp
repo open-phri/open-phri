@@ -1,7 +1,4 @@
-#include <safety_controller.h>
-#include <velocity_generators.h>
-#include <force_generators.h>
-#include <constraints.h>
+#include <RSCL/RSCL.h>
 
 using namespace RSCL;
 using namespace std;

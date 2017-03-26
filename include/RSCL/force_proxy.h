@@ -1,7 +1,7 @@
 #pragma once
 
-#include <force_generator.h>
-#include <definitions.h>
+#include <RSCL/force_generator.h>
+#include <RSCL/definitions.h>
 
 namespace RSCL {
 

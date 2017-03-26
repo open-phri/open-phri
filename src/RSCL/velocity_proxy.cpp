@@ -1,4 +1,4 @@
-#include <velocity_proxy.h>
+#include <RSCL/velocity_proxy.h>
 
 using namespace RSCL;
 

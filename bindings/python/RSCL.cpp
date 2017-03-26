@@ -1,8 +1,5 @@
-#include <RSCL.h>
-#include <constraints.h>
-#include <velocity_generators.h>
-#include <force_generators.h>
-#include <vrep_driver.h>
+#include <RSCL/RSCL.h>
+#include <vrep_driver/vrep_driver.h>
 
 #include <boost/python.hpp>
 #include <iostream>
@@ -177,7 +174,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SafetyController_addForceGenerator_overlo
 
 BOOST_PYTHON_MODULE(PyRSCL) {
 	using namespace RSCL;
-	
+
 	using namespace vrep;
 	using namespace boost::python;
 

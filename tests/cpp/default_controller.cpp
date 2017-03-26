@@ -1,4 +1,4 @@
-#include <safety_controller.h>
+#include <RSCL/RSCL.h>
 
 using namespace RSCL;
 using namespace std;

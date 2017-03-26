@@ -1,4 +1,4 @@
-#include <force_constraint.h>
+#include <RSCL/force_constraint.h>
 #include <limits>
 
 using namespace RSCL;

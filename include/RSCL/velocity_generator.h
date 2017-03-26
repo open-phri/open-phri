@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include <definitions.h>
+#include <RSCL/definitions.h>
 
 namespace RSCL {
 

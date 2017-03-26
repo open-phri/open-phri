@@ -1,7 +1,7 @@
 #pragma once
 
-#include <definitions.h>
-#include <constraint.h>
+#include <RSCL/definitions.h>
+#include <RSCL/constraint.h>
 
 namespace RSCL {
 

@@ -1,4 +1,4 @@
-#include <stop_constraint.h>
+#include <RSCL/stop_constraint.h>
 #include <iostream>
 
 using namespace RSCL;

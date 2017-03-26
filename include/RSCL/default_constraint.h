@@ -1,6 +1,6 @@
 #pragma once
 
-#include <constraint.h>
+#include <RSCL/constraint.h>
 
 namespace RSCL {
 

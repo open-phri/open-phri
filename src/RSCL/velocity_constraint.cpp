@@ -1,4 +1,4 @@
-#include <velocity_constraint.h>
+#include <RSCL/velocity_constraint.h>
 
 using namespace RSCL;
 

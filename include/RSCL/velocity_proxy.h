@@ -1,7 +1,7 @@
 #pragma once
 
-#include <velocity_generator.h>
-#include <definitions.h>
+#include <RSCL/velocity_generator.h>
+#include <RSCL/definitions.h>
 
 namespace RSCL {
 

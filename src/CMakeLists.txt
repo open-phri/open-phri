@@ -4,7 +4,7 @@ find_package(Threads)
 
 
 ###					RSCL library					###
-set(RSCL_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include/RSCL;${EIGEN3_INCLUDE_DIRS}" CACHE INTERNAL "")
+set(RSCL_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include;${EIGEN3_INCLUDE_DIRS}" CACHE INTERNAL "")
 include_directories(${RSCL_INCLUDE_DIRS})
 file(
     GLOB_RECURSE
@@ -40,7 +40,7 @@ target_compile_definitions(vrep_remote_api PRIVATE ${VREP_CFLAGS})
 
 
 ###				vrep_driver library				###
-set(VREP_DRIVER_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include/vrep_driver;${RSCL_INCLUDE_DIRS};${VREP_REMOTE_API_INCLUDE_DIRS}" CACHE INTERNAL "")
+set(VREP_DRIVER_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include;${RSCL_INCLUDE_DIRS};${VREP_REMOTE_API_INCLUDE_DIRS}" CACHE INTERNAL "")
 include_directories(${VREP_DRIVER_INCLUDE_DIRS})
 file(
     GLOB_RECURSE

@@ -1,4 +1,4 @@
-#include <constraint.h>
+#include <RSCL/constraint.h>
 
 using namespace RSCL;
 

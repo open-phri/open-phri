@@ -1,6 +1,6 @@
 #pragma once
 
-#include <definitions.h>
+#include <RSCL/definitions.h>
 
 namespace RSCL {
 

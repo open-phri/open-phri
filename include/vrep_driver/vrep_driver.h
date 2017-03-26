@@ -3,7 +3,7 @@
 #include <string>
 #include <unordered_map>
 
-#include <definitions.h>
+#include <RSCL/definitions.h>
 
 namespace vrep {
 

@@ -1,4 +1,4 @@
-#include <power_constraint.h>
+#include <RSCL/power_constraint.h>
 
 using namespace RSCL;
 

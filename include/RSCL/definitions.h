@@ -1,5 +1,4 @@
-#ifndef DEFINITIONS_H
-#define DEFINITIONS_H
+#pragma once
 
 #include <Eigen/Dense>
 #include <memory>
@@ -22,5 +21,3 @@ using Vector6dConstPtr = std::shared_ptr<const Vector6d>;
 using doubleConstPtr = std::shared_ptr<const double>;
 
 }
-
-#endif /* DEFINITIONS_H */

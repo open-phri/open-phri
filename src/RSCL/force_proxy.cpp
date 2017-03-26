@@ -1,4 +1,4 @@
-#include <force_proxy.h>
+#include <RSCL/force_proxy.h>
 
 using namespace RSCL;
 

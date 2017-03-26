@@ -1,4 +1,4 @@
-#include <vrep_driver.h>
+#include <vrep_driver/vrep_driver.h>
 
 #include <iostream>
 #include <stdexcept>

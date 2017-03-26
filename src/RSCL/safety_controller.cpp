@@ -1,5 +1,8 @@
-#include <safety_controller.h>
-#include <default_constraint.h>
+#include <RSCL/safety_controller.h>
+
+#include <RSCL/default_constraint.h>
+#include <RSCL/force_generator.h>
+#include <RSCL/velocity_generator.h>
 
 #include <limits>
 #include <iostream>
