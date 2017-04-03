@@ -9,7 +9,7 @@ using namespace std;
 using namespace RSCL;
 using namespace vrep;
 
-constexpr double SAMPLE_TIME = 0.005;
+constexpr double SAMPLE_TIME = 0.010;
 
 bool _stop = false;
 
@@ -70,6 +70,7 @@ int main(int argc, char const *argv[]) {
 		driver.nextStep();
 	}
 
+	driver.enableSynchonous(false);
 	driver.stopSimulation();
 
 	return 0;

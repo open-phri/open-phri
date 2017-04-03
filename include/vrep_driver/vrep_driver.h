@@ -2,6 +2,8 @@
 
 #include <string>
 #include <unordered_map>
+#include <map>
+#include <utility>
 
 #include <RSCL/definitions.h>
 
@@ -47,11 +49,14 @@ public:
 
 	bool readTCPWrench(RSCL::Vector6dPtr wrench) const;
 
+	RSCL::Vector6dConstPtr trackObjectPosition(const std::string& name, ReferenceFrame frame);
+	bool updateTrackedObjectsPosition();
+
 private:
 	void init(const std::string& ip, int port);
 	void init(int client_id);
 	bool getObjectHandles();
-	bool startStreaming() const;
+	void startStreaming() const;
 	int getFrameHandle(ReferenceFrame frame) const;
 
 	int client_id_;
@@ -62,6 +67,7 @@ private:
 	std::string suffix_;
 
 	std::unordered_map<std::string, int> object_handles_;
+	std::map<std::pair<int,int>, RSCL::Vector6dPtr> tracked_objects_;
 
 };
 

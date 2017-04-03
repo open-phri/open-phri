@@ -3,7 +3,7 @@ from PyRSCL import *
 
 from signal import *
 
-SAMPLE_TIME = 0.005
+SAMPLE_TIME = 0.01
 stop = False
 
 def sigint_handler(signal, frame):

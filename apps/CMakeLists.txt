@@ -1,13 +1,14 @@
 # Apps
 include_directories(${RSCL_INCLUDE_DIRS} ${VREP_DRIVER_INCLUDE_DIRS})
 
-file(
-    GLOB_RECURSE
-    stop_controller_source_files
-    ${CMAKE_CURRENT_SOURCE_DIR}/stop_controller_example/*
-)
+function(add_application app)
+    file(GLOB_RECURSE app_source_files ${CMAKE_CURRENT_SOURCE_DIR}/${app}/*)
+    add_executable(${app} ${app_source_files})
+    set_property(TARGET ${app} PROPERTY CXX_STANDARD 14)
+    target_link_libraries(${app} RSCL)
+    target_link_libraries(${app} vrep_driver)
+endfunction()
 
-add_executable(stop_controller_example ${stop_controller_source_files})
-set_property(TARGET stop_controller_example PROPERTY CXX_STANDARD 14)
-target_link_libraries(stop_controller_example RSCL)
-target_link_libraries(stop_controller_example vrep_driver)
+add_application(stop_constraint_example)
+add_application(velocity_constraint_example)
+add_application(obstacle_avoidance_example)

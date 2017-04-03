@@ -56,9 +56,8 @@ void VREPDriver::init(int client_id) {
 	assert_msg("In VREPDriver::init: invalid client id", client_id >= 0);
 	client_id_ = client_id;
 
-	bool all_ok = true;
-	all_ok &= getObjectHandles();
-	all_ok &= startStreaming();
+	getObjectHandles();
+	startStreaming();
 }
 
 
@@ -204,6 +203,43 @@ bool VREPDriver::readTCPWrench(RSCL::Vector6dPtr wrench) const {
 	return all_ok;
 }
 
+RSCL::Vector6dConstPtr VREPDriver::trackObjectPosition(const std::string& name, ReferenceFrame frame) {
+	int handle = -1;
+	int ref_frame = getFrameHandle(frame);
+	float data[3];
+
+	if(simxGetObjectHandle(client_id_, name.c_str(), &handle, simx_opmode_oneshot_wait) != simx_return_ok) {
+		cerr << "In VREPDriver::trackObjectPosition: can't get the handle of object " << name << endl;
+	}
+
+	simxGetObjectPosition(client_id_, handle, ref_frame, data, simx_opmode_streaming);
+
+	auto ptr = make_shared<RSCL::Vector6d>(RSCL::Vector6d::Zero());
+
+	tracked_objects_[make_pair(handle, ref_frame)] = ptr;
+
+	return ptr;
+}
+
+bool VREPDriver::updateTrackedObjectsPosition() {
+	bool all_ok = true;
+	float data[3];
+	for(auto& obj: tracked_objects_) {
+		all_ok &= (simxGetObjectPosition(client_id_, obj.first.first, obj.first.second, data, simx_opmode_buffer) == simx_return_ok);
+		if(all_ok) {
+			double* pose_data = obj.second->data();
+			for (size_t i = 0; all_ok and i < 3; ++i) {
+				pose_data[i] = data[i];
+			}
+		}
+		else {
+			cerr << "In VREPDriver::updateTrackedObjectsPosition: can't get position of object with handle " << obj.first.first << endl;
+		}
+	}
+	return all_ok;
+}
+
+
 bool VREPDriver::getObjectHandles() {
 	bool all_ok = true;
 
@@ -226,8 +262,7 @@ bool VREPDriver::getObjectHandles() {
 	return all_ok;
 }
 
-bool VREPDriver::startStreaming() const {
-	bool all_ok = true;
+void VREPDriver::startStreaming() const {
 	float data[6];
 
 	ReferenceFrame frames[] = {ReferenceFrame::TCP, ReferenceFrame::Base, ReferenceFrame::World};
@@ -237,17 +272,15 @@ bool VREPDriver::startStreaming() const {
 		int obj_handle = object_handles_.at(prefix_ + object + suffix_);
 		for(auto frame : frames) {
 			int frame_id = getFrameHandle(frame);
-			all_ok &= (simxGetObjectPosition    (client_id_, obj_handle, frame_id, data,    simx_opmode_streaming) == simx_return_ok);
-			all_ok &= (simxGetObjectOrientation (client_id_, obj_handle, frame_id, data+3,  simx_opmode_streaming) == simx_return_ok);
+			simxGetObjectPosition    (client_id_, obj_handle, frame_id, data,    simx_opmode_streaming);
+			simxGetObjectOrientation (client_id_, obj_handle, frame_id, data+3,  simx_opmode_streaming);
 		}
-		all_ok &= (simxGetObjectVelocity    (client_id_, obj_handle, data, data+3, simx_opmode_streaming) == simx_return_ok);
+		simxGetObjectVelocity    (client_id_, obj_handle, data, data+3, simx_opmode_streaming);
 	}
 
 	uint8_t ft_state;
 	int obj_handle = object_handles_.at(prefix_ + "force_sensor" + suffix_);
-	all_ok &= (simxReadForceSensor(client_id_, obj_handle, &ft_state, data, data+3, simx_opmode_streaming) == simx_return_ok);
-
-	return all_ok;
+	simxReadForceSensor(client_id_, obj_handle, &ft_state, data, data+3, simx_opmode_streaming);
 }
 
 int VREPDriver::getFrameHandle(ReferenceFrame frame) const {

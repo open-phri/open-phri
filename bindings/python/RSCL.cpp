@@ -110,17 +110,17 @@ std::shared_ptr<DefaultConstraint> NewDefaultConstraint(ConstraintType type)
 
 std::shared_ptr<VelocityConstraint> NewVelocityConstraint(Vector6dPtr total_velocity, doublePtr maximum_velocity)
 {
-	return std::make_shared<VelocityConstraint>(static_cast<Vector6dConstPtr>(total_velocity), static_cast<doublePtr>(maximum_velocity));
+	return std::make_shared<VelocityConstraint>(static_cast<Vector6dConstPtr>(total_velocity), static_cast<doubleConstPtr>(maximum_velocity));
 }
 
 std::shared_ptr<PowerConstraintWrap> NewPowerConstraint(Vector6dPtr total_velocity, Vector6dPtr external_force, doublePtr maximum_power)
 {
-	return std::make_shared<PowerConstraintWrap>(static_cast<Vector6dConstPtr>(total_velocity), static_cast<Vector6dConstPtr>(external_force), static_cast<doublePtr>(maximum_power));
+	return std::make_shared<PowerConstraintWrap>(static_cast<Vector6dConstPtr>(total_velocity), static_cast<Vector6dConstPtr>(external_force), static_cast<doubleConstPtr>(maximum_power));
 }
 
 std::shared_ptr<StopConstraint> NewStopConstraint(Vector6dPtr external_force, doublePtr activation_force_threshold, doublePtr deactivation_force_threshold)
 {
-	return std::make_shared<StopConstraint>(static_cast<Vector6dConstPtr>(external_force), static_cast<doublePtr>(activation_force_threshold), static_cast<doublePtr>(deactivation_force_threshold));
+	return std::make_shared<StopConstraint>(static_cast<Vector6dConstPtr>(external_force), static_cast<doubleConstPtr>(activation_force_threshold), static_cast<doubleConstPtr>(deactivation_force_threshold));
 }
 
 std::shared_ptr<VelocityProxy> NewVelocityProxy(Vector6dPtr velocity)
@@ -132,6 +132,23 @@ std::shared_ptr<ForceProxy> NewForceProxy(Vector6dPtr force)
 {
 	return std::make_shared<ForceProxy>(static_cast<Vector6dConstPtr>(force));
 }
+
+std::shared_ptr<PotentialFieldObject> NewPotentialFieldObject(PotentialFieldType type, doublePtr gain, doublePtr threshold_distance, Vector6dPtr object_position)
+{
+	return std::make_shared<PotentialFieldObject>(type, static_cast<doubleConstPtr>(gain), static_cast<doubleConstPtr>(threshold_distance), static_cast<Vector6dConstPtr>(object_position));
+}
+
+std::shared_ptr<PotentialFieldGenerator> NewPotentialFieldGenerator(Vector6dPtr robot_position)
+{
+	return std::make_shared<PotentialFieldGenerator>(static_cast<Vector6dConstPtr>(robot_position));
+}
+
+std::shared_ptr<PotentialFieldGenerator> NewPotentialFieldGenerator()
+{
+	return std::make_shared<PotentialFieldGenerator>();
+}
+BOOST_PYTHON_FUNCTION_OVERLOADS(NewPotentialFieldGenerator_overloads, NewPotentialFieldGenerator, 0, 1)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(PotentialFieldGenerator_addObject_overloads, addObject, 2, 3)
 
 std::shared_ptr<SafetyController> NewSafetyController(Matrix6dPtr damping_matrix)
 {
@@ -269,8 +286,11 @@ BOOST_PYTHON_MODULE(PyRSCL) {
 	/**********************************************************************************/
 	/*                                 Generators bindings                            */
 	/**********************************************************************************/
-	def("NewVelocityProxy",    &NewVelocityProxy,  "Create a new instance of a VelocityProxy shared_ptr");
-	def("NewForceProxy",       &NewForceProxy,     "Create a new instance of a ForceProxy shared_ptr");
+	def("NewVelocityProxy",             NewVelocityProxy,           "Create a new instance of a VelocityProxy shared_ptr");
+	def("NewForceProxy",                NewForceProxy,              "Create a new instance of a ForceProxy shared_ptr");
+	def("NewPotentialFieldObject",      NewPotentialFieldObject,    "Create a new instance of a PotentialFieldObject shared_ptr");
+	def("NewPotentialFieldGenerator",   (std::shared_ptr<PotentialFieldGenerator>(*)(Vector6dPtr)) 0,
+	    NewPotentialFieldGenerator_overloads(args("rob_pos"),       "Create a new instance of a PotentialFieldGenerator shared_ptr"));
 
 	struct VelocityGeneratorWrap : VelocityGenerator, wrapper<VelocityGenerator> {
 		using VelocityGenerator::VelocityGenerator;
@@ -285,7 +305,7 @@ BOOST_PYTHON_MODULE(PyRSCL) {
 	.def("compute", pure_virtual(&VelocityGenerator::compute));
 
 	class_<VelocityProxy, boost::noncopyable>("VelocityProxy", init<Vector6dConstPtr>())
-	.def("compute", pure_virtual(&VelocityProxy::compute));
+	.def("compute", &VelocityProxy::compute);
 
 
 	struct ForceGeneratorWrap : ForceGenerator, wrapper<ForceGenerator> {
@@ -301,7 +321,7 @@ BOOST_PYTHON_MODULE(PyRSCL) {
 	.def("compute", pure_virtual(&ForceGenerator::compute));
 
 	class_<ForceProxy, boost::noncopyable>("ForceProxy", init<Vector6dConstPtr>())
-	.def("compute", pure_virtual(&ForceProxy::compute));
+	.def("compute", &ForceProxy::compute);
 
 	register_ptr_to_python<std::shared_ptr<VelocityProxy>>();
 	register_ptr_to_python<std::shared_ptr<ForceProxy>>();
@@ -309,6 +329,22 @@ BOOST_PYTHON_MODULE(PyRSCL) {
 	implicitly_convertible<std::shared_ptr<VelocityProxy>, std::shared_ptr<VelocityGenerator>>();
 	implicitly_convertible<std::shared_ptr<ForceProxy>,    std::shared_ptr<ForceGenerator>>();
 
+	enum_<PotentialFieldType>("PotentialFieldType", "Type of potential field")
+	.value("Attractive", PotentialFieldType::Attractive)
+	.value("Repulsive", PotentialFieldType::Repulsive);
+
+	class_<PotentialFieldObject>("PotentialFieldObject", init<PotentialFieldType, doubleConstPtr, doubleConstPtr, Vector6dConstPtr>());
+
+	class_<PotentialFieldGenerator, boost::noncopyable, bases<ForceGenerator>>("PotentialFieldGenerator", init<Vector6dConstPtr>())
+	.def("setVerbose",      &PotentialFieldGenerator::setVerbose)
+	.def("compute",         &PotentialFieldGenerator::compute)
+	.def("addObject",       &PotentialFieldGenerator::addObject,           PotentialFieldGenerator_addObject_overloads(args("name", "object", "force")))
+	.def("removeObject",    &PotentialFieldGenerator::removeObject)
+	.def("getObject",       &PotentialFieldGenerator::getObject);
+
+	register_ptr_to_python<std::shared_ptr<PotentialFieldObject>>();
+	register_ptr_to_python<std::shared_ptr<PotentialFieldGenerator>>();
+	implicitly_convertible<std::shared_ptr<PotentialFieldGenerator>,    std::shared_ptr<ForceGenerator>>();
 	/*********************************************************************************/
 	/*                          SafetyController bindings                            */
 	/*********************************************************************************/
@@ -348,18 +384,21 @@ BOOST_PYTHON_MODULE(PyRSCL) {
 
 	class_<VREPDriver, boost::noncopyable>("VREPDriver", "Interface to the V-REP simulator", init<double, const std::string&, const std::string&, const std::string&, int>())
 	.def(init<double, int, const std::string&, const std::string&>())
-	.def("getClientID",           &VREPDriver::getClientID)
-	.def("checkConnection",       &VREPDriver::checkConnection)
-	.def("enableSynchonous",      &VREPDriver::enableSynchonous)
-	.def("nextStep",              &VREPDriver::nextStep)
-	.def("startSimulation",       &VREPDriver::startSimulation)
-	.def("stopSimulation",        &VREPDriver::stopSimulation)
-	.def("pauseSimulation",       &VREPDriver::pauseSimulation)
-	.def("readTCPPose",           &VREPDriver::readTCPPose)
-	.def("readTCPVelocity",       &VREPDriver::readTCPVelocity)
-	.def("readTCPTargetPose",     &VREPDriver::readTCPTargetPose)
-	.def("sendTCPtargetVelocity", &VREPDriver::sendTCPtargetVelocity)
-	.def("readTCPWrench",         &VREPDriver::readTCPWrench);
+	.def("getClientID",                     &VREPDriver::getClientID)
+	.def("checkConnection",                 &VREPDriver::checkConnection)
+	.def("enableSynchonous",                &VREPDriver::enableSynchonous)
+	.def("nextStep",                        &VREPDriver::nextStep)
+	.def("startSimulation",                 &VREPDriver::startSimulation)
+	.def("stopSimulation",                  &VREPDriver::stopSimulation)
+	.def("pauseSimulation",                 &VREPDriver::pauseSimulation)
+	.def("readTCPPose",                     &VREPDriver::readTCPPose)
+	.def("readTCPVelocity",                 &VREPDriver::readTCPVelocity)
+	.def("readTCPTargetPose",               &VREPDriver::readTCPTargetPose)
+	.def("sendTCPtargetVelocity",           &VREPDriver::sendTCPtargetVelocity)
+	.def("readTCPWrench",                   &VREPDriver::readTCPWrench)
+	.def("trackObjectPosition",             &VREPDriver::trackObjectPosition)
+	.def("updateTrackedObjectsPosition",    &VREPDriver::updateTrackedObjectsPosition)
+	;
 
 	register_ptr_to_python<std::shared_ptr<VREPDriver>>();
 }
