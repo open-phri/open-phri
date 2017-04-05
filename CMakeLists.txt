@@ -2,6 +2,14 @@ cmake_minimum_required (VERSION 2.6)
 
 project(RobotSafetyControlLibrary)
 
+option(BUILD_DEBUG "Build everything for debugging" OFF)
+
+if(BUILD_DEBUG)
+    set(CMAKE_BUILD_TYPE Debug)
+else()
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+
 # Use Ccache if it is available on the system
 find_program(CCACHE_FOUND ccache)
 if(CCACHE_FOUND)

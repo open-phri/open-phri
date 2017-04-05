@@ -1,5 +1,5 @@
 # Dependencies:
-* C++ compiler with C++14 support
+* C++ compiler with C++14 support (Unsolved bug with Clang (tested with v3.9.1) when using Vector6.Zero in python and passing it to C++ functions like NewVector6dPtr)
 * CMake
 * Eiegen3
 * For python bindings:

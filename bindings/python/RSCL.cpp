@@ -256,21 +256,21 @@ BOOST_PYTHON_MODULE(PyRSCL) {
 		}
 	};
 
-	class_<ConstraintWrap, boost::noncopyable>("Constraint", init<ConstraintType>())
+	class_<ConstraintWrap, boost::noncopyable>("Constraint", no_init)
 	.def("getType", &Constraint::getType)
 	.def("compute", pure_virtual(&Constraint::compute));
 
-	class_<DefaultConstraint, boost::noncopyable, bases<Constraint>>("DefaultConstraint", "Default constraint, always evaluates to 1", init<ConstraintType>())
+	class_<DefaultConstraint, boost::noncopyable, bases<Constraint>>("DefaultConstraint", "Default constraint, always evaluates to 1", no_init)
 	.def("compute", &DefaultConstraint::compute);
 
-	class_<VelocityConstraint, boost::noncopyable, bases<Constraint>>("VelocityConstraint", "Velocity constraint, limits the tool's maximum velocity", init<Vector6dConstPtr, doubleConstPtr>())
+	class_<VelocityConstraint, boost::noncopyable, bases<Constraint>>("VelocityConstraint", "Velocity constraint, limits the tool's maximum velocity", no_init)
 	.def("compute", &VelocityConstraint::compute);
 
-	class_<PowerConstraintWrap, boost::noncopyable, bases<Constraint>>("PowerConstraint", "Power constraint, limits the exchanged power between the tool and the environment", init<Vector6dConstPtr, Vector6dConstPtr, doubleConstPtr>())
+	class_<PowerConstraintWrap, boost::noncopyable, bases<Constraint>>("PowerConstraint", "Power constraint, limits the exchanged power between the tool and the environment", no_init)
 	.def("compute", &PowerConstraintWrap::compute)
 	.def("getPower", &PowerConstraintWrap::getPowerPy);
 
-	class_<StopConstraint, boost::noncopyable, bases<Constraint>>("StopConstraint", "Stop constraint, stops the tool when the external force is above a given limit", init<Vector6dConstPtr, doubleConstPtr, doubleConstPtr>())
+	class_<StopConstraint, boost::noncopyable, bases<Constraint>>("StopConstraint", "Stop constraint, stops the tool when the external force is above a given limit", no_init)
 	.def("compute", &StopConstraint::compute);
 
 	register_ptr_to_python<std::shared_ptr<DefaultConstraint>>();
@@ -301,10 +301,10 @@ BOOST_PYTHON_MODULE(PyRSCL) {
 		}
 	};
 
-	class_<VelocityGeneratorWrap, boost::noncopyable>("VelocityGenerator")
+	class_<VelocityGeneratorWrap, boost::noncopyable>("VelocityGenerator", no_init)
 	.def("compute", pure_virtual(&VelocityGenerator::compute));
 
-	class_<VelocityProxy, boost::noncopyable>("VelocityProxy", init<Vector6dConstPtr>())
+	class_<VelocityProxy, boost::noncopyable>("VelocityProxy", no_init)
 	.def("compute", &VelocityProxy::compute);
 
 
@@ -317,10 +317,10 @@ BOOST_PYTHON_MODULE(PyRSCL) {
 		}
 	};
 
-	class_<ForceGeneratorWrap, boost::noncopyable>("ForceGenerator")
+	class_<ForceGeneratorWrap, boost::noncopyable>("ForceGenerator", no_init)
 	.def("compute", pure_virtual(&ForceGenerator::compute));
 
-	class_<ForceProxy, boost::noncopyable>("ForceProxy", init<Vector6dConstPtr>())
+	class_<ForceProxy, boost::noncopyable>("ForceProxy", no_init)
 	.def("compute", &ForceProxy::compute);
 
 	register_ptr_to_python<std::shared_ptr<VelocityProxy>>();
@@ -335,7 +335,7 @@ BOOST_PYTHON_MODULE(PyRSCL) {
 
 	class_<PotentialFieldObject>("PotentialFieldObject", init<PotentialFieldType, doubleConstPtr, doubleConstPtr, Vector6dConstPtr>());
 
-	class_<PotentialFieldGenerator, boost::noncopyable, bases<ForceGenerator>>("PotentialFieldGenerator", init<Vector6dConstPtr>())
+	class_<PotentialFieldGenerator, boost::noncopyable, bases<ForceGenerator>>("PotentialFieldGenerator", no_init)
 	.def("setVerbose",      &PotentialFieldGenerator::setVerbose)
 	.def("compute",         &PotentialFieldGenerator::compute)
 	.def("addObject",       &PotentialFieldGenerator::addObject,           PotentialFieldGenerator_addObject_overloads(args("name", "object", "force")))
@@ -351,7 +351,7 @@ BOOST_PYTHON_MODULE(PyRSCL) {
 
 	def("NewSafetyController",       &NewSafetyController,     "Create a new instance of a SafetyController shared_ptr");
 
-	class_<SafetyController, boost::noncopyable>("SafetyController", "Generates a tool velocity based on force and velocity inputs and a set of constraints", init<Matrix6dConstPtr>())
+	class_<SafetyController, boost::noncopyable>("SafetyController", "Generates a tool velocity based on force and velocity inputs and a set of constraints", no_init)
 	.def("setVerbose",              &SafetyController::setVerbose)
 	.def("addConstraint",           &SafetyController::addConstraint,           SafetyController_addConstraint_overloads(       args("name", "constraint", "force")))
 	.def("addForceGenerator",       &SafetyController::addForceGenerator,       SafetyController_addForceGenerator_overloads(   args("name", "generator", "force")))

@@ -1,3 +1,5 @@
+#undef NDEBUG
+
 #include <RSCL/RSCL.h>
 
 using namespace RSCL;

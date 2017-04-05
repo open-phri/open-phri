@@ -5,15 +5,15 @@ import sys
 
 
 damping_matrix = NewMatrix6dPtr(Matrix6.Identity)
-ext_force = NewVector6dPtr()
-activation_force_threshold = NewDoublePtr(25.)
-deactivation_force_threshold = NewDoublePtr(5.)
-
-safety_controller = SafetyController(damping_matrix)
+safety_controller = NewSafetyController(damping_matrix)
 safety_controller.setVerbose(True)
+
 tcp_velocity = safety_controller.getTCPVelocity()
 total_velocity = safety_controller.getTotalVelocity()
 
+ext_force = NewVector6dPtr()
+activation_force_threshold = NewDoublePtr(25.)
+deactivation_force_threshold = NewDoublePtr(5.)
 stop_constraint = NewStopConstraint(ext_force, activation_force_threshold, deactivation_force_threshold)
 
 constant_vel = NewVector6dPtr()

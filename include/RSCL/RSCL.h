@@ -5,3 +5,4 @@
 #include <RSCL/constraints.h>
 #include <RSCL/velocity_generators.h>
 #include <RSCL/force_generators.h>
+#include <RSCL/interpolators.h>

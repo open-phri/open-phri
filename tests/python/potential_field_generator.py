@@ -5,7 +5,7 @@ import sys
 import math
 
 damping_matrix = NewMatrix6dPtr(Matrix6.Identity * 100.)
-safety_controller = SafetyController(damping_matrix)
+safety_controller = NewSafetyController(damping_matrix)
 safety_controller.setVerbose(True)
 
 tcp_velocity = safety_controller.getTCPVelocity()

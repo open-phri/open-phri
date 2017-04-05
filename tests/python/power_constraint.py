@@ -6,10 +6,6 @@ import sys
 def isClose(v1, v2, eps = 1e-3):
 	return abs(v1-v2) < eps
 
-def setZero(vec):
-	for i in range(0,6):
-		vec[i] = 0
-
 def getTransVel(vec):
 	t = Vector3.Zero
 	for i in range(0,3):
@@ -17,14 +13,15 @@ def getTransVel(vec):
 	return t
 
 damping_matrix = NewMatrix6dPtr(Matrix6.Identity * 10)
-maximum_power = NewDoublePtr(10)
-external_force = NewVector6dPtr(Vector6.Zero)
-
 safety_controller = NewSafetyController(damping_matrix)
 safety_controller.setVerbose(True)
+
 tcp_velocity = safety_controller.getTCPVelocity()
 total_velocity = safety_controller.getTotalVelocity()
 
+external_force = NewVector6dPtr()
+
+maximum_power = NewDoublePtr(10)
 power_constraint = NewPowerConstraint(total_velocity, external_force, maximum_power)
 power_constraint_test = NewPowerConstraint(tcp_velocity, external_force, maximum_power)
 power = power_constraint_test.getPower()
