@@ -8,6 +8,6 @@ Constraint::Constraint(ConstraintType type) : type_(type)
 
 }
 
-ConstraintType Constraint::getType() {
+ConstraintType Constraint::getType() const {
 	return type_;
 }

@@ -14,7 +14,7 @@ public:
 	Constraint(ConstraintType type);
 	virtual ~Constraint() = default;
 
-	ConstraintType getType();
+	ConstraintType getType() const;
 	virtual double compute() = 0;
 
 protected:

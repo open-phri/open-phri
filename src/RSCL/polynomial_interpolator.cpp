@@ -2,17 +2,24 @@
 
 using namespace RSCL;
 
-PolynomialInterpolator::PolynomialInterpolator(PolynomialPointConstPtr from, PolynomialPointConstPtr to, doubleConstPtr input) {
+PolynomialInterpolator::PolynomialInterpolator(
+	PolynomialPointConstPtr from,
+	PolynomialPointConstPtr to,
+	doubleConstPtr input) :
+	PolynomialInterpolator(from, to)
+{
+	setInput(input);
+}
+
+PolynomialInterpolator::PolynomialInterpolator(
+	PolynomialPointConstPtr from,
+	PolynomialPointConstPtr to)
+{
 	from_ = from;
 	to_ = to;
-	input_ = input;
 	output_ = std::make_shared<double>(0.);
 
 	computeParameters();
-}
-
-doubleConstPtr PolynomialInterpolator::getOutput() const {
-	return output_;
 }
 
 /* Simplified coefficient for xi = 0 and dx = xf-xi

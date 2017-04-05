@@ -1,6 +1,6 @@
 #pragma once
 
-#include <RSCL/definitions.h>
+#include <RSCL/interpolator.h>
 
 namespace RSCL {
 
@@ -24,15 +24,14 @@ using PolynomialPointPtr = std::shared_ptr<PolynomialPoint>;
 using PolynomialPointConstPtr = std::shared_ptr<const PolynomialPoint>;
 
 
-class PolynomialInterpolator {
+class PolynomialInterpolator : public Interpolator {
 public:
 	PolynomialInterpolator(PolynomialPointConstPtr from, PolynomialPointConstPtr to, doubleConstPtr input);
+	PolynomialInterpolator(PolynomialPointConstPtr from, PolynomialPointConstPtr to);
 	~PolynomialInterpolator() = default;
 
-	doubleConstPtr getOutput() const;
-
-	void computeParameters();
-	double compute();
+	virtual void computeParameters() override;
+	virtual double compute() override;
 
 private:
 	struct PolynomialParameters {
@@ -53,8 +52,9 @@ private:
 
 	PolynomialPointConstPtr from_;
 	PolynomialPointConstPtr to_;
-	doubleConstPtr input_;
-	doublePtr output_;
 };
+
+using PolynomialInterpolatorPtr = std::shared_ptr<PolynomialInterpolator>;
+using PolynomialInterpolatorConstPtr = std::shared_ptr<const PolynomialInterpolator>;
 
 } // namespace RSCL

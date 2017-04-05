@@ -1,22 +1,21 @@
 #pragma once
 
-#include <RSCL/definitions.h>
+#include <RSCL/interpolator.h>
 
 namespace RSCL {
 
-class LinearInterpolator {
+class LinearInterpolator : public Interpolator {
 public:
 	LinearInterpolator(Vector2dConstPtr from, Vector2dConstPtr to, doubleConstPtr input);
+	LinearInterpolator(Vector2dConstPtr from, Vector2dConstPtr to);
 	~LinearInterpolator() = default;
 
-	doubleConstPtr getOutput() const;
-
 	void enableSaturation(bool on);
-	void computeParameters();
-	double compute();
+	virtual void computeParameters() override;
+	virtual double compute() override;
 
 private:
-	struct PolynomialParameters {
+	struct LinearParameters {
 		double a;
 		double b;
 
@@ -26,13 +25,14 @@ private:
 		double yf;
 	};
 
-	PolynomialParameters params_;
+	LinearParameters params_;
 
 	Vector2dConstPtr from_;
 	Vector2dConstPtr to_;
-	doubleConstPtr input_;
-	doublePtr output_;
 	bool saturation_;
 };
+
+using LinearInterpolatorPtr = std::shared_ptr<LinearInterpolator>;
+using LinearInterpolatorConstPtr = std::shared_ptr<const LinearInterpolator>;
 
 } // namespace RSCL

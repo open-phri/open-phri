@@ -2,18 +2,25 @@
 
 using namespace RSCL;
 
-LinearInterpolator::LinearInterpolator(Vector2dConstPtr from, Vector2dConstPtr to, doubleConstPtr input) {
+LinearInterpolator::LinearInterpolator(
+	Vector2dConstPtr from,
+	Vector2dConstPtr to,
+	doubleConstPtr input) :
+	LinearInterpolator(from, to)
+{
+	setInput(input);
+}
+
+LinearInterpolator::LinearInterpolator(
+	Vector2dConstPtr from,
+	Vector2dConstPtr to)
+{
 	from_ = from;
 	to_ = to;
-	input_ = input;
 	output_ = std::make_shared<double>(0.);
 	saturation_ = false;
 
 	computeParameters();
-}
-
-doubleConstPtr LinearInterpolator::getOutput() const {
-	return output_;
 }
 
 void LinearInterpolator::enableSaturation(bool on) {
