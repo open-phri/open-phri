@@ -6,7 +6,13 @@ include_directories(${VREP_DRIVER_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${PYTHON_INCLUDE_DIRS})
 
-add_library(PyRSCL SHARED RSCL.cpp)
+file(
+    GLOB_RECURSE
+    pyrscl_source_files
+    ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
+)
+
+add_library(PyRSCL SHARED ${pyrscl_source_files})
 target_link_libraries(PyRSCL ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} RSCL vrep_driver)
 set_property(TARGET PyRSCL PROPERTY CXX_STANDARD 14)
 set_target_properties(PyRSCL PROPERTIES PREFIX "") # python needs a PyRSCL.so file, without prefix
