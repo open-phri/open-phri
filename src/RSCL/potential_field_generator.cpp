@@ -5,23 +5,18 @@
 using namespace RSCL;
 using namespace Eigen;
 
+PotentialFieldGenerator::PotentialFieldGenerator()
+{
+	robot_position_ = std::make_shared<Vector6d>(Vector6d::Zero());
+}
+
 PotentialFieldGenerator::PotentialFieldGenerator(Vector6dConstPtr robot_position) : robot_position_(robot_position) {
 
 }
 
-void PotentialFieldGenerator::setVerbose(bool on) {
-	verbose_ = on;
-}
-
 Vector6d PotentialFieldGenerator::compute() {
 	Vector3d total_force = Vector3d::Zero();
-	Vector3d rob_pos;
-	if(robot_position_) {
-		rob_pos = robot_position_->block<3,1>(0,0);
-	}
-	else {
-		rob_pos = Vector3d::Zero();
-	}
+	const Vector3d& rob_pos = robot_position_->block<3,1>(0,0);
 
 	for(const auto& object : objects_) {
 		const PotentialFieldObject& obj = *(object.second);
@@ -48,39 +43,4 @@ Vector6d PotentialFieldGenerator::compute() {
 	Vector6d result = Vector6d::Zero();
 	result.block<3,1>(0,0) = total_force;
 	return result;
-}
-
-bool PotentialFieldGenerator::addObject(const std::string& name, PotentialFieldObjectPtr object, bool force) {
-	if((objects_.find(name) != objects_.end())and not force) {
-		if(verbose_) {
-			std::cerr << "In PotentialFieldGenerator::addObject: an object called \"" << name << "\" already exists. Not replaced (force = false)" << std::endl;
-		}
-		return false;
-	}
-	objects_[name] = object;
-	return true;
-}
-
-bool PotentialFieldGenerator::removeObject(const std::string& name) {
-	auto elem = objects_.find(name);
-	if(elem == objects_.end()) {
-		if(verbose_) {
-			std::cerr << "In PotentialFieldGenerator::removeObject: no object called \"" << name << "\"" << std::endl;
-		}
-		return false;
-	}
-	objects_.erase(elem);
-	return true;
-}
-
-PotentialFieldObjectPtr PotentialFieldGenerator::getObject(const std::string& name) {
-	PotentialFieldObjectPtr ptr;
-	auto elem = objects_.find(name);
-	if(elem != objects_.end()) {
-		ptr = elem->second;
-	}
-	else if(verbose_) {
-		std::cerr << "In PotentialFieldGenerator::getObject: no object called \"" << name << "\"" << std::endl;
-	}
-	return ptr;
 }

@@ -5,6 +5,7 @@
 
 #include <RSCL/definitions.h>
 #include <RSCL/fwd_decl.h>
+#include <RSCL/object_collection.hpp>
 
 namespace RSCL {
 
@@ -19,6 +20,24 @@ public:
 	bool addConstraint(const std::string& name, std::shared_ptr<Constraint> constraint, bool force = false);
 	bool addForceGenerator(const std::string& name, std::shared_ptr<ForceGenerator> generator, bool force = false);
 	bool addVelocityGenerator(const std::string& name, std::shared_ptr<VelocityGenerator> generator, bool force = false);
+
+	template<typename T>
+	typename std::enable_if<std::is_base_of<Constraint, T>::value, bool>::type
+	add(const std::string& name, std::shared_ptr<T> obj, bool force = false) {
+		return addConstraint(name, obj, force);
+	}
+
+	template<typename T>
+	typename std::enable_if<std::is_base_of<ForceGenerator, T>::value, bool>::type
+	add(const std::string& name, std::shared_ptr<T> obj, bool force = false) {
+		return addForceGenerator(name, obj, force);
+	}
+
+	template<typename T>
+	typename std::enable_if<std::is_base_of<VelocityGenerator, T>::value, bool>::type
+	add(const std::string& name, std::shared_ptr<T> obj, bool force = false) {
+		return addVelocityGenerator(name, obj, force);
+	}
 
 	bool removeConstraint(const std::string& name);
 	bool removeForceGenerator(const std::string& name);
@@ -43,16 +62,14 @@ private:
 	Vector6d computeForceSum() const;
 	Vector6d computeVelocitySum() const;
 
-	std::map<std::string, std::shared_ptr<Constraint>>           constraints_;
-	std::map<std::string, std::shared_ptr<ForceGenerator>>       force_generators_;
-	std::map<std::string, std::shared_ptr<VelocityGenerator>>    velocity_generators_;
+	ObjectCollection<std::shared_ptr<Constraint>>           constraints_;
+	ObjectCollection<std::shared_ptr<ForceGenerator>>       force_generators_;
+	ObjectCollection<std::shared_ptr<VelocityGenerator>>    velocity_generators_;
 
 	Vector6dPtr tcp_velocity_;
 	Vector6dPtr total_velocity_;
 	Vector6dPtr total_force_;
 	Matrix6dConstPtr damping_matrix_;
-
-	bool verbose_;
 };
 
 } // namespace RSCL

@@ -5,9 +5,9 @@
 
 namespace RSCL {
 
-std::shared_ptr<SafetyController> NewSafetyController(Matrix6dPtr damping_matrix)
+std::shared_ptr<SafetyController> NewSafetyController(Matrix6dConstPtr damping_matrix)
 {
-	return std::make_shared<SafetyController>(static_cast<Matrix6dConstPtr>(damping_matrix));
+	return std::make_shared<SafetyController>(damping_matrix);
 }
 
 // Safety controller methods overloads

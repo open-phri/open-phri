@@ -16,7 +16,7 @@ int main(int argc, char const *argv[]) {
 	auto velocity_constraint = make_shared<VelocityConstraint>(total_velocity, maximum_velocity);
 
 	bool ok;
-	ok = safety_controller.addConstraint("velocity limit", velocity_constraint);
+	ok = safety_controller.add("velocity limit", velocity_constraint);
 	assert_msg("Step #1", ok == true);
 
 	auto cstr = safety_controller.getConstraint("velocity limit");

@@ -22,19 +22,19 @@ std::shared_ptr<DefaultConstraint> NewDefaultConstraint(ConstraintType type)
 	return std::make_shared<DefaultConstraint>(type);
 }
 
-std::shared_ptr<VelocityConstraint> NewVelocityConstraint(Vector6dPtr total_velocity, doubleConstPtr maximum_velocity)
+std::shared_ptr<VelocityConstraint> NewVelocityConstraint(Vector6dConstPtr total_velocity, doubleConstPtr maximum_velocity)
 {
-	return std::make_shared<VelocityConstraint>(static_cast<Vector6dConstPtr>(total_velocity), static_cast<doubleConstPtr>(maximum_velocity));
+	return std::make_shared<VelocityConstraint>(total_velocity, maximum_velocity);
 }
 
-std::shared_ptr<PowerConstraintWrap> NewPowerConstraint(Vector6dPtr total_velocity, Vector6dPtr external_force, doublePtr maximum_power)
+std::shared_ptr<PowerConstraintWrap> NewPowerConstraint(Vector6dConstPtr total_velocity, Vector6dConstPtr external_force, doubleConstPtr maximum_power)
 {
-	return std::make_shared<PowerConstraintWrap>(static_cast<Vector6dConstPtr>(total_velocity), static_cast<Vector6dConstPtr>(external_force), static_cast<doubleConstPtr>(maximum_power));
+	return std::make_shared<PowerConstraintWrap>(total_velocity, external_force, maximum_power);
 }
 
-std::shared_ptr<StopConstraint> NewStopConstraint(Vector6dPtr external_force, doublePtr activation_force_threshold, doublePtr deactivation_force_threshold)
+std::shared_ptr<StopConstraint> NewStopConstraint(Vector6dConstPtr external_force, doubleConstPtr activation_force_threshold, doubleConstPtr deactivation_force_threshold)
 {
-	return std::make_shared<StopConstraint>(static_cast<Vector6dConstPtr>(external_force), static_cast<doubleConstPtr>(activation_force_threshold), static_cast<doubleConstPtr>(deactivation_force_threshold));
+	return std::make_shared<StopConstraint>(external_force, activation_force_threshold, deactivation_force_threshold);
 }
 
 std::shared_ptr<SeparationDistanceConstraint> NewSeparationDistanceConstraint(ConstraintPtr constraint, InterpolatorPtr interpolator)
@@ -99,9 +99,10 @@ void wrapConstraints() {
 	class_<StopConstraint, boost::noncopyable, bases<Constraint>>("StopConstraint", "Stop constraint, stops the tool when the external force is above a given limit", no_init)
 	.def("compute", &StopConstraint::compute);
 
+	void (SeparationDistanceConstraint:: *SeparationDistanceConstraint_setVerbose)(bool) = &SeparationDistanceConstraint::setVerbose;
 	class_<SeparationDistanceConstraint, boost::noncopyable, bases<Constraint>>("SeparationDistanceConstraint", "Separation distance constraint, adapts the constraint depending on the distance to the closest object", no_init)
 	.def("compute",         &SeparationDistanceConstraint::compute)
-	.def("setVerbose",      &SeparationDistanceConstraint::setVerbose)
+	.def("setVerbose",      SeparationDistanceConstraint_setVerbose)
 	.def("addObject",       &SeparationDistanceConstraint::addObject, SeparationDistanceConstraint_addObject_overloads(args("name", "object", "force")))
 	.def("removeObject",    &SeparationDistanceConstraint::removeObject)
 	.def("getObject",       &SeparationDistanceConstraint::getObject);

@@ -6,3 +6,4 @@
 #include <RSCL/velocity_generators.h>
 #include <RSCL/force_generators.h>
 #include <RSCL/interpolators.h>
+#include <RSCL/utilities.h>

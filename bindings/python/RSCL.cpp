@@ -5,6 +5,7 @@ extern void wrapMisc();
 extern void wrapConstraints();
 extern void wrapGenerators();
 extern void wrapInterpolators();
+extern void wrapUtilities();
 extern void wrapSafetyController();
 extern void wrapVREP();
 
@@ -17,6 +18,7 @@ BOOST_PYTHON_MODULE(PyRSCL) {
 	wrapConstraints();
 	wrapGenerators();
 	wrapInterpolators();
+	wrapUtilities();
 	wrapSafetyController();
 	wrapVREP();
 }

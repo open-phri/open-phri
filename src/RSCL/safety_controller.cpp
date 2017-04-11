@@ -11,8 +11,7 @@ using namespace RSCL;
 
 SafetyController::SafetyController(
 	Matrix6dConstPtr damping_matrix) :
-	damping_matrix_(damping_matrix),
-	verbose_(false)
+	damping_matrix_(damping_matrix)
 {
 	tcp_velocity_ = std::make_shared<Vector6d>(Vector6d::Zero());
 	total_velocity_ = std::make_shared<Vector6d>(Vector6d::Zero());
@@ -23,112 +22,45 @@ SafetyController::SafetyController(
 }
 
 void SafetyController::setVerbose(bool on) {
-	verbose_ = on;
+	constraints_.setVerbose         (on, "RSCL::SafetyController", "Constraint");
+	force_generators_.setVerbose    (on, "RSCL::SafetyController", "ForceGenerator");
+	velocity_generators_.setVerbose (on, "RSCL::SafetyController", "VelocityGenerator");
 }
 
 bool SafetyController::addConstraint(const std::string& name, ConstraintPtr constraint, bool force) {
-	if((constraints_.find(name) != constraints_.end())and not force) {
-		if(verbose_) {
-			std::cerr << "In SafetyController::addConstraint: a constraint called \"" << name << "\" already exists. Not replaced (force = false)" << std::endl;
-		}
-		return false;
-	}
-	constraints_[name] = constraint;
-	return true;
+	return constraints_.addObject(name, constraint, force);
 }
 
 bool SafetyController::addForceGenerator(const std::string& name, ForceGeneratorPtr generator, bool force) {
-	if((force_generators_.find(name) != force_generators_.end())and not force) {
-		if(verbose_) {
-			std::cerr << "In SafetyController::addForceGenerator: a generator called \"" << name << "\" already exists. Not replaced (force = false)" << std::endl;
-		}
-		return false;
-	}
-	force_generators_[name] = generator;
-	return true;
+	return force_generators_.addObject(name, generator, force);
 }
 
 bool SafetyController::addVelocityGenerator(const std::string& name, VelocityGeneratorPtr generator, bool force) {
-	if((velocity_generators_.find(name) != velocity_generators_.end())and not force) {
-		if(verbose_) {
-			std::cerr << "In SafetyController::addVelocityGenerator: a generator called \"" << name << "\" already exists. Not replaced (force = false)" << std::endl;
-		}
-		return false;
-	}
-	velocity_generators_[name] = generator;
-	return true;
+	return velocity_generators_.addObject(name, generator, force);
 }
 
 bool SafetyController::removeConstraint(const std::string& name) {
-	auto elem = constraints_.find(name);
-	if(elem == constraints_.end()) {
-		if(verbose_) {
-			std::cerr << "In SafetyController::removeConstraint: no constraint called \"" << name << "\"" << std::endl;
-		}
-		return false;
-	}
-	constraints_.erase(elem);
-	return true;
+	return constraints_.removeObject(name);
 }
 
 bool SafetyController::removeForceGenerator(const std::string& name) {
-	auto elem = force_generators_.find(name);
-	if(elem == force_generators_.end()) {
-		if(verbose_) {
-			std::cerr << "In SafetyController::removeForceGenerator: no generator called \"" << name << "\"" << std::endl;
-		}
-		return false;
-	}
-	force_generators_.erase(elem);
-	return true;
+	return force_generators_.removeObject(name);
 }
 
 bool SafetyController::removeVelocityGenerator(const std::string& name) {
-	auto elem = velocity_generators_.find(name);
-	if(elem == velocity_generators_.end()) {
-		if(verbose_) {
-			std::cerr << "In SafetyController::removeVelocityGenerator: no generator called \"" << name << "\"" << std::endl;
-		}
-		return false;
-	}
-	velocity_generators_.erase(elem);
-	return true;
+	return velocity_generators_.removeObject(name);
 }
 
 ConstraintPtr SafetyController::getConstraint(const std::string& name) {
-	ConstraintPtr ptr;
-	auto elem = constraints_.find(name);
-	if(elem != constraints_.end()) {
-		ptr = elem->second;
-	}
-	else if(verbose_) {
-		std::cerr << "In SafetyController::getConstraint: no constraint called \"" << name << "\"" << std::endl;
-	}
-	return ptr;
+	return constraints_.getObject(name);
 }
 
 ForceGeneratorPtr SafetyController::getForceGenerator(const std::string& name) {
-	ForceGeneratorPtr ptr;
-	auto elem = force_generators_.find(name);
-	if(elem != force_generators_.end()) {
-		ptr = elem->second;
-	}
-	else if(verbose_) {
-		std::cerr << "In SafetyController::getForceGenerator: no generator called \"" << name << "\"" << std::endl;
-	}
-	return ptr;
+	return force_generators_.getObject(name);
 }
 
 VelocityGeneratorPtr SafetyController::getVelocityGenerator(const std::string& name) {
-	VelocityGeneratorPtr ptr;
-	auto elem = velocity_generators_.find(name);
-	if(elem != velocity_generators_.end()) {
-		ptr = elem->second;
-	}
-	else if(verbose_) {
-		std::cerr << "In SafetyController::getVelocityGenerator: no generator called \"" << name << "\"" << std::endl;
-	}
-	return ptr;
+	return velocity_generators_.getObject(name);
 }
 
 

@@ -16,6 +16,8 @@ SeparationDistanceConstraint::SeparationDistanceConstraint(
 	separation_distance_ = std::make_shared<double>();
 
 	interpolator->setInput(separation_distance_);
+
+	robot_position_ = std::make_shared<Vector6d>(Vector6d::Zero());
 }
 
 SeparationDistanceConstraint::SeparationDistanceConstraint(
@@ -34,13 +36,7 @@ double SeparationDistanceConstraint::compute() {
 }
 
 double SeparationDistanceConstraint::closestObjectDistance() {
-	Vector3d rob_pos;
-	if(robot_position_) {
-		rob_pos = robot_position_->block<3,1>(0,0);
-	}
-	else {
-		rob_pos = Vector3d::Zero();
-	}
+	const Vector3d& rob_pos = robot_position_->block<3,1>(0,0);
 
 	double min_dist = std::numeric_limits<double>::infinity();
 	for(const auto& object : objects_) {
@@ -50,43 +46,4 @@ double SeparationDistanceConstraint::closestObjectDistance() {
 	}
 
 	return min_dist;
-}
-
-void SeparationDistanceConstraint::setVerbose(bool on) {
-	verbose_ = on;
-}
-
-bool SeparationDistanceConstraint::addObject(const std::string& name, Vector6dConstPtr object, bool force) {
-	if((objects_.find(name) != objects_.end())and not force) {
-		if(verbose_) {
-			std::cerr << "In SeparationDistanceConstraint::addObject: an object called \"" << name << "\" already exists. Not replaced (force = false)" << std::endl;
-		}
-		return false;
-	}
-	objects_[name] = object;
-	return true;
-}
-
-bool SeparationDistanceConstraint::removeObject(const std::string& name) {
-	auto elem = objects_.find(name);
-	if(elem == objects_.end()) {
-		if(verbose_) {
-			std::cerr << "In SeparationDistanceConstraint::removeObject: no object called \"" << name << "\"" << std::endl;
-		}
-		return false;
-	}
-	objects_.erase(elem);
-	return true;
-}
-
-Vector6dConstPtr SeparationDistanceConstraint::getObject(const std::string& name) {
-	Vector6dConstPtr ptr;
-	auto elem = objects_.find(name);
-	if(elem != objects_.end()) {
-		ptr = elem->second;
-	}
-	else if(verbose_) {
-		std::cerr << "In SeparationDistanceConstraint::getObject: no object called \"" << name << "\"" << std::endl;
-	}
-	return ptr;
 }

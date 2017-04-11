@@ -1,6 +1,7 @@
 #pragma once
 
 #include <RSCL/force_generator.h>
+#include <RSCL/object_collection.hpp>
 #include <RSCL/definitions.h>
 #include <map>
 
@@ -35,26 +36,16 @@ using PotentialFieldObjectPtr = std::shared_ptr<PotentialFieldObject>;
 using PotentialFieldObjectConstPtr = std::shared_ptr<const PotentialFieldObject>;
 
 
-class PotentialFieldGenerator : public ForceGenerator {
+class PotentialFieldGenerator : public ForceGenerator, public ObjectCollection<PotentialFieldObjectPtr> {
 public:
-	PotentialFieldGenerator() = default;
+	PotentialFieldGenerator();
 	PotentialFieldGenerator(Vector6dConstPtr robot_position);
 	~PotentialFieldGenerator() = default;
 
-	void setVerbose(bool on);
-
 	virtual Vector6d compute() override;
-
-	bool addObject(const std::string& name, PotentialFieldObjectPtr object, bool force = false);
-	bool removeObject(const std::string& name);
-	PotentialFieldObjectPtr getObject(const std::string& name);
 
 private:
 	Vector6dConstPtr robot_position_;
-
-	std::map<std::string, PotentialFieldObjectPtr> objects_;
-
-	bool verbose_;
 };
 
 using PotentialFieldGeneratorPtr = std::shared_ptr<PotentialFieldGenerator>;

@@ -6,3 +6,4 @@
 // #include <RSCL/force_constraint.h>
 #include <RSCL/stop_constraint.h>
 #include <RSCL/separation_distance_constraint.h>
+#include <RSCL/kinetic_energy_constraint.h>

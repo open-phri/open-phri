@@ -3,11 +3,12 @@
 #include <RSCL/definitions.h>
 #include <RSCL/constraint.h>
 #include <RSCL/interpolator.h>
+#include <RSCL/object_collection.hpp>
 #include <map>
 
 namespace RSCL {
 
-class SeparationDistanceConstraint : public Constraint {
+class SeparationDistanceConstraint : public Constraint, public ObjectCollection<Vector6dConstPtr> {
 public:
 	/***		Constructor & destructor		***/
 	SeparationDistanceConstraint(
@@ -24,13 +25,6 @@ public:
 	/***		Algorithm        ***/
 	virtual double compute() override;
 
-	/***       Configuration     ***/
-	void setVerbose(bool on);
-
-	bool addObject(const std::string& name, Vector6dConstPtr object, bool force = false);
-	bool removeObject(const std::string& name);
-	Vector6dConstPtr getObject(const std::string& name);
-
 private:
 	double closestObjectDistance();
 
@@ -38,10 +32,6 @@ private:
 	InterpolatorPtr interpolator_;
 	Vector6dConstPtr robot_position_;
 	doublePtr separation_distance_;
-
-	std::map<std::string, Vector6dConstPtr> objects_;
-
-	bool verbose_;
 };
 
 using SeparationDistanceConstraintPtr = std::shared_ptr<SeparationDistanceConstraint>;
