@@ -101,7 +101,7 @@ bool VREPDriver::readTCPPose(RSCL::Vector6dPtr pose, ReferenceFrame frame) const
 	bool all_ok = true;
 	float data[6];
 
-	int object_handle = object_handles_.at(prefix_ + "tcp*" + suffix_);
+	int object_handle = object_handles_.at(prefix_ + "tcp" + suffix_);
 	int frame_id = getFrameHandle(frame);
 	all_ok &= (simxGetObjectPosition    (client_id_, object_handle, frame_id, data,    simx_opmode_buffer) == simx_return_ok);
 	all_ok &= (simxGetObjectOrientation (client_id_, object_handle, frame_id, data+3,  simx_opmode_buffer) == simx_return_ok);
@@ -122,7 +122,7 @@ bool VREPDriver::readTCPVelocity(RSCL::Vector6dPtr velocity, ReferenceFrame fram
 	bool all_ok = true;
 	float data[6], angles[3];
 
-	int object_handle = object_handles_.at(prefix_ + "tcp*" + suffix_);
+	int object_handle = object_handles_.at(prefix_ + "tcp" + suffix_);
 	int frame_id = getFrameHandle(frame);
 	all_ok &= (simxGetObjectOrientation (client_id_, frame_id, -1, angles,  simx_opmode_buffer) == simx_return_ok);
 	all_ok &= (simxGetObjectVelocity(client_id_, object_handle, data, data+3, simx_opmode_buffer) == simx_return_ok);

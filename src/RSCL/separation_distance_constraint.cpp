@@ -11,7 +11,6 @@ SeparationDistanceConstraint::SeparationDistanceConstraint(
 {
 	constraint_ = constraint;
 	interpolator_ = interpolator;
-	verbose_ = false;
 
 	separation_distance_ = std::make_shared<double>();
 
@@ -33,6 +32,10 @@ double SeparationDistanceConstraint::compute() {
 	*separation_distance_ = closestObjectDistance();
 	interpolator_->compute();
 	return constraint_->compute();
+}
+
+doubleConstPtr SeparationDistanceConstraint::getSeparationDistance() const {
+	return separation_distance_;
 }
 
 double SeparationDistanceConstraint::closestObjectDistance() {
