@@ -2,6 +2,9 @@ cmake_minimum_required (VERSION 2.6)
 
 project(RobotSafetyControlLibrary)
 
+find_package(Doxygen)
+option(BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" ${DOXYGEN_FOUND})
+
 option(BUILD_DEBUG "Build everything for debugging" OFF)
 
 if(BUILD_DEBUG)
@@ -27,3 +30,18 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/tests)
 
 # Bindings
 add_subdirectory(${PROJECT_SOURCE_DIR}/bindings)
+
+# Documentation
+if(BUILD_DOCUMENTATION)
+    if(NOT DOXYGEN_FOUND)
+        message(FATAL_ERROR "Doxygen is needed to build the documentation.")
+    endif()
+
+    set(doxyfile ${PROJECT_SOURCE_DIR}/share/Doxyfile)
+
+    add_custom_target(doc
+        COMMAND ${DOXYGEN_EXECUTABLE} ${doxyfile}
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/share
+        COMMENT "Generating API documentation with Doxygen"
+        VERBATIM)
+endif()
