@@ -1,5 +1,5 @@
 find_package(Boost COMPONENTS python3 REQUIRED)
-find_package(PythonLibs)
+find_package(PythonLibs REQUIRED)
 
 include_directories(${RSCL_INCLUDE_DIRS})
 include_directories(${VREP_DRIVER_INCLUDE_DIRS})
