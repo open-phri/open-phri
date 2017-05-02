@@ -12,7 +12,7 @@ declare_PID_Package(
 			DESCRIPTION "obot Safety Control Library: provides a generic framework to easily control robots in operational space with safety constraints"
 )
 
-set_PID_Package_Version(0 1)
+set_PID_Package_Version(0 2)
 
 check_PID_Platform(CONFIGURATION posix)
 
