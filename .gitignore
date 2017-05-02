@@ -1,2 +1,3 @@
 *~
 *.old
+.clang_complete

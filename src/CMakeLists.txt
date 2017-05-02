@@ -1,2 +1,5 @@
-
-#declare library components
+if(PID_WS_FOUND)
+    include(CMakeLists.pid)
+else()
+    include(CMakeLists.cmake)
+endif()
