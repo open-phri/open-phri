@@ -1,7 +1,7 @@
 
 Software license for the software named : rscl
 
-Software description : obot Safety Control Library: provides a generic framework to easily control robots in operational space with safety constraints
+Software description : Robot Safety Control Library: provides a generic framework to easily control robots in operational space with safety constraints
 
 Copyright (C) 2017  Benjamin Navarro (LIRMM)
 

@@ -2,7 +2,7 @@
 Overview
 =========
 
-obot Safety Control Library: provides a generic framework to easily control robots in operational space with safety constraints
+Robot Safety Control Library: provides a generic framework to easily control robots in operational space with safety constraints
 
 The license that applies to the whole package content is **GNULGPL**. Please look at the license.txt file at the root of this repository.
 

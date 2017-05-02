@@ -19,10 +19,10 @@ if(EXISTS ${WORKSPACE_DIR}/share/cmake/system)
 				ADDRESS 	git@gite.lirmm.fr:navarro/RSCL.git
 				YEAR 		2017
 				LICENSE 	GNULGPL
-				DESCRIPTION "obot Safety Control Library: provides a generic framework to easily control robots in operational space with safety constraints"
+				DESCRIPTION "Robot Safety Control Library: provides a generic framework to easily control robots in operational space with safety constraints"
 	)
 
-	set_PID_Package_Version(0 3 0)
+	set_PID_Package_Version(0 3)
 
 	check_PID_Platform(CONFIGURATION posix)
 
