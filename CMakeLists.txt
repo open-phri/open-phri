@@ -22,7 +22,7 @@ if(EXISTS ${WORKSPACE_DIR}/share/cmake/system)
 				DESCRIPTION "obot Safety Control Library: provides a generic framework to easily control robots in operational space with safety constraints"
 	)
 
-	set_PID_Package_Version(0 2)
+	set_PID_Package_Version(0 3 0)
 
 	check_PID_Platform(CONFIGURATION posix)
 
