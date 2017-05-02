@@ -25,19 +25,19 @@ Trajectory::Trajectory(TrajectoryOutputType output_type, TrajectoryPointPtr star
 
 void Trajectory::addPathTo(TrajectoryPointPtr to, double max_velocity, double max_acceleration) {
 	points_.push_back(to);
-	path_params_.push_back({
-		.max_velocity = max_velocity,
-		.max_acceleration = max_acceleration,
-		.isFixedTime = false
-	});
+	PathParams params;
+	params.max_velocity = max_velocity;
+	params.max_acceleration = max_acceleration;
+	params.isFixedTime = false;
+	path_params_.push_back(params);
 }
 
 void Trajectory::addPathTo(TrajectoryPointPtr to, double duration) {
 	points_.push_back(to);
-	path_params_.push_back({
-		.minimum_time = duration,
-		.isFixedTime = true
-	});
+	PathParams params;
+	params.minimum_time = duration;
+	params.isFixedTime = true;
+	path_params_.push_back(params);
 }
 
 doubleConstPtr Trajectory::getOutput() {

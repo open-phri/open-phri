@@ -1,5 +1,5 @@
 from minieigen import *
-from PyRSCL import *
+from pyrscl import *
 
 from signal import *
 import math

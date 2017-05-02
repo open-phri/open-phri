@@ -1,0 +1,68 @@
+###         RSCL        ###
+declare_PID_Component(
+    SHARED_LIB
+    NAME rscl
+    DIRECTORY RSCL
+    EXPORTED COMPILER_OPTIONS -std=c++14
+)
+
+declare_PID_Component_Dependency(
+    COMPONENT rscl
+    EXPORT EXTERNAL eigen
+    INCLUDE_DIRS <eigen>/include
+)
+
+###         RSCL V-REP DRIVER        ###
+declare_PID_Component(
+    SHARED_LIB
+    NAME rscl-vrep-driver
+    DIRECTORY vrep_driver
+)
+
+declare_PID_Component_Dependency(
+    COMPONENT rscl-vrep-driver
+    EXPORT NATIVE rscl
+)
+
+declare_PID_Component_Dependency(
+    COMPONENT rscl-vrep-driver
+    EXPORT NATIVE vrep-driver
+    PACKAGE api-driver-vrep
+)
+
+###         pyRSCL        ###
+if(GEN_PYTHON_BINDINGS)
+    # find_package(Boost COMPONENTS python3 REQUIRED)
+
+    declare_PID_Component(
+        MODULE_LIB
+        NAME pyrscl
+        DIRECTORY pyRSCL
+    )
+
+    declare_PID_Component_Dependency(
+        COMPONENT pyrscl
+        EXPORT NATIVE rscl
+    )
+
+    declare_PID_Component_Dependency(
+        COMPONENT pyrscl
+        EXPORT NATIVE rscl-vrep-driver
+    )
+
+    declare_PID_Component_Dependency(
+  		COMPONENT pyrscl
+  		EXPORT EXTERNAL boost
+  		INCLUDE_DIRS <boost>/include
+        LINKS SHARED <boost>/lib/libboost_python3.so.1.63.0
+    )
+
+    declare_PID_Component_Dependency(
+        COMPONENT pyrscl
+        EXPORT LINKS SHARED ${PYTHON_LIBRARIES}# ${Boost_LIBRARIES}
+        INCLUDE_DIRS ${PYTHON_INCLUDE_DIRS}# ${Boost_INCLUDE_DIRS}
+    )
+
+    set_target_properties(pyrscl${INSTALL_NAME_SUFFIX} PROPERTIES PREFIX "") # python needs a pyrscl.so file (without lib prefix)
+    set_target_properties(pyrscl${INSTALL_NAME_SUFFIX} PROPERTIES OUTPUT_NAME "pyrscl") # python needs a pyrscl.so file (without -dbg suffix)
+endif()

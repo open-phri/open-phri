@@ -1,5 +1,5 @@
 from minieigen import *
-from PyRSCL import *
+from pyrscl import *
 
 from signal import *
 import math
@@ -51,7 +51,7 @@ if POSITION_OUTPUT:
 	px = x_traj.getOutput()
 	pz = x_traj.getOutput()
 else:
-	traj_vel = NewVector6dPtr(Vector6.Zero)
+	traj_vel = NewVector6dPtr()
 	traj_vel_gen = NewVelocityProxy(traj_vel)
 
 	safety_controller.addVelocityGenerator(
