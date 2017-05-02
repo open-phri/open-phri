@@ -34,8 +34,8 @@ int main(int argc, char const *argv[]) {
 	auto total_velocity = safety_controller.getTotalVelocity();
 
 	auto max_vel_interpolator = make_shared<LinearInterpolator>(
-		make_shared<Vector2d>(0.1, 0.),     // 0m/s at 0.1m
-		make_shared<Vector2d>(0.5, 0.2));   // 0.2m/s at 0.5m
+		make_shared<LinearPoint>(0.1, 0.),     // 0m/s at 0.1m
+		make_shared<LinearPoint>(0.5, 0.2));   // 0.2m/s at 0.5m
 
 	max_vel_interpolator->enableSaturation(true);
 
@@ -50,8 +50,8 @@ int main(int argc, char const *argv[]) {
 		max_vel_interpolator);
 
 	separation_dist_vel_cstr->setVerbose(true);
-	separation_dist_vel_cstr->addObject("obstacle1", driver.trackObjectPosition("obstacle1", ReferenceFrame::TCP));
-	separation_dist_vel_cstr->addObject("obstacle2", driver.trackObjectPosition("obstacle2", ReferenceFrame::TCP));
+	separation_dist_vel_cstr->add("obstacle1", driver.trackObjectPosition("obstacle1", ReferenceFrame::TCP));
+	separation_dist_vel_cstr->add("obstacle2", driver.trackObjectPosition("obstacle2", ReferenceFrame::TCP));
 
 	auto ext_force = make_shared<Vector6d>(Vector6d::Zero());
 	auto ext_force_generator = make_shared<ForceProxy>(ext_force);

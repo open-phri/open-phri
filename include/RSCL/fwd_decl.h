@@ -21,7 +21,7 @@
  * @file fwd_decl.h
  * @author Benjamin Navarro
  * @brief Some forward declaration to avoid the inclusion of unnecessary headers in the interface
- * @date April 2014
+ * @date April 2017
  * @ingroup RSCL
  */
 

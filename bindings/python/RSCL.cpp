@@ -15,10 +15,10 @@ BOOST_PYTHON_MODULE(PyRSCL) {
 	using namespace boost::python;
 
 	wrapMisc();
+	wrapUtilities();
 	wrapConstraints();
 	wrapGenerators();
 	wrapInterpolators();
-	wrapUtilities();
 	wrapSafetyController();
 	wrapVREP();
 }

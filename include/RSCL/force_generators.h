@@ -21,13 +21,13 @@
  * @file force_generators.h
  * @author Benjamin Navarro
  * @brief Include all implemented force generators
- * @date April 2014
+ * @date April 2017
  * @ingroup RSCL
  */
 
 #pragma once
 
-#include <RSCL/force_proxy.h>
-#include <RSCL/potential_field_generator.h>
-#include <RSCL/stiffness_generator.h>
-#include <RSCL/mass_generator.h>
+#include <RSCL/force_generators/force_proxy.h>
+#include <RSCL/force_generators/potential_field_generator.h>
+#include <RSCL/force_generators/stiffness_generator.h>
+#include <RSCL/force_generators/mass_generator.h>

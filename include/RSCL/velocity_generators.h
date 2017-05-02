@@ -21,10 +21,10 @@
  * @file velocity_generators.h
  * @author Benjamin Navarro
  * @brief Include all implemented velocity generators
- * @date April 2014
+ * @date April 2017
  * @ingroup RSCL
  */
 
 #pragma once
 
-#include <RSCL/velocity_proxy.h>
+#include <RSCL/velocity_generators/velocity_proxy.h>

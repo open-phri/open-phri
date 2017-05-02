@@ -40,6 +40,14 @@ std::shared_ptr<Derivator<T>> NewDerivator(std::shared_ptr<const T> input, doubl
 	.def("reset",           reset##type) \
 	.def("compute",         &Derivator<type>::compute); \
 
+#define CREATE_OBJECT_COLLECTION(type) \
+	void (ObjectCollection<type>:: *setVerbose##type)(bool) = &ObjectCollection<type>::setVerbose; \
+	class_<ObjectCollection<type>, boost::noncopyable>("ObjectCollection", no_init) \
+	.def("reset",           setVerbose##type) \
+	.def("add",             &ObjectCollection<type>::add) \
+	.def("remove",          &ObjectCollection<type>::remove) \
+	.def("get",             &ObjectCollection<type>::get); \
+
 void wrapUtilities() {
 	using namespace RSCL;
 	using namespace boost::python;
@@ -66,6 +74,10 @@ void wrapUtilities() {
 	CREATE_DERIVATOR(Vector2d)
 	CREATE_DERIVATOR(Vector3d)
 	CREATE_DERIVATOR(Vector6d)
+
+	CREATE_OBJECT_COLLECTION(Vector6dConstPtr)
+	CREATE_OBJECT_COLLECTION(PotentialFieldObjectPtr)
+	CREATE_OBJECT_COLLECTION(TrajectoryPtr)
 
 	register_ptr_to_python<std::shared_ptr<Integrator<double>>>();
 	register_ptr_to_python<std::shared_ptr<Integrator<Vector2d>>>();

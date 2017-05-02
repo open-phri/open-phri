@@ -21,16 +21,16 @@
  * @file constraints.h
  * @author Benjamin Navarro
  * @brief Include all implemented constraints
- * @date April 2014
+ * @date April 2017
  * @ingroup RSCL
  */
 
 #pragma once
 
-#include <RSCL/default_constraint.h>
-#include <RSCL/velocity_constraint.h>
-#include <RSCL/power_constraint.h>
+#include <RSCL/constraints/default_constraint.h>
+#include <RSCL/constraints/velocity_constraint.h>
+#include <RSCL/constraints/power_constraint.h>
 // #include <RSCL/force_constraint.h>
-#include <RSCL/stop_constraint.h>
-#include <RSCL/separation_distance_constraint.h>
-#include <RSCL/kinetic_energy_constraint.h>
+#include <RSCL/constraints/stop_constraint.h>
+#include <RSCL/constraints/separation_distance_constraint.h>
+#include <RSCL/constraints/kinetic_energy_constraint.h>

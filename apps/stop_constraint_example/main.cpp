@@ -32,11 +32,11 @@ int main(int argc, char const *argv[]) {
 
 	auto constant_vel = make_shared<Vector6d>(Vector6d::Zero());
 	auto constant_velocity_generator = make_shared<VelocityProxy>(constant_vel);
-	auto constant_force_generator = make_shared<ForceProxy>(ext_force);
+	auto external_force_generator = make_shared<ForceProxy>(ext_force);
 
 	safety_controller.addConstraint("stop constraint", stop_constraint);
 	safety_controller.addVelocityGenerator("vel proxy", constant_velocity_generator);
-	safety_controller.addForceGenerator("force proxy", constant_force_generator);
+	safety_controller.addForceGenerator("force proxy", external_force_generator);
 
 	/***				V-REP driver				***/
 	VREPDriver driver(

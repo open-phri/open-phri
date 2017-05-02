@@ -21,7 +21,7 @@
  * @file RSCL.h
  * @author Benjamin Navarro
  * @brief root include file for RSCL library
- * @date April 2014
+ * @date April 2017
  */
 
 /** @defgroup RSCL
@@ -38,5 +38,4 @@
 #include <RSCL/constraints.h>
 #include <RSCL/velocity_generators.h>
 #include <RSCL/force_generators.h>
-#include <RSCL/interpolators.h>
 #include <RSCL/utilities.h>

@@ -21,7 +21,7 @@
  * @file definitions.h
  * @author Benjamin Navarro
  * @brief Usefull definitions being used in RSCL
- * @date April 2014
+ * @date April 2017
  * @ingroup RSCL
  */
 

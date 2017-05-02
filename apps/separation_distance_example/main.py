@@ -26,8 +26,8 @@ tcp_velocity = safety_controller.getTCPVelocity()
 total_velocity = safety_controller.getTotalVelocity()
 
 max_vel_interpolator = NewLinearInterpolator(
-    NewVector2dPtr(Vector2(0.1, 0.)),    # 0m/s at 0.1m
-    NewVector2dPtr(Vector2(0.5, 0.2)))   # 0.2m/s at 0.5m
+    NewLinearPoint(0.1, 0.),    # 0m/s at 0.1m
+    NewLinearPoint(0.5, 0.2))   # 0.2m/s at 0.5m
 
 max_vel_interpolator.enableSaturation(True)
 
@@ -44,8 +44,8 @@ separation_dist_vel_cstr = NewSeparationDistanceConstraint(
 separation_dist_vel_cstr.setVerbose(True)
 obs1 = driver.trackObjectPosition("obstacle1", ReferenceFrame.TCP)
 obs2 = driver.trackObjectPosition("obstacle2", ReferenceFrame.TCP)
-separation_dist_vel_cstr.addObject("obstacle1", obs1)
-separation_dist_vel_cstr.addObject("obstacle2", obs2)
+separation_dist_vel_cstr.add("obstacle1", obs1)
+separation_dist_vel_cstr.add("obstacle2", obs2)
 
 ext_force = NewVector6dPtr()
 ext_force_generator = NewForceProxy(ext_force)

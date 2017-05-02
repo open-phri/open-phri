@@ -34,30 +34,30 @@ int main(int argc, char const *argv[]) {
 		make_shared<double>(std::numeric_limits<double>::infinity()),   // threshold distance
 		tgt_pos);
 
-	// Step #1 : addObject
+	// Step #1 : add
 	bool ok;
-	ok = potential_field_generator->addObject("obstacle", obstacle);
+	ok = potential_field_generator->add("obstacle", obstacle);
 	assert_msg("Step #1", ok == true);
 
-	// Step #2 : re-addObject, force=false
-	ok = potential_field_generator->addObject("obstacle", obstacle);
+	// Step #2 : re-add, force=false
+	ok = potential_field_generator->add("obstacle", obstacle);
 	assert_msg("Step #2", ok == false);
 
-	// Step #3 : re-addObject, force=true
-	ok = potential_field_generator->addObject("obstacle", obstacle, true);
+	// Step #3 : re-add, force=true
+	ok = potential_field_generator->add("obstacle", obstacle, true);
 	assert_msg("Step #3", ok == true);
 
-	// Step #4 : removeObject
-	ok = potential_field_generator->removeObject("obstacle");
+	// Step #4 : remove
+	ok = potential_field_generator->remove("obstacle");
 	assert_msg("Step #4", ok == true);
 
-	// Step #5 : re-removeObject
-	ok = potential_field_generator->removeObject("obstacle");
+	// Step #5 : re-remove
+	ok = potential_field_generator->remove("obstacle");
 	assert_msg("Step #5", ok == false);
 
-	// Step #6 : getObject
-	potential_field_generator->addObject("obstacle", obstacle);
-	auto obj = potential_field_generator->getObject("obstacle");
+	// Step #6 : get
+	potential_field_generator->add("obstacle", obstacle);
+	auto obj = potential_field_generator->get("obstacle");
 	assert_msg("Step #6", obj == obstacle);
 
 	// Step #7 : 1 obstacle > threshold distance
@@ -71,8 +71,8 @@ int main(int argc, char const *argv[]) {
 	assert_msg("Step #8", tcp_velocity->dot(*obs_pos) < 0.);
 
 	// Step #9 : 1 target
-	ok = potential_field_generator->removeObject("obstacle");
-	potential_field_generator->addObject("target", target);
+	ok = potential_field_generator->remove("obstacle");
+	potential_field_generator->add("target", target);
 	(*tgt_pos)(0) = 0.1;
 	(*tgt_pos)(1) = 0.2;
 	safety_controller.updateTCPVelocity();

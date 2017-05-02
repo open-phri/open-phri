@@ -60,9 +60,9 @@ int main(int argc, char const *argv[]) {
 		make_shared<double>(std::numeric_limits<double>::infinity()),   // threshold distance
 		driver.trackObjectPosition("target", ReferenceFrame::TCP));
 
-	potential_field_generator->addObject("obstacle1", obstacle1);
-	potential_field_generator->addObject("obstacle2", obstacle2);
-	potential_field_generator->addObject("target", target);
+	potential_field_generator->add("obstacle1", obstacle1);
+	potential_field_generator->add("obstacle2", obstacle2);
+	potential_field_generator->add("target", target);
 
 	safety_controller.addConstraint(
 		"velocity constraint",

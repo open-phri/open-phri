@@ -1087,7 +1087,7 @@ enum { /* Object int/float/string parameters */
     sim_jointfloatparam_intrinsic_qw= 2011,
     sim_jointfloatparam_velocity= 2012,
     sim_jointfloatparam_spherical_qx= 2013,
-    sim_jointfloatparam_spherical_qy= 2014,
+    sim_jointfloatparam_spherical_qy= 2017,
     sim_jointfloatparam_spherical_qz= 2015,
     sim_jointfloatparam_spherical_qw= 2016,
     sim_jointfloatparam_upper_limit= 2017,

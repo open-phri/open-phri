@@ -21,7 +21,7 @@
  * @file safety_controller.h
  * @author Benjamin Navarro
  * @brief Definition of the SafetyController class
- * @date April 2014
+ * @date April 2017
  * @ingroup RSCL
  */
 
@@ -32,7 +32,7 @@
 
 #include <RSCL/definitions.h>
 #include <RSCL/fwd_decl.h>
-#include <RSCL/object_collection.hpp>
+#include <RSCL/utilities/object_collection.hpp>
 
 namespace RSCL {
 

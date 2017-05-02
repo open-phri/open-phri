@@ -21,13 +21,16 @@
  * @file utilities.h
  * @author Benjamin Navarro
  * @brief Include all available utilities
- * @date April 2014
+ * @date April 2017
  * @ingroup RSCL
  */
 
  #pragma once
 
-#include <RSCL/derivator.hpp>
-#include <RSCL/integrator.hpp>
-#include <RSCL/object_collection.hpp>
-#include <RSCL/manipulator_equivalent_mass.hpp>
+#include <RSCL/utilities/derivator.hpp>
+#include <RSCL/utilities/integrator.hpp>
+#include <RSCL/utilities/object_collection.hpp>
+#include <RSCL/utilities/manipulator_equivalent_mass.hpp>
+#include <RSCL/utilities/interpolators.h>
+#include <RSCL/utilities/trajectory_generator.h>
+#include <RSCL/utilities/path_follower.h>

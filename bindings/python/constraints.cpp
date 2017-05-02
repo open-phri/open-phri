@@ -47,7 +47,7 @@ std::shared_ptr<SeparationDistanceConstraint> NewSeparationDistanceConstraint(Co
 	return std::make_shared<SeparationDistanceConstraint>(constraint, interpolator, robot_position);
 }
 BOOST_PYTHON_FUNCTION_OVERLOADS(NewSeparationDistanceConstraint_overloads, NewSeparationDistanceConstraint, 2, 3)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SeparationDistanceConstraint_addObject_overloads, addObject, 2, 3)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SeparationDistanceConstraint_add_overloads, add, 2, 3)
 
 
 } // namespace RSCL
@@ -100,12 +100,12 @@ void wrapConstraints() {
 	.def("compute", &StopConstraint::compute);
 
 	void (SeparationDistanceConstraint:: *SeparationDistanceConstraint_setVerbose)(bool) = &SeparationDistanceConstraint::setVerbose;
-	class_<SeparationDistanceConstraint, boost::noncopyable, bases<Constraint>>("SeparationDistanceConstraint", "Separation distance constraint, adapts the constraint depending on the distance to the closest object", no_init)
+	class_<SeparationDistanceConstraint, boost::noncopyable, bases<Constraint, ObjectCollection<Vector6dConstPtr>>>("SeparationDistanceConstraint", "Separation distance constraint, adapts the constraint depending on the distance to the closest object", no_init)
 	.def("compute",         &SeparationDistanceConstraint::compute)
 	.def("setVerbose",      SeparationDistanceConstraint_setVerbose)
-	.def("addObject",       &SeparationDistanceConstraint::addObject, SeparationDistanceConstraint_addObject_overloads(args("name", "object", "force")))
-	.def("removeObject",    &SeparationDistanceConstraint::removeObject)
-	.def("getObject",       &SeparationDistanceConstraint::getObject);
+	.def("add",             &SeparationDistanceConstraint::add, SeparationDistanceConstraint_add_overloads(args("name", "object", "force")))
+	.def("remove",          &SeparationDistanceConstraint::remove)
+	.def("get",             &SeparationDistanceConstraint::get);
 
 	register_ptr_to_python<std::shared_ptr<DefaultConstraint>>();
 	register_ptr_to_python<std::shared_ptr<VelocityConstraint>>();

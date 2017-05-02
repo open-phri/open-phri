@@ -1,8 +1,8 @@
 #include <RSCL/safety_controller.h>
 
-#include <RSCL/default_constraint.h>
-#include <RSCL/force_generator.h>
-#include <RSCL/velocity_generator.h>
+#include <RSCL/constraints/default_constraint.h>
+#include <RSCL/force_generators/force_generator.h>
+#include <RSCL/velocity_generators/velocity_generator.h>
 
 #include <limits>
 #include <iostream>
@@ -28,39 +28,39 @@ void SafetyController::setVerbose(bool on) {
 }
 
 bool SafetyController::addConstraint(const std::string& name, ConstraintPtr constraint, bool force) {
-	return constraints_.addObject(name, constraint, force);
+	return constraints_.add(name, constraint, force);
 }
 
 bool SafetyController::addForceGenerator(const std::string& name, ForceGeneratorPtr generator, bool force) {
-	return force_generators_.addObject(name, generator, force);
+	return force_generators_.add(name, generator, force);
 }
 
 bool SafetyController::addVelocityGenerator(const std::string& name, VelocityGeneratorPtr generator, bool force) {
-	return velocity_generators_.addObject(name, generator, force);
+	return velocity_generators_.add(name, generator, force);
 }
 
 bool SafetyController::removeConstraint(const std::string& name) {
-	return constraints_.removeObject(name);
+	return constraints_.remove(name);
 }
 
 bool SafetyController::removeForceGenerator(const std::string& name) {
-	return force_generators_.removeObject(name);
+	return force_generators_.remove(name);
 }
 
 bool SafetyController::removeVelocityGenerator(const std::string& name) {
-	return velocity_generators_.removeObject(name);
+	return velocity_generators_.remove(name);
 }
 
 ConstraintPtr SafetyController::getConstraint(const std::string& name) {
-	return constraints_.getObject(name);
+	return constraints_.get(name);
 }
 
 ForceGeneratorPtr SafetyController::getForceGenerator(const std::string& name) {
-	return force_generators_.getObject(name);
+	return force_generators_.get(name);
 }
 
 VelocityGeneratorPtr SafetyController::getVelocityGenerator(const std::string& name) {
-	return velocity_generators_.getObject(name);
+	return velocity_generators_.get(name);
 }
 
 

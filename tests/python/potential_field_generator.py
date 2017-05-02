@@ -30,29 +30,29 @@ target = NewPotentialFieldObject(
 	NewDoublePtr(math.inf),   	# threshold distance
 	tgt_pos)
 
-# Step #1 : addObject
-ok = potential_field_generator.addObject("obstacle", obstacle)
+# Step #1 : add
+ok = potential_field_generator.add("obstacle", obstacle)
 assert_msg("Step #1", ok == True)
 
-# Step #2 : re-addObject, force=False
-ok = potential_field_generator.addObject("obstacle", obstacle)
+# Step #2 : re-add, force=False
+ok = potential_field_generator.add("obstacle", obstacle)
 assert_msg("Step #2", ok == False)
 
-# Step #3 : re-addObject, force=True
-ok = potential_field_generator.addObject("obstacle", obstacle, True)
+# Step #3 : re-add, force=True
+ok = potential_field_generator.add("obstacle", obstacle, True)
 assert_msg("Step #3", ok == True)
 
-# Step #4 : removeObject
-ok = potential_field_generator.removeObject("obstacle")
+# Step #4 : remove
+ok = potential_field_generator.remove("obstacle")
 assert_msg("Step #4", ok == True)
 
-# Step #5 : re-removeObject
-ok = potential_field_generator.removeObject("obstacle")
+# Step #5 : re-remove
+ok = potential_field_generator.remove("obstacle")
 assert_msg("Step #5", ok == False)
 
-# Step #6 : getObject
-potential_field_generator.addObject("obstacle", obstacle)
-obj = potential_field_generator.getObject("obstacle")
+# Step #6 : get
+potential_field_generator.add("obstacle", obstacle)
+obj = potential_field_generator.get("obstacle")
 assert_msg("Step #6", obj == obstacle)
 
 # Step #7 : 1 obstacle > threshold distance
@@ -66,8 +66,8 @@ safety_controller.updateTCPVelocity()
 assert_msg("Step #8", tcp_velocity.dot(obs_pos) < 0.)
 
 # Step #9 : 1 target
-ok = potential_field_generator.removeObject("obstacle")
-potential_field_generator.addObject("target", target)
+ok = potential_field_generator.remove("obstacle")
+potential_field_generator.add("target", target)
 tgt_pos[0] = 0.1
 tgt_pos[1] = 0.2
 safety_controller.updateTCPVelocity()

@@ -21,7 +21,7 @@
  * @file vrep_driver.h
  * @author Benjamin Navarro
  * @brief Definition of the VREPDriver class and the ReferenceFrame enum.
- * @date April 2014
+ * @date April 2017
  * @ingroup VREP
  */
 

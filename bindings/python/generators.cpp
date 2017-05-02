@@ -30,7 +30,7 @@ std::shared_ptr<PotentialFieldGenerator> NewPotentialFieldGenerator()
 	return std::make_shared<PotentialFieldGenerator>();
 }
 BOOST_PYTHON_FUNCTION_OVERLOADS(NewPotentialFieldGenerator_overloads, NewPotentialFieldGenerator, 0, 1)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(PotentialFieldGenerator_addObject_overloads, addObject, 2, 3)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(PotentialFieldGenerator_add_overloads, add, 2, 3)
 
 std::shared_ptr<StiffnessGenerator> NewStiffnessGenerator(Matrix6dConstPtr stiffness, Vector6dConstPtr target_position)
 {
@@ -122,9 +122,9 @@ void wrapGenerators() {
 	class_<PotentialFieldGenerator, boost::noncopyable, bases<ForceGenerator, ObjectCollection<PotentialFieldObjectPtr>>>("PotentialFieldGenerator", no_init)
 	.def("setVerbose",      PotentialFieldGenerator_setVerbose)
 	.def("compute",         &PotentialFieldGenerator::compute)
-	.def("addObject",       &PotentialFieldGenerator::addObject,           PotentialFieldGenerator_addObject_overloads(args("name", "object", "force")))
-	.def("removeObject",    &PotentialFieldGenerator::removeObject)
-	.def("getObject",       &PotentialFieldGenerator::getObject);
+	.def("add",             &PotentialFieldGenerator::add,           PotentialFieldGenerator_add_overloads(args("name", "object", "force")))
+	.def("remove",          &PotentialFieldGenerator::remove)
+	.def("get",             &PotentialFieldGenerator::get);
 
 	class_<StiffnessGenerator, boost::noncopyable, bases<ForceGenerator>>("StiffnessGenerator", no_init)
 	.def("compute",         &StiffnessGenerator::compute);
