@@ -45,7 +45,6 @@ public:
 	 * @param maximum_kinetic_energy The maximum kinetic energy allowed.
 	 */
 	KineticEnergyConstraint(
-		Vector6dConstPtr total_velocity,
 		doubleConstPtr mass,
 		doubleConstPtr maximum_kinetic_energy);
 
@@ -55,7 +54,6 @@ public:
 	virtual double compute() override;
 
 private:
-	Vector6dConstPtr total_velocity_;
 	doubleConstPtr mass_;
 	doubleConstPtr maximum_kinetic_energy_;
 

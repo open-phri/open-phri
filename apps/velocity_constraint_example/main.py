@@ -15,12 +15,9 @@ damping_matrix = NewMatrix6dPtr(Matrix6.Identity * 100)
 safety_controller = NewSafetyController(damping_matrix)
 
 tcp_velocity = safety_controller.getTCPVelocity()
-total_velocity = safety_controller.getTotalVelocity()
 
 maximum_velocity = NewDoublePtr(0.1)
-velocity_constraint = NewVelocityConstraint(
-    total_velocity,
-    maximum_velocity)
+velocity_constraint = NewVelocityConstraint(maximum_velocity)
 
 reference_vel = NewVector6dPtr()
 constant_vel_gen = NewVelocityProxy(reference_vel)

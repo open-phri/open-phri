@@ -40,7 +40,8 @@ void wrapSafetyController() {
 	.def("updateTCPVelocity",       &SafetyController::updateTCPVelocity)
 	.def("getTCPVelocity",          &SafetyController::getTCPVelocity)
 	.def("getTotalVelocity",        &SafetyController::getTotalVelocity)
-	.def("getTotalForce",           &SafetyController::getTotalForce);
+	.def("getForceSum",             &SafetyController::getForceSum)
+	.def("getVelocitySum",          &SafetyController::getVelocitySum);
 
 	register_ptr_to_python<std::shared_ptr<SafetyController>>();
 }

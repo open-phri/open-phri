@@ -9,16 +9,21 @@
 
 using namespace RSCL;
 
-SafetyController::SafetyController(
-	Matrix6dConstPtr damping_matrix) :
-	damping_matrix_(damping_matrix)
-{
+SafetyController::SafetyController() {
 	tcp_velocity_ = std::make_shared<Vector6d>(Vector6d::Zero());
 	total_velocity_ = std::make_shared<Vector6d>(Vector6d::Zero());
-	total_force_ = std::make_shared<Vector6d>(Vector6d::Zero());
+	force_sum_ = std::make_shared<Vector6d>(Vector6d::Zero());
+	velocity_sum_ = std::make_shared<Vector6d>(Vector6d::Zero());
 
 	addConstraint("default min", std::make_shared<DefaultConstraint>(ConstraintType::Minimum));
 	addConstraint("default mult", std::make_shared<DefaultConstraint>(ConstraintType::Multiplicative));
+}
+
+SafetyController::SafetyController(
+	Matrix6dConstPtr damping_matrix) :
+	SafetyController()
+{
+	damping_matrix_ = damping_matrix;
 }
 
 void SafetyController::setVerbose(bool on) {
@@ -28,6 +33,10 @@ void SafetyController::setVerbose(bool on) {
 }
 
 bool SafetyController::addConstraint(const std::string& name, ConstraintPtr constraint, bool force) {
+	constraint->total_velocity_ = total_velocity_;
+	constraint->force_sum_      = force_sum_;
+	constraint->velocity_sum_   = velocity_sum_;
+
 	return constraints_.add(name, constraint, force);
 }
 
@@ -69,7 +78,8 @@ void SafetyController::updateTCPVelocity() {
 	Vector6d velocity_sum = computeVelocitySum();
 
 	*total_velocity_ = damping_matrix_->inverse()*force_sum + velocity_sum;
-	*total_force_ = force_sum;
+	*force_sum_ = force_sum;
+	*velocity_sum_ = velocity_sum;
 
 	double constraint_value = computeConstraintValue();
 
@@ -84,8 +94,12 @@ Vector6dConstPtr SafetyController::getTotalVelocity() const {
 	return total_velocity_;
 }
 
-Vector6dConstPtr SafetyController::getTotalForce() const {
-	return total_force_;
+Vector6dConstPtr SafetyController::getForceSum() const {
+	return force_sum_;
+}
+
+Vector6dConstPtr SafetyController::getVelocitySum() const {
+	return velocity_sum_;
 }
 
 double SafetyController::computeConstraintValue() const {

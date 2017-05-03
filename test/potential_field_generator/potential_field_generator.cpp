@@ -18,7 +18,7 @@ int main(int argc, char const *argv[]) {
 	auto potential_field_generator = make_shared<PotentialFieldGenerator>(rob_pos);
 	potential_field_generator->setVerbose(true);
 
-	safety_controller.addForceGenerator("potential field", potential_field_generator);
+	safety_controller.add("potential field", potential_field_generator);
 
 	auto obs_pos = make_shared<Vector6d>(Vector6d::Zero());
 	auto obstacle = make_shared<PotentialFieldObject>(

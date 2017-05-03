@@ -44,7 +44,6 @@ public:
 	 * @param maximum_velocity A shared pointer to the maximum velocity allowed.
 	 */
 	VelocityConstraint(
-		Vector6dConstPtr total_velocity,
 		doubleConstPtr maximum_velocity);
 
 	virtual ~VelocityConstraint() = default;
@@ -53,7 +52,6 @@ public:
 	virtual double compute() override;
 
 private:
-	Vector6dConstPtr total_velocity_;
 	doubleConstPtr maximum_velocity_;
 };
 

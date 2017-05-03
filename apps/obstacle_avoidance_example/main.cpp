@@ -31,12 +31,9 @@ int main(int argc, char const *argv[]) {
 	auto safety_controller = SafetyController(damping_matrix);
 
 	auto tcp_velocity = safety_controller.getTCPVelocity();
-	auto total_velocity = safety_controller.getTotalVelocity();
 
 	auto maximum_velocity = make_shared<double>(0.1);
-	auto velocity_constraint = make_shared< VelocityConstraint >(
-		total_velocity,
-		maximum_velocity);
+	auto velocity_constraint = make_shared<VelocityConstraint>(maximum_velocity);
 
 	// Objects are tracked in the TCP frame so there is no need to provide the robot position
 	auto potential_field_generator = make_shared<PotentialFieldGenerator>();

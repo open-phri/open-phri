@@ -24,8 +24,8 @@ int main(int argc, char const *argv[]) {
 	safety_controller.setVerbose(true);
 	auto tcp_velocity = safety_controller.getTCPVelocity();
 
-	safety_controller.addVelocityGenerator("vel proxy", constant_velocity_generator);
-	safety_controller.addForceGenerator("force proxy", constant_force_generator);
+	safety_controller.add("vel proxy", constant_velocity_generator);
+	safety_controller.add("force proxy", constant_force_generator);
 
 	// Step #1 : no velocity, no force
 	safety_controller.updateTCPVelocity();

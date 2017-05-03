@@ -23,7 +23,6 @@ damping_matrix = NewMatrix6dPtr(Matrix6.Identity * 100)
 safety_controller = NewSafetyController(damping_matrix)
 
 tcp_velocity = safety_controller.getTCPVelocity()
-total_velocity = safety_controller.getTotalVelocity()
 
 max_vel_interpolator = NewLinearInterpolator(
     NewLinearPoint(0.1, 0.),    # 0m/s at 0.1m
@@ -32,9 +31,7 @@ max_vel_interpolator = NewLinearInterpolator(
 max_vel_interpolator.enableSaturation(True)
 
 maximum_velocity = max_vel_interpolator.getOutput()
-velocity_constraint = NewVelocityConstraint(
-    total_velocity,
-    maximum_velocity)
+velocity_constraint = NewVelocityConstraint(maximum_velocity)
 
 # Objects are tracked in the TCP frame so there is no need to provide the robot position
 separation_dist_vel_cstr = NewSeparationDistanceConstraint(

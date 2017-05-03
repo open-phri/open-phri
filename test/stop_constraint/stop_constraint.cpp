@@ -27,9 +27,9 @@ int main(int argc, char const *argv[]) {
 	auto constant_velocity_generator = make_shared<VelocityProxy>(constant_vel);
 	auto constant_force_generator = make_shared<ForceProxy>(ext_force);
 
-	safety_controller.addConstraint("stop constraint", stop_constraint);
-	safety_controller.addVelocityGenerator("vel proxy", constant_velocity_generator);
-	safety_controller.addForceGenerator("force proxy", constant_force_generator);
+	safety_controller.add("stop constraint", stop_constraint);
+	safety_controller.add("vel proxy", constant_velocity_generator);
+	safety_controller.add("force proxy", constant_force_generator);
 
 	// Step #1 : no velocity, no force
 	safety_controller.updateTCPVelocity();

@@ -24,7 +24,7 @@ safety_controller.setVerbose(True)
 tcp_velocity = safety_controller.getTCPVelocity()
 total_velocity = safety_controller.getTotalVelocity()
 
-velocity_constraint = NewVelocityConstraint(total_velocity, maximum_velocity)
+velocity_constraint = NewVelocityConstraint(maximum_velocity)
 
 constant_vel = NewVector6dPtr()
 constant_velocity_generator = NewVelocityProxy(constant_vel)

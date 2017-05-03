@@ -27,7 +27,8 @@
 
 #pragma once
 
-#include <memory>
+#include <RSCL/definitions.h>
+#include <RSCL/fwd_decl.h>
 
 namespace RSCL {
 
@@ -43,6 +44,7 @@ enum class ConstraintType {
  *  @details Provides a ConstraintType and a pure virtual compute method.
  */
 class Constraint {
+	friend class SafetyController; // So that only the controller can set the inner pointers
 public:
 	/**
 	 * @brief Construct a constraint of a given type
@@ -62,6 +64,11 @@ public:
 	 * @return The constraint's evaluated value.
 	 */
 	virtual double compute() = 0;
+
+protected:
+	Vector6dConstPtr velocity_sum_;
+	Vector6dConstPtr force_sum_;
+	Vector6dConstPtr total_velocity_;
 
 private:
 	ConstraintType type_;

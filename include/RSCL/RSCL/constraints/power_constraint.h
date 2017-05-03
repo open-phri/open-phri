@@ -48,7 +48,6 @@ public:
 	 * @param maximum_power A shared pointer to the maximum power allowed.
 	 */
 	PowerConstraint(
-		Vector6dConstPtr total_velocity,
 		Vector6dConstPtr external_force,
 		doubleConstPtr maximum_power);
 
@@ -64,7 +63,6 @@ public:
 	doubleConstPtr getPower() const;
 
 private:
-	Vector6dConstPtr total_velocity_;
 	Vector6dConstPtr external_force_;
 	doubleConstPtr maximum_power_;
 

@@ -24,12 +24,9 @@ int main(int argc, char const *argv[]) {
 	auto safety_controller = SafetyController(damping_matrix);
 
 	auto tcp_velocity = safety_controller.getTCPVelocity();
-	auto total_velocity = safety_controller.getTotalVelocity();
 
 	auto maximum_velocity = make_shared<double>(0.1);
-	auto velocity_constraint = make_shared< VelocityConstraint >(
-		total_velocity,
-		maximum_velocity);
+	auto velocity_constraint = make_shared<VelocityConstraint>(maximum_velocity);
 
 	auto reference_vel = make_shared<Vector6d>();
 	auto constant_vel_gen = make_shared<VelocityProxy>(reference_vel);

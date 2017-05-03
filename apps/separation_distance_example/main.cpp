@@ -31,7 +31,6 @@ int main(int argc, char const *argv[]) {
 	auto safety_controller = SafetyController(damping_matrix);
 
 	auto tcp_velocity = safety_controller.getTCPVelocity();
-	auto total_velocity = safety_controller.getTotalVelocity();
 
 	auto max_vel_interpolator = make_shared<LinearInterpolator>(
 		make_shared<LinearPoint>(0.1, 0.),     // 0m/s at 0.1m
@@ -40,9 +39,7 @@ int main(int argc, char const *argv[]) {
 	max_vel_interpolator->enableSaturation(true);
 
 	auto maximum_velocity = max_vel_interpolator->getOutput();
-	auto velocity_constraint = make_shared< VelocityConstraint >(
-		total_velocity,
-		maximum_velocity);
+	auto velocity_constraint = make_shared<VelocityConstraint>(maximum_velocity);
 
 	// Objects are tracked in the TCP frame so there is no need to provide the robot position
 	auto separation_dist_vel_cstr = make_shared<SeparationDistanceConstraint>(

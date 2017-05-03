@@ -5,11 +5,9 @@ using namespace std;
 
 /***		Constructor & destructor		***/
 KineticEnergyConstraint::KineticEnergyConstraint(
-	Vector6dConstPtr total_velocity,
 	doubleConstPtr mass,
 	doubleConstPtr maximum_kinetic_energy) :
-	VelocityConstraint(total_velocity, maximum_velocity_),
-	total_velocity_(total_velocity),
+	VelocityConstraint(maximum_velocity_),
 	mass_(mass),
 	maximum_kinetic_energy_(maximum_kinetic_energy)
 {

@@ -22,14 +22,19 @@ std::shared_ptr<DefaultConstraint> NewDefaultConstraint(ConstraintType type)
 	return std::make_shared<DefaultConstraint>(type);
 }
 
-std::shared_ptr<VelocityConstraint> NewVelocityConstraint(Vector6dConstPtr total_velocity, doubleConstPtr maximum_velocity)
+std::shared_ptr<VelocityConstraint> NewVelocityConstraint(doubleConstPtr maximum_velocity)
 {
-	return std::make_shared<VelocityConstraint>(total_velocity, maximum_velocity);
+	return std::make_shared<VelocityConstraint>(maximum_velocity);
 }
 
-std::shared_ptr<PowerConstraintWrap> NewPowerConstraint(Vector6dConstPtr total_velocity, Vector6dConstPtr external_force, doubleConstPtr maximum_power)
+std::shared_ptr<KineticEnergyConstraint> NewKineticEnergyConstraint(doubleConstPtr mass, doubleConstPtr maximum_kinetic_energy)
 {
-	return std::make_shared<PowerConstraintWrap>(total_velocity, external_force, maximum_power);
+	return std::make_shared<KineticEnergyConstraint>(mass, maximum_kinetic_energy);
+}
+
+std::shared_ptr<PowerConstraintWrap> NewPowerConstraint(Vector6dConstPtr external_force, doubleConstPtr maximum_power)
+{
+	return std::make_shared<PowerConstraintWrap>(external_force, maximum_power);
 }
 
 std::shared_ptr<StopConstraint> NewStopConstraint(Vector6dConstPtr external_force, doubleConstPtr activation_force_threshold, doubleConstPtr deactivation_force_threshold)
@@ -62,6 +67,7 @@ void wrapConstraints() {
 	/**********************************************************************************/
 	def("NewDefaultConstraint",            NewDefaultConstraint,          "Create a new instance of a DefaultConstraint shared_ptr");
 	def("NewVelocityConstraint",           NewVelocityConstraint,         "Create a new instance of a VelocityConstraint shared_ptr");
+	def("NewKineticEnergyConstraint",      NewKineticEnergyConstraint,    "Create a new instance of a KineticEnergyConstraint shared_ptr");
 	def("NewPowerConstraint",              NewPowerConstraint,            "Create a new instance of a PowerConstraint shared_ptr");
 	def("NewStopConstraint",               NewStopConstraint,             "Create a new instance of a StopConstraint shared_ptr");
 	def("NewSeparationDistanceConstraint", (std::shared_ptr<SeparationDistanceConstraint>(*)(ConstraintPtr, InterpolatorPtr, Vector6dConstPtr)) 0,
@@ -92,6 +98,9 @@ void wrapConstraints() {
 	class_<VelocityConstraint, boost::noncopyable, bases<Constraint>>("VelocityConstraint", "Velocity constraint, limits the tool's maximum velocity", no_init)
 	.def("compute", &VelocityConstraint::compute);
 
+	class_<KineticEnergyConstraint, boost::noncopyable, bases<Constraint>>("KineticEnergyConstraint", "kinetic energy constraint, limits the tool's maximum kinetic energy", no_init)
+	.def("compute", &KineticEnergyConstraint::compute);
+
 	class_<PowerConstraintWrap, boost::noncopyable, bases<Constraint>>("PowerConstraint", "Power constraint, limits the exchanged power between the tool and the environment", no_init)
 	.def("compute", &PowerConstraintWrap::compute)
 	.def("getPower", &PowerConstraintWrap::getPowerPy);
@@ -109,12 +118,14 @@ void wrapConstraints() {
 
 	register_ptr_to_python<std::shared_ptr<DefaultConstraint>>();
 	register_ptr_to_python<std::shared_ptr<VelocityConstraint>>();
+	register_ptr_to_python<std::shared_ptr<KineticEnergyConstraint>>();
 	register_ptr_to_python<std::shared_ptr<PowerConstraintWrap>>();
 	register_ptr_to_python<std::shared_ptr<StopConstraint>>();
 	register_ptr_to_python<std::shared_ptr<SeparationDistanceConstraint>>();
 
 	implicitly_convertible<std::shared_ptr<DefaultConstraint>,              std::shared_ptr<Constraint>>();
 	implicitly_convertible<std::shared_ptr<VelocityConstraint>,             std::shared_ptr<Constraint>>();
+	implicitly_convertible<std::shared_ptr<KineticEnergyConstraint>,        std::shared_ptr<Constraint>>();
 	implicitly_convertible<std::shared_ptr<PowerConstraintWrap>,            std::shared_ptr<Constraint>>();
 	implicitly_convertible<std::shared_ptr<StopConstraint>,                 std::shared_ptr<Constraint>>();
 	implicitly_convertible<std::shared_ptr<SeparationDistanceConstraint>,   std::shared_ptr<Constraint>>();

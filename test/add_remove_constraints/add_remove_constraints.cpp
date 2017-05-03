@@ -13,7 +13,7 @@ int main(int argc, char const *argv[]) {
 
 	auto maximum_velocity = make_shared<double>(0.1);
 	auto total_velocity = safety_controller.getTotalVelocity();
-	auto velocity_constraint = make_shared<VelocityConstraint>(total_velocity, maximum_velocity);
+	auto velocity_constraint = make_shared<VelocityConstraint>(maximum_velocity);
 
 	bool ok;
 	ok = safety_controller.add("velocity limit", velocity_constraint);

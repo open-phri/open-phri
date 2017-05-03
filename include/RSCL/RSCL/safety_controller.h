@@ -171,12 +171,23 @@ public:
 
 	/**
 	 * @brief Sum of all the generated forces. Updated during SafetyController::updateToolVelocity.
-	 * @return A shared pointer to the total force.
+	 * @return A shared pointer to the force sum.
 	 */
-	Vector6dConstPtr getTotalForce() const;
+	Vector6dConstPtr getForceSum() const;
+
+	/**
+	 * @brief Sum of all the generated velocities. Updated during SafetyController::updateToolVelocity.
+	 * @return A shared pointer to the velocity sum.
+	 */
+	Vector6dConstPtr getVelocitySum() const;
 
 
-private:
+protected:
+	/**
+	 * @brief Construct a default safety controller. The damping matrix must be initialized by the parent class.
+	 */
+	SafetyController();
+
 	double computeConstraintValue() const;
 	Vector6d computeForceSum() const;
 	Vector6d computeVelocitySum() const;
@@ -187,7 +198,8 @@ private:
 
 	Vector6dPtr tcp_velocity_;
 	Vector6dPtr total_velocity_;
-	Vector6dPtr total_force_;
+	Vector6dPtr force_sum_;
+	Vector6dPtr velocity_sum_;
 	Matrix6dConstPtr damping_matrix_;
 };
 

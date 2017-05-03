@@ -19,13 +19,13 @@ int main(int argc, char const *argv[]) {
 	auto tcp_velocity = safety_controller.getTCPVelocity();
 	auto total_velocity = safety_controller.getTotalVelocity();
 
-	auto velocity_constraint = make_shared<VelocityConstraint>(total_velocity, maximum_velocity);
+	auto velocity_constraint = make_shared<VelocityConstraint>(maximum_velocity);
 
 	auto constant_vel = make_shared<Vector6d>(Vector6d::Zero());
 	auto constant_velocity_generator = make_shared<VelocityProxy>(constant_vel);
 
-	safety_controller.addConstraint("velocity constraint", velocity_constraint);
-	safety_controller.addVelocityGenerator("vel proxy", constant_velocity_generator);
+	safety_controller.add("velocity constraint", velocity_constraint);
+	safety_controller.add("vel proxy", constant_velocity_generator);
 
 	auto& translation_velocity = tcp_velocity->block<3,1>(0,0);
 

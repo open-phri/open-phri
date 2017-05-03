@@ -15,8 +15,7 @@ safety_controller.setVerbose(True)
 
 maximum_velocity = NewDoublePtr()
 maximum_velocity.set(0.1)
-total_velocity = safety_controller.getTotalVelocity()
-velocity_constraint = NewVelocityConstraint(total_velocity, maximum_velocity)
+velocity_constraint = NewVelocityConstraint(maximum_velocity)
 
 ok = safety_controller.addConstraint("velocity limit", velocity_constraint)
 assert_msg("Step #1", ok == True)
