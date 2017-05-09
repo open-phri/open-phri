@@ -58,7 +58,9 @@ public:
 
 	double getCurrentPathMinimumTime();
 	double getTrajectoryMinimumTime();
+	double getTrajectoryDuration();
 	double getPathMinimumTime(size_t idx);
+	double getPathDuration(size_t idx);
 	size_t getSegmentCount();
 
 	void setPaddingTime(size_t idx, double time);

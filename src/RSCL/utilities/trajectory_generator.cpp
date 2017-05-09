@@ -52,9 +52,26 @@ double Trajectory::getTrajectoryMinimumTime() {
 	return total_minimum_time_;
 }
 
+double Trajectory::getTrajectoryDuration() {
+	double total = 0.;
+	for (size_t i = 0; i < getSegmentCount(); ++i) {
+		total += getPathDuration(i);
+	}
+	return total;
+}
+
 double Trajectory::getPathMinimumTime(size_t idx) {
 	if(idx < points_.size()-1) {
 		return path_params_[idx].minimum_time;
+	}
+	else {
+		return 0.;
+	}
+}
+
+double Trajectory::getPathDuration(size_t idx) {
+	if(idx < points_.size()-1) {
+		return path_params_[idx].minimum_time + path_params_[idx].padding_time;
 	}
 	else {
 		return 0.;
@@ -99,6 +116,8 @@ bool Trajectory::computeParameters() {
 	return true;
 }
 
+size_t _compute_timings_total_iter = 0;     // for benchmarking only
+
 bool Trajectory::computeTimings(double v_eps, double a_eps) {
 	int segments = points_.size()-1;
 	if(segments < 1) {
@@ -112,6 +131,18 @@ bool Trajectory::computeTimings(double v_eps, double a_eps) {
 		if(not params.isFixedTime) {
 			TrajectoryPoint& from = *points_[i];
 			TrajectoryPoint& to = *points_[i+1];
+			bool ok = true;
+			if(params.max_velocity < std::abs(*from.dy) or params.max_velocity < std::abs(*to.dy)) {
+				std::cerr << "In Trajectory::computeTimings: initial or final velocity for segment " << i+1 << " is higher than the maximum" << std::endl;
+				ok = false;
+			}
+			if(params.max_acceleration < std::abs(*from.d2y) or params.max_acceleration < std::abs(*to.d2y)) {
+				std::cerr << "In Trajectory::computeTimings: initial or final acceleration for segment " << i+1 << " is higher than the maximum" << std::endl;
+				ok = false;
+			}
+			if(not ok) {
+				return false;
+			}
 
 			auto& poly_params = params.poly_params;
 			poly_params = {0, 1., *from.y, *to.y, *from.dy, *to.dy, *from.d2y, *to.d2y};
@@ -122,23 +153,24 @@ bool Trajectory::computeTimings(double v_eps, double a_eps) {
 				FifthOrderPolynomial::computeParameters(poly_params);
 
 				if(not vmax_found) {
+					++_compute_timings_total_iter;
 					double v_max = std::abs(FifthOrderPolynomial::getFirstDerivativeMaximum(poly_params));
 					double v_error = v_max - params.max_velocity;
 					double v_error_abs = std::abs(v_error);
 					vmax_found = v_error_abs < v_eps;
 					if(not vmax_found) {
-						poly_params.xf += v_error/params.max_velocity;
+						poly_params.xf = poly_params.xf*v_max/params.max_velocity;
 					}
 				}
 				else if(not amax_found) {
+					++_compute_timings_total_iter;
 					double a_max = std::abs(FifthOrderPolynomial::getSecondDerivativeMaximum(poly_params));
 					double a_error = a_max - params.max_acceleration;
 					amax_found = a_error < a_eps;
 					if(not amax_found) {
-						poly_params.xf += std::sqrt(a_error/params.max_acceleration);
+						poly_params.xf = poly_params.xf*(std::sqrt(a_max/params.max_acceleration));
 					}
 				}
-
 			}
 
 			params.minimum_time = poly_params.xf;
@@ -193,7 +225,10 @@ void TrajectoryGenerator::setSynchronizationMethod(TrajectorySynchronization syn
 
 void TrajectoryGenerator::computeParameters() {
 	for(auto& traj: items_) {
-		traj.second->computeTimings();
+		bool ok = traj.second->computeTimings();
+		if(not ok) {
+			std::cerr << "In TrajectoryGenerator::computeParameters: couldn't compute timings for trajectory " << traj.first << std::endl;
+		}
 	}
 
 	if(sync_ == TrajectorySynchronization::SynchronizeWaypoints) {

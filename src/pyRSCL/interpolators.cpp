@@ -107,7 +107,9 @@ void wrapInterpolators() {
 	.def("compute",                     &TrajectoryWrap::compute)
 	.def("getCurrentPathMinimumTime",   &TrajectoryWrap::getCurrentPathMinimumTime)
 	.def("getTrajectoryMinimumTime",    &TrajectoryWrap::getTrajectoryMinimumTime)
+	.def("getTrajectoryDuration",       &TrajectoryWrap::getTrajectoryDuration)
 	.def("getPathMinimumTime",          &TrajectoryWrap::getPathMinimumTime)
+	.def("getPathDuration",             &TrajectoryWrap::getPathDuration)
 	.def("getSegmentCount",             &TrajectoryWrap::getSegmentCount)
 	.def("setPaddingTime",              &TrajectoryWrap::setPaddingTime)
 	.def("setPathCurrentTime",          &TrajectoryWrap::setPathCurrentTime);
