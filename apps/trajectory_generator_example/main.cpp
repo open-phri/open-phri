@@ -21,16 +21,23 @@ void sigint_handler(int sig) {
 }
 
 int main(int argc, char const *argv[]) {
+
+	/***				Robot				***/
+	auto robot = make_shared<Robot>(
+		"LBR4p",    // Robot's name, must match V-REP model's name
+		7);         // Robot's joint count
+
 	/***				V-REP driver				***/
 	VREPDriver driver(
-		SAMPLE_TIME,
-		"LBR4p_");      // Robot prefix
+		robot,
+		ControlLevel::TCP,
+		SAMPLE_TIME);
 
+	driver.startSimulation();
 
 	/***			Controller configuration			***/
-	auto damping_matrix = make_shared<Matrix6d>(Matrix6d::Identity() * 500.);
-	auto safety_controller = SafetyController(damping_matrix);
-	auto tcp_velocity = safety_controller.getTCPVelocity();
+	*robot->controlPointDampingMatrix() *= 500.;
+	auto safety_controller = SafetyController(robot);
 
 	auto x_point_1 = make_shared<TrajectoryPoint>(-0.197,  0.,     0.);
 	auto x_point_2 = make_shared<TrajectoryPoint>(-0.25,    0.,     0.);
@@ -42,7 +49,7 @@ int main(int argc, char const *argv[]) {
 
 
 #if POSITION_OUTPUT
-	auto robot_position = make_shared<Vector6d>();
+	auto robot_position = robot->controlPointCurrentPose();
 	auto target_position = make_shared<Vector6d>();
 	auto stiffness = make_shared<StiffnessGenerator>(
 		make_shared<Matrix6d>(Matrix6d::Identity() * 5000.),
@@ -85,9 +92,9 @@ int main(int argc, char const *argv[]) {
 
 	trajectory_generator.computeParameters();
 
-	driver.startSimulation();
-	driver.enableSynchonous(true);
 	signal(SIGINT, sigint_handler);
+
+	usleep(10.*SAMPLE_TIME*1e6);
 
 #if POSITION_OUTPUT
 	driver.readTCPPose(target_position, ReferenceFrame::Base);
@@ -95,21 +102,17 @@ int main(int argc, char const *argv[]) {
 
 	bool end = false;
 	while(not (_stop or end)) {
-#if POSITION_OUTPUT
-		driver.readTCPPose(robot_position, ReferenceFrame::Base);
-#endif
+		if(driver.getRobotData()) {
+			end = trajectory_generator.compute();
+			safety_controller.compute();
+			driver.sendRobotData();
+		}
 
-		end = trajectory_generator.compute();
-
-		safety_controller.updateTCPVelocity();
-		driver.sendTCPtargetVelocity(tcp_velocity, ReferenceFrame::TCP);
-
-		driver.nextStep();
+		usleep(SAMPLE_TIME*1e6);
 	}
 
 	cout << (end ? "End of the trajectory reached" : "Trajectory generation interrupted") << endl;
 
-	driver.enableSynchonous(false);
 	driver.stopSimulation();
 
 	return 0;

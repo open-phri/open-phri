@@ -38,18 +38,29 @@ namespace RSCL {
  */
 class StopConstraint : public Constraint {
 public:
+	enum CheckType {
+		CheckForces         = 1<<0,
+		CheckJointTorques   = 1<<1,
+		CheckBoth = CheckForces | CheckJointTorques
+	};
+
 	/***		Constructor & destructor		***/
 
 	/**
 	 * @brief Construct a stop constraint with a given external force, activation and deactivation threshold.
-	 * @param external_force A shared pointer to the external force.
 	 * @param activation_force_threshold A shared pointer to the activation threshold.
 	 * @param deactivation_force_threshold A shared pointer to the deactivation threshold.
 	 */
 	StopConstraint(
-		Vector6dConstPtr external_force,
 		doubleConstPtr activation_force_threshold,
 		doubleConstPtr deactivation_force_threshold);
+
+	StopConstraint(
+		CheckType check_type,
+		doubleConstPtr activation_force_threshold,
+		doubleConstPtr deactivation_force_threshold,
+		doubleConstPtr activation_torque_threshold,
+		doubleConstPtr deactivation_torque_threshold);
 
 	virtual ~StopConstraint() = default;
 
@@ -57,10 +68,12 @@ public:
 	virtual double compute() override;
 
 private:
-	Vector6dConstPtr external_force_;
 	doubleConstPtr activation_force_threshold_;
 	doubleConstPtr deactivation_force_threshold_;
+	doubleConstPtr activation_torque_threshold_;
+	doubleConstPtr deactivation_torque_threshold_;
 
+	CheckType check_type_;
 	double previous_constraint_value_;
 };
 

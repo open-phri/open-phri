@@ -61,4 +61,7 @@ private:
 	Vector6dConstPtr robot_position_;
 };
 
+using StiffnessGeneratorPtr = std::shared_ptr<StiffnessGenerator>;
+using StiffnessGeneratorConstPtr = std::shared_ptr<const StiffnessGenerator>;
+
 } // namespace RSCL

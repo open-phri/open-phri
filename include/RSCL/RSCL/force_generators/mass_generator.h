@@ -61,4 +61,7 @@ private:
 	Vector6dConstPtr robot_acceleration_;
 };
 
+using MassGeneratorPtr = std::shared_ptr<MassGenerator>;
+using MassGeneratorConstPtr = std::shared_ptr<const MassGenerator>;
+
 } // namespace RSCL

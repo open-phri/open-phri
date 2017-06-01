@@ -1,6 +1,6 @@
 // This file is part of the REMOTE API
 // 
-// Copyright 2006-2016 Coppelia Robotics GmbH. All rights reserved. 
+// Copyright 2006-2017 Coppelia Robotics GmbH. All rights reserved. 
 // marc@coppeliarobotics.com
 // www.coppeliarobotics.com
 // 
@@ -24,10 +24,14 @@
 // along with the REMOTE API.  If not, see <http://www.gnu.org/licenses/>.
 // -------------------------------------------------------------------
 //
-// This file was automatically created for V-REP release V3.3.2 on August 29th 2016
+// This file was automatically created for V-REP release V3.4.0 rev. 1 on April 5th 2017
 
 #ifndef _EXTAPIPLATFORM__
 #define _EXTAPIPLATFORM__
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #ifdef _WIN32
     /* on older win compilers stdint.h can be missing */
@@ -106,6 +110,10 @@ simxInt extApi_recv_socket(simxInt clientID,simxUChar* data,simxInt maxDataLengt
     simxVoid extApi_cleanUp_sharedMem(simxInt clientID);
     simxInt extApi_send_sharedMem(simxInt clientID,const simxUChar* data,simxInt dataLength);
     simxUChar* extApi_recv_sharedMem(simxInt clientID,simxInt* dataLength);
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif /* _EXTAPIPLATFORM__ */          

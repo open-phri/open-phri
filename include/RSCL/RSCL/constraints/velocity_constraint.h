@@ -40,7 +40,6 @@ public:
 
 	/**
 	 * @brief Construct a velocity constraint with a given total and a maximum velocity.
-	 * @param total_velocity A shared pointer to the total velocity. See SafetyController::getTotalVelocity.
 	 * @param maximum_velocity A shared pointer to the maximum velocity allowed.
 	 */
 	VelocityConstraint(

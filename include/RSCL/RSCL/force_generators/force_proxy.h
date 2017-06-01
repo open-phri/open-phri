@@ -48,4 +48,7 @@ private:
 	Vector6dConstPtr force_;
 };
 
+using ForceProxyPtr = std::shared_ptr<ForceProxy>;
+using ForceProxyConstPtr = std::shared_ptr<const ForceProxy>;
+
 } // namespace RSCL

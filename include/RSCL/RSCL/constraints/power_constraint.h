@@ -43,12 +43,9 @@ public:
 
 	/**
 	 * @brief Construct a power constraint with a given total velocity, external force and maximum power.
-	 * @param total_velocity A shared pointer to the total velocity. See SafetyController::getTotalVelocity.
-	 * @param external_force A shared pointer to the external force.
 	 * @param maximum_power A shared pointer to the maximum power allowed.
 	 */
 	PowerConstraint(
-		Vector6dConstPtr external_force,
 		doubleConstPtr maximum_power);
 
 	virtual ~PowerConstraint() = default;

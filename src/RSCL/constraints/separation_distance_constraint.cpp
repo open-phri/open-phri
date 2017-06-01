@@ -6,8 +6,7 @@ using namespace RSCL;
 
 SeparationDistanceConstraint::SeparationDistanceConstraint(
 	ConstraintPtr constraint,
-	InterpolatorPtr interpolator) :
-	Constraint(constraint->getType())
+	InterpolatorPtr interpolator)
 {
 	constraint_ = constraint;
 	interpolator_ = interpolator;
@@ -36,6 +35,11 @@ double SeparationDistanceConstraint::compute() {
 
 doubleConstPtr SeparationDistanceConstraint::getSeparationDistance() const {
 	return separation_distance_;
+}
+
+void SeparationDistanceConstraint::setRobot(RobotConstPtr robot) {
+	constraint_->setRobot(robot);
+	Constraint::setRobot(robot);
 }
 
 double SeparationDistanceConstraint::closestObjectDistance() {

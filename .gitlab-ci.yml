@@ -19,6 +19,12 @@ stages:
  - deploy
  - cleanup
 
+before_script:
+  - eval $(ssh-agent -s)
+  - ssh-add <(echo "$SSH_PRIVATE_KEY")
+  - mkdir -p ~/.ssh
+  - '[[ -f /.dockerenv ]] && echo "$SSH_SERVER_HOSTKEYS" > ~/.ssh/known_hosts'
+
 ############ patterns for in job description #############
 
 # Hidden key that defines an anchor for reusing artifacts def when a build fails

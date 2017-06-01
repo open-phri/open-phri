@@ -2,10 +2,11 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.0.2)
 
 option(GEN_PYTHON_BINDINGS 	"Generate bindings for Python" OFF)
 option(RUN_PYTHON_TESTS 	"Run also the Python version of the tests" OFF)
+option(FORCE_CMAKE_BUILD 	"Build with CMake only even if inside a PID workspace" OFF)
 
 # Check if we're inside a PID workspace, if not, fall back to a pure CMake configuration
 set(WORKSPACE_DIR ${CMAKE_SOURCE_DIR}/../.. CACHE PATH "root of the packages workspace directory")
-if(EXISTS ${WORKSPACE_DIR}/share/cmake/system)
+if(NOT FORCE_CMAKE_BUILD AND EXISTS ${WORKSPACE_DIR}/share/cmake/system)
 	list(APPEND CMAKE_MODULE_PATH ${WORKSPACE_DIR}/share/cmake/system) # using generic scripts/modules of the workspace
 	include(Package_Definition NO_POLICY_SCOPE)
 	set(PID_WS_FOUND TRUE)
@@ -27,8 +28,8 @@ if(EXISTS ${WORKSPACE_DIR}/share/cmake/system)
 	check_PID_Platform(CONFIGURATION posix)
 
 	#now finding packages
-	find_package (api-driver-vrep 0.6 REQUIRED) #api-driver-vrep is required
-	declare_PID_Package_Dependency (PACKAGE api-driver-vrep NATIVE VERSION 0.6)
+	find_package (api-driver-vrep 0.7 REQUIRED) #api-driver-vrep is required
+	declare_PID_Package_Dependency (PACKAGE api-driver-vrep NATIVE VERSION 0.7)
 
 	find_package (eigen 3.2.9 REQUIRED) #eigen is required
 	declare_PID_Package_Dependency(	PACKAGE eigen EXTERNAL VERSION 3.2.9)

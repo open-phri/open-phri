@@ -27,10 +27,10 @@
 
 #pragma once
 
-#include <memory>
 #include <map>
 
 #include <RSCL/definitions.h>
+#include <RSCL/robot.h>
 #include <RSCL/fwd_decl.h>
 #include <RSCL/utilities/object_collection.hpp>
 
@@ -42,10 +42,10 @@ namespace RSCL {
 class SafetyController {
 public:
 	/**
-	 * @brief Construct a safety controller with a given damping matrix.
-	 * @param damping_matrix The damping matrix used to map forces to velocities.
+	 * @brief Construct a safety controller with a given robot.
+	 * @param robot The robot to work with.
 	 */
-	SafetyController(Matrix6dConstPtr damping_matrix);
+	SafetyController(RobotPtr robot);
 
 	~SafetyController() = default;
 
@@ -74,6 +74,15 @@ public:
 	bool addForceGenerator(const std::string& name, std::shared_ptr<ForceGenerator> generator, bool force = false);
 
 	/**
+	 * @brief Add a new torque generator to the controller.
+	 * @param name The name given to the torque generator. Must be unique. Used to latter get/remove the torque generator.
+	 * @param generator A shared pointer to the torque generator to add.
+	 * @param force [optional] If true, any force generator with the same name will be overriden.
+	 * @return true if the torque generator has successfully been added to the controller, false otherwise.
+	 */
+	bool addTorqueGenerator(const std::string& name, std::shared_ptr<TorqueGenerator> generator, bool force = false);
+
+	/**
 	 * @brief Add a new velocity generator to the controller.
 	 * @param name The name given to the velocity generator. Must be unique. Used to latter get/remove the velocity generator.
 	 * @param generator A shared pointer to the velocity generator to add.
@@ -81,6 +90,15 @@ public:
 	 * @return true if the velocity generator has successfully been added to the controller, false otherwise.
 	 */
 	bool addVelocityGenerator(const std::string& name, std::shared_ptr<VelocityGenerator> generator, bool force = false);
+
+	/**
+	 * @brief Add a new joint velocity generator to the controller.
+	 * @param name The name given to the joint velocity generator. Must be unique. Used to latter get/remove the joint velocity generator.
+	 * @param generator A shared pointer to the joint velocity generator to add.
+	 * @param force [optional] If true, any joint velocity generator with the same name will be overriden.
+	 * @return true if the joint velocity generator has successfully been added to the controller, false otherwise.
+	 */
+	bool addJointVelocityGenerator(const std::string& name, std::shared_ptr<JointVelocityGenerator> generator, bool force = false);
 
 
 	/**
@@ -102,12 +120,30 @@ public:
 	}
 
 	/**
+	 * @brief Shortcut for the SafetyController::addTorqueGenerator method.
+	 */
+	template<typename T>
+	typename std::enable_if<std::is_base_of<TorqueGenerator, T>::value, bool>::type
+	add(const std::string& name, std::shared_ptr<T> obj, bool force = false) {
+		return addTorqueGenerator(name, obj, force);
+	}
+
+	/**
 	 * @brief Shortcut for the SafetyController::addVelocityGenerator method.
 	 */
 	template<typename T>
 	typename std::enable_if<std::is_base_of<VelocityGenerator, T>::value, bool>::type
 	add(const std::string& name, std::shared_ptr<T> obj, bool force = false) {
 		return addVelocityGenerator(name, obj, force);
+	}
+
+	/**
+	 * @brief Shortcut for the SafetyController::addJointVelocityGenerator method.
+	 */
+	template<typename T>
+	typename std::enable_if<std::is_base_of<JointVelocityGenerator, T>::value, bool>::type
+	add(const std::string& name, std::shared_ptr<T> obj, bool force = false) {
+		return addJointVelocityGenerator(name, obj, force);
 	}
 
 	/**
@@ -125,11 +161,25 @@ public:
 	bool removeForceGenerator(const std::string& name);
 
 	/**
+	 * @brief Remove a torque generator from the controller.
+	 * @param name The name given to the torque generator to remove.
+	 * @return true if the torque generator has successfully been removed from the controller, false otherwise.
+	 */
+	bool removeTorqueGenerator(const std::string& name);
+
+	/**
 	 * @brief Remove a velocity generator from the controller.
 	 * @param name The name given to the velocity generator to remove.
 	 * @return true if the velocity generator has successfully been removed from the controller, false otherwise.
 	 */
 	bool removeVelocityGenerator(const std::string& name);
+
+	/**
+	 * @brief Remove a joint velocity generator from the controller.
+	 * @param name The name given to the joint velocity generator to remove.
+	 * @return true if the joint velocity generator has successfully been removed from the controller, false otherwise.
+	 */
+	bool removeJointVelocityGenerator(const std::string& name);
 
 	/**
 	 * @brief Retrieve a constraint from the controller.
@@ -146,6 +196,13 @@ public:
 	std::shared_ptr<ForceGenerator> getForceGenerator(const std::string& name);
 
 	/**
+	 * @brief Retrieve a torque generator from the controller.
+	 * @param name The name given to the torque generator to retreive.
+	 * @return A pointer to the torque generator. Store a null pointer if the torque generator doesn't exist.
+	 */
+	std::shared_ptr<TorqueGenerator> getTorqueGenerator(const std::string& name);
+
+	/**
 	 * @brief Retrieve a velocity generator from the controller.
 	 * @param name The name given to the velocity generator to retreive.
 	 * @return A pointer to the velocity generator. Store a null pointer if the velocity generator doesn't exist.
@@ -153,54 +210,39 @@ public:
 	std::shared_ptr<VelocityGenerator> getVelocityGenerator(const std::string& name);
 
 	/**
-	 * @brief Use all the generators and constraints to compute the tool control point velocity
+	 * @brief Retrieve a joint velocity generator from the controller.
+	 * @param name The name given to the joint velocity generator to retreive.
+	 * @return A pointer to the joint velocity generator. Store a null pointer if the joint velocity generator doesn't exist.
 	 */
-	void updateTCPVelocity();
+	std::shared_ptr<JointVelocityGenerator> getJointVelocityGenerator(const std::string& name);
 
 	/**
-	 * @brief Controller velocity output (in TCP frame). Updated during SafetyController::updateToolVelocity
-	 * @return A shared pointer to the total velocity.
+	 * @brief Use all the generators and constraints to compute the robot velocities
 	 */
-	Vector6dConstPtr getTCPVelocity() const;
-
-	/**
-	 * @brief Sum of all the velocities generated by the force and velocity generators ). Updated during SafetyController::updateToolVelocity
-	 * @return A shared pointer to the total velocity.
-	 */
-	Vector6dConstPtr getTotalVelocity() const;
-
-	/**
-	 * @brief Sum of all the generated forces. Updated during SafetyController::updateToolVelocity.
-	 * @return A shared pointer to the force sum.
-	 */
-	Vector6dConstPtr getForceSum() const;
-
-	/**
-	 * @brief Sum of all the generated velocities. Updated during SafetyController::updateToolVelocity.
-	 * @return A shared pointer to the velocity sum.
-	 */
-	Vector6dConstPtr getVelocitySum() const;
+	void compute();
 
 
 protected:
 	/**
-	 * @brief Construct a default safety controller. The damping matrix must be initialized by the parent class.
+	 * @brief Construct a default safety controller. The robot must be set by the parent class.
 	 */
 	SafetyController();
 
 	double computeConstraintValue() const;
-	Vector6d computeForceSum() const;
-	Vector6d computeVelocitySum() const;
+	const Vector6d& computeForceSum() const;
+	const VectorXd& computeTorqueSum() const;
+	const Vector6d& computeVelocitySum() const;
+	const VectorXd& computeJointVelocitySum() const;
+	const Matrix6d& computeSpatialTransformation() const;
+	const MatrixXd& computeJacobianInverse() const;
 
-	ObjectCollection<std::shared_ptr<Constraint>>           constraints_;
-	ObjectCollection<std::shared_ptr<ForceGenerator>>       force_generators_;
-	ObjectCollection<std::shared_ptr<VelocityGenerator>>    velocity_generators_;
+	ObjectCollection<std::shared_ptr<Constraint>>               constraints_;
+	ObjectCollection<std::shared_ptr<ForceGenerator>>           force_generators_;
+	ObjectCollection<std::shared_ptr<TorqueGenerator>>          torque_generators_;
+	ObjectCollection<std::shared_ptr<VelocityGenerator>>        velocity_generators_;
+	ObjectCollection<std::shared_ptr<JointVelocityGenerator>>   joint_velocity_generators_;
 
-	Vector6dPtr tcp_velocity_;
-	Vector6dPtr total_velocity_;
-	Vector6dPtr force_sum_;
-	Vector6dPtr velocity_sum_;
-	Matrix6dConstPtr damping_matrix_;
+	RobotPtr robot_;
 };
 
 } // namespace RSCL

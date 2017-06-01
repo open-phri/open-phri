@@ -28,7 +28,8 @@
 #pragma once
 
 #include <RSCL/definitions.h>
-#include <RSCL/constraints/constraint.h>
+#include <RSCL/constraints/velocity_constraint.h>
+#include <RSCL/velocity_generators/velocity_generator.h>
 
 namespace RSCL {
 
@@ -41,20 +42,22 @@ public:
 
 	/**
 	 * @brief Construct a force constraint with a given external and maximum force.
-	 * @param external_force A shared pointer to the external force.
 	 * @param maximum_force A shared pointer to the maximum external force allowed.
 	 */
 	ForceConstraint(
-		Vector6dConstPtr external_force,
+		VelocityConstraintPtr constraint,
 		doubleConstPtr maximum_force);
 
 	virtual ~ForceConstraint() = default;
+
+	VelocityGeneratorPtr getVelocityGenerator() const;
 
 	/***		Algorithm		***/
 	virtual double compute() override;
 
 private:
-	Vector6dConstPtr external_force_;
+	VelocityConstraintPtr constraint_;
+	VelocityGeneratorPtr velocity_generator_;
 	doubleConstPtr maximum_force_;
 };
 

@@ -28,36 +28,22 @@
 #pragma once
 
 #include <RSCL/definitions.h>
+#include <RSCL/robot.h>
 #include <RSCL/fwd_decl.h>
 
 namespace RSCL {
-
-/** @enum RSCL::ConstraintType
- *  @brief Defines the type of a Constraint and how it will be treated by the SafetyController.
- */
-enum class ConstraintType {
-	Multiplicative, /**< Gets multiplied to the minimum function */
-	Minimum         /**< Gets evaluated by the minimum function */
-};
 
 /** @brief Base class for all constraints.
  *  @details Provides a ConstraintType and a pure virtual compute method.
  */
 class Constraint {
-	friend class SafetyController; // So that only the controller can set the inner pointers
 public:
 	/**
 	 * @brief Construct a constraint of a given type
 	 * @param type The type of the constraint. See ConstraintType.
 	 */
-	Constraint(ConstraintType type);
+	Constraint() = default;
 	virtual ~Constraint() = default;
-
-	/**
-	 * @brief Provide the constraint's type
-	 * @return The type. See ConstraintType.
-	 */
-	ConstraintType getType() const;
 
 	/**
 	 * @brief Compute the value associated with the constraint.
@@ -65,13 +51,14 @@ public:
 	 */
 	virtual double compute() = 0;
 
-protected:
-	Vector6dConstPtr velocity_sum_;
-	Vector6dConstPtr force_sum_;
-	Vector6dConstPtr total_velocity_;
+	/**
+	 * @brief Set the robot to work with. Should not be set by the user.
+	 * @param robot The robot.
+	 */
+	virtual void setRobot(RobotConstPtr robot);
 
-private:
-	ConstraintType type_;
+protected:
+	RobotConstPtr robot_;
 };
 
 using ConstraintPtr = std::shared_ptr<Constraint>;

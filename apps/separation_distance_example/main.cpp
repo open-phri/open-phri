@@ -19,18 +19,22 @@ void sigint_handler(int sig) {
 
 int main(int argc, char const *argv[]) {
 
+	/***				Robot				***/
+	auto robot = make_shared<Robot>(
+		"LBR4p",    // Robot's name, must match V-REP model's name
+		7);         // Robot's joint count
+
 	/***				V-REP driver				***/
 	VREPDriver driver(
-		SAMPLE_TIME,
-		"LBR4p_");      // LBR4p_: Robot prefix
+		robot,
+		ControlLevel::TCP,
+		SAMPLE_TIME);
 
 	driver.startSimulation();
 
 	/***			Controller configuration			***/
-	auto damping_matrix = make_shared<Matrix6d>(Matrix6d::Identity() * 100.);
-	auto safety_controller = SafetyController(damping_matrix);
-
-	auto tcp_velocity = safety_controller.getTCPVelocity();
+	*robot->controlPointDampingMatrix() *= 100.;
+	auto safety_controller = SafetyController(robot);
 
 	auto max_vel_interpolator = make_shared<LinearInterpolator>(
 		make_shared<LinearPoint>(0.1, 0.),     // 0m/s at 0.1m
@@ -50,8 +54,7 @@ int main(int argc, char const *argv[]) {
 	separation_dist_vel_cstr->add("obstacle1", driver.trackObjectPosition("obstacle1", ReferenceFrame::TCP));
 	separation_dist_vel_cstr->add("obstacle2", driver.trackObjectPosition("obstacle2", ReferenceFrame::TCP));
 
-	auto ext_force = make_shared<Vector6d>(Vector6d::Zero());
-	auto ext_force_generator = make_shared<ForceProxy>(ext_force);
+	auto ext_force_generator = make_shared<ForceProxy>(robot->controlPointExternalForce());
 
 	safety_controller.addConstraint(
 		"velocity constraint",
@@ -63,19 +66,18 @@ int main(int argc, char const *argv[]) {
 
 	signal(SIGINT, sigint_handler);
 
-	driver.enableSynchonous(true);
+	usleep(10.*SAMPLE_TIME*1e6);
 
 	cout << "Starting main loop" << endl;
 	while(not _stop) {
-		driver.readTCPWrench(ext_force);
-		driver.updateTrackedObjectsPosition();
-		safety_controller.updateTCPVelocity();
-		driver.sendTCPtargetVelocity(tcp_velocity, ReferenceFrame::TCP);
+		if(driver.getRobotData()) {
+			safety_controller.compute();
+			driver.sendRobotData();
+		}
 
-		driver.nextStep();
+		usleep(SAMPLE_TIME*1e6);
 	}
 
-	driver.enableSynchonous(false);
 	driver.stopSimulation();
 
 	return 0;

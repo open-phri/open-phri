@@ -7,15 +7,16 @@ using namespace std;
 
 int main(int argc, char const *argv[]) {
 
-	auto damping_matrix = make_shared<Matrix6d>(Matrix6d::Identity());
+	auto robot = make_shared<Robot>(
+		"rob",  // Robot's name
+		7);     // Robot's joint count
 
-	auto safety_controller = SafetyController(damping_matrix);
+	auto safety_controller = SafetyController(robot);
 	safety_controller.setVerbose(true);
-	auto tcp_velocity = safety_controller.getTCPVelocity();
 
-	safety_controller.updateTCPVelocity();
+	safety_controller.compute();
 
-	assert(tcp_velocity->isZero());
+	assert(robot->controlPointVelocity()->isZero());
 
 	return 0;
 }

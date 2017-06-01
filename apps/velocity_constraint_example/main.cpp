@@ -19,49 +19,66 @@ void sigint_handler(int sig) {
 
 int main(int argc, char const *argv[]) {
 
-	/***			Controller configuration			***/
-	auto damping_matrix = make_shared<Matrix6d>(Matrix6d::Identity() * 100.);
-	auto safety_controller = SafetyController(damping_matrix);
+	/***				Robot				***/
+	auto robot = make_shared<Robot>(
+		"LBR4p",    // Robot's name, must match V-REP model's name
+		7);         // Robot's joint count
 
-	auto tcp_velocity = safety_controller.getTCPVelocity();
+	/***				V-REP driver				***/
+	VREPDriver driver(
+		robot,
+		ControlLevel::TCP,
+		SAMPLE_TIME,
+		"", "127.0.0.1", -1000
+		);
+
+	driver.startSimulation();
+
+	/***			Controller configuration			***/
+	*robot->controlPointDampingMatrix() *= 100.;
+	auto safety_controller = SafetyController(robot);
 
 	auto maximum_velocity = make_shared<double>(0.1);
 	auto velocity_constraint = make_shared<VelocityConstraint>(maximum_velocity);
 
-	auto reference_vel = make_shared<Vector6d>();
-	auto constant_vel_gen = make_shared<VelocityProxy>(reference_vel);
-
-	auto ext_force = make_shared<Vector6d>(Vector6d::Zero());
-	auto ext_force_generator = make_shared<ForceProxy>(ext_force);
+	auto ext_force_generator = make_shared<ForceProxy>(robot->controlPointExternalForce());
 
 	safety_controller.addConstraint(
 		"velocity constraint",
 		velocity_constraint);
 
-	safety_controller.addVelocityGenerator(
-		"vel proxy",
-		constant_vel_gen);
-
 	safety_controller.addForceGenerator(
 		"ext force proxy",
 		ext_force_generator);
 
-	/***				V-REP driver				***/
-	VREPDriver driver(
-		SAMPLE_TIME,
-		"LBR4p_");      // LBR4p_: Robot prefix
-
-	driver.enableSynchonous(true);
-	driver.startSimulation();
-
 	signal(SIGINT, sigint_handler);
 
-	while(not _stop) {
-		driver.readTCPWrench(ext_force);
-		safety_controller.updateTCPVelocity();
-		driver.sendTCPtargetVelocity(tcp_velocity, ReferenceFrame::TCP);
+	while(not driver.getRobotData() and not _stop) {
+		usleep(SAMPLE_TIME*1e6);
+	}
+	driver.enableSynchonous(true);
 
+	if(not _stop)
+		std::cout << "Starting main loop\n";
+	while(not _stop) {
+		if(driver.getRobotData()) {
+			safety_controller.compute();
+			if(not driver.sendRobotData()) {
+				std::cerr << "Can'send robot data to V-REP" << std::endl;
+			}
+		}
+		else {
+			std::cerr << "Can't get robot data from V-REP" << std::endl;
+		}
+
+		// std::cout << "**********************************************************************\n";
+		// std::cout << "vel    : " << robot->jointVelocity()->transpose() << "\n";
+		// std::cout << "pos msr: " << robot->jointCurrentPosition()->transpose() << "\n";
+		// std::cout << "pos tgt: " << robot->jointTargetPosition()->transpose() << "\n";
+
+		// usleep(SAMPLE_TIME*1e6);
 		driver.nextStep();
+
 	}
 
 	driver.enableSynchonous(false);

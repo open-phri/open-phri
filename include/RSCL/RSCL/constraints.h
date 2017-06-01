@@ -30,7 +30,8 @@
 #include <RSCL/constraints/default_constraint.h>
 #include <RSCL/constraints/velocity_constraint.h>
 #include <RSCL/constraints/power_constraint.h>
-// #include <RSCL/force_constraint.h>
+#include <RSCL/constraints/force_constraint.h>
 #include <RSCL/constraints/stop_constraint.h>
 #include <RSCL/constraints/separation_distance_constraint.h>
+#include <RSCL/constraints/joint_velocity_constraint.h>
 #include <RSCL/constraints/kinetic_energy_constraint.h>

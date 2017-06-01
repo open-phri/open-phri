@@ -46,4 +46,7 @@ private:
 	Vector6dConstPtr velocity_;
 };
 
+using VelocityProxyPtr = std::shared_ptr<VelocityProxy>;
+using VelocityProxyConstPtr = std::shared_ptr<const VelocityProxy>;
+
 } // namespace RSCL

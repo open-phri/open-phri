@@ -7,12 +7,14 @@ using namespace std;
 
 int main(int argc, char const *argv[]) {
 
-	auto damping_matrix = make_shared<Matrix6d>();
-	auto safety_controller = SafetyController(damping_matrix);
+	auto robot = make_shared<Robot>(
+		"rob",  // Robot's name
+		7);     // Robot's joint count
+
+	auto safety_controller = SafetyController(robot);
 	safety_controller.setVerbose(true);
 
 	auto maximum_velocity = make_shared<double>(0.1);
-	auto total_velocity = safety_controller.getTotalVelocity();
 	auto velocity_constraint = make_shared<VelocityConstraint>(maximum_velocity);
 
 	bool ok;

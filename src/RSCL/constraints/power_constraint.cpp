@@ -6,10 +6,7 @@ using namespace Eigen;
 
 /***		Constructor & destructor		***/
 PowerConstraint::PowerConstraint(
-	Vector6dConstPtr external_force,
 	doubleConstPtr maximum_power) :
-	Constraint(ConstraintType::Minimum),
-	external_force_(external_force),
 	maximum_power_(maximum_power)
 {
 	power_ = std::make_shared<double>(0);
@@ -18,8 +15,8 @@ PowerConstraint::PowerConstraint(
 /***		Algorithm		***/
 double PowerConstraint::compute() {
 	double constraint = 1.;
-	const Vector3d& velocity = total_velocity_->block<3,1>(0,0);
-	const Vector3d& force = external_force_->block<3,1>(0,0);
+	const Vector3d& velocity = robot_->controlPointTotalVelocity()->block<3,1>(0,0);
+	const Vector3d& force = robot_->controlPointExternalForce()->block<3,1>(0,0);
 	double power = force.dot(velocity);
 	*power_ = power;
 

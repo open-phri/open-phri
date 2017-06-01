@@ -32,7 +32,9 @@ namespace RSCL {
 class SafetyController;
 class Constraint;
 class VelocityGenerator;
+class JointVelocityGenerator;
 class ForceGenerator;
+class TorqueGenerator;
 class LinearInterpolator;
 class PolynomialInterpolator;
 

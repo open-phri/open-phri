@@ -38,9 +38,11 @@
 #include <string>
 #include <unordered_map>
 #include <map>
+#include <vector>
 #include <utility>
 
 #include <RSCL/definitions.h>
+#include <RSCL/robot.h>
 
 namespace vrep {
 
@@ -53,7 +55,15 @@ enum class ReferenceFrame {
 	World   /**< Frame fixed relative to the environment */
 };
 
-/** @brief Wrapper for V-REP low level C API.
+/** @enum vrep::ControlLevel
+ *  @brief Specify the control level (joint or TCP)
+ */
+enum class ControlLevel {
+	Joint,  /**< Joint position commands will be sent */
+	TCP     /**< TCP velocity commands will be sent */
+};
+
+/** @brief Wrapper for -REP low level C API.
  *  @details Can be used to control the simulation (start/pause/stop), to tack objects' position, read and send robot related data.
  *  Some objects need to be present in the scene: tcp (actual TCP pose), tcp_target (TCP reference pose), force_sensor (force sensor attached to the TCP),
  *  base_frame (frame attached to the base link) and world_frame (frame attached to the environment).
@@ -63,30 +73,32 @@ class VREPDriver {
 public:
 	/**
 	 * @brief Construct a driver using an IP & port. Prefix and suffix can be used to target a specific robot.
+	 * @param robot The robot to read/write data from/to.
 	 * @param sample_time The sample time set in V-REP (sorry, no way to get it remotely...).
-	 * @param prefix [optional] Can be used to specify a prefix for all the basic objects.
 	 * @param suffix [optional] Can be used to specify a suffix for all the basic objects.
 	 * @param ip [optional] Can be used to specify a IP address different than the local network.
 	 * @param port [optional] Can be used to specify a port different thant the default one.
 	 */
 	VREPDriver(
+		RSCL::RobotPtr robot,
+		ControlLevel control_level,
 		double sample_time,
-		const std::string& prefix = "",
 		const std::string& suffix = "",
 		const std::string& ip = "127.0.0.1",
 		int port = 19997);
 
 	/**
 	 * @brief Construct a driver using an already open connection. Prefix and suffix can be used to target a specific robot.
+	 * @param robot The robot to read/write data from/to.
 	 * @param sample_time The sample time set in V-REP (sorry, no way to get it remotely...).
 	 * @param client_id The client ID of the previously openned connection.
-	 * @param prefix [optional] Can be used to specify a prefix for all the basic objects.
 	 * @param suffix [optional] Can be used to specify a suffix for all the basic objects.
 	 */
 	VREPDriver(
+		RSCL::RobotPtr robot,
+		ControlLevel control_level,
 		double sample_time,
 		int client_id,
-		const std::string& prefix = "",
 		const std::string& suffix = "");
 
 	~VREPDriver();
@@ -170,6 +182,20 @@ public:
 	bool readTCPWrench(RSCL::Vector6dPtr wrench) const;
 
 	/**
+	 * @brief Get the Jacobian matrix associated with the TCP.
+	 * @param jacobian [out] The current Jacobian matrix.
+	 * @return True if correctly read, false otherwise.
+	 */
+	bool readJacobian(RSCL::MatrixXdPtr jacobian) const;
+
+	/**
+	 * @brief Get the transformation matrix associated with the TCP.
+	 * @param matrix [out] The current transformation matrix.
+	 * @return True if correctly read, false otherwise.
+	 */
+	bool readTransformationMatrix(RSCL::Matrix4dPtr matrix) const;
+
+	/**
 	 * @brief Start tracking a given object in the specified frame.
 	 * @param name [in] The full name of the object to track.
 	 * @param frame [in] The reference frame.
@@ -183,6 +209,13 @@ public:
 	 */
 	bool updateTrackedObjectsPosition();
 
+	bool readJointPosition(RSCL::VectorXdPtr position) const;
+	bool sendJointTargetPosition(RSCL::VectorXdConstPtr position) const;
+	bool sendJointTargetVelocity(RSCL::VectorXdConstPtr velocity) const;
+
+	bool getRobotData(ReferenceFrame frame_velocities = ReferenceFrame::TCP, ReferenceFrame frame_positions = ReferenceFrame::Base);
+	bool sendRobotData(ReferenceFrame frame_velocities = ReferenceFrame::TCP);
+
 private:
 	void init(const std::string& ip, int port);
 	void init(int client_id);
@@ -190,12 +223,12 @@ private:
 	void startStreaming() const;
 	int getFrameHandle(ReferenceFrame frame) const;
 
-	int client_id_;
+	ControlLevel control_level_;
 	double sample_time_;
 	bool sync_mode_;
-
-	std::string prefix_;
+	RSCL::RobotPtr robot_;
 	std::string suffix_;
+	int client_id_;
 
 	std::unordered_map<std::string, int> object_handles_;
 	std::map<std::pair<int,int>, RSCL::Vector6dPtr> tracked_objects_;

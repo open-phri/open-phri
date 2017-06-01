@@ -28,3 +28,4 @@
 #pragma once
 
 #include <RSCL/velocity_generators/velocity_proxy.h>
+#include <RSCL/velocity_generators/force_control.h>

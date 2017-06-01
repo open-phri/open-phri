@@ -1,6 +1,6 @@
 // This file is part of V-REP, the Virtual Robot Experimentation Platform.
 // 
-// Copyright 2006-2016 Coppelia Robotics GmbH. All rights reserved. 
+// Copyright 2006-2017 Coppelia Robotics GmbH. All rights reserved. 
 // marc@coppeliarobotics.com
 // www.coppeliarobotics.com
 // 
@@ -27,13 +27,13 @@
 // along with V-REP.  If not, see <http://www.gnu.org/licenses/>.
 // -------------------------------------------------------------------
 //
-// This file was automatically created for V-REP release V3.3.2 on August 29th 2016
+// This file was automatically created for V-REP release V3.4.0 rev. 1 on April 5th 2017
 
 #if !defined(V_REPCONST_INCLUDED_)
 #define V_REPCONST_INCLUDED_
 
-#define VREP_PROGRAM_VERSION_NB 30302
-#define VREP_PROGRAM_VERSION "3.3.2."
+#define VREP_PROGRAM_VERSION_NB 30400
+#define VREP_PROGRAM_VERSION "3.4.0."
 
 #define VREP_PROGRAM_REVISION_NB 1
 #define VREP_PROGRAM_REVISION "(rev. 1)"
@@ -326,6 +326,8 @@ enum {
         sim_displayattribute_nodrawingobjects       =0x2000000,
         sim_displayattribute_noparticles            =0x4000000,
         sim_displayattribute_colorcodedtriangles    =0x8000000
+/*        sim_displayattribute_mode1                  =0x10000000,
+        sim_displayattribute_mode2                  =0x20000000 */
 };
 
 enum { /* Scene object properties. Combine with the | operator */
@@ -472,7 +474,17 @@ enum { /* Customization script call types */
     sim_customizationscriptcall_simulationsensing, /* called in the "sensing" phase of the main script. Called only if the script is flagged as sim_customizationscriptattribute_activeduringsimulation */
     sim_customizationscriptcall_simulationpause, /* called while simulation is paused */
     sim_customizationscriptcall_simulationpausefirst, /* called just after a simulation was paused */
-    sim_customizationscriptcall_simulationpauselast /* called just before a simulation is unpaused */
+    sim_customizationscriptcall_simulationpauselast, /* called just before a simulation is unpaused */
+    sim_customizationscriptcall_lastbeforeinstanceswitch, /* called just before an instance switch (switch to another scene) */
+    sim_customizationscriptcall_firstafterinstanceswitch /* called just after an instance switch (switch to another scene) */
+};
+
+enum { /* Add-on script call types */
+    sim_addonscriptcall_initialization=0, /* first time called. Do some initializations */
+    sim_addonscriptcall_run, /* running */
+    sim_addonscriptcall_suspend, /* last before suspend state */
+    sim_addonscriptcall_restarting, /* running again after suspend state */
+    sim_addonscriptcall_cleanup /* last time called. Do some clean-up */
 };
 
 enum { /* Script attributes */
@@ -529,7 +541,8 @@ enum { /* special argument of some functions: */
     sim_handle_default                  =-9,
     sim_handle_all_except_self          =-10,
     sim_handle_parent                   =-11,
-    sim_handle_scene                    =-12
+    sim_handle_scene                    =-12,
+    sim_handle_app                      =-13
 };
 
 enum { /* special handle flags: */
@@ -538,6 +551,7 @@ enum { /* special handle flags: */
     sim_handleflag_extended             =0x00400000,
     sim_handleflag_greyscale            =0x00400000,
     sim_handleflag_codedstring          =0x00400000,
+    sim_handleflag_camera               =0x00400000,
     sim_handleflag_model                =0x00800000,
     sim_handleflag_rawvalue             =0x01000000
 };
@@ -757,7 +771,8 @@ enum { /* Float parameters: */
     sim_floatparam_rand=0, /* random value (0.0-1.0) */
     sim_floatparam_simulation_time_step,
     sim_floatparam_stereo_distance,
-    sim_floatparam_dynamic_step_size
+    sim_floatparam_dynamic_step_size,
+    sim_floatparam_mouse_wheel_zoom_factor
 };
 
 enum { /* String parameters: */
@@ -860,7 +875,8 @@ enum { /* Reflexxes Motion Library flags */
 enum { /* file dialog styles */
     sim_filedlg_type_load=0,
     sim_filedlg_type_save,
-    sim_filedlg_type_load_multiple
+    sim_filedlg_type_load_multiple,
+    sim_filedlg_type_folder
 };
 
 enum { /* message box styles */
@@ -954,6 +970,15 @@ enum { /* color components */
     sim_colorcomponent_auxiliary
 };
 
+enum { /* prox. sensor or mill volume types */
+    sim_volume_pyramid=0,
+    sim_volume_cylinder,
+    sim_volume_disc,
+    sim_volume_cone,
+    sim_volume_ray,
+    sim_volume_randomizedray
+};
+
 enum { /* Pov pattern types */
     sim_pov_pattern_null=0,
     sim_pov_white_marble,
@@ -1045,10 +1070,11 @@ enum { /* Object int/float/string parameters */
     sim_objfloatparam_modelbbox_max_z= 26,
     sim_objintparam_collection_self_collision_indicator= 27,
     sim_objfloatparam_transparency_offset= 28,
-    sim_objintparam_child_role= 29,
-    sim_objintparam_parent_role= 30,
+    sim_objintparam_child_role= 29, /* DEPRECATED */
+    sim_objintparam_parent_role= 30, /* DEPRECATED */
     sim_objintparam_manipulation_permissions= 31,
     sim_objintparam_illumination_handle= 32,
+    sim_objstringparam_dna=33,
 
     sim_objparam_end= 999,
 
@@ -1087,7 +1113,7 @@ enum { /* Object int/float/string parameters */
     sim_jointfloatparam_intrinsic_qw= 2011,
     sim_jointfloatparam_velocity= 2012,
     sim_jointfloatparam_spherical_qx= 2013,
-    sim_jointfloatparam_spherical_qy= 2017,
+    sim_jointfloatparam_spherical_qy= 2014,
     sim_jointfloatparam_spherical_qz= 2015,
     sim_jointfloatparam_spherical_qw= 2016,
     sim_jointfloatparam_upper_limit= 2017,
@@ -1139,8 +1165,10 @@ enum { /* Object int/float/string parameters */
 
     /* proximity sensors */
     sim_proxintparam_ray_invisibility= 4000,
+    sim_proxintparam_volume_type= 4001,
+    sim_proxintparam_entity_to_detect= 4002,
 
-    /* proximity sensors */
+    /* force sensors */
     sim_forcefloatparam_error_x= 5000,
     sim_forcefloatparam_error_y= 5001,
     sim_forcefloatparam_error_z= 5002,
@@ -1165,6 +1193,11 @@ enum { /* Object int/float/string parameters */
 
     /* dummies */
     sim_dummyintparam_link_type= 10000,
+    sim_dummyintparam_follow_path= 10001,
+    sim_dummyfloatparam_follow_path_offset= 10002,
+
+    /* mills */
+    sim_millintparam_volume_type= 11000,
 
     /* mirrors */
     sim_mirrorfloatparam_width= 12000,
@@ -1258,6 +1291,7 @@ enum { /* Physics engines params */
     sim_ode_global_int_start=10000,
     sim_ode_global_constraintsolvingiterations,
     sim_ode_global_bitcoded,
+    sim_ode_global_randomseed,
     sim_ode_global_int_end,
 
     sim_ode_global_bool_start=11000,
@@ -1524,7 +1558,7 @@ enum {
     sim_announce_containsstaticshapesondynamicconstruction,
     sim_announce_purehollowshapenotsupported,
     sim_announce_vortexpluginisdemo,
-    sim_announce_newtondynamicrandommeshnotsupported
+    sim_announce_newtondynamicrandommeshnotsupported,
 };
 
 enum {
@@ -1532,6 +1566,79 @@ enum {
     sim_dynamicsimicon_objectisdynamicallysimulated,
     sim_dynamicsimicon_objectisnotdynamicallyenabled
 };
+
+enum { /* Filter component types */
+    sim_filtercomponent_originalimage=1,
+    sim_filtercomponent_originaldepth,
+    sim_filtercomponent_uniformimage,
+    sim_filtercomponent_tooutput,
+    sim_filtercomponent_tobuffer1,
+    sim_filtercomponent_tobuffer2,
+    sim_filtercomponent_frombuffer1,
+    sim_filtercomponent_frombuffer2,
+    sim_filtercomponent_swapbuffers,
+    sim_filtercomponent_addbuffer1,
+    sim_filtercomponent_subtractbuffer1,
+    sim_filtercomponent_multiplywithbuffer1,
+    sim_filtercomponent_horizontalflip,
+    sim_filtercomponent_verticalflip,
+    sim_filtercomponent_rotate,
+    sim_filtercomponent_shift,
+    sim_filtercomponent_resize,
+    sim_filtercomponent_3x3filter,
+    sim_filtercomponent_5x5filter,
+    sim_filtercomponent_sharpen,
+    sim_filtercomponent_edge,
+    sim_filtercomponent_rectangularcut,
+    sim_filtercomponent_circularcut,
+    sim_filtercomponent_normalize,
+    sim_filtercomponent_intensityscale,
+    sim_filtercomponent_keeporremovecolors,
+    sim_filtercomponent_scaleandoffsetcolors,
+    sim_filtercomponent_binary,
+    sim_filtercomponent_swapwithbuffer1,
+    sim_filtercomponent_addtobuffer1,
+    sim_filtercomponent_subtractfrombuffer1,
+    sim_filtercomponent_correlationwithbuffer1,
+    sim_filtercomponent_colorsegmentation,
+    sim_filtercomponent_blobextraction,
+    sim_filtercomponent_imagetocoord,
+    sim_filtercomponent_pixelchange,
+    sim_filtercomponent_velodyne,
+    sim_filtercomponent_todepthoutput,
+    sim_filtercomponent_customized=1000
+};
+
+enum { /* Buffer types */
+    sim_buffer_uint8=0,
+    sim_buffer_int8,
+    sim_buffer_uint16,
+    sim_buffer_int16,
+    sim_buffer_uint32,
+    sim_buffer_int32,
+    sim_buffer_float,
+    sim_buffer_double,
+    sim_buffer_uint8rgb,
+    sim_buffer_uint8bgr
+};
+
+enum { /* Image combination */
+    sim_imgcomb_vertical=0,
+    sim_imgcomb_horizontal
+};
+
+enum { /* Default dynamic materials */
+    sim_dynmat_default=2310013, /* i.e. SIM_IDSTART_DEFDYNMATERIAL */
+    sim_dynmat_highfriction,
+    sim_dynmat_lowfriction,
+    sim_dynmat_nofriction,
+    sim_dynmat_reststackgrasp,
+    sim_dynmat_foot,
+    sim_dynmat_wheel,
+    sim_dynmat_gripper,
+    sim_dynmat_floor
+};
+
 
 /******************************************
 *******************************************

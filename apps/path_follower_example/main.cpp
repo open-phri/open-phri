@@ -21,22 +21,29 @@ void sigint_handler(int sig) {
 }
 
 int main(int argc, char const *argv[]) {
+
+	/***				Robot				***/
+	auto robot = make_shared<Robot>(
+		"LBR4p",    // Robot's name, must match V-REP model's name
+		7);         // Robot's joint count
+
 	/***				V-REP driver				***/
 	VREPDriver driver(
-		SAMPLE_TIME,
-		"LBR4p_");      // Robot prefix
+		robot,
+		ControlLevel::TCP,
+		SAMPLE_TIME);
 
+	driver.startSimulation();
 
 	/***			Controller configuration			***/
-	auto damping_matrix = make_shared<Matrix6d>(Matrix6d::Identity() * 500.);
-	auto safety_controller = SafetyController(damping_matrix);
-	auto tcp_velocity = safety_controller.getTCPVelocity();
+	*robot->controlPointDampingMatrix() *= 100.;
+	auto safety_controller = SafetyController(robot);
 
-	auto ext_force = make_shared<Vector6d>(Vector6d::Zero());
+	auto ext_force = robot->controlPointExternalForce();
 	auto activation_force_threshold = make_shared<double>(25.);
 	auto deactivation_force_threshold = make_shared<double>(5.);
 
-	auto stop_constraint = make_shared<StopConstraint>(ext_force, activation_force_threshold, deactivation_force_threshold);
+	auto stop_constraint = make_shared<StopConstraint>(activation_force_threshold, deactivation_force_threshold);
 	safety_controller.addConstraint("stop constraint", stop_constraint);
 
 	auto external_force_generator = make_shared<ForceProxy>(ext_force);
@@ -50,8 +57,8 @@ int main(int argc, char const *argv[]) {
 	auto z_point_2 = make_shared<TrajectoryPoint>(1.,      -0.025, 0.);
 	auto z_point_3 = make_shared<TrajectoryPoint>(0.85,    0.,     0.);
 
-	auto robot_position = make_shared<Vector6d>();
-	auto target_position = make_shared<Vector6d>();
+	auto robot_position = robot->controlPointCurrentPose();
+	auto target_position = robot->controlPointTargetPose();
 
 #if POSITION_OUTPUT
 	auto stiffness = make_shared<StiffnessGenerator>(
@@ -95,9 +102,9 @@ int main(int argc, char const *argv[]) {
 
 	trajectory_generator.computeParameters();
 
-	driver.startSimulation();
-	driver.enableSynchonous(true);
 	signal(SIGINT, sigint_handler);
+
+	usleep(10.*SAMPLE_TIME*1e6);
 
 #if POSITION_OUTPUT
 	driver.readTCPPose(target_position, ReferenceFrame::Base);
@@ -105,23 +112,17 @@ int main(int argc, char const *argv[]) {
 
 	bool end = false;
 	while(not (_stop or end)) {
-		driver.readTCPWrench(ext_force);
-		driver.readTCPPose(robot_position, ReferenceFrame::Base);
-#if not POSITION_OUTPUT
-		driver.readTCPTargetPose(target_position, ReferenceFrame::Base);
-#endif
+		if(driver.getRobotData()) {
+			end = trajectory_generator.compute();
+			safety_controller.compute();
+			driver.sendRobotData();
+		}
 
-		end = trajectory_generator.compute();
-
-		safety_controller.updateTCPVelocity();
-		driver.sendTCPtargetVelocity(tcp_velocity, ReferenceFrame::TCP);
-
-		driver.nextStep();
+		usleep(SAMPLE_TIME*1e6);
 	}
 
 	cout << (end ? "End of the trajectory reached" : "Trajectory generation interrupted") << endl;
 
-	driver.enableSynchonous(false);
 	driver.stopSimulation();
 
 	return 0;

@@ -39,9 +39,8 @@ public:
 
 	/**
 	 * @brief Construct a default constraint of a given type
-	 * @param type The type of the constraint. See ConstraintType.
 	 */
-	DefaultConstraint(ConstraintType type);
+	DefaultConstraint() = default;
 
 	virtual ~DefaultConstraint() = default;
 

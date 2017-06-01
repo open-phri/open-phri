@@ -8,11 +8,12 @@ using namespace std;
 
 int main(int argc, char const *argv[]) {
 
-	auto damping_matrix = make_shared<Matrix6d>(Matrix6d::Identity());
-	auto safety_controller = SafetyController(damping_matrix);
-	safety_controller.setVerbose(true);
+	auto robot = make_shared<Robot>(
+		"rob",  // Robot's name
+		7);     // Robot's joint count
 
-	auto tcp_velocity = safety_controller.getTCPVelocity();
+	auto safety_controller = SafetyController(robot);
+	safety_controller.setVerbose(true);
 
 	auto rob_pos = make_shared<Vector6d>(Vector6d::Zero());
 	auto potential_field_generator = make_shared<PotentialFieldGenerator>(rob_pos);
@@ -62,21 +63,21 @@ int main(int argc, char const *argv[]) {
 
 	// Step #7 : 1 obstacle > threshold distance
 	(*obs_pos)(0) = 0.3;
-	safety_controller.updateTCPVelocity();
-	assert_msg("Step #7", tcp_velocity->isZero());
+	safety_controller.compute();
+	assert_msg("Step #7", robot->controlPointVelocity()->isZero());
 
 	// Step #8 : 1 obstacle < threshold distance
 	(*obs_pos)(0) = 0.1;
-	safety_controller.updateTCPVelocity();
-	assert_msg("Step #8", tcp_velocity->dot(*obs_pos) < 0.);
+	safety_controller.compute();
+	assert_msg("Step #8", robot->controlPointVelocity()->dot(*obs_pos) < 0.);
 
 	// Step #9 : 1 target
 	ok = potential_field_generator->remove("obstacle");
 	potential_field_generator->add("target", target);
 	(*tgt_pos)(0) = 0.1;
 	(*tgt_pos)(1) = 0.2;
-	safety_controller.updateTCPVelocity();
-	assert_msg("Step #9", tcp_velocity->dot(*tgt_pos) > 0.);
+	safety_controller.compute();
+	assert_msg("Step #9", robot->controlPointVelocity()->dot(*tgt_pos) > 0.);
 
 	return 0;
 }

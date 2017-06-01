@@ -2,12 +2,6 @@
 
 using namespace RSCL;
 
-
-Constraint::Constraint(ConstraintType type) : type_(type)
-{
-
-}
-
-ConstraintType Constraint::getType() const {
-	return type_;
+void Constraint::setRobot(RobotConstPtr robot) {
+	robot_ = robot;
 }

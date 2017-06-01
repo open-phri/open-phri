@@ -19,18 +19,22 @@ void sigint_handler(int sig) {
 
 int main(int argc, char const *argv[]) {
 
+	/***				Robot				***/
+	auto robot = make_shared<Robot>(
+		"LBR4p",    // Robot's name, must match V-REP model's name
+		7);         // Robot's joint count
+
 	/***				V-REP driver				***/
 	VREPDriver driver(
-		SAMPLE_TIME,
-		"LBR4p_");      // LBR4p_: Robot prefix
+		robot,
+		ControlLevel::TCP,
+		SAMPLE_TIME);
 
 	driver.startSimulation();
 
 	/***			Controller configuration			***/
-	auto damping_matrix = make_shared<Matrix6d>(Matrix6d::Identity() * 100.);
-	auto safety_controller = SafetyController(damping_matrix);
-
-	auto tcp_velocity = safety_controller.getTCPVelocity();
+	*robot->controlPointDampingMatrix() *= 100.;
+	auto safety_controller = SafetyController(robot);
 
 	auto maximum_velocity = make_shared<double>(0.1);
 	auto velocity_constraint = make_shared<VelocityConstraint>(maximum_velocity);
@@ -71,18 +75,21 @@ int main(int argc, char const *argv[]) {
 
 	signal(SIGINT, sigint_handler);
 
-	driver.enableSynchonous(true);
+	usleep(10.*SAMPLE_TIME*1e6);
 
 	cout << "Starting main loop" << endl;
 	while(not _stop) {
-		driver.updateTrackedObjectsPosition();
-		safety_controller.updateTCPVelocity();
-		driver.sendTCPtargetVelocity(tcp_velocity, ReferenceFrame::TCP);
+		if(driver.getRobotData()) {
+			safety_controller.compute();
+			driver.sendRobotData();
+		}
+		else {
+			std::cerr << "Can't get robot data from V-REP" << std::endl;
+		}
 
-		driver.nextStep();
+		usleep(SAMPLE_TIME*1e6);
 	}
 
-	driver.enableSynchonous(false);
 	driver.stopSimulation();
 
 	return 0;

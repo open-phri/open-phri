@@ -1,6 +1,6 @@
 // This file is part of V-REP, the Virtual Robot Experimentation Platform.
 // 
-// Copyright 2006-2016 Coppelia Robotics GmbH. All rights reserved. 
+// Copyright 2006-2017 Coppelia Robotics GmbH. All rights reserved. 
 // marc@coppeliarobotics.com
 // www.coppeliarobotics.com
 // 
@@ -27,7 +27,7 @@
 // along with V-REP.  If not, see <http://www.gnu.org/licenses/>.
 // -------------------------------------------------------------------
 //
-// This file was automatically created for V-REP release V3.3.2 on August 29th 2016
+// This file was automatically created for V-REP release V3.4.0 rev. 1 on April 5th 2017
 
 // Use this header to dynamically load and bind v_rep.dll and its functions (call loadVrepLibrary and unloadVrepLibrary)
 
@@ -133,8 +133,6 @@ typedef simInt (__cdecl *ptrSimCloseScene)();
 typedef simInt (__cdecl *ptrSimSaveScene)(const simChar* filename);
 typedef simInt (__cdecl *ptrSimLoadModel)(const simChar* filename);
 typedef simInt (__cdecl *ptrSimSaveModel)(int baseOfModelHandle,const simChar* filename);
-typedef simInt (__cdecl *ptrSimLoadUI)(const simChar* filename,int maxCount,int* uiHandles);
-typedef simInt (__cdecl *ptrSimSaveUI)(int count,const int* uiHandles,const simChar* filename);
 typedef simInt (__cdecl *ptrSimAddStatusbarMessage)(const simChar* message);
 typedef simInt (__cdecl *ptrSimAddModuleMenuEntry)(const simChar* entryLabel,simInt itemCount,simInt* itemHandles);
 typedef simInt (__cdecl *ptrSimSetModuleMenuItemState)(simInt itemHandle,simInt state,const simChar* label);
@@ -183,12 +181,6 @@ typedef simInt (__cdecl *ptrSimResetMill)(simInt millHandle);
 typedef simInt (__cdecl *ptrSimCheckProximitySensor)(simInt sensorHandle,simInt entityHandle,simFloat* detectedPoint);
 typedef simInt (__cdecl *ptrSimCheckProximitySensorEx)(simInt sensorHandle,simInt entityHandle,simInt detectionMode,simFloat detectionThreshold,simFloat maxAngle,simFloat* detectedPoint,simInt* detectedObjectHandle,simFloat* normalVector);
 typedef simInt (__cdecl *ptrSimCheckProximitySensorEx2)(simInt sensorHandle,simFloat* vertexPointer,simInt itemType,simInt itemCount,simInt detectionMode,simFloat detectionThreshold,simFloat maxAngle,simFloat* detectedPoint,simFloat* normalVector);
-typedef simInt (__cdecl *ptrSimAddSceneCustomData)(simInt header,const simChar* data,simInt dataLength);
-typedef simInt (__cdecl *ptrSimGetSceneCustomDataLength)(simInt header);
-typedef simInt (__cdecl *ptrSimGetSceneCustomData)(simInt header,simChar* data);
-typedef simInt (__cdecl *ptrSimAddObjectCustomData)(simInt objectHandle,simInt header,const simChar* data,simInt dataLength);
-typedef simInt (__cdecl *ptrSimGetObjectCustomDataLength)(simInt objectHandle,simInt header);
-typedef simInt (__cdecl *ptrSimGetObjectCustomData)(simInt objectHandle,simInt header,simChar* data);
 typedef simChar* (__cdecl *ptrSimCreateBuffer)(simInt size);
 typedef simInt (__cdecl *ptrSimReleaseBuffer)(simChar* buffer);
 typedef simInt (__cdecl *ptrSimCheckCollision)(simInt entity1Handle,simInt entity2Handle);
@@ -280,7 +272,6 @@ typedef simInt (__cdecl *ptrSimGetShapeVertex)(simInt shapeHandle,simInt groupEl
 typedef simInt (__cdecl *ptrSimGetShapeTriangle)(simInt shapeHandle,simInt groupElementIndex,simInt triangleIndex,simInt* vertexIndices,simFloat* triangleNormals);
 typedef simInt (__cdecl *ptrSimSetLightParameters)(simInt objectHandle,simInt state,const simFloat* setToNULL,const simFloat* diffusePart,const simFloat* specularPart);
 typedef simInt (__cdecl *ptrSimGetLightParameters)(simInt objectHandle,simFloat* setToNULL,simFloat* diffusePart,simFloat* specularPart);
-typedef simInt (__cdecl *ptrSimHandleVarious)();
 typedef simInt (__cdecl *ptrSimGetVelocity)(simInt shapeHandle,simFloat* linearVelocity,simFloat* angularVelocity);
 typedef simInt (__cdecl *ptrSimGetObjectVelocity)(simInt objectHandle,simFloat* linearVelocity,simFloat* angularVelocity);
 typedef simInt (__cdecl *ptrSimAddForceAndTorque)(simInt shapeHandle,const simFloat* force,const simFloat* torque);
@@ -361,27 +352,6 @@ typedef simUChar* (__cdecl *ptrSimGetVisionSensorCharImage)(simInt visionSensorH
 typedef simInt (__cdecl *ptrSimSetVisionSensorImage)(simInt visionSensorHandle,const simFloat* image);
 typedef simInt (__cdecl *ptrSimSetVisionSensorCharImage)(simInt visionSensorHandle,const simUChar* image);
 typedef simFloat* (__cdecl *ptrSimGetVisionSensorDepthBuffer)(simInt visionSensorHandle);
-typedef simInt (__cdecl *ptrSimCreateUI)(const simChar* uiName,simInt menuAttributes,const simInt* clientSize,const simInt* cellSize,simInt* buttonHandles);
-typedef simInt (__cdecl *ptrSimCreateUIButton)(simInt uiHandle,const simInt* position,const simInt* size,simInt buttonProperty);
-typedef simInt (__cdecl *ptrSimGetUIHandle)(const simChar* uiName);
-typedef simInt (__cdecl *ptrSimGetUIProperty)(simInt uiHandle);
-typedef simInt (__cdecl *ptrSimGetUIEventButton)(simInt uiHandle,simInt* auxiliaryValues);
-typedef simInt (__cdecl *ptrSimSetUIProperty)(simInt uiHandle,simInt elementProperty);
-typedef simInt (__cdecl *ptrSimGetUIButtonProperty)(simInt uiHandle,simInt buttonHandle);
-typedef simInt (__cdecl *ptrSimSetUIButtonProperty)(simInt uiHandle,simInt buttonHandle,simInt buttonProperty);
-typedef simInt (__cdecl *ptrSimGetUIButtonSize)(simInt uiHandle,simInt buttonHandle,simInt* size);
-typedef simInt (__cdecl *ptrSimSetUIButtonLabel)(simInt uiHandle,simInt buttonHandle,const simChar* upStateLabel,const simChar* downStateLabel);
-typedef simChar* (__cdecl *ptrSimGetUIButtonLabel)(simInt uiHandle,simInt buttonHandle);
-typedef simInt (__cdecl *ptrSimSetUISlider)(simInt uiHandle,simInt buttonHandle,simInt position);
-typedef simInt (__cdecl *ptrSimGetUISlider)(simInt uiHandle,simInt buttonHandle);
-typedef simInt (__cdecl *ptrSimSetUIButtonColor)(simInt uiHandle,simInt buttonHandle,const simFloat* upStateColor,const simFloat* downStateColor,const simFloat* labelColor);
-typedef simInt (__cdecl *ptrSimSetUIButtonTexture)(simInt uiHandle,simInt buttonHandle,const simInt* size,const simChar* textureData);
-typedef simInt (__cdecl *ptrSimCreateUIButtonArray)(simInt uiHandle,simInt buttonHandle);
-typedef simInt (__cdecl *ptrSimSetUIButtonArrayColor)(simInt uiHandle,simInt buttonHandle,const simInt* position,const simFloat* color);
-typedef simInt (__cdecl *ptrSimDeleteUIButtonArray)(simInt uiHandle,simInt buttonHandle);
-typedef simInt (__cdecl *ptrSimRemoveUI)(simInt uiHandle);
-typedef simInt (__cdecl *ptrSimSetUIPosition)(simInt uiHandle,const simInt* position);
-typedef simInt (__cdecl *ptrSimGetUIPosition)(simInt uiHandle,simInt* position);
 typedef simInt (__cdecl *ptrSimGetObjectQuaternion)(simInt objectHandle,simInt relativeToObjectHandle,simFloat* quaternion);
 typedef simInt (__cdecl *ptrSimSetObjectQuaternion)(simInt objectHandle,simInt relativeToObjectHandle,const simFloat* quaternion);
 typedef simInt (__cdecl *ptrSimRMLPosition)(simInt dofs,simDouble timeStep,simInt flags,const simDouble* currentPosVelAccel,const simDouble* maxVelAccelJerk,const simBool* selection,const simDouble* targetPosVel,simDouble* newPosVelAccel,simVoid* auxData);
@@ -407,15 +377,14 @@ typedef simInt (__cdecl *ptrSimGetThreadId)();
 typedef simInt (__cdecl *ptrSimLockResources)(simInt lockType,simInt reserved);
 typedef simInt (__cdecl *ptrSimUnlockResources)(simInt lockHandle);
 typedef simInt (__cdecl *ptrSimEnableEventCallback)(simInt eventCallbackType,const simChar* plugin,simInt reserved);
-typedef simInt (__cdecl *ptrSimGetMaterialId)(const simChar* materialName);
-typedef simInt (__cdecl *ptrSimSetShapeMaterial)(simInt shapeHandle,simInt materialId);
-typedef simInt (__cdecl *ptrSimGetShapeMaterial)(simInt shapeHandle);
+typedef simInt (__cdecl *ptrSimSetShapeMaterial)(simInt shapeHandle,simInt materialIdOrShapeHandle);
 typedef simInt (__cdecl *ptrSimGetTextureId)(const simChar* textureName,simInt* resolution);
 typedef simChar* (__cdecl *ptrSimReadTexture)(simInt textureId,simInt options,simInt posX,simInt posY,simInt sizeX,simInt sizeY);
 typedef simInt (__cdecl *ptrSimWriteTexture)(simInt textureId,simInt options,const simChar* data,simInt posX,simInt posY,simInt sizeX,simInt sizeY,simFloat interpol);
 typedef simInt (__cdecl *ptrSimCreateTexture)(const simChar* fileName,simInt options,const simFloat* planeSizes,const simFloat* scalingUV,const simFloat* xy_g,simInt fixedResolution,simInt* textureId,simInt* resolution,const simVoid* reserved);
-typedef simInt (__cdecl *ptrSimWriteCustomDataBlock)(simInt objectHandle,const simChar* dataName,const simChar* data,simInt dataSize);
-typedef simChar* (__cdecl *ptrSimReadCustomDataBlock)(simInt objectHandle,const simChar* dataName,simInt* dataSize);
+typedef simInt (__cdecl *ptrSimWriteCustomDataBlock)(simInt objectHandle,const simChar* tagName,const simChar* data,simInt dataSize);
+typedef simChar* (__cdecl *ptrSimReadCustomDataBlock)(simInt objectHandle,const simChar* tagName,simInt* dataSize);
+typedef simChar* (__cdecl *ptrSimReadCustomDataBlockTags)(simInt objectHandle,simInt* tagCount);
 typedef simInt (__cdecl *ptrSimAddPointCloud)(simInt pageMask,simInt layerMask,simInt objectHandle,simInt options,simFloat pointSize,simInt ptCnt,const simFloat* pointCoordinates,const simChar* defaultColors,const simChar* pointColors,const simFloat* pointNormals);
 typedef simInt (__cdecl *ptrSimModifyPointCloud)(simInt pointCloudHandle,simInt operation,const simInt* intParam,const simFloat* floatParam);
 typedef simInt (__cdecl *ptrSimGetShapeGeomInfo)(simInt shapeHandle,simInt* intData,simFloat* floatData,simVoid* reserved);
@@ -504,10 +473,13 @@ typedef simInt (__cdecl *ptrSimSubtractObjectFromOctree)(simInt octreeHandle,sim
 typedef simInt (__cdecl *ptrSimInsertObjectIntoPointCloud)(simInt pointCloudHandle,simInt objectHandle,simInt options,simFloat gridSize,const simUChar* color,simVoid* optionalValues);
 typedef simInt (__cdecl *ptrSimSubtractObjectFromPointCloud)(simInt pointCloudHandle,simInt objectHandle,simInt options,simFloat tolerance,simVoid* reserved);
 typedef simInt (__cdecl *ptrSimCheckOctreePointOccupancy)(simInt octreeHandle,simInt options,const simFloat* points,simInt ptCnt,simUInt* tag,simUInt64* location,simVoid* reserved);
-typedef simChar* (__cdecl *ptrSimOpenTextEditor)(const simChar* initText,const simChar* xml,simVoid* reserved);
+typedef simChar* (__cdecl *ptrSimOpenTextEditor)(const simChar* initText,const simChar* xml,simInt* various);
 typedef simChar* (__cdecl *ptrSimPackTable)(simInt stackHandle,simInt* bufferSize);
 typedef simInt (__cdecl *ptrSimUnpackTable)(simInt stackHandle,const simChar* buffer,simInt bufferSize);
-
+typedef simInt (__cdecl *ptrSimSetVisionSensorFilter)(simInt visionSensorHandle,simInt filterIndex,simInt options,const simInt* pSizes,const simUChar* bytes,const simInt* ints,const simFloat* floats,const simUChar* custom);
+typedef simInt (__cdecl *ptrSimGetVisionSensorFilter)(simInt visionSensorHandle,simInt filterIndex,simInt* options,simInt* pSizes,simUChar** bytes,simInt** ints,simFloat** floats,simUChar** custom);
+typedef simInt (__cdecl *ptrSimSetReferencedHandles)(simInt objectHandle,simInt count,const simInt* referencedHandles,const simInt* reserved1,const simInt* reserved2);
+typedef simInt (__cdecl *ptrSimGetReferencedHandles)(simInt objectHandle,simInt** referencedHandles,simInt** reserved1,simInt** reserved2);
 
 
 typedef simInt (__cdecl *ptr_simGetContactCallbackCount)();
@@ -675,8 +647,6 @@ extern ptrSimCloseScene simCloseScene;
 extern ptrSimSaveScene simSaveScene;
 extern ptrSimLoadModel simLoadModel;
 extern ptrSimSaveModel simSaveModel;
-extern ptrSimLoadUI simLoadUI;
-extern ptrSimSaveUI simSaveUI;
 extern ptrSimAddStatusbarMessage simAddStatusbarMessage;
 extern ptrSimAddModuleMenuEntry simAddModuleMenuEntry;
 extern ptrSimSetModuleMenuItemState simSetModuleMenuItemState;
@@ -725,12 +695,6 @@ extern ptrSimResetMill simResetMill;
 extern ptrSimCheckProximitySensor simCheckProximitySensor;
 extern ptrSimCheckProximitySensorEx simCheckProximitySensorEx;
 extern ptrSimCheckProximitySensorEx2 simCheckProximitySensorEx2;
-extern ptrSimAddSceneCustomData simAddSceneCustomData;
-extern ptrSimGetSceneCustomDataLength simGetSceneCustomDataLength;
-extern ptrSimGetSceneCustomData simGetSceneCustomData;
-extern ptrSimAddObjectCustomData simAddObjectCustomData;
-extern ptrSimGetObjectCustomDataLength simGetObjectCustomDataLength;
-extern ptrSimGetObjectCustomData simGetObjectCustomData;
 extern ptrSimCreateBuffer simCreateBuffer;
 extern ptrSimReleaseBuffer simReleaseBuffer;
 extern ptrSimCheckCollision simCheckCollision;
@@ -822,7 +786,6 @@ extern ptrSimGetShapeVertex simGetShapeVertex;
 extern ptrSimGetShapeTriangle simGetShapeTriangle;
 extern ptrSimSetLightParameters simSetLightParameters;
 extern ptrSimGetLightParameters simGetLightParameters;
-extern ptrSimHandleVarious simHandleVarious;
 extern ptrSimGetVelocity simGetVelocity;
 extern ptrSimGetObjectVelocity simGetObjectVelocity;
 extern ptrSimAddForceAndTorque simAddForceAndTorque;
@@ -903,27 +866,6 @@ extern ptrSimGetVisionSensorCharImage simGetVisionSensorCharImage;
 extern ptrSimSetVisionSensorImage simSetVisionSensorImage;
 extern ptrSimSetVisionSensorCharImage simSetVisionSensorCharImage;
 extern ptrSimGetVisionSensorDepthBuffer simGetVisionSensorDepthBuffer;
-extern ptrSimCreateUI simCreateUI;
-extern ptrSimCreateUIButton simCreateUIButton;
-extern ptrSimGetUIHandle simGetUIHandle;
-extern ptrSimGetUIProperty simGetUIProperty;
-extern ptrSimGetUIEventButton simGetUIEventButton;
-extern ptrSimSetUIProperty simSetUIProperty;
-extern ptrSimGetUIButtonProperty simGetUIButtonProperty;
-extern ptrSimSetUIButtonProperty simSetUIButtonProperty;
-extern ptrSimGetUIButtonSize simGetUIButtonSize;
-extern ptrSimSetUIButtonLabel simSetUIButtonLabel;
-extern ptrSimGetUIButtonLabel simGetUIButtonLabel;
-extern ptrSimSetUISlider simSetUISlider;
-extern ptrSimGetUISlider simGetUISlider;
-extern ptrSimSetUIButtonColor simSetUIButtonColor;
-extern ptrSimSetUIButtonTexture simSetUIButtonTexture;
-extern ptrSimCreateUIButtonArray simCreateUIButtonArray;
-extern ptrSimSetUIButtonArrayColor simSetUIButtonArrayColor;
-extern ptrSimDeleteUIButtonArray simDeleteUIButtonArray;
-extern ptrSimRemoveUI simRemoveUI;
-extern ptrSimSetUIPosition simSetUIPosition;
-extern ptrSimGetUIPosition simGetUIPosition;
 extern ptrSimGetObjectQuaternion simGetObjectQuaternion;
 extern ptrSimSetObjectQuaternion simSetObjectQuaternion;
 extern ptrSimRMLPosition simRMLPosition;
@@ -949,15 +891,14 @@ extern ptrSimGetThreadId simGetThreadId;
 extern ptrSimLockResources simLockResources;
 extern ptrSimUnlockResources simUnlockResources;
 extern ptrSimEnableEventCallback simEnableEventCallback;
-extern ptrSimGetMaterialId simGetMaterialId;
 extern ptrSimSetShapeMaterial simSetShapeMaterial;
-extern ptrSimGetShapeMaterial simGetShapeMaterial;
 extern ptrSimGetTextureId simGetTextureId;
 extern ptrSimReadTexture simReadTexture;
 extern ptrSimWriteTexture simWriteTexture;
 extern ptrSimCreateTexture simCreateTexture;
 extern ptrSimWriteCustomDataBlock simWriteCustomDataBlock;
 extern ptrSimReadCustomDataBlock simReadCustomDataBlock;
+extern ptrSimReadCustomDataBlockTags simReadCustomDataBlockTags;
 extern ptrSimAddPointCloud simAddPointCloud;
 extern ptrSimModifyPointCloud simModifyPointCloud;
 extern ptrSimGetShapeGeomInfo simGetShapeGeomInfo;
@@ -1049,6 +990,10 @@ extern ptrSimCheckOctreePointOccupancy simCheckOctreePointOccupancy;
 extern ptrSimOpenTextEditor simOpenTextEditor;
 extern ptrSimPackTable simPackTable;
 extern ptrSimUnpackTable simUnpackTable;
+extern ptrSimSetVisionSensorFilter simSetVisionSensorFilter;
+extern ptrSimGetVisionSensorFilter simGetVisionSensorFilter;
+extern ptrSimSetReferencedHandles simSetReferencedHandles;
+extern ptrSimGetReferencedHandles simGetReferencedHandles;
 
 
 extern ptr_simGetContactCallbackCount _simGetContactCallbackCount;
@@ -1143,6 +1088,9 @@ extern ptr_simGetJointCallbackCallOrder _simGetJointCallbackCallOrder;
 
 
 // Deprecated begin
+typedef simInt (__cdecl *ptrSimGetMaterialId)(const simChar* materialName);
+typedef simInt (__cdecl *ptrSimGetShapeMaterial)(simInt shapeHandle);
+typedef simInt (__cdecl *ptrSimHandleVarious)();
 typedef simInt (__cdecl *ptrSimSerialPortOpen)(simInt portNumber,simInt baudRate,simVoid* reserved1,simVoid* reserved2);
 typedef simInt (__cdecl *ptrSimSerialPortClose)(simInt portNumber);
 typedef simInt (__cdecl *ptrSimSerialPortSend)(simInt portNumber,const simChar* data,simInt dataLength);
@@ -1178,6 +1126,38 @@ typedef simVoid (__cdecl *ptr_simGetVortexParameters)(const simVoid* object,simI
 typedef simVoid (__cdecl *ptr_simGetNewtonParameters)(const simVoid* object,simInt* version,simFloat* floatParams,simInt* intParams);
 typedef simVoid (__cdecl *ptr_simGetDamping)(const simVoid* geomInfo,simFloat* linDamping,simFloat* angDamping);
 typedef simFloat (__cdecl *ptr_simGetFriction)(const simVoid* geomInfo);
+typedef simInt (__cdecl *ptrSimAddSceneCustomData)(simInt header,const simChar* data,simInt dataLength);
+typedef simInt (__cdecl *ptrSimGetSceneCustomDataLength)(simInt header);
+typedef simInt (__cdecl *ptrSimGetSceneCustomData)(simInt header,simChar* data);
+typedef simInt (__cdecl *ptrSimAddObjectCustomData)(simInt objectHandle,simInt header,const simChar* data,simInt dataLength);
+typedef simInt (__cdecl *ptrSimGetObjectCustomDataLength)(simInt objectHandle,simInt header);
+typedef simInt (__cdecl *ptrSimGetObjectCustomData)(simInt objectHandle,simInt header,simChar* data);
+typedef simInt (__cdecl *ptrSimCreateUI)(const simChar* uiName,simInt menuAttributes,const simInt* clientSize,const simInt* cellSize,simInt* buttonHandles);
+typedef simInt (__cdecl *ptrSimCreateUIButton)(simInt uiHandle,const simInt* position,const simInt* size,simInt buttonProperty);
+typedef simInt (__cdecl *ptrSimGetUIHandle)(const simChar* uiName);
+typedef simInt (__cdecl *ptrSimGetUIProperty)(simInt uiHandle);
+typedef simInt (__cdecl *ptrSimGetUIEventButton)(simInt uiHandle,simInt* auxiliaryValues);
+typedef simInt (__cdecl *ptrSimSetUIProperty)(simInt uiHandle,simInt elementProperty);
+typedef simInt (__cdecl *ptrSimGetUIButtonProperty)(simInt uiHandle,simInt buttonHandle);
+typedef simInt (__cdecl *ptrSimSetUIButtonProperty)(simInt uiHandle,simInt buttonHandle,simInt buttonProperty);
+typedef simInt (__cdecl *ptrSimGetUIButtonSize)(simInt uiHandle,simInt buttonHandle,simInt* size);
+typedef simInt (__cdecl *ptrSimSetUIButtonLabel)(simInt uiHandle,simInt buttonHandle,const simChar* upStateLabel,const simChar* downStateLabel);
+typedef simChar* (__cdecl *ptrSimGetUIButtonLabel)(simInt uiHandle,simInt buttonHandle);
+typedef simInt (__cdecl *ptrSimSetUISlider)(simInt uiHandle,simInt buttonHandle,simInt position);
+typedef simInt (__cdecl *ptrSimGetUISlider)(simInt uiHandle,simInt buttonHandle);
+typedef simInt (__cdecl *ptrSimSetUIButtonColor)(simInt uiHandle,simInt buttonHandle,const simFloat* upStateColor,const simFloat* downStateColor,const simFloat* labelColor);
+typedef simInt (__cdecl *ptrSimSetUIButtonTexture)(simInt uiHandle,simInt buttonHandle,const simInt* size,const simChar* textureData);
+typedef simInt (__cdecl *ptrSimCreateUIButtonArray)(simInt uiHandle,simInt buttonHandle);
+typedef simInt (__cdecl *ptrSimSetUIButtonArrayColor)(simInt uiHandle,simInt buttonHandle,const simInt* position,const simFloat* color);
+typedef simInt (__cdecl *ptrSimDeleteUIButtonArray)(simInt uiHandle,simInt buttonHandle);
+typedef simInt (__cdecl *ptrSimRemoveUI)(simInt uiHandle);
+typedef simInt (__cdecl *ptrSimSetUIPosition)(simInt uiHandle,const simInt* position);
+typedef simInt (__cdecl *ptrSimGetUIPosition)(simInt uiHandle,simInt* position);
+typedef simInt (__cdecl *ptrSimLoadUI)(const simChar* filename,int maxCount,int* uiHandles);
+typedef simInt (__cdecl *ptrSimSaveUI)(int count,const int* uiHandles,const simChar* filename);
+extern ptrSimGetMaterialId simGetMaterialId;
+extern ptrSimGetShapeMaterial simGetShapeMaterial;
+extern ptrSimHandleVarious simHandleVarious;
 extern ptrSimSerialPortOpen simSerialPortOpen;
 extern ptrSimSerialPortClose simSerialPortClose;
 extern ptrSimSerialPortSend simSerialPortSend;
@@ -1213,6 +1193,35 @@ extern ptr_simGetVortexParameters _simGetVortexParameters;
 extern ptr_simGetNewtonParameters _simGetNewtonParameters;
 extern ptr_simGetDamping _simGetDamping;
 extern ptr_simGetFriction _simGetFriction;
+extern ptrSimAddSceneCustomData simAddSceneCustomData;
+extern ptrSimGetSceneCustomDataLength simGetSceneCustomDataLength;
+extern ptrSimGetSceneCustomData simGetSceneCustomData;
+extern ptrSimAddObjectCustomData simAddObjectCustomData;
+extern ptrSimGetObjectCustomDataLength simGetObjectCustomDataLength;
+extern ptrSimGetObjectCustomData simGetObjectCustomData;
+extern ptrSimCreateUI simCreateUI;
+extern ptrSimCreateUIButton simCreateUIButton;
+extern ptrSimGetUIHandle simGetUIHandle;
+extern ptrSimGetUIProperty simGetUIProperty;
+extern ptrSimGetUIEventButton simGetUIEventButton;
+extern ptrSimSetUIProperty simSetUIProperty;
+extern ptrSimGetUIButtonProperty simGetUIButtonProperty;
+extern ptrSimSetUIButtonProperty simSetUIButtonProperty;
+extern ptrSimGetUIButtonSize simGetUIButtonSize;
+extern ptrSimSetUIButtonLabel simSetUIButtonLabel;
+extern ptrSimGetUIButtonLabel simGetUIButtonLabel;
+extern ptrSimSetUISlider simSetUISlider;
+extern ptrSimGetUISlider simGetUISlider;
+extern ptrSimSetUIButtonColor simSetUIButtonColor;
+extern ptrSimSetUIButtonTexture simSetUIButtonTexture;
+extern ptrSimCreateUIButtonArray simCreateUIButtonArray;
+extern ptrSimSetUIButtonArrayColor simSetUIButtonArrayColor;
+extern ptrSimDeleteUIButtonArray simDeleteUIButtonArray;
+extern ptrSimRemoveUI simRemoveUI;
+extern ptrSimSetUIPosition simSetUIPosition;
+extern ptrSimGetUIPosition simGetUIPosition;
+extern ptrSimLoadUI simLoadUI;
+extern ptrSimSaveUI simSaveUI;
 // Deprecated end
 
 #endif // !defined(V_REPLIB_INCLUDED_)

@@ -41,7 +41,6 @@ namespace RSCL {
  */
 class SeparationDistanceConstraint : public Constraint, public ObjectCollection<Vector6dConstPtr> {
 public:
-	/***		Constructor & destructor		***/
 
 	/**
 	 * @brief Construct a separaration distance constraint with a given constraint and interpolator.
@@ -67,8 +66,9 @@ public:
 
 	virtual ~SeparationDistanceConstraint() = default;
 
-	/***		Algorithm        ***/
 	virtual double compute() override;
+
+	virtual void setRobot(RobotConstPtr robot) override;
 
 	/**
 	 * @brief Retrieve the separation shared pointer.

@@ -40,7 +40,6 @@ public:
 
 	/**
 	 * @brief Construct the kinematic energy constraint.
-	 * @param total_velocity The total velocity computed by the controller. See SafetyController::getTotalVelocity.
 	 * @param mass The mass or equivalent mass of the robot.
 	 * @param maximum_kinetic_energy The maximum kinetic energy allowed.
 	 */
