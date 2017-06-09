@@ -10,8 +10,14 @@ PotentialFieldGenerator::PotentialFieldGenerator()
 	robot_position_ = std::make_shared<Vector6d>(Vector6d::Zero());
 }
 
-PotentialFieldGenerator::PotentialFieldGenerator(Vector6dConstPtr robot_position) : robot_position_(robot_position) {
-
+PotentialFieldGenerator::PotentialFieldGenerator(
+	Vector6dConstPtr robot_position,
+	Matrix6dConstPtr spatial_transformation,
+	bool do_transpose) :
+	robot_position_(robot_position)
+{
+	spatial_transformation_ = spatial_transformation;
+	do_transpose_ = do_transpose;
 }
 
 Vector6d PotentialFieldGenerator::compute() {
@@ -40,7 +46,18 @@ Vector6d PotentialFieldGenerator::compute() {
 		}
 	}
 
+
 	Vector6d result = Vector6d::Zero();
 	result.block<3,1>(0,0) = total_force;
+
+	if(static_cast<bool>(spatial_transformation_)) {
+		if(do_transpose_) {
+			result = spatial_transformation_->transpose() * result;
+		}
+		else {
+			result = *spatial_transformation_ * result;
+		}
+	}
+
 	return result;
 }

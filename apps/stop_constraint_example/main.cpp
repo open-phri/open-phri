@@ -56,9 +56,9 @@ int main(int argc, char const *argv[]) {
 
 	double t = 0.;
 	while(not _stop) {
-		if(driver.getRobotData()) {
+		if(driver.getSimulationData()) {
 			safety_controller.compute();
-			driver.sendRobotData();
+			driver.sendSimulationData();
 		}
 
 		if(t < 5.) {

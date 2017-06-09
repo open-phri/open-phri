@@ -80,14 +80,21 @@ public:
 	/**
 	 * @brief Construct a potential field generator where objects position are given in the same frame as robot_positon.
 	 * @param robot_position The positon of the robot in the same frame as the objects.
+	 * @param spatial_transformation The spatial transformation matrix between the chosen frame and the TCP frame
+	 * @param do_transpose [optional] If set to true, the spatial transformation matrix transpose will be used.
 	 */
-	PotentialFieldGenerator(Vector6dConstPtr robot_position);
+	PotentialFieldGenerator(
+		Vector6dConstPtr robot_position,
+		Matrix6dConstPtr spatial_transformation,
+		bool do_transpose = true);
 	~PotentialFieldGenerator() = default;
 
 	virtual Vector6d compute() override;
 
 private:
 	Vector6dConstPtr robot_position_;
+	Matrix6dConstPtr spatial_transformation_;
+	bool do_transpose_;
 };
 
 using PotentialFieldGeneratorPtr = std::shared_ptr<PotentialFieldGenerator>;

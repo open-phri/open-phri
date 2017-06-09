@@ -102,10 +102,10 @@ int main(int argc, char const *argv[]) {
 
 	bool end = false;
 	while(not (_stop or end)) {
-		if(driver.getRobotData()) {
+		if(driver.getSimulationData()) {
 			end = trajectory_generator.compute();
 			safety_controller.compute();
-			driver.sendRobotData();
+			driver.sendSimulationData();
 		}
 
 		usleep(SAMPLE_TIME*1e6);

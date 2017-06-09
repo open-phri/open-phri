@@ -48,8 +48,17 @@ public:
 	 * @param stiffness The virtual stiffness value.
 	 * @param target_position The position target in the chosen frame.
 	 * @param robot_position The robot position in the chosen frame.
+	 * @param spatial_transformation The spatial transformation matrix between the chosen frame and the TCP frame
+	 * @param do_transpose [optional] If set to true, the spatial transformation matrix transpose will be used.
+	 * @param stiffness_in_tcp_frame [optional] If set to false, the stiffness will be applied in the chosen frame.
 	 */
-	StiffnessGenerator(Matrix6dConstPtr stiffness, Vector6dConstPtr target_position, Vector6dConstPtr robot_position);
+	StiffnessGenerator(
+		Matrix6dConstPtr stiffness,
+		Vector6dConstPtr target_position,
+		Vector6dConstPtr robot_position,
+		Matrix6dConstPtr spatial_transformation,
+		bool do_transpose = true,
+		bool stiffness_in_tcp_frame = true);
 
 	~StiffnessGenerator() = default;
 
@@ -59,6 +68,9 @@ private:
 	Matrix6dConstPtr stiffness_;
 	Vector6dConstPtr target_position_;
 	Vector6dConstPtr robot_position_;
+	Matrix6dConstPtr spatial_transformation_;
+	bool do_transpose_;
+	bool stiffness_in_tcp_frame_;
 };
 
 using StiffnessGeneratorPtr = std::shared_ptr<StiffnessGenerator>;

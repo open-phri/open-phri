@@ -18,20 +18,46 @@
  */
 
 /**
- * @file utilities.h
+ * @file laser_scanner_detector.h
  * @author Benjamin Navarro
- * @brief Include all available utilities
- * @date April 2017
+ * @brief Definition of the LaserScannerDetector class.
+ * @date June 2017
  * @ingroup RSCL
  */
 
- #pragma once
+#pragma once
 
-#include <RSCL/utilities/derivator.hpp>
-#include <RSCL/utilities/integrator.hpp>
-#include <RSCL/utilities/object_collection.hpp>
-#include <RSCL/utilities/manipulator_equivalent_mass.hpp>
-#include <RSCL/utilities/interpolators.h>
-#include <RSCL/utilities/trajectory_generator.h>
-#include <RSCL/utilities/path_follower.h>
-#include <RSCL/utilities/laser_scanner_detector.h>
+#include <RSCL/definitions.h>
+
+namespace RSCL {
+
+class LaserScannerDetector {
+public:
+	LaserScannerDetector(
+		VectorXdConstPtr laser_data,
+		double scanning_angle,
+		double minimum_distance,
+		double maximum_distance,
+		double threshold = 0.1);
+
+	~LaserScannerDetector() = default;
+
+	Vector2dConstPtr getPosition() const;
+	doubleConstPtr getDistance() const;
+
+	void init();
+	double compute();
+
+private:
+	Vector2dPtr position_;
+	doublePtr distance_;
+	VectorXdConstPtr laser_data_;
+	double scanning_angle_;
+	double minimum_distance_;
+	double maximum_distance_;
+	double threshold_;
+
+	VectorXd maximum_distances_;
+};
+
+} // namespace RSCL

@@ -233,7 +233,6 @@ protected:
 	const VectorXd& computeTorqueSum() const;
 	const Vector6d& computeVelocitySum() const;
 	const VectorXd& computeJointVelocitySum() const;
-	const Matrix6d& computeSpatialTransformation() const;
 	const MatrixXd& computeJacobianInverse() const;
 
 	ObjectCollection<std::shared_ptr<Constraint>>               constraints_;

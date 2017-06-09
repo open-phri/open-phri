@@ -147,7 +147,7 @@ public:
 	Vector6dConstPtr controlPointTotalVelocity() const;
 
 	/**
-	 * @brief Cumulative effect of both control point force and tool force inputs.
+	 * @brief Cumulative effect of both control point force and joint torque inputs.
 	 * @return A shared pointer to the force.
 	 */
 	Vector6dConstPtr controlPointTotalForce() const;

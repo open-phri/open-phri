@@ -95,9 +95,9 @@ void SafetyController::compute() {
 	const auto& torque_sum = computeTorqueSum();
 	const auto& velocity_sum = computeVelocitySum();
 	const auto& joint_velocity_sum = computeJointVelocitySum();
-	const auto& spatial_transformation = computeSpatialTransformation();
 	const auto& jacobian_inverse = computeJacobianInverse();
 	const auto& jacobian = *robot_->jacobian();
+	const auto& spatial_transformation = *robot_->spatialTransformationMatrix();
 
 	// std::cout << "force_sum: " << force_sum.transpose() << std::endl;
 	// std::cout << "torque_sum: " << torque_sum.transpose() << std::endl;
@@ -197,17 +197,6 @@ const VectorXd& SafetyController::computeJointVelocitySum() const {
 	}
 
 	return sum;
-}
-
-const Matrix6d& SafetyController::computeSpatialTransformation() const {
-	auto& mat = *robot_->spatial_transformation_matrix_;
-	const auto& rot_mat = robot_->transformation_matrix_->block<3,3>(0,0);
-	mat.block<3,3>(3,0).setZero();
-	mat.block<3,3>(0,0) = rot_mat;
-	mat.block<3,3>(0,3).setZero();
-	mat.block<3,3>(3,3) = rot_mat;
-
-	return mat;
 }
 
 const MatrixXd& SafetyController::computeJacobianInverse() const {

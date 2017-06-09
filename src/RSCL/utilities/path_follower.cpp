@@ -16,6 +16,7 @@ void PathFollower::setStopAction(PathStopAction action) {
 bool PathFollower::compute() {
 	auto check = [](const TrajectoryParameters& param) -> bool
 				 {
+					 //  std::cout << *param.target_value << "," << *param.current_value << "\t";
 					 return std::abs(*param.target_value - *param.current_value) < std::abs(*param.max_error);
 				 };
 
@@ -41,7 +42,12 @@ bool PathFollower::compute() {
 		if(ok) {
 			all_ok = TrajectoryGenerator::compute();
 		}
+		else {
+			all_ok = false;
+			// std::cout << "Trajectory generation paused" << std::endl;
+		}
 	}
+	// std::cout << std::endl;
 	return all_ok;
 }
 

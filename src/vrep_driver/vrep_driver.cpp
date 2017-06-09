@@ -302,6 +302,47 @@ bool VREPDriver::updateTrackedObjectsPosition() {
 	return all_ok;
 }
 
+RSCL::VectorXdConstPtr VREPDriver::initLaserScanner(const std::string& name) {
+	std::string data_name = name + "_data";
+	simxUChar* sigVal;
+	simxInt sigLen;
+
+	simxReadStringStream(client_id_, data_name.c_str(), &sigVal, &sigLen, simx_opmode_streaming);
+
+	auto ptr = std::make_shared<RSCL::VectorXd>();
+	lasers_data_[data_name] = ptr;
+
+	return ptr;
+}
+
+bool VREPDriver::updateLaserScanners() {
+	bool all_ok = true;
+
+	for (auto& laser: lasers_data_) {
+		simxUChar* sigVal;
+		simxInt sigLen;
+
+		if(simxReadStringStream(client_id_, laser.first.c_str(), &sigVal, &sigLen, simx_opmode_buffer) == simx_return_ok) {
+			size_t count = sigLen / sizeof(float);
+
+			auto& vec = *laser.second;
+			if(count != vec.size()) {
+				vec.resize(count);
+			}
+
+			float* distances = reinterpret_cast<float*>(sigVal);
+			for (size_t i = 0; i < count; ++i) {
+				vec(i) = distances[i];
+			}
+		}
+		else {
+			all_ok = false;
+		}
+	}
+
+	return all_ok;
+}
+
 bool VREPDriver::readJointPosition(RSCL::VectorXdPtr position) const {
 	bool all_ok = true;
 
@@ -421,7 +462,16 @@ int VREPDriver::getFrameHandle(ReferenceFrame frame) const {
 	}
 }
 
-bool VREPDriver::getRobotData(ReferenceFrame frame_velocities, ReferenceFrame frame_positions) {
+void VREPDriver::computeSpatialTransformation(RSCL::Matrix4dConstPtr transformation, RSCL::Matrix6dPtr spatial_transformation) const {
+	auto& mat = *spatial_transformation;
+	const auto& rot_mat = transformation->block<3,3>(0,0);
+	mat.block<3,3>(3,0).setZero();
+	mat.block<3,3>(0,0) = rot_mat;
+	mat.block<3,3>(0,3).setZero();
+	mat.block<3,3>(3,3) = rot_mat;
+}
+
+bool VREPDriver::getSimulationData(ReferenceFrame frame_velocities, ReferenceFrame frame_positions) {
 	bool all_ok = true;
 
 	all_ok &= readTCPPose(robot_->controlPointCurrentPose(), frame_positions);
@@ -432,11 +482,14 @@ bool VREPDriver::getRobotData(ReferenceFrame frame_velocities, ReferenceFrame fr
 	all_ok &= readTransformationMatrix(robot_->transformationMatrix());
 	all_ok &= readJointPosition(robot_->jointCurrentPosition());
 	all_ok &= updateTrackedObjectsPosition();
+	all_ok &= updateLaserScanners();
+
+	computeSpatialTransformation(robot_->transformationMatrix(), robot_->spatialTransformationMatrix());
 
 	return all_ok;
 }
 
-bool VREPDriver::sendRobotData(ReferenceFrame frame_velocities) {
+bool VREPDriver::sendSimulationData(ReferenceFrame frame_velocities) {
 	bool all_ok = true;
 
 	// Make sure all commands are sent at the same time

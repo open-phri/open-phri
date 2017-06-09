@@ -111,6 +111,13 @@ public:
 	}
 
 	/**
+	 * @brief Remove all items from the collection.
+	 */
+	virtual void removeAll() {
+		items_.clear();
+	}
+
+	/**
 	 * @brief Retrieve a item from the collection.
 	 * @param name The name given to the item to retreive.
 	 * @return A pointer to the item. Store a null pointer if the item doesn't exist.

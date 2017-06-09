@@ -209,12 +209,15 @@ public:
 	 */
 	bool updateTrackedObjectsPosition();
 
+	RSCL::VectorXdConstPtr initLaserScanner(const std::string& name);
+	bool updateLaserScanners();
+
 	bool readJointPosition(RSCL::VectorXdPtr position) const;
 	bool sendJointTargetPosition(RSCL::VectorXdConstPtr position) const;
 	bool sendJointTargetVelocity(RSCL::VectorXdConstPtr velocity) const;
 
-	bool getRobotData(ReferenceFrame frame_velocities = ReferenceFrame::TCP, ReferenceFrame frame_positions = ReferenceFrame::Base);
-	bool sendRobotData(ReferenceFrame frame_velocities = ReferenceFrame::TCP);
+	bool getSimulationData(ReferenceFrame frame_velocities = ReferenceFrame::TCP, ReferenceFrame frame_positions = ReferenceFrame::Base);
+	bool sendSimulationData(ReferenceFrame frame_velocities = ReferenceFrame::TCP);
 
 private:
 	void init(const std::string& ip, int port);
@@ -222,6 +225,7 @@ private:
 	bool getObjectHandles();
 	void startStreaming() const;
 	int getFrameHandle(ReferenceFrame frame) const;
+	void computeSpatialTransformation(RSCL::Matrix4dConstPtr transformation, RSCL::Matrix6dPtr spatial_transformation) const;
 
 	ControlLevel control_level_;
 	double sample_time_;
@@ -231,6 +235,7 @@ private:
 	int client_id_;
 
 	std::unordered_map<std::string, int> object_handles_;
+	std::map<std::string, RSCL::VectorXdPtr> lasers_data_;
 	std::map<std::pair<int,int>, RSCL::Vector6dPtr> tracked_objects_;
 
 };

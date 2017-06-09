@@ -1,15 +1,16 @@
 #include <iostream>
 #include <unistd.h>
 #include <signal.h>
+#include <chrono>
+#include <list>
 
 #include <RSCL/RSCL.h>
 #include <vrep_driver/vrep_driver.h>
 
-using namespace std;
+#include "state_machine.h"
+
 using namespace RSCL;
 using namespace vrep;
-
-constexpr double SAMPLE_TIME = 0.010;
 
 bool _stop = false;
 
@@ -17,10 +18,27 @@ void sigint_handler(int sig) {
 	_stop = true;
 }
 
+enum class TeachStates {
+	Init,
+	WaitForMotion,
+	Motion,
+	End
+};
+
+enum class ReplayStates {
+	Init,
+	SetupTrajectory,
+	ReachingWaypoint,
+	ForceControlInit,
+	ForceControl,
+	ForceControlEnd,
+	End
+};
+
 int main(int argc, char const *argv[]) {
 
 	/***				Robot				***/
-	auto robot = make_shared<Robot>(
+	auto robot = std::make_shared<Robot>(
 		"LBR4p",    // Robot's name, must match V-REP model's name
 		7);         // Robot's joint count
 
@@ -33,35 +51,42 @@ int main(int argc, char const *argv[]) {
 		);
 
 	driver.startSimulation();
+	auto laser_data = driver.initLaserScanner("Hokuyo");
 
 	/***			Controller configuration			***/
-	*robot->controlPointDampingMatrix() *= 100.;
+	*robot->controlPointDampingMatrix() *= 500.;
 	auto safety_controller = SafetyController(robot);
 
-	auto maximum_velocity = make_shared<double>(0.1);
-	auto velocity_constraint = make_shared<VelocityConstraint>(maximum_velocity);
+	auto laser_detector = LaserScannerDetector(
+		laser_data,
+		270. * M_PI / 180.,
+		0.2,
+		3.);
 
-	auto ext_force_generator = make_shared<ForceProxy>(robot->controlPointExternalForce());
-
-	safety_controller.addConstraint(
-		"velocity constraint",
-		velocity_constraint);
-
-	safety_controller.addForceGenerator(
-		"ext force proxy",
-		ext_force_generator);
+	auto state_machine = StateMachine(
+		robot,
+		safety_controller,
+		laser_detector,
+		argc > 1); // skip teaching
 
 	signal(SIGINT, sigint_handler);
 
-	while(not driver.getSimulationData() and not _stop) {
+	while(not (driver.getSimulationData(ReferenceFrame::Base, ReferenceFrame::Base) and laser_data->size() == 1080)and not _stop) {
 		usleep(SAMPLE_TIME*1e6);
 	}
 	driver.enableSynchonous(true);
 
+	laser_detector.init();
+	state_machine.init();
+
 	if(not _stop)
 		std::cout << "Starting main loop\n";
+
 	while(not _stop) {
-		if(driver.getSimulationData()) {
+		if(driver.getSimulationData(ReferenceFrame::Base, ReferenceFrame::Base)) {
+
+			_stop &= not state_machine.compute();
+
 			safety_controller.compute();
 			if(not driver.sendSimulationData()) {
 				std::cerr << "Can'send robot data to V-REP" << std::endl;
@@ -71,14 +96,7 @@ int main(int argc, char const *argv[]) {
 			std::cerr << "Can't get robot data from V-REP" << std::endl;
 		}
 
-		// std::cout << "**********************************************************************\n";
-		// std::cout << "vel    : " << robot->jointVelocity()->transpose() << "\n";
-		// std::cout << "pos msr: " << robot->jointCurrentPosition()->transpose() << "\n";
-		// std::cout << "pos tgt: " << robot->jointTargetPosition()->transpose() << "\n";
-
-		// usleep(SAMPLE_TIME*1e6);
 		driver.nextStep();
-
 	}
 
 	driver.enableSynchonous(false);

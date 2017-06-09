@@ -67,7 +67,7 @@ int main(int argc, char const *argv[]) {
 
 	signal(SIGINT, sigint_handler);
 
-	while(not driver.getRobotData() and not _stop) {
+	while(not driver.getSimulationData() and not _stop) {
 		usleep(SAMPLE_TIME*1e6);
 	}
 	driver.enableSynchonous(true);
@@ -75,9 +75,9 @@ int main(int argc, char const *argv[]) {
 	if(not _stop)
 		std::cout << "Starting main loop\n";
 	while(not _stop) {
-		if(driver.getRobotData()) {
+		if(driver.getSimulationData()) {
 			safety_controller.compute();
-			if(not driver.sendRobotData()) {
+			if(not driver.sendSimulationData()) {
 				std::cerr << "Can'send robot data to V-REP" << std::endl;
 			}
 		}
