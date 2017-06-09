@@ -18,23 +18,6 @@ void sigint_handler(int sig) {
 	_stop = true;
 }
 
-enum class TeachStates {
-	Init,
-	WaitForMotion,
-	Motion,
-	End
-};
-
-enum class ReplayStates {
-	Init,
-	SetupTrajectory,
-	ReachingWaypoint,
-	ForceControlInit,
-	ForceControl,
-	ForceControlEnd,
-	End
-};
-
 int main(int argc, char const *argv[]) {
 
 	/***				Robot				***/
