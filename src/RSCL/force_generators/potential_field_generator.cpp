@@ -1,7 +1,5 @@
 #include <RSCL/force_generators/potential_field_generator.h>
 
-#include <iostream>
-
 using namespace RSCL;
 using namespace Eigen;
 

@@ -29,6 +29,7 @@
 
 #include <RSCL/constraints/default_constraint.h>
 #include <RSCL/constraints/velocity_constraint.h>
+#include <RSCL/constraints/acceleration_constraint.h>
 #include <RSCL/constraints/power_constraint.h>
 #include <RSCL/constraints/force_constraint.h>
 #include <RSCL/constraints/stop_constraint.h>

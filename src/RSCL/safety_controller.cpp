@@ -5,6 +5,7 @@
 #include <RSCL/torque_generators/torque_generator.h>
 #include <RSCL/velocity_generators/velocity_generator.h>
 #include <RSCL/joint_velocity_generators/joint_velocity_generator.h>
+#include <RSCL/utilities/demangle.h>
 
 #include <limits>
 #include <iostream>
@@ -12,7 +13,7 @@
 using namespace RSCL;
 
 SafetyController::SafetyController() {
-	addConstraint("default", std::make_shared<DefaultConstraint>());
+	addConstraint("default constraint", std::make_shared<DefaultConstraint>());
 }
 
 SafetyController::SafetyController(
@@ -33,23 +34,23 @@ void SafetyController::setVerbose(bool on) {
 bool SafetyController::addConstraint(const std::string& name, ConstraintPtr constraint, bool force) {
 	constraint->setRobot(robot_);
 
-	return constraints_.add(name, constraint, force);
+	return constraints_.add(name, {constraint}, force);
 }
 
 bool SafetyController::addForceGenerator(const std::string& name, ForceGeneratorPtr generator, bool force) {
-	return force_generators_.add(name, generator, force);
+	return force_generators_.add(name, {generator}, force);
 }
 
 bool SafetyController::addTorqueGenerator(const std::string& name, TorqueGeneratorPtr generator, bool force) {
-	return torque_generators_.add(name, generator, force);
+	return torque_generators_.add(name, {generator}, force);
 }
 
 bool SafetyController::addVelocityGenerator(const std::string& name, VelocityGeneratorPtr generator, bool force) {
-	return velocity_generators_.add(name, generator, force);
+	return velocity_generators_.add(name, {generator}, force);
 }
 
 bool SafetyController::addJointVelocityGenerator(const std::string& name, JointVelocityGeneratorPtr generator, bool force) {
-	return joint_velocity_generators_.add(name, generator, force);
+	return joint_velocity_generators_.add(name, {generator}, force);
 }
 
 bool SafetyController::removeConstraint(const std::string& name) {
@@ -73,19 +74,19 @@ bool SafetyController::removeJointVelocityGenerator(const std::string& name) {
 }
 
 ConstraintPtr SafetyController::getConstraint(const std::string& name) {
-	return constraints_.get(name);
+	return constraints_.get(name).object;
 }
 
 ForceGeneratorPtr SafetyController::getForceGenerator(const std::string& name) {
-	return force_generators_.get(name);
+	return force_generators_.get(name).object;
 }
 
 TorqueGeneratorPtr SafetyController::getTorqueGenerator(const std::string& name) {
-	return torque_generators_.get(name);
+	return torque_generators_.get(name).object;
 }
 
 JointVelocityGeneratorPtr SafetyController::getJointVelocityGenerator(const std::string& name) {
-	return joint_velocity_generators_.get(name);
+	return joint_velocity_generators_.get(name).object;
 }
 
 
@@ -145,55 +146,122 @@ void SafetyController::compute() {
 	// std::cout << "cp vel: " << robot_->control_point_velocity_->transpose() << std::endl;
 }
 
-double SafetyController::computeConstraintValue() const {
+void SafetyController::print() const {
+	std::cout << "Force generators:\n";
+	for (const auto& gen: force_generators_) {
+		std::cout << "\t- " << gen.first << " (" << getTypeName(*gen.second.object) << "): " << gen.second.last_value.transpose() << "\n";
+	}
+	std::cout << "Velocity generators:\n";
+	for (const auto& gen: velocity_generators_) {
+		std::cout << "\t- " << gen.first << " (" << getTypeName(*gen.second.object) << "): " << gen.second.last_value.transpose() << "\n";
+	}
+	std::cout << "Torque generators:\n";
+	for (const auto& gen: torque_generators_) {
+		std::cout << "\t- " << gen.first << " (" << getTypeName(*gen.second.object) << "): " << gen.second.last_value.transpose() << "\n";
+	}
+	std::cout << "Joint velocity generators:\n";
+	for (const auto& gen: joint_velocity_generators_) {
+		std::cout << "\t- " << gen.first << " (" << getTypeName(*gen.second.object) << "): " << gen.second.last_value.transpose() << "\n";
+	}
+	std::cout << "Constraints:\n";
+	for (const auto& cstr: constraints_) {
+		std::cout << "\t- " << cstr.first << " (" << getTypeName(*cstr.second.object) << "): " << cstr.second.last_value << "\n";
+	}
+}
+
+void SafetyController::operator()() {
+	compute();
+}
+
+SafetyController::storage_const_iterator<Constraint> SafetyController::constraints_begin() const {
+	return constraints_.begin();
+}
+SafetyController::storage_const_iterator<Constraint> SafetyController::constraints_end() const {
+	return constraints_.end();
+}
+
+SafetyController::storage_const_iterator<ForceGenerator> SafetyController::force_generators_begin() const {
+	return force_generators_.begin();
+}
+SafetyController::storage_const_iterator<ForceGenerator> SafetyController::force_generators_end() const {
+	return force_generators_.end();
+}
+
+SafetyController::storage_const_iterator<TorqueGenerator> SafetyController::torque_generators_begin() const {
+	return torque_generators_.begin();
+}
+SafetyController::storage_const_iterator<TorqueGenerator> SafetyController::torque_generators_end() const {
+	return torque_generators_.end();
+}
+
+SafetyController::storage_const_iterator<VelocityGenerator> SafetyController::velocity_generators_begin() const {
+	return velocity_generators_.begin();
+}
+SafetyController::storage_const_iterator<VelocityGenerator> SafetyController::velocity_generators_end() const {
+	return velocity_generators_.end();
+}
+
+SafetyController::storage_const_iterator<JointVelocityGenerator> SafetyController::joint_velocity_generators_begin() const {
+	return joint_velocity_generators_.begin();
+}
+SafetyController::storage_const_iterator<JointVelocityGenerator> SafetyController::joint_velocity_generators_end() const {
+	return joint_velocity_generators_.end();
+}
+
+double SafetyController::computeConstraintValue() {
 	double min_value = std::numeric_limits<double>::infinity();
 
-	for(const auto& constraint : constraints_) {
-		min_value = std::min(min_value, constraint.second->compute());
+	for(auto& constraint : constraints_) {
+		constraint.second.last_value = constraint.second.object->compute();
+		min_value = std::min(min_value, constraint.second.last_value);
 	}
 
 	return *robot_->scaling_factor_ = std::min(1., min_value);
 }
 
-const Vector6d& SafetyController::computeForceSum() const {
+const Vector6d& SafetyController::computeForceSum() {
 	auto& sum = *robot_->control_point_force_sum_;
 	sum.setZero();
 
-	for(const auto& force_generator : force_generators_) {
-		sum += force_generator.second->compute();
+	for(auto& force_generator : force_generators_) {
+		force_generator.second.last_value = force_generator.second.object->compute();
+		sum += force_generator.second.last_value;
 	}
 
 	return sum;
 }
 
-const VectorXd&  SafetyController::computeTorqueSum() const {
+const VectorXd&  SafetyController::computeTorqueSum() {
 	auto& sum = *robot_->joint_torque_sum_;
 	sum.setZero();
 
-	for(const auto& torque_generator : torque_generators_) {
-		sum += torque_generator.second->compute();
+	for(auto& torque_generator : torque_generators_) {
+		torque_generator.second.last_value = torque_generator.second.object->compute();
+		sum += torque_generator.second.last_value;
 	}
 
 	return sum;
 }
 
-const Vector6d&  SafetyController::computeVelocitySum() const {
+const Vector6d&  SafetyController::computeVelocitySum() {
 	auto& sum = *robot_->control_point_velocity_sum_;
 	sum.setZero();
 
-	for(const auto& velocity_generator : velocity_generators_) {
-		sum += velocity_generator.second->compute();
+	for(auto& velocity_generator : velocity_generators_) {
+		velocity_generator.second.last_value = velocity_generator.second.object->compute();
+		sum += velocity_generator.second.last_value;
 	}
 
 	return sum;
 }
 
-const VectorXd& SafetyController::computeJointVelocitySum() const {
+const VectorXd& SafetyController::computeJointVelocitySum() {
 	auto& sum = *robot_->joint_velocity_sum_;
 	sum.setZero();
 
-	for(const auto& joint_velocity_generator : joint_velocity_generators_) {
-		sum += joint_velocity_generator.second->compute();
+	for(auto& joint_velocity_generator : joint_velocity_generators_) {
+		joint_velocity_generator.second.last_value = joint_velocity_generator.second.object->compute();
+		sum += joint_velocity_generator.second.last_value;
 	}
 
 	return sum;

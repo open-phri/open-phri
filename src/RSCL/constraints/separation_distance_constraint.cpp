@@ -1,7 +1,5 @@
 #include <RSCL/constraints/separation_distance_constraint.h>
 
-#include <iostream>
-
 using namespace RSCL;
 
 SeparationDistanceConstraint::SeparationDistanceConstraint(

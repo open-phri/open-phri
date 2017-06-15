@@ -4,7 +4,7 @@
 #include <chrono>
 #include <list>
 
-constexpr double SAMPLE_TIME = 0.010;
+constexpr double SAMPLE_TIME = 0.005;
 
 class StateMachine {
 public:
@@ -41,6 +41,9 @@ public:
 
 	TeachStates getTeachState() const;
 	ReplayStates getReplayState() const;
+
+	double getOperatorDistance() const;
+	double getSeparationDistanceVelocityLimitation() const;
 
 private:
 	bool setupTrajectoryGenerator(RSCL::Vector6dPtr target_pose);

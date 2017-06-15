@@ -29,9 +29,7 @@
 
 #include <map>
 #include <iostream>
-#include <typeinfo>
-#include <memory>
-#include <cxxabi.h>
+#include "demangle.h"
 
 namespace RSCL {
 
@@ -53,7 +51,7 @@ public:
 	 */
 	void setVerbose(bool on) {
 		if(on) {
-			class_name_ = type(*this);
+			class_name_ = getTypeName(*this);
 			collection_name_ = "Object";
 		}
 		verbose_ = on;
@@ -114,7 +112,10 @@ public:
 	 * @brief Remove all items from the collection.
 	 */
 	virtual void removeAll() {
-		items_.clear();
+		// items_.clear(); Don't do that, the erase method can be overrided, and for a good reason!
+		for(const auto& item: items_) {
+			remove(item.first);
+		}
 	}
 
 	/**
@@ -176,22 +177,6 @@ private:
 	bool verbose_;
 	std::string class_name_;
 	std::string collection_name_;
-
-	std::string demangle(const char* name) {
-		int status = -4; // some arbitrary value to eliminate the compiler warning
-
-		std::unique_ptr<char, void (*)(void*)> res {
-			abi::__cxa_demangle(name, NULL, NULL, &status),
-			std::free
-		};
-
-		return (status==0) ? res.get() : name;
-	}
-
-	template<typename TT>
-	std::string type(const TT& t) {
-		return demangle(typeid(t).name());
-	}
 };
 
 } // namespace RSCL

@@ -59,7 +59,7 @@ StateMachine::StateMachine(
 	laser_base_transform_.block<3,1>(0,3) = RSCL::Vector3d(+4.2856e-01, 0., +2.6822e-02);
 
 
-	target_position_ = std::make_shared<RSCL::Vector6d>();
+	target_position_ = robot_->controlPointTargetPose();// std::make_shared<RSCL::Vector6d>();
 	init_position_ = std::make_shared<RSCL::Vector6d>();
 	traj_vel_ = std::make_shared<RSCL::Vector6d>(RSCL::Vector6d::Zero());
 	stiffness_mat_ = std::make_shared<RSCL::Matrix6d>(RSCL::Matrix6d::Identity() * STIFFNESS);
@@ -67,6 +67,22 @@ StateMachine::StateMachine(
 	tcp_collision_sphere_center_ = std::make_shared<RSCL::Vector6d>(RSCL::Vector6d::Zero());
 	tcp_collision_sphere_offset_ = RSCL::Vector3d(0.,0.,-7.44e-2);
 	end_of_teach_ = false;
+}
+
+StateMachine::TeachStates StateMachine::getTeachState() const {
+	return teach_state_;
+}
+
+StateMachine::ReplayStates StateMachine::getReplayState() const {
+	return replay_state_;
+}
+
+double StateMachine::getOperatorDistance() const {
+	return operator_position_tcp_->norm();
+}
+
+double StateMachine::getSeparationDistanceVelocityLimitation() const {
+	return *vmax_interpolator_output_;
 }
 
 void StateMachine::init() {
@@ -84,8 +100,7 @@ bool StateMachine::compute() {
 		switch(teach_state_) {
 		case TeachStates::Init:
 		{
-			auto maximum_velocity = std::make_shared<double>(0.1);
-			auto velocity_constraint = std::make_shared<RSCL::VelocityConstraint>(maximum_velocity);
+			auto velocity_constraint = std::make_shared<RSCL::VelocityConstraint>(std::make_shared<double>(0.1));
 			controller_.add(
 				"velocity constraint",
 				velocity_constraint);
@@ -159,21 +174,20 @@ bool StateMachine::compute() {
 			*obstacle_position << +8.1361e-02, -1.8324e-01, +9.7233e-01, 0., 0., 0.;
 			auto obstacle = std::make_shared<RSCL::PotentialFieldObject>(
 				RSCL::PotentialFieldType::Repulsive,
-				std::make_shared<double>(200.),   // gain
+				std::make_shared<double>(300.),   // gain
 				std::make_shared<double>(0.18),   // threshold distance
 				obstacle_position);
 
 			potential_field_generator->add("obstacle", obstacle);
 
-			auto velocity_constraint = std::make_shared<RSCL::VelocityConstraint>(vmax_interpolator_output_);
 			auto separation_dist_vel_cstr = std::make_shared<RSCL::SeparationDistanceConstraint>(
-				velocity_constraint,
+				std::make_shared<RSCL::VelocityConstraint>(vmax_interpolator_output_),
 				max_vel_interpolator_);
 
 			separation_dist_vel_cstr->add("operator", operator_position_tcp_);
 
 			controller_.add(
-				"sep dist vlim",
+				"sep dist cstr",
 				separation_dist_vel_cstr);
 
 			controller_.add(
@@ -186,6 +200,8 @@ bool StateMachine::compute() {
 		break;
 		case ReplayStates::SetupTrajectory:
 		{
+			(*stiffness_mat_)(0,0) = STIFFNESS;
+			(*stiffness_mat_)(1,1) = STIFFNESS;
 			(*stiffness_mat_)(2,2) = STIFFNESS;
 			*target_position_ = *robot_->controlPointCurrentPose();
 			if(setupTrajectoryGenerator(target_position_)) {
@@ -200,7 +216,10 @@ bool StateMachine::compute() {
 
 		break;
 		case ReplayStates::ReachingWaypoint:
-			if(trajectory_generator_->compute()) {
+		{
+			double error = (*target_position_ - *robot_->controlPointCurrentPose()).block<3,1>(0,0).norm();
+			// std::cout << "error: " << error << std::endl;
+			if(trajectory_generator_->compute() and error < 0.001) {
 				std::cout << "Waypoint reached" << std::endl;
 				if(waypoints_.size() > 0) {
 					replay_state_ = ReplayStates::ForceControlInit;
@@ -209,17 +228,18 @@ bool StateMachine::compute() {
 					replay_state_ = ReplayStates::End;
 				}
 			}
-
-			break;
+		}
+		break;
 		case ReplayStates::ForceControlInit:
 		{
 
-			auto maximum_velocity = std::make_shared<double>(0.1);
-			auto velocity_constraint = std::make_shared<RSCL::VelocityConstraint>(maximum_velocity);
+			auto velocity_constraint = std::make_shared<RSCL::VelocityConstraint>(std::make_shared<double>(0.1));
+			auto acceleration_constraint = std::make_shared<RSCL::AccelerationConstraint>(std::make_shared<double>(0.5), SAMPLE_TIME);
+
 
 			auto target_force = std::make_shared<RSCL::Vector6d>(RSCL::Vector6d::Zero());
 			auto p_gain = std::make_shared<RSCL::Vector6d>(RSCL::Vector6d::Ones() * 0.005);
-			auto d_gain = std::make_shared<RSCL::Vector6d>(RSCL::Vector6d::Ones() * 0.0003);
+			auto d_gain = std::make_shared<RSCL::Vector6d>(RSCL::Vector6d::Ones() * 0.00005);
 			auto selection = std::make_shared<RSCL::Vector6d>(RSCL::Vector6d::Zero());
 
 			target_force->z() = FORCE_TARGET;
@@ -233,20 +253,29 @@ bool StateMachine::compute() {
 				d_gain,
 				selection);
 
+			force_control->configureFilter(SAMPLE_TIME, 0.1);
+
 			controller_.add(
 				"force control vlim",
 				velocity_constraint);
 
 			controller_.add(
+				"force control alim",
+				acceleration_constraint);
+
+			controller_.add(
 				"force control",
 				force_control);
 
+			(*stiffness_mat_)(0,0) = 0.; // seems to be needed because of a strange behavior in vrep
+			(*stiffness_mat_)(1,1) = 0.; // seems to be needed because of a strange behavior in vrep
 			(*stiffness_mat_)(2,2) = 0.;
 
 			last_time_point_ = current_time;
 			is_force_ok_ = false;
 
 			std::cout << "Force control init done" << std::endl;
+
 			replay_state_ = ReplayStates::ForceControl;
 		}
 		break;
@@ -263,6 +292,7 @@ bool StateMachine::compute() {
 			break;
 		case ReplayStates::ForceControlEnd:
 			controller_.removeConstraint("force control vlim");
+			controller_.removeConstraint("force control alim");
 			controller_.removeVelocityGenerator("force control");
 
 			std::cout << "End of force control" << std::endl;
@@ -270,7 +300,7 @@ bool StateMachine::compute() {
 			break;
 		case ReplayStates::End:
 			controller_.removeForceGenerator("stiffness");
-			controller_.removeConstraint("sep dist vlim");
+			controller_.removeConstraint("sep dist cstr");
 			controller_.removeForceGenerator("potential field");
 			std::cout << "End of replay" << std::endl;
 			end = true;

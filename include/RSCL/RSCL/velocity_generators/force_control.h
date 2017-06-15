@@ -48,6 +48,8 @@ public:
 
 	virtual Vector6d compute() override;
 
+	void configureFilter(double sample_time, double time_constant);
+
 private:
 	void applySelection(Vector6d& vec);
 
@@ -57,6 +59,8 @@ private:
 	Vector6dConstPtr p_gain_;
 	Vector6dConstPtr d_gain_;
 	Vector6dConstPtr selection_;
+
+	double filter_coeff_;
 
 	Vector6d prev_error_;
 };

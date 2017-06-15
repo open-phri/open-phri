@@ -44,7 +44,7 @@ bool PathFollower::compute() {
 		}
 		else {
 			all_ok = false;
-			// std::cout << "Trajectory generation paused" << std::endl;
+			std::cout << "Trajectory generation paused" << std::endl;
 		}
 	}
 	// std::cout << std::endl;

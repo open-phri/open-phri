@@ -221,6 +221,40 @@ public:
 	 */
 	void compute();
 
+	/**
+	 * @brief Call operator. Shortcut for compute().
+	 */
+	void operator()();
+
+	/**
+	 * @brief Print all the constraints and generators currently in use.
+	 */
+	void print() const;
+
+	template<typename T>
+	struct StorageWrapper {
+		std::shared_ptr<T> object;
+		typename std::result_of<decltype(&T::compute)(T)>::type last_value;
+	};
+
+	template<typename T>
+	using storage_const_iterator = typename std::map<std::string,StorageWrapper<T>>::const_iterator;
+
+	storage_const_iterator<Constraint> constraints_begin() const;
+	storage_const_iterator<Constraint> constraints_end() const;
+
+	storage_const_iterator<ForceGenerator> force_generators_begin() const;
+	storage_const_iterator<ForceGenerator> force_generators_end() const;
+
+	storage_const_iterator<TorqueGenerator> torque_generators_begin() const;
+	storage_const_iterator<TorqueGenerator> torque_generators_end() const;
+
+	storage_const_iterator<VelocityGenerator> velocity_generators_begin() const;
+	storage_const_iterator<VelocityGenerator> velocity_generators_end() const;
+
+	storage_const_iterator<JointVelocityGenerator> joint_velocity_generators_begin() const;
+	storage_const_iterator<JointVelocityGenerator> joint_velocity_generators_end() const;
+
 
 protected:
 	/**
@@ -228,18 +262,18 @@ protected:
 	 */
 	SafetyController();
 
-	double computeConstraintValue() const;
-	const Vector6d& computeForceSum() const;
-	const VectorXd& computeTorqueSum() const;
-	const Vector6d& computeVelocitySum() const;
-	const VectorXd& computeJointVelocitySum() const;
+	double computeConstraintValue();
+	const Vector6d& computeForceSum();
+	const VectorXd& computeTorqueSum();
+	const Vector6d& computeVelocitySum();
+	const VectorXd& computeJointVelocitySum();
 	const MatrixXd& computeJacobianInverse() const;
 
-	ObjectCollection<std::shared_ptr<Constraint>>               constraints_;
-	ObjectCollection<std::shared_ptr<ForceGenerator>>           force_generators_;
-	ObjectCollection<std::shared_ptr<TorqueGenerator>>          torque_generators_;
-	ObjectCollection<std::shared_ptr<VelocityGenerator>>        velocity_generators_;
-	ObjectCollection<std::shared_ptr<JointVelocityGenerator>>   joint_velocity_generators_;
+	ObjectCollection<StorageWrapper<Constraint>>               constraints_;
+	ObjectCollection<StorageWrapper<ForceGenerator>>           force_generators_;
+	ObjectCollection<StorageWrapper<TorqueGenerator>>          torque_generators_;
+	ObjectCollection<StorageWrapper<VelocityGenerator>>        velocity_generators_;
+	ObjectCollection<StorageWrapper<JointVelocityGenerator>>   joint_velocity_generators_;
 
 	RobotPtr robot_;
 };

@@ -198,6 +198,7 @@ bool VREPDriver::readTCPWrench(RSCL::Vector6dPtr wrench) const {
 	string obj_name = robot_->name() + "_force_sensor" + suffix_;
 
 	all_ok &= (simxReadForceSensor(client_id_, object_handles_.at(obj_name), &ft_state, data, data+3, simx_opmode_buffer) == simx_return_ok);
+	all_ok &= ft_state == 0b01; // ft not broken + data available
 
 	if(all_ok) {
 		double* wrench_data = wrench->data();

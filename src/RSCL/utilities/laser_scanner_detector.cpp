@@ -1,5 +1,4 @@
 #include <RSCL/utilities/laser_scanner_detector.h>
-#include <iostream>
 
 using namespace RSCL;
 

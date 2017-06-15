@@ -8,7 +8,7 @@ Robot::Robot(const std::string& name,
 	joint_count_(joint_count)
 {
 	joint_damping_matrix_               = std::make_shared<MatrixXd>();
-	control_point_damping_matrix_       = std::make_shared<Matrix6d>();
+	control_point_damping_matrix_       = std::make_shared<Matrix6d>(Matrix6d::Identity());
 
 	joint_velocity_                     = std::make_shared<Eigen::VectorXd>();
 	joint_velocity_sum_                 = std::make_shared<Eigen::VectorXd>();
@@ -21,42 +21,52 @@ Robot::Robot(const std::string& name,
 	joint_target_position_              = std::make_shared<Eigen::VectorXd>();
 	joint_external_torque_              = std::make_shared<Eigen::VectorXd>();
 
-	control_point_velocity_             = std::make_shared<Vector6d>();
-	control_point_velocity_sum_         = std::make_shared<Vector6d>();
-	control_point_force_sum_            = std::make_shared<Vector6d>();
-	control_point_velocity_command_     = std::make_shared<Vector6d>();
-	control_point_total_velocity_       = std::make_shared<Vector6d>();
-	control_point_total_force_          = std::make_shared<Vector6d>();
+	control_point_velocity_             = std::make_shared<Vector6d>(Vector6d::Zero());
+	control_point_velocity_sum_         = std::make_shared<Vector6d>(Vector6d::Zero());
+	control_point_force_sum_            = std::make_shared<Vector6d>(Vector6d::Zero());
+	control_point_velocity_command_     = std::make_shared<Vector6d>(Vector6d::Zero());
+	control_point_total_velocity_       = std::make_shared<Vector6d>(Vector6d::Zero());
+	control_point_total_force_          = std::make_shared<Vector6d>(Vector6d::Zero());
 
-	control_point_current_pose_         = std::make_shared<Vector6d>();
-	control_point_target_pose_          = std::make_shared<Vector6d>();
-	control_point_current_velocity_     = std::make_shared<Vector6d>();
-	control_point_external_force_       = std::make_shared<Vector6d>();
+	control_point_current_pose_         = std::make_shared<Vector6d>(Vector6d::Zero());
+	control_point_target_pose_          = std::make_shared<Vector6d>(Vector6d::Zero());
+	control_point_current_velocity_     = std::make_shared<Vector6d>(Vector6d::Zero());
+	control_point_external_force_       = std::make_shared<Vector6d>(Vector6d::Zero());
 
 	scaling_factor_                     = std::make_shared<double>();
 
 	jacobian_                           = std::make_shared<MatrixXd>();
 	jacobian_inverse_                   = std::make_shared<MatrixXd>();
-	transformation_matrix_              = std::make_shared<Matrix4d>();
-	spatial_transformation_matrix_      = std::make_shared<Matrix6d>();
+	transformation_matrix_              = std::make_shared<Matrix4d>(Matrix4d::Identity());
+	spatial_transformation_matrix_      = std::make_shared<Matrix6d>(Matrix6d::Identity());
 
 	joint_velocity_->resize(joint_count_, 1);
+	joint_velocity_->setZero();
 	joint_velocity_sum_->resize(joint_count_, 1);
+	joint_velocity_sum_->setZero();
 	joint_torque_sum_->resize(joint_count_, 1);
+	joint_torque_sum_->setZero();
 	joint_velocity_command_->resize(joint_count_, 1);
+	joint_velocity_command_->setZero();
 	joint_total_velocity_->resize(joint_count_, 1);
+	joint_total_velocity_->setZero();
 	joint_total_torque_->resize(joint_count_, 1);
+	joint_total_torque_->setZero();
 
 	joint_current_position_->resize(joint_count_, 1);
+	joint_current_position_->setZero();
 	joint_target_position_->resize(joint_count_, 1);
+	joint_target_position_->setZero();
 	joint_external_torque_->resize(joint_count_, 1);
+	joint_external_torque_->setZero();
 
 	jacobian_->resize(6, joint_count_);
+	jacobian_->setZero();
 	jacobian_inverse_->resize(joint_count_, 6);
+	jacobian_inverse_->setZero();
 
 	joint_damping_matrix_->resize(joint_count, joint_count);
 	joint_damping_matrix_->setIdentity();
-	control_point_damping_matrix_->setIdentity();
 }
 
 const std::string& Robot::name() const {

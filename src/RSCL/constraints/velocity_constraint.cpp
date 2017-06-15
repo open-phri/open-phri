@@ -17,7 +17,7 @@ double VelocityConstraint::compute() {
 	double v_norm = robot_->controlPointTotalVelocity()->block<3,1>(0,0).norm();
 
 	if(v_norm > 0.) {
-		constraint = std::abs(*maximum_velocity_) / robot_->controlPointTotalVelocity()->norm();
+		constraint = std::abs(*maximum_velocity_) / v_norm;
 	}
 
 	return constraint;

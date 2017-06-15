@@ -18,22 +18,35 @@
  */
 
 /**
- * @file utilities.h
+ * @file clock.h
  * @author Benjamin Navarro
- * @brief Include all available utilities
- * @date April 2017
+ * @brief Definition of the Clock class
+ * @date June 2017
  * @ingroup RSCL
  */
 
- #pragma once
+#pragma once
 
-#include <RSCL/utilities/derivator.hpp>
-#include <RSCL/utilities/integrator.hpp>
-#include <RSCL/utilities/object_collection.hpp>
-#include <RSCL/utilities/manipulator_equivalent_mass.hpp>
-#include <RSCL/utilities/interpolators.h>
-#include <RSCL/utilities/trajectory_generator.h>
-#include <RSCL/utilities/path_follower.h>
-#include <RSCL/utilities/laser_scanner_detector.h>
-#include <RSCL/utilities/data_logger.h>
-#include <RSCL/utilities/clock.h>
+#include <memory>
+#include <chrono>
+
+namespace RSCL {
+
+class Clock {
+public:
+	Clock();
+	Clock(double sample_time);
+	~Clock() = default;
+
+	std::shared_ptr<double> getTime() const;
+
+	void update();
+	void operator()();
+
+private:
+	std::chrono::high_resolution_clock::time_point init_time_;
+	double sample_time_;
+	std::shared_ptr<double> time_;
+};
+
+} // namespace RSCL

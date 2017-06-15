@@ -53,32 +53,25 @@ int main(int argc, char const *argv[]) {
 
 	signal(SIGINT, sigint_handler);
 
-	while(not driver.getSimulationData() and not _stop) {
-		usleep(SAMPLE_TIME*1e6);
-	}
 	driver.enableSynchonous(true);
+	while(not driver.getSimulationData() and not _stop) {
+		driver.nextStep();
+	}
 
 	if(not _stop)
 		std::cout << "Starting main loop\n";
 	while(not _stop) {
 		if(driver.getSimulationData()) {
-			safety_controller.compute();
+			safety_controller();
 			if(not driver.sendSimulationData()) {
-				std::cerr << "Can'send robot data to V-REP" << std::endl;
+				std::cerr << "Can'send simulation data to V-REP" << std::endl;
 			}
 		}
 		else {
-			std::cerr << "Can't get robot data from V-REP" << std::endl;
+			std::cerr << "Can't get simulation data from V-REP" << std::endl;
 		}
 
-		// std::cout << "**********************************************************************\n";
-		// std::cout << "vel    : " << robot->jointVelocity()->transpose() << "\n";
-		// std::cout << "pos msr: " << robot->jointCurrentPosition()->transpose() << "\n";
-		// std::cout << "pos tgt: " << robot->jointTargetPosition()->transpose() << "\n";
-
-		// usleep(SAMPLE_TIME*1e6);
 		driver.nextStep();
-
 	}
 
 	driver.enableSynchonous(false);

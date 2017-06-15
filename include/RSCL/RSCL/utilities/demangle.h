@@ -18,22 +18,20 @@
  */
 
 /**
- * @file utilities.h
+ * @file demangle.h
  * @author Benjamin Navarro
- * @brief Include all available utilities
- * @date April 2017
+ * @brief Definition of the type demangling functions
+ * @date June 2017
  * @ingroup RSCL
  */
 
- #pragma once
+#pragma once
 
-#include <RSCL/utilities/derivator.hpp>
-#include <RSCL/utilities/integrator.hpp>
-#include <RSCL/utilities/object_collection.hpp>
-#include <RSCL/utilities/manipulator_equivalent_mass.hpp>
-#include <RSCL/utilities/interpolators.h>
-#include <RSCL/utilities/trajectory_generator.h>
-#include <RSCL/utilities/path_follower.h>
-#include <RSCL/utilities/laser_scanner_detector.h>
-#include <RSCL/utilities/data_logger.h>
-#include <RSCL/utilities/clock.h>
+#include <string>
+
+std::string demangle(const char* name);
+
+template<typename TT>
+std::string getTypeName(const TT& t) {
+	return demangle(typeid(t).name());
+}
