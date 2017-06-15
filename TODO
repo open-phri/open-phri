@@ -1,0 +1,6 @@
+List of things to be done (decreasing priority):
+    - Update MassGenerator (and others that don't use spatial transforms) to mach with StiffnessGenerator. Maybe try to find a way to generalize the process
+    - Improve the trajectory generator to easily work on vectors
+    - Use quaternions instead of euler angles to represent the orientation
+    - Update the python bindings & tests
+    - Make a ROS package with a service system to reconfigure the controller online
