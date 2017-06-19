@@ -111,12 +111,30 @@ public:
 	}
 
 	/**
+	 * @brief Shortcut for the SafetyController::addConstraint method.
+	 */
+	template<typename T>
+	typename std::enable_if<std::is_base_of<Constraint, T>::value, bool>::type
+	add(const std::string& name, T&& obj, bool force = false) {
+		return addConstraint(name, std::make_shared<T>(obj), force);
+	}
+
+	/**
 	 * @brief Shortcut for the SafetyController::addForceGenerator method.
 	 */
 	template<typename T>
 	typename std::enable_if<std::is_base_of<ForceGenerator, T>::value, bool>::type
 	add(const std::string& name, std::shared_ptr<T> obj, bool force = false) {
 		return addForceGenerator(name, obj, force);
+	}
+
+	/**
+	 * @brief Shortcut for the SafetyController::addForceGenerator method.
+	 */
+	template<typename T>
+	typename std::enable_if<std::is_base_of<ForceGenerator, T>::value, bool>::type
+	add(const std::string& name, T&& obj, bool force = false) {
+		return addForceGenerator(name, std::make_shared<T>(obj), force);
 	}
 
 	/**
@@ -129,6 +147,15 @@ public:
 	}
 
 	/**
+	 * @brief Shortcut for the SafetyController::addTorqueGenerator method.
+	 */
+	template<typename T>
+	typename std::enable_if<std::is_base_of<TorqueGenerator, T>::value, bool>::type
+	add(const std::string& name, T&& obj, bool force = false) {
+		return addTorqueGenerator(name, std::make_shared<T>(obj), force);
+	}
+
+	/**
 	 * @brief Shortcut for the SafetyController::addVelocityGenerator method.
 	 */
 	template<typename T>
@@ -138,12 +165,30 @@ public:
 	}
 
 	/**
+	 * @brief Shortcut for the SafetyController::addVelocityGenerator method.
+	 */
+	template<typename T>
+	typename std::enable_if<std::is_base_of<VelocityGenerator, T>::value, bool>::type
+	add(const std::string& name, T&& obj, bool force = false) {
+		return addVelocityGenerator(name, std::make_shared<T>(obj), force);
+	}
+
+	/**
 	 * @brief Shortcut for the SafetyController::addJointVelocityGenerator method.
 	 */
 	template<typename T>
 	typename std::enable_if<std::is_base_of<JointVelocityGenerator, T>::value, bool>::type
 	add(const std::string& name, std::shared_ptr<T> obj, bool force = false) {
 		return addJointVelocityGenerator(name, obj, force);
+	}
+
+	/**
+	 * @brief Shortcut for the SafetyController::addJointVelocityGenerator method.
+	 */
+	template<typename T>
+	typename std::enable_if<std::is_base_of<JointVelocityGenerator, T>::value, bool>::type
+	add(const std::string& name, T&& obj, bool force = false) {
+		return addJointVelocityGenerator(name, std::make_shared<T>(obj), force);
 	}
 
 	/**
