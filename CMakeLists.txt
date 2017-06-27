@@ -23,7 +23,7 @@ if(NOT FORCE_CMAKE_BUILD AND EXISTS ${WORKSPACE_DIR}/share/cmake/system)
 				DESCRIPTION "Robot Safety Control Library: provides a generic framework to easily control robots in operational space with safety constraints"
 	)
 
-	set_PID_Package_Version(0 4 0)
+	set_PID_Package_Version(0 5 0)
 
 	check_PID_Platform(CONFIGURATION posix)
 
