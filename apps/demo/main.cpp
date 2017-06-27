@@ -90,15 +90,22 @@ int main(int argc, char const *argv[]) {
 	if(not _stop)
 		std::cout << "Starting main loop\n";
 
+	double t_avg = 0.;
 	while(not _stop) {
 		if(driver.getSimulationData(ReferenceFrame::Base, ReferenceFrame::Base)) {
 
+			auto t_start = std::chrono::high_resolution_clock::now();
 			_stop |= state_machine.compute();
 			safety_controller.compute();
+			auto t_end = std::chrono::high_resolution_clock::now();
+
+			t_avg = 0.01*std::chrono::duration<double>(t_end-t_start).count() + 0.99*t_avg;
 
 			if(not driver.sendSimulationData()) {
 				std::cerr << "Can'send robot data to V-REP" << std::endl;
 			}
+
+			std::cout << "t_avg: " << t_avg << std::endl;
 
 
 			clock();
