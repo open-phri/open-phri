@@ -116,7 +116,7 @@ public:
 	template<typename T>
 	typename std::enable_if<std::is_base_of<Constraint, T>::value, bool>::type
 	add(const std::string& name, T&& obj, bool force = false) {
-		return addConstraint(name, std::make_shared<T>(obj), force);
+		return addConstraint(name, std::make_shared<T>(std::move(obj)), force);
 	}
 
 	/**
@@ -134,7 +134,7 @@ public:
 	template<typename T>
 	typename std::enable_if<std::is_base_of<ForceGenerator, T>::value, bool>::type
 	add(const std::string& name, T&& obj, bool force = false) {
-		return addForceGenerator(name, std::make_shared<T>(obj), force);
+		return addForceGenerator(name, std::make_shared<T>(std::move(obj)), force);
 	}
 
 	/**
@@ -152,7 +152,7 @@ public:
 	template<typename T>
 	typename std::enable_if<std::is_base_of<TorqueGenerator, T>::value, bool>::type
 	add(const std::string& name, T&& obj, bool force = false) {
-		return addTorqueGenerator(name, std::make_shared<T>(obj), force);
+		return addTorqueGenerator(name, std::make_shared<T>(std::move(obj)), force);
 	}
 
 	/**
@@ -170,7 +170,7 @@ public:
 	template<typename T>
 	typename std::enable_if<std::is_base_of<VelocityGenerator, T>::value, bool>::type
 	add(const std::string& name, T&& obj, bool force = false) {
-		return addVelocityGenerator(name, std::make_shared<T>(obj), force);
+		return addVelocityGenerator(name, std::make_shared<T>(std::move(obj)), force);
 	}
 
 	/**
@@ -188,7 +188,7 @@ public:
 	template<typename T>
 	typename std::enable_if<std::is_base_of<JointVelocityGenerator, T>::value, bool>::type
 	add(const std::string& name, T&& obj, bool force = false) {
-		return addJointVelocityGenerator(name, std::make_shared<T>(obj), force);
+		return addJointVelocityGenerator(name, std::make_shared<T>(std::move(obj)), force);
 	}
 
 	/**
@@ -278,8 +278,10 @@ public:
 
 	template<typename T>
 	struct StorageWrapper {
+		using value_type = decltype(std::declval<T>().compute());
+
 		std::shared_ptr<T> object;
-		typename std::result_of<decltype(&T::compute)(T)>::type last_value;
+		value_type last_value;
 	};
 
 	template<typename T>

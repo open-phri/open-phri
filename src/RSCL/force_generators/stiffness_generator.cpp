@@ -27,11 +27,6 @@ StiffnessGenerator::StiffnessGenerator(
 
 Vector6d StiffnessGenerator::compute() {
 	Vector6d error = *target_position_ - *robot_position_;
-	// std::cout << "target_position_: " << target_position_->transpose() << std::endl;
-	// std::cout << "robot_position_: " << robot_position_->transpose() << std::endl;
-	// std::cout << "error: " << error.transpose() << std::endl;
-	// std::cout << "stiffness: " << stiffness_->diagonal().transpose() << std::endl;
-	// std::cout << "force: " << force.transpose() << std::endl;
 	if(static_cast<bool>(spatial_transformation_)) {
 		if(stiffness_in_tcp_frame_) {
 			if(do_transpose_) {

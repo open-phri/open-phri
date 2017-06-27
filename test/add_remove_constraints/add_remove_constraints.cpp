@@ -24,10 +24,10 @@ int main(int argc, char const *argv[]) {
 	auto cstr = safety_controller.getConstraint("velocity limit");
 	assert_msg("Step #2", cstr == velocity_constraint);
 
-	ok = safety_controller.addConstraint("velocity limit", velocity_constraint);
+	ok = safety_controller.add("velocity limit", VelocityConstraint(maximum_velocity));
 	assert_msg("Step #3", ok == false);
 
-	ok = safety_controller.addConstraint("velocity limit", velocity_constraint, true);
+	ok = safety_controller.add("velocity limit", std::move(*velocity_constraint), true);
 	assert_msg("Step #4", ok == true);
 
 	ok = safety_controller.removeConstraint("velocity limit");

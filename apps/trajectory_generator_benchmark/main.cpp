@@ -20,19 +20,19 @@ void run_once<0>(std::function<void(void)> todo) {
 	return;
 }
 
-template<int N, typename std::enable_if<(N <= 1000), bool>::type = 0>
+template<int N, typename std::enable_if<(N <= 900), bool>::type = 0>
 void run(std::function<void(void)> todo) {
 	run_once<N>(todo);
 }
 
-template<int N, typename std::enable_if<not (N <= 1000), bool>::type = 0> // use <= to remove parsing error in atom when using >
+template<int N, typename std::enable_if<not (N <= 900), bool>::type = 0> // use <= to remove parsing error in atom when using >
 void run(std::function<void(void)> todo) {
 	size_t iter = N;
-	while(iter >= 1000) {
-		run_once<1000>(todo);
-		iter -= 1000;
+	while(iter >= 900) {
+		run_once<900>(todo);
+		iter -= 900;
 	}
-	run_once<N%1000>(todo);
+	run_once<N%900>(todo);
 }
 
 

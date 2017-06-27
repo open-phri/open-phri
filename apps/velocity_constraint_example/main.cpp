@@ -39,17 +39,14 @@ int main(int argc, char const *argv[]) {
 	auto safety_controller = SafetyController(robot);
 
 	auto maximum_velocity = make_shared<double>(0.1);
-	auto velocity_constraint = make_shared<VelocityConstraint>(maximum_velocity);
 
-	auto ext_force_generator = make_shared<ForceProxy>(robot->controlPointExternalForce());
-
-	safety_controller.addConstraint(
+	safety_controller.add(
 		"velocity constraint",
-		velocity_constraint);
+		VelocityConstraint(maximum_velocity));
 
-	safety_controller.addForceGenerator(
+	safety_controller.add(
 		"ext force proxy",
-		ext_force_generator);
+		ForceProxy(robot->controlPointExternalForce()));
 
 	signal(SIGINT, sigint_handler);
 
