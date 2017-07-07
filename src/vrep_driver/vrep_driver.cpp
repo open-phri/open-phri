@@ -379,7 +379,7 @@ bool VREPDriver::sendJointTargetVelocity(RSCL::VectorXdConstPtr velocity) const 
 	const auto& velocity_vec = *velocity;
 	const auto& position_vec = *robot_->jointCurrentPosition();
 
-	*robot_->jointTargetPosition() = position_vec + velocity_vec*sample_time_;
+	*robot_->jointTargetPosition() += velocity_vec*sample_time_;
 
 	all_ok &= sendJointTargetPosition(robot_->jointTargetPosition());
 
@@ -476,7 +476,7 @@ bool VREPDriver::getSimulationData(ReferenceFrame frame_velocities, ReferenceFra
 	bool all_ok = true;
 
 	all_ok &= readTCPPose(robot_->controlPointCurrentPose(), frame_positions);
-	all_ok &= readTCPTargetPose(robot_->controlPointTargetPose(), frame_positions);
+	// all_ok &= readTCPTargetPose(robot_->controlPointTargetPose(), frame_positions);
 	all_ok &= readTCPVelocity(robot_->controlPointCurrentVelocity(), frame_velocities);
 	all_ok &= readTCPWrench(robot_->controlPointExternalForce());
 	all_ok &= readJacobian(robot_->jacobian());
