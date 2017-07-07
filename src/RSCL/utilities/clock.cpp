@@ -3,7 +3,7 @@
 using namespace RSCL;
 
 Clock::Clock() : sample_time_(-1.) {
-	init_time_ = std::chrono::high_resolution_clock::now();
+	reset();
 	time_ = std::make_shared<double>(0.);
 }
 
@@ -11,18 +11,25 @@ Clock::Clock(double sample_time) : sample_time_(sample_time) {
 	time_ = std::make_shared<double>(0.);
 }
 
+void Clock::reset() {
+	init_time_ = std::chrono::high_resolution_clock::now();
+}
+
 std::shared_ptr<double> Clock::getTime() const {
 	return time_;
 }
 
-void Clock::update() {
+double Clock::update() {
+	auto& current_time = *time_;
 	if(sample_time_ < 0) {
-		*time_ = std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - init_time_).count();
+		current_time = std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - init_time_).count();
 	}
 	else {
-		*time_ += sample_time_;
+		current_time += sample_time_;
 	}
+	return current_time;
 }
-void Clock::operator()() {
-	update();
+
+double Clock::operator()() {
+	return update();
 }

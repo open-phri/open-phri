@@ -100,6 +100,14 @@ public:
 		return *output_;
 	}
 
+	/**
+	 * @brief Call operator, shortcut for compute()
+	 * @return The new estimation.
+	 */
+	virtual T operator()() final {
+		return compute();
+	}
+
 private:
 	std::shared_ptr<const T> input_;
 	std::shared_ptr<T> output_;

@@ -56,6 +56,12 @@ public:
 	void setVerbose(bool on);
 
 	/**
+	 * @brief This can be used to disable the Jacobian inverse computation in the case it is performed externally and updated on the robot object.
+	 * @param on True to skip the computation, false to perform it.
+	 */
+	void skipJacobianInverseComputation(bool on);
+
+	/**
 	 * @brief Add a new constraint to the controller.
 	 * @param name The name given to the constraint. Must be unique. Used to latter get/remove the constraint.
 	 * @param constraint A shared pointer to the constraint to add.
@@ -323,6 +329,7 @@ protected:
 	ObjectCollection<StorageWrapper<JointVelocityGenerator>>   joint_velocity_generators_;
 
 	RobotPtr robot_;
+	bool skip_jacobian_inverse_computation_;
 };
 
 } // namespace RSCL

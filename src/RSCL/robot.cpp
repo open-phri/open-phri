@@ -7,8 +7,8 @@ Robot::Robot(const std::string& name,
 	name_(name),
 	joint_count_(joint_count)
 {
-	joint_damping_matrix_               = std::make_shared<MatrixXd>();
-	control_point_damping_matrix_       = std::make_shared<Matrix6d>(Matrix6d::Identity());
+	joint_damping_matrix_               = std::make_shared<VectorXd>();
+	control_point_damping_matrix_       = std::make_shared<Vector6d>(Vector6d::Ones());
 
 	joint_velocity_                     = std::make_shared<Eigen::VectorXd>();
 	joint_velocity_sum_                 = std::make_shared<Eigen::VectorXd>();
@@ -65,8 +65,8 @@ Robot::Robot(const std::string& name,
 	jacobian_inverse_->resize(joint_count_, 6);
 	jacobian_inverse_->setZero();
 
-	joint_damping_matrix_->resize(joint_count, joint_count);
-	joint_damping_matrix_->setIdentity();
+	joint_damping_matrix_->resize(joint_count, 1);
+	joint_damping_matrix_->setOnes();
 }
 
 const std::string& Robot::name() const {
@@ -77,11 +77,11 @@ size_t Robot::jointCount() const {
 	return joint_count_;
 }
 
-MatrixXdPtr Robot::jointDampingMatrix() const {
+VectorXdPtr Robot::jointDampingMatrix() const {
 	return joint_damping_matrix_;
 }
 
-Matrix6dPtr Robot::controlPointDampingMatrix() const {
+Vector6dPtr Robot::controlPointDampingMatrix() const {
 	return control_point_damping_matrix_;
 }
 

@@ -36,15 +36,16 @@ namespace RSCL {
 class DataLogger {
 public:
 	DataLogger(
-		const SafetyController& controller,
 		const std::string& directory,
 		doubleConstPtr time,
 		bool create_gnuplot_files = false,
 		bool delay_disk_write = false);
 	~DataLogger();
 
+	void logSafetyControllerData(SafetyController* controller);
 	void logRobotData(RobotConstPtr robot);
 	void logExternalData(const std::string& data_name, const double* data, size_t data_count);
+	void reset();
 	void process();
 	void operator()();
 
@@ -53,7 +54,7 @@ private:
 	std::ostream& getStream(std::ofstream& file);
 	void logData(std::ofstream& file, const double* data, size_t data_count);
 
-	const SafetyController& controller_;
+	SafetyController* controller_;
 	std::string directory_;
 	doubleConstPtr time_;
 	bool create_gnuplot_files_;

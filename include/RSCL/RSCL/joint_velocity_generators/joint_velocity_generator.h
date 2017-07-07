@@ -46,6 +46,12 @@ public:
 	 * @return The joint_velocity generator's evaluated value.
 	 */
 	virtual VectorXd compute() = 0;
+
+	/**
+	 * @brief Call operator, shortcut for compute().
+	 * @return The joint_velocity generator's evaluated value.
+	 */
+	virtual VectorXd operator()() final;
 };
 
 using JointVelocityGeneratorPtr = std::shared_ptr<JointVelocityGenerator>;

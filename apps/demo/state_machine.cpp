@@ -10,7 +10,7 @@ constexpr double REPLAY_WMAX = 1.;
 constexpr double REPLAY_DWMAX = 1.;
 constexpr double FORCE_TARGET = 10.;
 constexpr double FORCE_DURATION = 2.;
-constexpr double STIFFNESS = 10000.;
+constexpr double STIFFNESS = 1000.;
 
 StateMachine::StateMachine(
 	RSCL::RobotPtr robot_,
@@ -25,20 +25,24 @@ StateMachine::StateMachine(
 	replay_state_ = ReplayStates::Init;
 
 	if(skip_teaching) {
+
 		RSCL::Vector6d wp;
-		wp << -0.146334,  -0.0682229,    0.837455,     1.57359, -0.00954553,     1.29903;
+
+		wp << -0.176542, -0.0672858,   0.772875,    1.57698, -0.0115612,    1.56215;
 		waypoints_.push_back(wp);
-		wp << -0.0908882,   -0.065789,     1.02997,     1.56203, -0.00717306,     1.29165;
+		wp << -0.173713, -0.0660992,   0.959651,    1.56696, -0.0120195,    1.55371;
 		waypoints_.push_back(wp);
-		wp << 0.240759, -0.0595554,   0.929419,    1.56793,  0.0133712,    1.28132;
+		wp << 0.156179, -0.0612425,   0.949056,    1.56838, 0.00866731,    1.54394;
 		waypoints_.push_back(wp);
-		wp << 0.193554, -0.0579581,   0.768515,    1.57518, 0.00950321,    1.27064;
+		wp << 0.150482, -0.0590984,   0.777583,    1.57879, 0.00644068,    1.53824;
 		waypoints_.push_back(wp);
 
 		teach_state_ = TeachStates::End;
 	}
 
-	trajectory_generator_ = std::make_shared<RSCL::PathFollower>(RSCL::TrajectorySynchronization::SynchronizeTrajectory, RSCL::PathStopAction::StopAll);
+	target_velocity_ = std::make_shared<RSCL::Vector6d>(RSCL::Vector6d::Zero());
+	trajectory_generator_ = std::make_shared<RSCL::TrajectoryGenerator>(RSCL::TrajectorySynchronization::SynchronizeTrajectory);
+	target_integrator_ = std::make_shared<RSCL::Integrator<RSCL::Vector6d>>(target_velocity_, robot_->controlPointTargetPose(), SAMPLE_TIME);
 
 	operator_position_laser_ = laser_detector_.getPosition();
 	operator_position_tcp_ = std::make_shared<RSCL::Vector6d>();
@@ -59,7 +63,6 @@ StateMachine::StateMachine(
 	laser_base_transform_.block<3,1>(0,3) = RSCL::Vector3d(+4.2856e-01, 0., +2.6822e-02);
 
 
-	target_position_ = robot_->controlPointTargetPose();// std::make_shared<RSCL::Vector6d>();
 	init_position_ = std::make_shared<RSCL::Vector6d>();
 	traj_vel_ = std::make_shared<RSCL::Vector6d>(RSCL::Vector6d::Zero());
 	stiffness_mat_ = std::make_shared<RSCL::Matrix6d>(RSCL::Matrix6d::Identity() * STIFFNESS);
@@ -86,8 +89,11 @@ double StateMachine::getSeparationDistanceVelocityLimitation() const {
 }
 
 void StateMachine::init() {
+	robot_->controlPointDampingMatrix()->setOnes();
+	*robot_->controlPointDampingMatrix() *= 250.;
 	*init_position_ = *robot_->controlPointCurrentPose();
-
+	target_integrator_->force(*robot_->controlPointCurrentPose());
+	*robot_->jointTargetPosition() = *robot_->jointCurrentPosition();
 }
 
 bool StateMachine::compute() {
@@ -159,23 +165,27 @@ bool StateMachine::compute() {
 		{
 			auto stiffness = std::make_shared<RSCL::StiffnessGenerator>(
 				stiffness_mat_,
-				target_position_,
+				robot_->controlPointTargetPose(),
 				robot_->controlPointCurrentPose(),
 				robot_->spatialTransformationMatrix());
 
 			controller_.add("stiffness", stiffness);
-			*target_position_ = *robot_->controlPointCurrentPose();
+			target_integrator_->force(*robot_->controlPointCurrentPose());
+
+			controller_.add(
+				"traj vel",
+				RSCL::VelocityProxy(target_velocity_, robot_->spatialTransformationMatrix()));
 
 			auto potential_field_generator = std::make_shared<RSCL::PotentialFieldGenerator>(
 				tcp_collision_sphere_center_,
 				robot_->spatialTransformationMatrix());
 
 			auto obstacle_position = std::make_shared<RSCL::Vector6d>();
-			*obstacle_position << +8.1361e-02, -1.8324e-01, +9.7233e-01, 0., 0., 0.;
+			*obstacle_position << +6.3307e-03, -1.5126e-01, +9.9744e-01, 0., 0., 0.;
 			auto obstacle = std::make_shared<RSCL::PotentialFieldObject>(
 				RSCL::PotentialFieldType::Repulsive,
 				std::make_shared<double>(300.),   // gain
-				std::make_shared<double>(0.18),   // threshold distance
+				std::make_shared<double>(0.16),   // threshold distance
 				obstacle_position);
 
 			potential_field_generator->add("obstacle", obstacle);
@@ -203,8 +213,7 @@ bool StateMachine::compute() {
 			(*stiffness_mat_)(0,0) = STIFFNESS;
 			(*stiffness_mat_)(1,1) = STIFFNESS;
 			(*stiffness_mat_)(2,2) = STIFFNESS;
-			*target_position_ = *robot_->controlPointCurrentPose();
-			if(setupTrajectoryGenerator(target_position_)) {
+			if(setupTrajectoryGenerator()) {
 				std::cout << "Trajectory setup done" << std::endl;
 				replay_state_ = ReplayStates::ReachingWaypoint;
 			}
@@ -217,7 +226,7 @@ bool StateMachine::compute() {
 		break;
 		case ReplayStates::ReachingWaypoint:
 		{
-			double error = (*target_position_ - *robot_->controlPointCurrentPose()).block<3,1>(0,0).norm();
+			double error = (*robot_->controlPointTargetPose() - *robot_->controlPointCurrentPose()).block<3,1>(0,0).norm();
 			// std::cout << "error: " << error << std::endl;
 			if(trajectory_generator_->compute() and error < 0.001) {
 				std::cout << "Waypoint reached" << std::endl;
@@ -228,6 +237,7 @@ bool StateMachine::compute() {
 					replay_state_ = ReplayStates::End;
 				}
 			}
+			target_integrator_->compute();
 		}
 		break;
 		case ReplayStates::ForceControlInit:
@@ -311,20 +321,21 @@ bool StateMachine::compute() {
 	return end;
 }
 
-bool StateMachine::setupTrajectoryGenerator(RSCL::Vector6dPtr target_pose) {
+bool StateMachine::setupTrajectoryGenerator() {
 	if(waypoints_.size() == 0)
 		return false;
 
+	auto& from = *robot_->controlPointCurrentPose();
 	auto to = waypoints_.front();
 	waypoints_.pop_front();
-	std::cout << "Going from [" << robot_->controlPointCurrentPose()->transpose() << "] to [" << to.transpose() << "]" << std::endl;
+	std::cout << "Going from [" << from.transpose() << "] to [" << to.transpose() << "]" << std::endl;
 
 	trajectory_generator_->removeAll();
 
 	for (size_t i = 0; i < 6; ++i) {
-		auto point_from = std::make_shared<RSCL::TrajectoryPoint>((*robot_->controlPointCurrentPose())(i), 0., 0.);
+		auto point_from = std::make_shared<RSCL::TrajectoryPoint>(from(i), 0., 0.);
 		auto point_to = std::make_shared<RSCL::TrajectoryPoint>(to(i), 0., 0.);
-		auto trajectory = std::make_shared<RSCL::Trajectory>(RSCL::TrajectoryOutputType::Position, point_from, target_pose->data()+i, SAMPLE_TIME);
+		auto trajectory = std::make_shared<RSCL::Trajectory>(RSCL::TrajectoryOutputType::Velocity, point_from, target_velocity_->data()+i, SAMPLE_TIME);
 		if(i < 3) {
 			trajectory->addPathTo(point_to, REPLAY_VMAX, REPLAY_AMAX);
 		}
@@ -332,10 +343,12 @@ bool StateMachine::setupTrajectoryGenerator(RSCL::Vector6dPtr target_pose) {
 			trajectory->addPathTo(point_to, REPLAY_WMAX, REPLAY_DWMAX);
 		}
 
-		trajectory_generator_->add("traj"+std::to_string(i), trajectory, robot_->controlPointCurrentPose()->data()+i, target_pose->data()+i, 0.05);
+		trajectory_generator_->add("traj"+std::to_string(i), trajectory);
 	}
 
 	trajectory_generator_->computeParameters();
+
+	target_integrator_->force(from);
 
 	return true;
 }

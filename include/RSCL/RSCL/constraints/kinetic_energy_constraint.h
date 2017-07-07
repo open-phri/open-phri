@@ -56,7 +56,7 @@ private:
 	doubleConstPtr mass_;
 	doubleConstPtr maximum_kinetic_energy_;
 
-	doublePtr maximum_velocity_;
+	doublePtr kinetic_energy_maximum_velocity_;
 };
 
 using KineticEnergyConstraintPtr = std::shared_ptr<KineticEnergyConstraint>;

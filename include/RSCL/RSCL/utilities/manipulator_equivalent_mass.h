@@ -36,12 +36,8 @@ namespace RSCL {
  *  @details Based on the manipulator's inertia matrix and Jacobian and a set of items that can collide with the its TCP.
  *  @tparam joint_count Number of joints of the manipulator.
  */
-template<int joint_count>
 class ManipulatorEquivalentMass : public ObjectCollection<Vector6dConstPtr> {
 public:
-	using InertiaMatrixType = Eigen::Matrix<double, joint_count, joint_count>;
-	using JacobianMatrixType = Eigen::Matrix<double, 6, joint_count>;
-
 	/**
 	 * @brief Construct a manipulator equivalent mass utility given an inertia matrix and a Jacobian.
 	 * Objects positons must be expressed in the TCP frame.
@@ -49,11 +45,8 @@ public:
 	 * @param jacobian_matrix A shared pointer to the Jacobian matrix.
 	 */
 	ManipulatorEquivalentMass(
-		std::shared_ptr<const InertiaMatrixType> inertia_matrix,
-		std::shared_ptr<const JacobianMatrixType> jacobian_matrix)
-	{
-		robot_position_ = std::make_shared<Vector6d>(Vector6d::Zero());
-	}
+		MatrixXdConstPtr inertia_matrix,
+		MatrixXdConstPtr jacobian_matrix);
 
 	/**
 	 * @brief Construct a manipulator equivalent mass utility given an inertia matrix and a Jacobian.
@@ -63,12 +56,9 @@ public:
 	 * @param robot_position A shared pointer to the robot position in the chosen frame.
 	 */
 	ManipulatorEquivalentMass(
-		std::shared_ptr<const InertiaMatrixType> inertia_matrix,
-		std::shared_ptr<const JacobianMatrixType> jacobian_matrix,
-		Vector6dConstPtr robot_position)
-	{
-		robot_position_ = robot_position;
-	}
+		MatrixXdConstPtr inertia_matrix,
+		MatrixXdConstPtr jacobian_matrix,
+		Vector6dConstPtr robot_position);
 
 	~ManipulatorEquivalentMass() = default;
 
@@ -76,48 +66,18 @@ public:
 	 * @brief Get the pointer to the equivalent mass.
 	 * @return A shared pointer to the equivalent mass.
 	 */
-	doubleConstPtr getEquivalentMass() const {
-		return mass_;
-	}
+	doubleConstPtr getEquivalentMass() const;
 
 	/**
 	 * @brief Compute the equivalent mass based on the inertia, jacobian and the closest item.
 	 * @return The equivalent mass.
 	 */
-	double compute() {
-		const JacobianMatrixType& jac = *jacobian_matrix_;
-		const InertiaMatrixType& inertia = *inertia_matrix_;
-		Vector3d direction = closestObjectDirection();
-
-		Matrix6d mass_inv = jac * inertia.inverse() * jac.transpose();
-
-		*mass_ = 1. / (direction.transpose() * mass_inv.block<3,3>(0,0) * direction);
-
-		return *mass_;
-	}
-
+	double compute();
 private:
-	Vector3d closestObjectDirection() {
-		Vector3d direction = Vector3d::Zero();
-		const Vector3d& rob_pos = robot_position_->block<3,1>(0,0);
+	Vector3d closestObjectDirection();
 
-		double min_dist = std::numeric_limits<double>::infinity();
-		for(const auto& item : items_) {
-			Vector6d obj_pos = *item.second;
-			Vector3d obj_rob_vec = obj_pos.block<3,1>(0,0) - rob_pos;
-
-			double dist =  obj_rob_vec.norm();
-			min_dist = std::min(min_dist, dist);
-			if(min_dist == dist) {
-				direction = obj_rob_vec.normalized();
-			}
-		}
-
-		return direction;
-	}
-
-	std::shared_ptr<const InertiaMatrixType> inertia_matrix_;
-	std::shared_ptr<const JacobianMatrixType> jacobian_matrix_;
+	MatrixXdConstPtr inertia_matrix_;
+	MatrixXdConstPtr jacobian_matrix_;
 	Vector6dConstPtr robot_position_;
 	doublePtr mass_;
 };

@@ -46,19 +46,20 @@ public:
 	double getSeparationDistanceVelocityLimitation() const;
 
 private:
-	bool setupTrajectoryGenerator(RSCL::Vector6dPtr target_pose);
+	bool setupTrajectoryGenerator();
 	void computeLaserDistanceInTCPFrame(RSCL::Vector6dPtr obstacle_position);
 
 	RSCL::RobotPtr robot_;
 	RSCL::SafetyController& controller_;
 	RSCL::LaserScannerDetector& laser_detector_;
+	std::shared_ptr<RSCL::Integrator<RSCL::Vector6d>> target_integrator_;
 
 	TeachStates teach_state_;
 	ReplayStates replay_state_;
 	std::list<RSCL::Vector6d> waypoints_;
-	std::shared_ptr<RSCL::PathFollower> trajectory_generator_;
+	std::shared_ptr<RSCL::TrajectoryGenerator> trajectory_generator_;
 	std::shared_ptr<RSCL::LinearInterpolator> max_vel_interpolator_;
-	std::shared_ptr<RSCL::Vector6d> target_position_;
+	std::shared_ptr<RSCL::Vector6d> target_velocity_;
 	std::shared_ptr<RSCL::Vector6d> init_position_;
 	std::shared_ptr<RSCL::Vector6d> traj_vel_;
 	std::shared_ptr<RSCL::Matrix6d> stiffness_mat_;

@@ -38,12 +38,14 @@ namespace RSCL {
 class VelocityProxy : public VelocityGenerator {
 public:
 	VelocityProxy(Vector6dConstPtr velocity);
+	VelocityProxy(Vector6dConstPtr velocity, Matrix6dConstPtr spatial_transformation);
 	~VelocityProxy() = default;
 
 	virtual Vector6d compute() override;
 
 private:
 	Vector6dConstPtr velocity_;
+	Matrix6dConstPtr spatial_transformation_;
 };
 
 using VelocityProxyPtr = std::shared_ptr<VelocityProxy>;

@@ -54,6 +54,18 @@ public:
 		reset();
 	}
 
+	/**
+	 * @brief Construct an Integrator for a given input and sample time.
+	 * @param input A shared pointer to the input data
+	 * @param output A shared pointer to the output data
+	 * @param sample_time Time step between each call to Integrator::compute().
+	 */
+	Integrator(std::shared_ptr<const T> input, std::shared_ptr<T> output, double sample_time) :
+		input_(input), output_(output), sample_time_(sample_time)
+	{
+		reset();
+	}
+
 	virtual ~Integrator() = default;
 
 	/***		Configuration		***/
@@ -98,6 +110,14 @@ public:
 	virtual T compute() {
 		*output_ += *input_ * sample_time_;
 		return *output_;
+	}
+
+	/**
+	 * @brief Call operator, shortcut for compute().
+	 * @return The new integrator output.
+	 */
+	virtual T operator()() final {
+		return compute();
 	}
 
 private:

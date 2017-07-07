@@ -44,6 +44,12 @@ public:
 	 * @return The force generator's evaluated value.
 	 */
 	virtual Vector6d compute() = 0;
+
+	/**
+	 * @brief Call operator, shortcut for compute().
+	 * @return The force generator's evaluated value.
+	 */
+	virtual Vector6d operator()() final;
 };
 
 using ForceGeneratorPtr = std::shared_ptr<ForceGenerator>;

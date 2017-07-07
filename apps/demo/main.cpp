@@ -28,7 +28,7 @@ int main(int argc, char const *argv[]) {
 	/***				V-REP driver				***/
 	VREPDriver driver(
 		robot,
-		ControlLevel::TCP,
+		ControlLevel::Joint,
 		SAMPLE_TIME,
 		"", "127.0.0.1", -1000
 		);
@@ -37,7 +37,6 @@ int main(int argc, char const *argv[]) {
 	auto laser_data = driver.initLaserScanner("Hokuyo");
 
 	/***			Controller configuration			***/
-	*robot->controlPointDampingMatrix() *= 500.;
 	auto safety_controller = SafetyController(robot);
 
 	auto laser_detector = LaserScannerDetector(
@@ -54,11 +53,12 @@ int main(int argc, char const *argv[]) {
 
 	Clock clock(SAMPLE_TIME);
 	DataLogger logger(
-		safety_controller,
 		"/mnt/tmpfs/rscl_logs",
 		clock.getTime(),
 		true,   // create gnuplot files
 		true);  // delay disk write
+
+	logger.logSafetyControllerData(&safety_controller);
 	logger.logRobotData(robot);
 
 	double fsm_states[2];
@@ -67,8 +67,10 @@ int main(int argc, char const *argv[]) {
 	logger.logExternalData("operator distance", &operator_distance, 1);
 	double sep_dist_vlim;
 	logger.logExternalData("sep dist vlim", &sep_dist_vlim, 1);
+	double t_avg = 0.;
+	logger.logExternalData("tavg_fsm_and_controller", &t_avg, 1);
 
-	auto update_external_data = [state_machine, &fsm_states, &operator_distance, &sep_dist_vlim]()
+	auto update_external_data = [&state_machine, &fsm_states, &operator_distance, &sep_dist_vlim]()
 								{
 									fsm_states[0] = static_cast<double>(state_machine.getTeachState());
 									fsm_states[1] = static_cast<double>(state_machine.getReplayState());
@@ -90,7 +92,6 @@ int main(int argc, char const *argv[]) {
 	if(not _stop)
 		std::cout << "Starting main loop\n";
 
-	double t_avg = 0.;
 	while(not _stop) {
 		if(driver.getSimulationData(ReferenceFrame::Base, ReferenceFrame::Base)) {
 
@@ -99,13 +100,13 @@ int main(int argc, char const *argv[]) {
 			safety_controller.compute();
 			auto t_end = std::chrono::high_resolution_clock::now();
 
-			t_avg = 0.01*std::chrono::duration<double>(t_end-t_start).count() + 0.99*t_avg;
+			t_avg = (1e6 * 0.01*std::chrono::duration<double>(t_end-t_start).count() + 0.99*t_avg);
 
 			if(not driver.sendSimulationData()) {
 				std::cerr << "Can'send robot data to V-REP" << std::endl;
 			}
 
-			std::cout << "t_avg: " << t_avg << std::endl;
+			// std::cout << "t_avg (us): " << t_avg*1e6 << std::endl;
 
 
 			clock();

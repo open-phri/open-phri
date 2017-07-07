@@ -100,17 +100,6 @@ double FifthOrderPolynomial::getFirstDerivativeMaximum(const Parameters& params)
 		max = std::max(max, ( poly(roots_real[i]) ));
 	}
 
-	// std::cout << "***    First derivative    ***\n";
-	// std::cout << "\tdegree: " << degree << "\n";
-	// std::cout << "\troots_real: ";
-	// for (size_t i = 0; i < 3; ++i)
-	//  std::cout << roots_real[i] << " ";
-	// std::cout << "\n\troots_img: ";
-	// for (size_t i = 0; i < 3; ++i)
-	//  std::cout << roots_img[i] << " ";
-	// std::cout << "\n\tmax: " << max;
-	// std::cout << std::endl;
-
 	return max;
 }
 
@@ -130,17 +119,6 @@ double FifthOrderPolynomial::getSecondDerivativeMaximum(const Parameters& params
 
 
 	double max = std::max(poly(roots_real[0]), poly(roots_real[1]));
-
-	// std::cout << "***    Second derivative    ***\n";
-	// std::cout << "\tdegree: " << degree << "\n";
-	// std::cout << "\troots_real: ";
-	// for (size_t i = 0; i < 2; ++i)
-	//  std::cout << roots_real[i] << " ";
-	// std::cout << "\n\troots_img: ";
-	// for (size_t i = 0; i < 2; ++i)
-	//  std::cout << roots_img[i] << " ";
-	// std::cout << "\n\tmax: " << max;
-	// std::cout << std::endl;
 
 	return max;
 }

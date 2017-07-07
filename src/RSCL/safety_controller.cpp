@@ -12,7 +12,7 @@
 
 using namespace RSCL;
 
-SafetyController::SafetyController() {
+SafetyController::SafetyController() : skip_jacobian_inverse_computation_(false) {
 	addConstraint("default constraint", std::make_shared<DefaultConstraint>());
 }
 
@@ -29,6 +29,10 @@ void SafetyController::setVerbose(bool on) {
 	torque_generators_.setVerbose           (on, "RSCL::SafetyController", "TorqueGenerator");
 	velocity_generators_.setVerbose         (on, "RSCL::SafetyController", "VelocityGenerator");
 	joint_velocity_generators_.setVerbose   (on, "RSCL::SafetyController", "JointVelocityGenerator");
+}
+
+void SafetyController::skipJacobianInverseComputation(bool on) {
+	skip_jacobian_inverse_computation_ = on;
 }
 
 bool SafetyController::addConstraint(const std::string& name, ConstraintPtr constraint, bool force) {
@@ -96,9 +100,13 @@ void SafetyController::compute() {
 	const auto& torque_sum = computeTorqueSum();
 	const auto& velocity_sum = computeVelocitySum();
 	const auto& joint_velocity_sum = computeJointVelocitySum();
-	const auto& jacobian_inverse = computeJacobianInverse();
+	const auto& jacobian_inverse = *robot_->jacobianInverse();
 	const auto& jacobian = *robot_->jacobian();
 	const auto& spatial_transformation = *robot_->spatialTransformationMatrix();
+
+	if(not skip_jacobian_inverse_computation_) {
+		*robot_->jacobianInverse() = computeJacobianInverse();
+	}
 
 	// std::cout << "force_sum: " << force_sum.transpose() << std::endl;
 	// std::cout << "torque_sum: " << torque_sum.transpose() << std::endl;
@@ -111,11 +119,11 @@ void SafetyController::compute() {
 	// std::cout << "*******************************************************************\n";
 
 	// Joint level damping control
-	*robot_->joint_velocity_command_ = robot_->joint_damping_matrix_->inverse() * torque_sum + joint_velocity_sum;
+	*robot_->joint_velocity_command_ = torque_sum.cwiseQuotient(*robot_->joint_damping_matrix_) + joint_velocity_sum;
 	// std::cout << "joint vel cmd: " << robot_->joint_velocity_command_->transpose() << std::endl;
 
 	// Control point level damping control
-	*robot_->control_point_velocity_command_ = robot_->control_point_damping_matrix_->inverse() * force_sum + velocity_sum;
+	*robot_->control_point_velocity_command_ = force_sum.cwiseQuotient(*robot_->control_point_damping_matrix_) + velocity_sum;
 	// std::cout << "cp vel cmd: " << robot_->control_point_velocity_command_->transpose() << std::endl;
 
 	// Cumulative effect on the joint velocity of all inputs

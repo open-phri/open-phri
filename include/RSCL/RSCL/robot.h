@@ -53,13 +53,13 @@ public:
 	 * @brief Damping matrix used by the joint-level damping control.
 	 * @return A shared pointer to the matrix.
 	 */
-	MatrixXdPtr jointDampingMatrix() const;
+	VectorXdPtr jointDampingMatrix() const;
 
 	/**
 	 * @brief Damping matrix used by the control point-level damping control.
 	 * @return A shared pointer to the matrix.
 	 */
-	Matrix6dPtr controlPointDampingMatrix() const;
+	Vector6dPtr controlPointDampingMatrix() const;
 
 
 	/**
@@ -211,8 +211,8 @@ private:
 
 	std::string name_;
 	size_t joint_count_;
-	MatrixXdPtr joint_damping_matrix_;
-	Matrix6dPtr control_point_damping_matrix_;
+	VectorXdPtr joint_damping_matrix_;
+	Vector6dPtr control_point_damping_matrix_;
 
 	VectorXdPtr joint_velocity_;
 	VectorXdPtr joint_velocity_sum_;

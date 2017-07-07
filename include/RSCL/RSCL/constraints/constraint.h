@@ -52,6 +52,12 @@ public:
 	virtual double compute() = 0;
 
 	/**
+	 * @brief Call operator, shortcut for compute.
+	 * @return The constraint's evaluated value.
+	 */
+	virtual double operator()() final;
+
+	/**
 	 * @brief Set the robot to work with. Should not be set by the user.
 	 * @param robot The robot.
 	 */

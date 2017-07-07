@@ -113,7 +113,7 @@ public:
 
 	void setSynchronizationMethod(TrajectorySynchronization sync);
 
-	virtual void computeParameters();
+	virtual void computeParameters(double v_eps = 1e-6, double a_eps = 1e-6);
 	virtual bool compute();
 
 private:

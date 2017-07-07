@@ -10,12 +10,11 @@ using namespace RSCL;
 
 
 DataLogger::DataLogger(
-	const SafetyController& controller,
 	const std::string& directory,
 	doubleConstPtr time,
 	bool create_gnuplot_files,
 	bool delay_disk_write) :
-	controller_(controller),
+	controller_(nullptr),
 	directory_(directory),
 	time_(time),
 	create_gnuplot_files_(create_gnuplot_files),
@@ -35,12 +34,15 @@ DataLogger::~DataLogger() {
 	}
 }
 
+void DataLogger::logSafetyControllerData(SafetyController* controller) {
+	controller_ = controller;
+}
+
 void DataLogger::logRobotData(RobotConstPtr robot) {
 	size_t joint_vec_size = robot->jointCount();
-	size_t joint_mat_size = joint_vec_size*joint_vec_size;
 
-	logExternalData("jointDampingMatrix", robot->jointDampingMatrix()->data(), joint_mat_size);
-	logExternalData("controlPointDampingMatrix", robot->controlPointDampingMatrix()->data(), 36);
+	logExternalData("jointDampingMatrix", robot->jointDampingMatrix()->data(), joint_vec_size);
+	logExternalData("controlPointDampingMatrix", robot->controlPointDampingMatrix()->data(), 6);
 
 	logExternalData("jointVelocity", robot->jointVelocity()->data(), joint_vec_size);
 	logExternalData("jointVelocitySum", robot->jointVelocitySum()->data(), joint_vec_size);
@@ -70,6 +72,12 @@ void DataLogger::logRobotData(RobotConstPtr robot) {
 
 void DataLogger::logExternalData(const std::string& data_name, const double* data, size_t data_count) {
 	external_data_[&createLog(data_name, data_count)] = {.data=data, .size=data_count};
+}
+
+void DataLogger::reset() {
+	controller_ = nullptr;
+	robot_.reset();
+	external_data_.clear();
 }
 
 std::ofstream& DataLogger::createLog(const std::string& data_name, size_t data_count) {
@@ -129,55 +137,55 @@ void DataLogger::logData(std::ofstream& file, const double* data, size_t data_co
 }
 
 void DataLogger::process() {
-	for(auto it=controller_.constraints_begin(); it!=controller_.constraints_end(); ++it) {
-		const std::string& data_name = it->first;
-		auto& file = log_files_[data_name];
-		if(not file.is_open()) {
-			createLog(data_name, 1);
+	if(controller_ != nullptr) {
+		for(auto it=controller_->constraints_begin(); it!=controller_->constraints_end(); ++it) {
+			const std::string& data_name = it->first;
+			auto& file = log_files_[data_name];
+			if(not file.is_open()) {
+				createLog(data_name, 1);
+			}
+			logData(file, &(it->second.last_value), 1);
 		}
-		logData(file, &(it->second.last_value), 1);
+
+		for(auto it=controller_->force_generators_begin(); it!=controller_->force_generators_end(); ++it) {
+			const std::string& data_name = it->first;
+			auto& file = log_files_[data_name];
+			if(not file.is_open()) {
+				createLog(data_name, 6);
+			}
+			logData(file, it->second.last_value.data(), 6);
+		}
+
+		for(auto it=controller_->torque_generators_begin(); it!=controller_->torque_generators_end(); ++it) {
+			const std::string& data_name = it->first;
+			auto& file = log_files_[data_name];
+			if(not file.is_open()) {
+				createLog(data_name, 6);
+			}
+			logData(file, it->second.last_value.data(), 6);
+		}
+
+		for(auto it=controller_->velocity_generators_begin(); it!=controller_->velocity_generators_end(); ++it) {
+			const std::string& data_name = it->first;
+			auto& file = log_files_[data_name];
+			if(not file.is_open()) {
+				createLog(data_name, 6);
+			}
+			logData(file, it->second.last_value.data(), 6);
+		}
+
+		for(auto it=controller_->joint_velocity_generators_begin(); it!=controller_->joint_velocity_generators_end(); ++it) {
+			const std::string& data_name = it->first;
+			auto& file = log_files_[data_name];
+			if(not file.is_open()) {
+				createLog(data_name, 6);
+			}
+			logData(file, it->second.last_value.data(), 6);
+		}
 	}
 
-	for(auto it=controller_.force_generators_begin(); it!=controller_.force_generators_end(); ++it) {
-		const std::string& data_name = it->first;
-		auto& file = log_files_[data_name];
-		if(not file.is_open()) {
-			createLog(data_name, 6);
-		}
-		logData(file, it->second.last_value.data(), 6);
-	}
-
-	for(auto it=controller_.torque_generators_begin(); it!=controller_.torque_generators_end(); ++it) {
-		const std::string& data_name = it->first;
-		auto& file = log_files_[data_name];
-		if(not file.is_open()) {
-			createLog(data_name, 6);
-		}
-		logData(file, it->second.last_value.data(), 6);
-	}
-
-	for(auto it=controller_.velocity_generators_begin(); it!=controller_.velocity_generators_end(); ++it) {
-		const std::string& data_name = it->first;
-		auto& file = log_files_[data_name];
-		if(not file.is_open()) {
-			createLog(data_name, 6);
-		}
-		logData(file, it->second.last_value.data(), 6);
-	}
-
-	for(auto it=controller_.joint_velocity_generators_begin(); it!=controller_.joint_velocity_generators_end(); ++it) {
-		const std::string& data_name = it->first;
-		auto& file = log_files_[data_name];
-		if(not file.is_open()) {
-			createLog(data_name, 6);
-		}
-		logData(file, it->second.last_value.data(), 6);
-	}
-
-	if(static_cast<bool>(robot_)) {
-		for(auto& data: external_data_) {
-			logData(*data.first, data.second.data, data.second.size);
-		}
+	for(auto& data: external_data_) {
+		logData(*data.first, data.second.data, data.second.size);
 	}
 }
 

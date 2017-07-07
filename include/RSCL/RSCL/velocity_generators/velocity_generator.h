@@ -46,6 +46,12 @@ public:
 	 * @return The velocity generator's evaluated value.
 	 */
 	virtual Vector6d compute() = 0;
+
+	/**
+	 * @brief Call operator, shortcut for compute().
+	 * @return The velocity generator's evaluated value.
+	 */
+	virtual Vector6d operator()() final;
 };
 
 using VelocityGeneratorPtr = std::shared_ptr<VelocityGenerator>;

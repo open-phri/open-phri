@@ -47,6 +47,7 @@ public:
 
 	void init();
 	double compute();
+	double operator()();
 
 private:
 	Vector2dPtr position_;

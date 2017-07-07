@@ -46,7 +46,7 @@ int main(int argc, char const *argv[]) {
 
 	safety_controller.add(
 		"ext force proxy",
-		ForceProxy(robot->controlPointExternalForce()));
+		ExternalForce(robot));
 
 	signal(SIGINT, sigint_handler);
 

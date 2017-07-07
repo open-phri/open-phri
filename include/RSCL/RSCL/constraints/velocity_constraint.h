@@ -50,7 +50,8 @@ public:
 	/***		Algorithm		***/
 	virtual double compute() override;
 
-private:
+protected:
+	VelocityConstraint() = default;
 	doubleConstPtr maximum_velocity_;
 };
 

@@ -28,6 +28,7 @@
 #pragma once
 
 #include <RSCL/force_generators/force_proxy.h>
+#include <RSCL/force_generators/external_force.h>
 #include <RSCL/force_generators/potential_field_generator.h>
 #include <RSCL/force_generators/stiffness_generator.h>
 #include <RSCL/force_generators/mass_generator.h>

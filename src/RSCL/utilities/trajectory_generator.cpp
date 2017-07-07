@@ -124,8 +124,10 @@ bool Trajectory::computeTimings(double v_eps, double a_eps) {
 		return false;
 	}
 
+	bool ret = true;
 	total_minimum_time_ = 0.;
 
+	#pragma omp parallel for
 	for (size_t i = 0; i < segments; ++i) {
 		auto& params = path_params_[i];
 		if(not params.isFixedTime) {
@@ -141,7 +143,8 @@ bool Trajectory::computeTimings(double v_eps, double a_eps) {
 				ok = false;
 			}
 			if(not ok) {
-				return false;
+				ret = false;
+				continue;
 			}
 
 			auto& poly_params = params.poly_params;
@@ -149,28 +152,35 @@ bool Trajectory::computeTimings(double v_eps, double a_eps) {
 
 			bool vmax_found = false;
 			bool amax_found = false;
+			double v_max, a_max;
+			auto get_vmax_error = [&poly_params, &params, &v_max]() {
+									  v_max = FifthOrderPolynomial::getFirstDerivativeMaximum(poly_params);
+									  return v_max - params.max_velocity;
+								  };
+			auto get_amax_error = [&poly_params, &params, &a_max]() {
+									  a_max = FifthOrderPolynomial::getSecondDerivativeMaximum(poly_params);
+									  return a_max - params.max_acceleration;
+								  };
+			// std::cout << "--------------------------------------\n";
 			while(not (vmax_found and amax_found)) {
+				++_compute_timings_total_iter;
 				FifthOrderPolynomial::computeParameters(poly_params);
 
 				if(not vmax_found) {
-					++_compute_timings_total_iter;
-					double v_max = std::abs(FifthOrderPolynomial::getFirstDerivativeMaximum(poly_params));
-					double v_error = v_max - params.max_velocity;
-					double v_error_abs = std::abs(v_error);
+					double v_error_abs = std::abs(get_vmax_error());
 					vmax_found = v_error_abs < v_eps;
 					if(not vmax_found) {
 						poly_params.xf = poly_params.xf*v_max/params.max_velocity;
 					}
 				}
 				else if(not amax_found) {
-					++_compute_timings_total_iter;
-					double a_max = std::abs(FifthOrderPolynomial::getSecondDerivativeMaximum(poly_params));
-					double a_error = a_max - params.max_acceleration;
-					amax_found = a_error < a_eps;
+					double a_error_abs = std::abs(get_amax_error());
+					amax_found = a_error_abs < a_eps;
 					if(not amax_found) {
 						poly_params.xf = poly_params.xf*(std::sqrt(a_max/params.max_acceleration));
 					}
 				}
+				// std::cout << "vmax found: " << vmax_found << ", amax found: " << amax_found << std::endl;
 			}
 
 			params.minimum_time = poly_params.xf;
@@ -179,7 +189,7 @@ bool Trajectory::computeTimings(double v_eps, double a_eps) {
 		total_minimum_time_ += params.minimum_time;
 	}
 
-	return true;
+	return ret;
 }
 
 bool Trajectory::compute() {
@@ -223,9 +233,10 @@ void TrajectoryGenerator::setSynchronizationMethod(TrajectorySynchronization syn
 	sync_ = sync;
 }
 
-void TrajectoryGenerator::computeParameters() {
-	for(auto& traj: items_) {
-		bool ok = traj.second->computeTimings();
+void TrajectoryGenerator::computeParameters(double v_eps, double a_eps) {
+	// Have not seen the benefit of using OpenMP for this part, it is slower or equivalent to version below
+	for(const auto& traj: items_) {
+		bool ok = traj.second->computeTimings(v_eps,a_eps);
 		if(not ok) {
 			std::cerr << "In TrajectoryGenerator::computeParameters: couldn't compute timings for trajectory " << traj.first << std::endl;
 		}

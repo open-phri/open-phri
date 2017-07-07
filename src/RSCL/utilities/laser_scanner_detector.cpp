@@ -1,4 +1,5 @@
 #include <RSCL/utilities/laser_scanner_detector.h>
+#include <iostream>
 
 using namespace RSCL;
 
@@ -58,6 +59,12 @@ double LaserScannerDetector::compute() {
 		position_->y() = 0.;
 	}
 
+	// std::cout << "position: " << position_->transpose() << ", min_dist: " << min_dist << std::endl;
+
 	*distance_ = min_dist;
 	return min_dist;
+}
+
+double LaserScannerDetector::operator()() {
+	return compute();
 }

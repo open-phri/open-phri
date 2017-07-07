@@ -38,10 +38,11 @@ public:
 	Clock(double sample_time);
 	~Clock() = default;
 
+	void reset();
 	std::shared_ptr<double> getTime() const;
 
-	void update();
-	void operator()();
+	double update();
+	double operator()();
 
 private:
 	std::chrono::high_resolution_clock::time_point init_time_;

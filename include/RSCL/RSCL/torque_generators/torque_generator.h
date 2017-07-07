@@ -44,6 +44,12 @@ public:
 	 * @return The torque generator's evaluated value.
 	 */
 	virtual VectorXd compute() = 0;
+
+	/**
+	 * @brief Call operator, shortcut for compute().
+	 * @return The torque generator's evaluated value.
+	 */
+	virtual VectorXd operator()() final;
 };
 
 using TorqueGeneratorPtr = std::shared_ptr<TorqueGenerator>;
