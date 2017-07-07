@@ -15,6 +15,10 @@ file(
 add_library(RSCL SHARED ${rscl_source_files})
 set_property(TARGET RSCL PROPERTY CXX_STANDARD 14)
 
+if(USE_OPENMP)
+    set_target_properties(RSCL PROPERTIES COMPILE_FLAGS "${OpenMP_CXX_FLAGS}" LINK_FLAGS "${OpenMP_CXX_FLAGS}")
+endif()
+
 
 ###				vrep_remote_api library				###
 # Set V-REP flags according to the platform

@@ -3,6 +3,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.0.2)
 option(GEN_PYTHON_BINDINGS 	"Generate bindings for Python" OFF)
 option(RUN_PYTHON_TESTS 	"Run also the Python version of the tests" OFF)
 option(FORCE_CMAKE_BUILD 	"Build with CMake only even if inside a PID workspace" OFF)
+option(USE_OPENMP 			"Make use of OpenMP to parallize certain parts of the library" OFF)
 
 # Check if we're inside a PID workspace, if not, fall back to a pure CMake configuration
 set(WORKSPACE_DIR ${CMAKE_SOURCE_DIR}/../.. CACHE PATH "root of the packages workspace directory")

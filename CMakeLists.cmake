@@ -42,3 +42,7 @@ if(BUILD_DOCUMENTATION)
         COMMENT "Generating API documentation with Doxygen"
         VERBATIM)
 endif()
+
+if(USE_OPENMP)
+    find_package(OpenMP)
+endif()
