@@ -4,8 +4,9 @@ variables:
   PACKAGE_HAS_EXAMPLES: "true"
   PACKAGE_HAS_SITE: "false"
   PACKAGE_BINARIES_PUBLISHED: "false"
+  PACKAGE_DEV_INFO_PUBLISHED: "false"
 
-cache:  
+cache:
   key: "$CI_BUILD_REF/$CI_BUILD_REF_NAME"
   paths:
    - binaries/
@@ -13,69 +14,60 @@ cache:
 
 stages:
  - configure
- - compile
- - test
- - install
+ - build
  - deploy
  - cleanup
 
-before_script:
-  - eval $(ssh-agent -s)
-  - ssh-add <(echo "$SSH_PRIVATE_KEY")
-  - mkdir -p ~/.ssh
-  - '[[ -f /.dockerenv ]] && echo "$SSH_SERVER_HOSTKEYS" > ~/.ssh/known_hosts'
-
 ############ patterns for in job description #############
 
-# Hidden key that defines an anchor for reusing artifacts def when a build fails
-.artifacts_:
-    artifacts: &artifacts_upload
+# Hidden key that defines an anchor for reusing artifacts def
+.artifacts_integration_:
+    artifacts: &artifacts_integration
+        name: "artefacts_${CI_BUILD_REF_NAME}"
+        paths:
+          - build/release/share/developper_info.tgz
+
+.artifacts_release_:
+    artifacts: &artifacts_release
         name: "artefacts_${CI_BUILD_REF_NAME}"
         paths:
           - build/release/share/dependencies.txt
-          - build/debug/share/coverage.tgz
-          - build/release/share/staticchecks.tgz
 
 # Hidden key that defines an anchor for reusing artifacts uploaded when a build fails
-.artifacts_when_failing_: 
-    artifacts: &artifacts_on_failure  
+.artifacts_when_failing_:
+    artifacts: &artifacts_on_failure
         name: "artefacts_${CI_BUILD_REF_NAME}"
         paths:
           - build/release/share/dependencies.txt
         when: on_failure
 
 # Hidden key that defines an anchor for reusing code relative to integration branch
-.selection_integration_: &job_selection_integration  
+.selection_integration_: &job_selection_integration
     only:
         - integration
 
 # Hidden key that defines an anchor for reusing code relative to released versions
-.selection_release_: &job_selection_release  
+.selection_release_: &job_selection_release
     only:
          - tags
          - /^v.*$/
 
-.test_any_: &test_job
-    stage: test
+.build_any_: &build_job
+    stage: build
     script:
-         - chmod 700 ./share/ci/test_package.sh
-         - ./share/ci/test_package.sh
-
-.compile_any_: &compile_job
-    stage: compile
-    script:
-         - cd build && cmake --build . && cd ..
+      - chmod 700 ./share/ci/build_package.sh
+      - ./share/ci/build_package.sh
 
 .cleanup_any_: &cleanup_job
    stage: cleanup
    script:
-     - cd build && rm -Rf * && cd ..
-     - cd binaries && rm -Rf * && cd ..
+     - chmod 700 ./share/ci/cleanup_package.sh
+     - ./share/ci/cleanup_package.sh
    when: always
 
 ############ generic jobs patterns #############
 
-### configure (CMake project configuration) 
+### configure (CMake project configuration)
 .configure_integration_: &configure_integration
     stage: configure
     script:
@@ -93,47 +85,19 @@ before_script:
          - chmod 700 ./share/ci/configure_package_release.sh
          - ./share/ci/configure_package_release.sh
     <<: *job_selection_release
- 
-### compile  
 
-.compile_integration_: &compile_integration
-    <<: *compile_job
+### build
+
+.build_integration_: &build_integration
+    <<: *build_job
     artifacts: *artifacts_on_failure
     <<: *job_selection_integration
 
-.compile_release_: &compile_release
-    <<: *compile_job
+.build_release_: &build_release
+    <<: *build_job
     artifacts: *artifacts_on_failure
     <<: *job_selection_release
 
-### run tests 
-
-.test_integration_: &test_integration
-    <<: *test_job
-    artifacts: *artifacts_on_failure
-    <<: *job_selection_integration
-
-.test_release_: &test_release
-    <<: *test_job
-    artifacts: *artifacts_on_failure
-    <<: *job_selection_release
-
-### install package into the workspace
-
-.install_integration_: &install_integration
-    stage: install
-    script:
-         - cd build && cmake --build . --target install && cd ..
-    artifacts: *artifacts_on_failure
-    <<: *job_selection_integration
-
-.install_release_: &install_release
-    stage: install
-    script:
-         - chmod 700 ./share/ci/install_package_release.sh
-         - ./share/ci/install_package_release.sh
-    artifacts: *artifacts_on_failure
-    <<: *job_selection_release
 
 ### deploy (make interesting part of the result available wiki+doc, binaries)
 
@@ -142,7 +106,7 @@ before_script:
     script:
          - chmod 700 ./share/ci/deploy_package_integration.sh
          - ./share/ci/deploy_package_integration.sh
-    artifacts: *artifacts_upload
+    artifacts: *artifacts_integration
     <<: *job_selection_integration
 
 .deploy_release_: &deploy_release
@@ -150,7 +114,7 @@ before_script:
     script:
          - chmod 700 ./share/ci/deploy_package_release.sh
          - ./share/ci/deploy_package_release.sh
-    artifacts: *artifacts_upload
+    artifacts: *artifacts_release
     <<: *job_selection_release
 
 ### cleanup when pipeline is finished
@@ -165,9 +129,6 @@ before_script:
 
 ############ patterns for platforms selection #############
 # here the project generates patterns for runner selection according for all platforms defined in the workspace
-
-
-
 #platform arm_32_abi11
 
 .selection_platform_arm_32_abi11_: &selection_platform_arm_32_abi11
@@ -243,16 +204,8 @@ configure_integration_arm_32_abi11:
   <<: *configure_integration
   <<: *selection_platform_arm_32_abi11
 
-compile_integration_arm_32_abi11:
-  <<: *compile_integration
-  <<: *selection_platform_arm_32_abi11
-
-test_integration_arm_32_abi11:
-  <<: *test_integration
-  <<: *selection_platform_arm_32_abi11
-
-install_integration_arm_32_abi11:
-  <<: *install_integration
+build_integration_arm_32_abi11:
+  <<: *build_integration
   <<: *selection_platform_arm_32_abi11
 
 deploy_integration_arm_32_abi11:
@@ -269,16 +222,8 @@ configure_release_arm_32_abi11:
   <<: *configure_release
   <<: *selection_platform_arm_32_abi11
 
-compile_release_arm_32_abi11:
-  <<: *compile_release
-  <<: *selection_platform_arm_32_abi11
-
-test_release_arm_32_abi11:
-  <<: *test_release
-  <<: *selection_platform_arm_32_abi11
-
-install_release_arm_32_abi11:
-  <<: *install_release
+build_release_arm_32_abi11:
+  <<: *build_release
   <<: *selection_platform_arm_32_abi11
 
 deploy_release_arm_32_abi11:
@@ -297,16 +242,8 @@ configure_integration_x86_32_linux_abi11:
   <<: *configure_integration
   <<: *selection_platform_x86_32_linux_abi11
 
-compile_integration_x86_32_linux_abi11:
-  <<: *compile_integration
-  <<: *selection_platform_x86_32_linux_abi11
-
-test_integration_x86_32_linux_abi11:
-  <<: *test_integration
-  <<: *selection_platform_x86_32_linux_abi11
-
-install_integration_x86_32_linux_abi11:
-  <<: *install_integration
+build_integration_x86_32_linux_abi11:
+  <<: *build_integration
   <<: *selection_platform_x86_32_linux_abi11
 
 deploy_integration_x86_32_linux_abi11:
@@ -323,16 +260,8 @@ configure_release_x86_32_linux_abi11:
   <<: *configure_release
   <<: *selection_platform_x86_32_linux_abi11
 
-compile_release_x86_32_linux_abi11:
-  <<: *compile_release
-  <<: *selection_platform_x86_32_linux_abi11
-
-test_release_x86_32_linux_abi11:
-  <<: *test_release
-  <<: *selection_platform_x86_32_linux_abi11
-
-install_release_x86_32_linux_abi11:
-  <<: *install_release
+build_release_x86_32_linux_abi11:
+  <<: *build_release
   <<: *selection_platform_x86_32_linux_abi11
 
 deploy_release_x86_32_linux_abi11:
@@ -351,16 +280,8 @@ configure_integration_x86_32_linux_abi98:
   <<: *configure_integration
   <<: *selection_platform_x86_32_linux_abi98
 
-compile_integration_x86_32_linux_abi98:
-  <<: *compile_integration
-  <<: *selection_platform_x86_32_linux_abi98
-
-test_integration_x86_32_linux_abi98:
-  <<: *test_integration
-  <<: *selection_platform_x86_32_linux_abi98
-
-install_integration_x86_32_linux_abi98:
-  <<: *install_integration
+build_integration_x86_32_linux_abi98:
+  <<: *build_integration
   <<: *selection_platform_x86_32_linux_abi98
 
 deploy_integration_x86_32_linux_abi98:
@@ -377,16 +298,8 @@ configure_release_x86_32_linux_abi98:
   <<: *configure_release
   <<: *selection_platform_x86_32_linux_abi98
 
-compile_release_x86_32_linux_abi98:
-  <<: *compile_release
-  <<: *selection_platform_x86_32_linux_abi98
-
-test_release_x86_32_linux_abi98:
-  <<: *test_release
-  <<: *selection_platform_x86_32_linux_abi98
-
-install_release_x86_32_linux_abi98:
-  <<: *install_release
+build_release_x86_32_linux_abi98:
+  <<: *build_release
   <<: *selection_platform_x86_32_linux_abi98
 
 deploy_release_x86_32_linux_abi98:
@@ -405,16 +318,8 @@ configure_integration_x86_32_xenomai_abi98:
   <<: *configure_integration
   <<: *selection_platform_x86_32_xenomai_abi98
 
-compile_integration_x86_32_xenomai_abi98:
-  <<: *compile_integration
-  <<: *selection_platform_x86_32_xenomai_abi98
-
-test_integration_x86_32_xenomai_abi98:
-  <<: *test_integration
-  <<: *selection_platform_x86_32_xenomai_abi98
-
-install_integration_x86_32_xenomai_abi98:
-  <<: *install_integration
+build_integration_x86_32_xenomai_abi98:
+  <<: *build_integration
   <<: *selection_platform_x86_32_xenomai_abi98
 
 deploy_integration_x86_32_xenomai_abi98:
@@ -431,16 +336,8 @@ configure_release_x86_32_xenomai_abi98:
   <<: *configure_release
   <<: *selection_platform_x86_32_xenomai_abi98
 
-compile_release_x86_32_xenomai_abi98:
-  <<: *compile_release
-  <<: *selection_platform_x86_32_xenomai_abi98
-
-test_release_x86_32_xenomai_abi98:
-  <<: *test_release
-  <<: *selection_platform_x86_32_xenomai_abi98
-
-install_release_x86_32_xenomai_abi98:
-  <<: *install_release
+build_release_x86_32_xenomai_abi98:
+  <<: *build_release
   <<: *selection_platform_x86_32_xenomai_abi98
 
 deploy_release_x86_32_xenomai_abi98:
@@ -459,16 +356,8 @@ configure_integration_x86_64_linux_abi11:
   <<: *configure_integration
   <<: *selection_platform_x86_64_linux_abi11
 
-compile_integration_x86_64_linux_abi11:
-  <<: *compile_integration
-  <<: *selection_platform_x86_64_linux_abi11
-
-test_integration_x86_64_linux_abi11:
-  <<: *test_integration
-  <<: *selection_platform_x86_64_linux_abi11
-
-install_integration_x86_64_linux_abi11:
-  <<: *install_integration
+build_integration_x86_64_linux_abi11:
+  <<: *build_integration
   <<: *selection_platform_x86_64_linux_abi11
 
 deploy_integration_x86_64_linux_abi11:
@@ -485,16 +374,8 @@ configure_release_x86_64_linux_abi11:
   <<: *configure_release
   <<: *selection_platform_x86_64_linux_abi11
 
-compile_release_x86_64_linux_abi11:
-  <<: *compile_release
-  <<: *selection_platform_x86_64_linux_abi11
-
-test_release_x86_64_linux_abi11:
-  <<: *test_release
-  <<: *selection_platform_x86_64_linux_abi11
-
-install_release_x86_64_linux_abi11:
-  <<: *install_release
+build_release_x86_64_linux_abi11:
+  <<: *build_release
   <<: *selection_platform_x86_64_linux_abi11
 
 deploy_release_x86_64_linux_abi11:
@@ -513,16 +394,8 @@ configure_integration_x86_64_linux_abi98:
   <<: *configure_integration
   <<: *selection_platform_x86_64_linux_abi98
 
-compile_integration_x86_64_linux_abi98:
-  <<: *compile_integration
-  <<: *selection_platform_x86_64_linux_abi98
-
-test_integration_x86_64_linux_abi98:
-  <<: *test_integration
-  <<: *selection_platform_x86_64_linux_abi98
-
-install_integration_x86_64_linux_abi98:
-  <<: *install_integration
+build_integration_x86_64_linux_abi98:
+  <<: *build_integration
   <<: *selection_platform_x86_64_linux_abi98
 
 deploy_integration_x86_64_linux_abi98:
@@ -539,16 +412,8 @@ configure_release_x86_64_linux_abi98:
   <<: *configure_release
   <<: *selection_platform_x86_64_linux_abi98
 
-compile_release_x86_64_linux_abi98:
-  <<: *compile_release
-  <<: *selection_platform_x86_64_linux_abi98
-
-test_release_x86_64_linux_abi98:
-  <<: *test_release
-  <<: *selection_platform_x86_64_linux_abi98
-
-install_release_x86_64_linux_abi98:
-  <<: *install_release
+build_release_x86_64_linux_abi98:
+  <<: *build_release
   <<: *selection_platform_x86_64_linux_abi98
 
 deploy_release_x86_64_linux_abi98:
@@ -567,16 +432,8 @@ configure_integration_x86_64_macosx_abi11:
   <<: *configure_integration
   <<: *selection_platform_x86_64_macosx_abi11
 
-compile_integration_x86_64_macosx_abi11:
-  <<: *compile_integration
-  <<: *selection_platform_x86_64_macosx_abi11
-
-test_integration_x86_64_macosx_abi11:
-  <<: *test_integration
-  <<: *selection_platform_x86_64_macosx_abi11
-
-install_integration_x86_64_macosx_abi11:
-  <<: *install_integration
+build_integration_x86_64_macosx_abi11:
+  <<: *build_integration
   <<: *selection_platform_x86_64_macosx_abi11
 
 deploy_integration_x86_64_macosx_abi11:
@@ -593,16 +450,8 @@ configure_release_x86_64_macosx_abi11:
   <<: *configure_release
   <<: *selection_platform_x86_64_macosx_abi11
 
-compile_release_x86_64_macosx_abi11:
-  <<: *compile_release
-  <<: *selection_platform_x86_64_macosx_abi11
-
-test_release_x86_64_macosx_abi11:
-  <<: *test_release
-  <<: *selection_platform_x86_64_macosx_abi11
-
-install_release_x86_64_macosx_abi11:
-  <<: *install_release
+build_release_x86_64_macosx_abi11:
+  <<: *build_release
   <<: *selection_platform_x86_64_macosx_abi11
 
 deploy_release_x86_64_macosx_abi11:
@@ -621,16 +470,8 @@ configure_integration_x86_64_macosx_abi98:
   <<: *configure_integration
   <<: *selection_platform_x86_64_macosx_abi98
 
-compile_integration_x86_64_macosx_abi98:
-  <<: *compile_integration
-  <<: *selection_platform_x86_64_macosx_abi98
-
-test_integration_x86_64_macosx_abi98:
-  <<: *test_integration
-  <<: *selection_platform_x86_64_macosx_abi98
-
-install_integration_x86_64_macosx_abi98:
-  <<: *install_integration
+build_integration_x86_64_macosx_abi98:
+  <<: *build_integration
   <<: *selection_platform_x86_64_macosx_abi98
 
 deploy_integration_x86_64_macosx_abi98:
@@ -647,16 +488,8 @@ configure_release_x86_64_macosx_abi98:
   <<: *configure_release
   <<: *selection_platform_x86_64_macosx_abi98
 
-compile_release_x86_64_macosx_abi98:
-  <<: *compile_release
-  <<: *selection_platform_x86_64_macosx_abi98
-
-test_release_x86_64_macosx_abi98:
-  <<: *test_release
-  <<: *selection_platform_x86_64_macosx_abi98
-
-install_release_x86_64_macosx_abi98:
-  <<: *install_release
+build_release_x86_64_macosx_abi98:
+  <<: *build_release
   <<: *selection_platform_x86_64_macosx_abi98
 
 deploy_release_x86_64_macosx_abi98:
@@ -675,16 +508,8 @@ configure_integration_x86_64_xenomai_abi11:
   <<: *configure_integration
   <<: *selection_platform_x86_64_xenomai_abi11
 
-compile_integration_x86_64_xenomai_abi11:
-  <<: *compile_integration
-  <<: *selection_platform_x86_64_xenomai_abi11
-
-test_integration_x86_64_xenomai_abi11:
-  <<: *test_integration
-  <<: *selection_platform_x86_64_xenomai_abi11
-
-install_integration_x86_64_xenomai_abi11:
-  <<: *install_integration
+build_integration_x86_64_xenomai_abi11:
+  <<: *build_integration
   <<: *selection_platform_x86_64_xenomai_abi11
 
 deploy_integration_x86_64_xenomai_abi11:
@@ -701,16 +526,8 @@ configure_release_x86_64_xenomai_abi11:
   <<: *configure_release
   <<: *selection_platform_x86_64_xenomai_abi11
 
-compile_release_x86_64_xenomai_abi11:
-  <<: *compile_release
-  <<: *selection_platform_x86_64_xenomai_abi11
-
-test_release_x86_64_xenomai_abi11:
-  <<: *test_release
-  <<: *selection_platform_x86_64_xenomai_abi11
-
-install_release_x86_64_xenomai_abi11:
-  <<: *install_release
+build_release_x86_64_xenomai_abi11:
+  <<: *build_release
   <<: *selection_platform_x86_64_xenomai_abi11
 
 deploy_release_x86_64_xenomai_abi11:
