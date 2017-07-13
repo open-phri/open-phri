@@ -171,6 +171,12 @@ public:
 	Vector6dPtr controlPointCurrentVelocity() const;
 
 	/**
+	 * @brief Current control point acceleration.
+	 * @return A shared pointer to the acceleration.
+	 */
+	Vector6dPtr controlPointCurrentAcceleration() const;
+
+	/**
 	 * @brief Current control point pose external, read from the robot.
 	 * @return A shared pointer to the force.
 	 */
@@ -235,6 +241,7 @@ private:
 	Vector6dPtr control_point_current_pose_;
 	Vector6dPtr control_point_target_pose_;
 	Vector6dPtr control_point_current_velocity_;
+	Vector6dPtr control_point_current_acceleration_;
 	Vector6dPtr control_point_external_force_;
 
 	doublePtr scaling_factor_;

@@ -55,6 +55,13 @@ public:
 	bool computeParameters();
 	bool computeTimings(double v_eps = 1e-6, double a_eps = 1e-6);
 	bool compute();
+	/**
+	 * @brief Call operator, shortcut for compute()
+	 * @return The new output data.
+	 */
+	virtual double operator()() final;
+
+	void reset();
 
 	double getCurrentPathMinimumTime();
 	double getTrajectoryMinimumTime();
@@ -115,6 +122,13 @@ public:
 
 	virtual void computeParameters(double v_eps = 1e-6, double a_eps = 1e-6);
 	virtual bool compute();
+	/**
+	 * @brief Call operator, shortcut for compute()
+	 * @return The new output data.
+	 */
+	virtual double operator()() final;
+
+	void reset();
 
 private:
 	TrajectorySynchronization sync_;

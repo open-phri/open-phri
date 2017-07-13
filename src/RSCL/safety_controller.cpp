@@ -37,23 +37,26 @@ void SafetyController::skipJacobianInverseComputation(bool on) {
 
 bool SafetyController::addConstraint(const std::string& name, ConstraintPtr constraint, bool force) {
 	constraint->setRobot(robot_);
-
 	return constraints_.add(name, {constraint}, force);
 }
 
 bool SafetyController::addForceGenerator(const std::string& name, ForceGeneratorPtr generator, bool force) {
+	generator->robot_ = robot_;
 	return force_generators_.add(name, {generator}, force);
 }
 
 bool SafetyController::addTorqueGenerator(const std::string& name, TorqueGeneratorPtr generator, bool force) {
+	generator->robot_ = robot_;
 	return torque_generators_.add(name, {generator}, force);
 }
 
 bool SafetyController::addVelocityGenerator(const std::string& name, VelocityGeneratorPtr generator, bool force) {
+	generator->robot_ = robot_;
 	return velocity_generators_.add(name, {generator}, force);
 }
 
 bool SafetyController::addJointVelocityGenerator(const std::string& name, JointVelocityGeneratorPtr generator, bool force) {
+	generator->robot_ = robot_;
 	return joint_velocity_generators_.add(name, {generator}, force);
 }
 

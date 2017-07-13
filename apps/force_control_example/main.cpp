@@ -50,7 +50,6 @@ int main(int argc, char const *argv[]) {
 	selection->z() = 1.;
 
 	auto force_control = make_shared<ForceControl>(
-		robot->controlPointExternalForce(),
 		target_force,
 		SAMPLE_TIME,
 		p_gain,

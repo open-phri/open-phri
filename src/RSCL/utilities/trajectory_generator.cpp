@@ -222,6 +222,16 @@ bool Trajectory::compute() {
 	return false;
 }
 
+double Trajectory::operator()() {
+	return compute();
+}
+
+void Trajectory::reset() {
+	current_section_ = 0;
+	for(auto& param: path_params_) {
+		param.current_time = 0.;
+	}
+}
 
 
 TrajectoryGenerator::TrajectoryGenerator(TrajectorySynchronization sync)
@@ -292,4 +302,14 @@ bool TrajectoryGenerator::compute() {
 	}
 
 	return all_ok;
+}
+
+double TrajectoryGenerator::operator()() {
+	return compute();
+}
+
+void TrajectoryGenerator::reset() {
+	for(auto& traj: items_) {
+		traj.second->reset();
+	}
 }

@@ -37,28 +37,17 @@ namespace RSCL {
 class StiffnessGenerator : public ForceGenerator {
 public:
 	/**
-	 * @brief Construct a stiffness generator given a stiffness and a target position in the TCP frame.
+	 * @brief Construct a stiffness generator given a stiffness and a target position.
 	 * @param stiffness The virtual stiffness value.
-	 * @param target_position The position target in the TCP frame.
-	 */
-	StiffnessGenerator(Matrix6dConstPtr stiffness, Vector6dConstPtr target_position);
-
-	/**
-	 * @brief Construct a stiffness generator given a stiffness and a target position in the chosen frame.
-	 * @param stiffness The virtual stiffness value.
-	 * @param target_position The position target in the chosen frame.
-	 * @param robot_position The robot position in the chosen frame.
-	 * @param spatial_transformation The spatial transformation matrix between the chosen frame and the TCP frame
-	 * @param do_transpose [optional] If set to true, the spatial transformation matrix transpose will be used.
-	 * @param stiffness_in_tcp_frame [optional] If set to false, the stiffness will be applied in the chosen frame.
+	 * @param target_position The position target.
+	 * @param stiffness_frame The frame in which the stiffness is expressed.
+	 * @param target_position_frame The frame in which the position target is expressed.
 	 */
 	StiffnessGenerator(
 		Matrix6dConstPtr stiffness,
 		Vector6dConstPtr target_position,
-		Vector6dConstPtr robot_position,
-		Matrix6dConstPtr spatial_transformation,
-		bool do_transpose = true,
-		bool stiffness_in_tcp_frame = true);
+		ReferenceFrame stiffness_frame = ReferenceFrame::TCP,
+		ReferenceFrame target_position_frame = ReferenceFrame::TCP);
 
 	~StiffnessGenerator() = default;
 
@@ -67,10 +56,8 @@ public:
 private:
 	Matrix6dConstPtr stiffness_;
 	Vector6dConstPtr target_position_;
-	Vector6dConstPtr robot_position_;
-	Matrix6dConstPtr spatial_transformation_;
-	bool do_transpose_;
-	bool stiffness_in_tcp_frame_;
+	ReferenceFrame stiffness_frame_;
+	ReferenceFrame target_position_frame_;
 };
 
 using StiffnessGeneratorPtr = std::shared_ptr<StiffnessGenerator>;

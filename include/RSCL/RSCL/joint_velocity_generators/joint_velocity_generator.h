@@ -30,6 +30,8 @@
 #include <memory>
 
 #include <RSCL/definitions.h>
+#include <RSCL/robot.h>
+#include <RSCL/fwd_decl.h>
 
 namespace RSCL {
 
@@ -52,6 +54,10 @@ public:
 	 * @return The joint_velocity generator's evaluated value.
 	 */
 	virtual VectorXd operator()() final;
+
+protected:
+	friend class SafetyController;
+	RobotConstPtr robot_;
 };
 
 using JointVelocityGeneratorPtr = std::shared_ptr<JointVelocityGenerator>;

@@ -2,19 +2,41 @@
 
 using namespace RSCL;
 
-MassGenerator::MassGenerator(Matrix6dConstPtr mass, Vector6dConstPtr target_acceleration) :
+MassGenerator::MassGenerator(
+	Matrix6dConstPtr mass,
+	Vector6dConstPtr target_acceleration,
+	ReferenceFrame mass_frame,
+	ReferenceFrame target_acceleration_frame) :
+	ForceGenerator(mass_frame),
 	mass_(mass),
-	target_acceleration_(target_acceleration)
+	target_acceleration_(target_acceleration),
+	mass_frame_(mass_frame),
+	target_acceleration_frame_(target_acceleration_frame)
 {
-	robot_acceleration_ = std::make_shared<Vector6d>(Vector6d::Zero());
 }
 
-MassGenerator::MassGenerator(Matrix6dConstPtr mass, Vector6dConstPtr target_acceleration, Vector6dConstPtr robot_acceleration) :
-	MassGenerator(mass, target_acceleration)
-{
-	robot_acceleration_ = robot_acceleration;
-}
 
 Vector6d MassGenerator::compute() {
-	return *mass_ * (*target_acceleration_ - *robot_acceleration_);
+	Vector6d error;
+
+	if(mass_frame_ == ReferenceFrame::TCP) {
+		if(target_acceleration_frame_ == ReferenceFrame::TCP) {
+			error = *target_acceleration_;
+		}
+		else {
+			error = robot_->spatialTransformationMatrix()->transpose() * (*target_acceleration_ - *robot_->controlPointCurrentAcceleration());
+		}
+		force_ = *mass_ * error;
+	}
+	else {
+		if(target_acceleration_frame_ == ReferenceFrame::TCP) {
+			error = *robot_->spatialTransformationMatrix() * *target_acceleration_;
+		}
+		else {
+			error = *target_acceleration_ - *robot_->controlPointCurrentAcceleration();
+		}
+		force_ = *mass_ * error;
+	}
+
+	return ForceGenerator::compute();
 }

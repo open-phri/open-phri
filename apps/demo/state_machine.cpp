@@ -156,7 +156,6 @@ bool StateMachine::compute() {
 		}
 	}
 	else {
-		tcp_collision_sphere_center_->block<3,1>(0,0) = robot_->controlPointCurrentPose()->block<3,1>(0,0) + robot_->transformationMatrix()->block<3,3>(0,0) * tcp_collision_sphere_offset_;
 		laser_detector_.compute();
 		computeLaserDistanceInTCPFrame(operator_position_tcp_);
 
@@ -166,19 +165,19 @@ bool StateMachine::compute() {
 			auto stiffness = std::make_shared<RSCL::StiffnessGenerator>(
 				stiffness_mat_,
 				robot_->controlPointTargetPose(),
-				robot_->controlPointCurrentPose(),
-				robot_->spatialTransformationMatrix());
+				RSCL::ReferenceFrame::TCP,
+				RSCL::ReferenceFrame::Base);
 
 			controller_.add("stiffness", stiffness);
 			target_integrator_->force(*robot_->controlPointCurrentPose());
 
 			controller_.add(
 				"traj vel",
-				RSCL::VelocityProxy(target_velocity_, robot_->spatialTransformationMatrix()));
+				RSCL::VelocityProxy(target_velocity_, RSCL::ReferenceFrame::Base));
 
 			auto potential_field_generator = std::make_shared<RSCL::PotentialFieldGenerator>(
-				tcp_collision_sphere_center_,
-				robot_->spatialTransformationMatrix());
+				std::make_shared<RSCL::Vector3d>(tcp_collision_sphere_offset_),
+				RSCL::ReferenceFrame::Base);
 
 			auto obstacle_position = std::make_shared<RSCL::Vector6d>();
 			*obstacle_position << +6.3307e-03, -1.5126e-01, +9.9744e-01, 0., 0., 0.;
@@ -256,7 +255,6 @@ bool StateMachine::compute() {
 			selection->z() = 1.;
 
 			auto force_control = std::make_shared<RSCL::ForceControl>(
-				robot_->controlPointExternalForce(),
 				target_force,
 				SAMPLE_TIME,
 				p_gain,

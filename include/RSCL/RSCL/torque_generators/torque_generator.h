@@ -28,6 +28,8 @@
 #pragma once
 
 #include <RSCL/definitions.h>
+#include <RSCL/robot.h>
+#include <RSCL/fwd_decl.h>
 
 namespace RSCL {
 
@@ -50,6 +52,10 @@ public:
 	 * @return The torque generator's evaluated value.
 	 */
 	virtual VectorXd operator()() final;
+
+protected:
+	friend class SafetyController;
+	RobotConstPtr robot_;
 };
 
 using TorqueGeneratorPtr = std::shared_ptr<TorqueGenerator>;

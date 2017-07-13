@@ -72,29 +72,26 @@ using PotentialFieldObjectConstPtr = std::shared_ptr<const PotentialFieldObject>
  */
 class PotentialFieldGenerator : public ForceGenerator, public ObjectCollection<PotentialFieldObjectPtr> {
 public:
-	/**
-	 * @brief Construct a potential field generator where objects position are given in the TCP frame.
-	 */
-	PotentialFieldGenerator();
 
 	/**
-	 * @brief Construct a potential field generator where objects position are given in the same frame as robot_positon.
-	 * @param robot_position The positon of the robot in the same frame as the objects.
-	 * @param spatial_transformation The spatial transformation matrix between the chosen frame and the TCP frame
-	 * @param do_transpose [optional] If set to true, the spatial transformation matrix transpose will be used.
+	 * @brief Construct a potential field generator where objects position are given in the specified frame.
+	 * @param objects_frame The frame in which the positons of the objects are expressed .
 	 */
-	PotentialFieldGenerator(
-		Vector6dConstPtr robot_position,
-		Matrix6dConstPtr spatial_transformation,
-		bool do_transpose = true);
+	PotentialFieldGenerator(ReferenceFrame objects_frame = ReferenceFrame::TCP);
+
+	/**
+	 * @brief Construct a potential field generator where objects position are given in the specified frame.
+	 * @param offset An offset in the TCP frame at which the distances will be computed.
+	 * @param objects_frame The frame in which the positons of the objects are expressed.
+	 */
+	PotentialFieldGenerator(Vector3dConstPtr offset, ReferenceFrame objects_frame = ReferenceFrame::TCP);
 	~PotentialFieldGenerator() = default;
 
 	virtual Vector6d compute() override;
 
 private:
-	Vector6dConstPtr robot_position_;
-	Matrix6dConstPtr spatial_transformation_;
-	bool do_transpose_;
+	ReferenceFrame objects_frame_;
+	Vector3dConstPtr offset_;
 };
 
 using PotentialFieldGeneratorPtr = std::shared_ptr<PotentialFieldGenerator>;

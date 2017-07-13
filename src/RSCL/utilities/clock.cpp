@@ -12,7 +12,12 @@ Clock::Clock(double sample_time) : sample_time_(sample_time) {
 }
 
 void Clock::reset() {
-	init_time_ = std::chrono::high_resolution_clock::now();
+	if(sample_time_ < 0) {
+		init_time_ = std::chrono::high_resolution_clock::now();
+	}
+	else {
+		*time_ = 0.;
+	}
 }
 
 std::shared_ptr<double> Clock::getTime() const {

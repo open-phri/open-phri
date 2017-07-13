@@ -37,12 +37,12 @@ namespace RSCL {
 class ForceControl : public VelocityGenerator {
 public:
 	ForceControl(
-		Vector6dConstPtr external_force,
 		Vector6dConstPtr external_force_target,
 		double sample_time,
 		Vector6dConstPtr p_gain,
 		Vector6dConstPtr d_gain,
-		Vector6dConstPtr selection);
+		Vector6dConstPtr selection,
+		ReferenceFrame frame = ReferenceFrame::TCP);
 
 	~ForceControl() = default;
 
@@ -53,12 +53,12 @@ public:
 private:
 	void applySelection(Vector6d& vec);
 
-	Vector6dConstPtr external_force_;
 	Vector6dConstPtr external_force_target_;
 	double sample_time_;
 	Vector6dConstPtr p_gain_;
 	Vector6dConstPtr d_gain_;
 	Vector6dConstPtr selection_;
+	ReferenceFrame frame_;
 
 	double filter_coeff_;
 

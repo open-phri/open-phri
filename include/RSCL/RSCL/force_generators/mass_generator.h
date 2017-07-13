@@ -40,16 +40,14 @@ public:
 	 * @brief Construct a mass generator given a mass and a target acceleration in the TCP frame.
 	 * @param mass The virtual mass value.
 	 * @param target_acceleration The acceleration target in the TCP frame.
+	 * @param mass_frame The frame in which the mass is expressed.
+	 * @param target_acceleration_frame The frame in which the acceleration target is expressed.
 	 */
-	MassGenerator(Matrix6dConstPtr mass, Vector6dConstPtr target_acceleration);
-
-	/**
-	 * @brief Construct a mass generator given a mass, a target and the robot's acceleration expressed in the same frame.
-	 * @param mass The virtual mass value
-	 * @param target_acceleration The acceleration target in the chosen frame
-	 * @param robot_acceleration The robot's acceleration in the chosen frame
-	 */
-	MassGenerator(Matrix6dConstPtr mass, Vector6dConstPtr target_acceleration, Vector6dConstPtr robot_acceleration);
+	MassGenerator(
+		Matrix6dConstPtr mass,
+		Vector6dConstPtr target_acceleration,
+		ReferenceFrame mass_frame = ReferenceFrame::TCP,
+		ReferenceFrame target_acceleration_frame = ReferenceFrame::TCP);
 
 	~MassGenerator() = default;
 
@@ -58,7 +56,8 @@ public:
 private:
 	Matrix6dConstPtr mass_;
 	Vector6dConstPtr target_acceleration_;
-	Vector6dConstPtr robot_acceleration_;
+	ReferenceFrame mass_frame_;
+	ReferenceFrame target_acceleration_frame_;
 };
 
 using MassGeneratorPtr = std::shared_ptr<MassGenerator>;

@@ -31,6 +31,7 @@ Robot::Robot(const std::string& name,
 	control_point_current_pose_         = std::make_shared<Vector6d>(Vector6d::Zero());
 	control_point_target_pose_          = std::make_shared<Vector6d>(Vector6d::Zero());
 	control_point_current_velocity_     = std::make_shared<Vector6d>(Vector6d::Zero());
+	control_point_current_acceleration_ = std::make_shared<Vector6d>(Vector6d::Zero());
 	control_point_external_force_       = std::make_shared<Vector6d>(Vector6d::Zero());
 
 	scaling_factor_                     = std::make_shared<double>();
@@ -156,6 +157,10 @@ Vector6dPtr Robot::controlPointTargetPose() const {
 
 Vector6dPtr Robot::controlPointCurrentVelocity() const {
 	return control_point_current_velocity_;
+}
+
+Vector6dPtr Robot::controlPointCurrentAcceleration() const {
+	return control_point_current_acceleration_;
 }
 
 Vector6dPtr Robot::controlPointExternalForce() const {

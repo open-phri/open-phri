@@ -38,7 +38,7 @@ namespace RSCL {
  */
 class ExternalForce : public ForceGenerator {
 public:
-	/** @brief Construct an external force generator based on a given robot
+	/** @brief Construct an external fworce generator based on a given robot
 	 */
 	ExternalForce(RobotConstPtr robot);
 	~ExternalForce() = default;
@@ -46,7 +46,7 @@ public:
 	virtual Vector6d compute() override;
 
 private:
-	Vector6dConstPtr force_;
+	Vector6dConstPtr external_force_;
 };
 
 using ExternalForcePtr = std::shared_ptr<ExternalForce>;

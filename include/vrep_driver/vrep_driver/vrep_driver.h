@@ -20,7 +20,7 @@
 /**
  * @file vrep_driver.h
  * @author Benjamin Navarro
- * @brief Definition of the VREPDriver class and the ReferenceFrame enum.
+ * @brief Definition of the VREPDriver class and the RSCL::ReferenceFrame enum.
  * @date April 2017
  * @ingroup VREP
  */
@@ -45,15 +45,6 @@
 #include <RSCL/robot.h>
 
 namespace vrep {
-
-/** @enum vrep::ReferenceFrame
- *  @brief Specify an object's reference frame.
- */
-enum class ReferenceFrame {
-	TCP,    /**< Controlled frame. Tool control frame */
-	Base,   /**< Frame fixed relative to the robot's base */
-	World   /**< Frame fixed relative to the environment */
-};
 
 /** @enum vrep::ControlLevel
  *  @brief Specify the control level (joint or TCP)
@@ -148,7 +139,7 @@ public:
 	 * @param frame [in] The reference frame.
 	 * @return True if correctly read, false otherwise.
 	 */
-	bool readTCPPose(RSCL::Vector6dPtr pose, ReferenceFrame frame) const;
+	bool readTCPPose(RSCL::Vector6dPtr pose, RSCL::ReferenceFrame frame) const;
 
 	/**
 	 * @brief Get the TCP velocity in the given frame.
@@ -156,7 +147,7 @@ public:
 	 * @param frame [in] The reference frame.
 	 * @return True if correctly read, false otherwise.
 	 */
-	bool readTCPVelocity(RSCL::Vector6dPtr velocity, ReferenceFrame frame) const;
+	bool readTCPVelocity(RSCL::Vector6dPtr velocity, RSCL::ReferenceFrame frame) const;
 
 	/**
 	 * @brief Get the target TCP pose in the given frame.
@@ -164,7 +155,7 @@ public:
 	 * @param frame [in] The reference frame.
 	 * @return True if correctly read, false otherwise.
 	 */
-	bool readTCPTargetPose(RSCL::Vector6dPtr pose, ReferenceFrame frame) const;
+	bool readTCPTargetPose(RSCL::Vector6dPtr pose, RSCL::ReferenceFrame frame) const;
 
 	/**
 	 * @brief Send the target TCP velocity in the given frame.
@@ -172,7 +163,7 @@ public:
 	 * @param frame [in] The reference frame.
 	 * @return True if correctly read, false otherwise.
 	 */
-	bool sendTCPtargetVelocity(RSCL::Vector6dConstPtr velocity, ReferenceFrame frame) const;
+	bool sendTCPtargetVelocity(RSCL::Vector6dConstPtr velocity, RSCL::ReferenceFrame frame) const;
 
 	/**
 	 * @brief Get the TCP wrench in the TCP frame.
@@ -201,7 +192,7 @@ public:
 	 * @param frame [in] The reference frame.
 	 * @return A shared pointer to the object's postion. Updated on VREPDriver::updateTrackedObjectsPosition.
 	 */
-	RSCL::Vector6dConstPtr trackObjectPosition(const std::string& name, ReferenceFrame frame);
+	RSCL::Vector6dConstPtr trackObjectPosition(const std::string& name, RSCL::ReferenceFrame frame);
 
 	/**
 	 * @brief Update all tracked objects' position.
@@ -216,15 +207,15 @@ public:
 	bool sendJointTargetPosition(RSCL::VectorXdConstPtr position) const;
 	bool sendJointTargetVelocity(RSCL::VectorXdConstPtr velocity) const;
 
-	bool getSimulationData(ReferenceFrame frame_velocities = ReferenceFrame::TCP, ReferenceFrame frame_positions = ReferenceFrame::Base);
-	bool sendSimulationData(ReferenceFrame frame_velocities = ReferenceFrame::TCP);
+	bool getSimulationData(RSCL::ReferenceFrame frame_velocities = RSCL::ReferenceFrame::TCP, RSCL::ReferenceFrame frame_positions = RSCL::ReferenceFrame::Base);
+	bool sendSimulationData(RSCL::ReferenceFrame frame_velocities = RSCL::ReferenceFrame::TCP);
 
 private:
 	void init(const std::string& ip, int port);
 	void init(int client_id);
 	bool getObjectHandles();
 	void startStreaming() const;
-	int getFrameHandle(ReferenceFrame frame) const;
+	int getFrameHandle(RSCL::ReferenceFrame frame) const;
 	void computeSpatialTransformation(RSCL::Matrix4dConstPtr transformation, RSCL::Matrix6dPtr spatial_transformation) const;
 
 	ControlLevel control_level_;

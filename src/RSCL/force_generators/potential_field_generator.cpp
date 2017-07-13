@@ -3,24 +3,33 @@
 using namespace RSCL;
 using namespace Eigen;
 
-PotentialFieldGenerator::PotentialFieldGenerator()
+
+PotentialFieldGenerator::PotentialFieldGenerator(
+	ReferenceFrame objects_frame) :
+	ForceGenerator(objects_frame),
+	objects_frame_(objects_frame)
 {
-	robot_position_ = std::make_shared<Vector6d>(Vector6d::Zero());
+	offset_ = std::make_shared<Vector3d>(Vector3d::Zero());
 }
 
 PotentialFieldGenerator::PotentialFieldGenerator(
-	Vector6dConstPtr robot_position,
-	Matrix6dConstPtr spatial_transformation,
-	bool do_transpose) :
-	robot_position_(robot_position)
+	Vector3dConstPtr offset,
+	ReferenceFrame objects_frame) :
+	PotentialFieldGenerator(objects_frame)
 {
-	spatial_transformation_ = spatial_transformation;
-	do_transpose_ = do_transpose;
+	offset_ = offset;
 }
 
 Vector6d PotentialFieldGenerator::compute() {
 	Vector3d total_force = Vector3d::Zero();
-	const Vector3d& rob_pos = robot_position_->block<3,1>(0,0);
+	Vector3d rob_pos;
+
+	if(objects_frame_ == ReferenceFrame::TCP) {
+		rob_pos = *offset_;
+	}
+	else {
+		rob_pos = robot_->controlPointCurrentPose()->block<3,1>(0,0) + robot_->transformationMatrix()->block<3,3>(0,0) * *offset_;
+	}
 
 	for(const auto& item : items_) {
 		const PotentialFieldObject& obj = *(item.second);
@@ -45,17 +54,8 @@ Vector6d PotentialFieldGenerator::compute() {
 	}
 
 
-	Vector6d result = Vector6d::Zero();
-	result.block<3,1>(0,0) = total_force;
+	force_ = Vector6d::Zero();
+	force_.block<3,1>(0,0) = total_force;
 
-	if(static_cast<bool>(spatial_transformation_)) {
-		if(do_transpose_) {
-			result = spatial_transformation_->transpose() * result;
-		}
-		else {
-			result = *spatial_transformation_ * result;
-		}
-	}
-
-	return result;
+	return ForceGenerator::compute();
 }

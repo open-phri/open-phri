@@ -101,13 +101,13 @@ int main(int argc, char const *argv[]) {
 	potential_field_generator->add("obstacle", obstacle);
 	potential_field_generator->add("target", target);
 	safety_controller.add("pfm", potential_field_generator);
-	safety_controller.add("stiffness", std::make_shared<StiffnessGenerator>(make_shared<Matrix6d>(Matrix6d::Identity()), robot->controlPointTargetPose(), robot->controlPointCurrentPose(), robot->spatialTransformationMatrix()));
+	safety_controller.add("stiffness", std::make_shared<StiffnessGenerator>(make_shared<Matrix6d>(Matrix6d::Identity()), robot->controlPointTargetPose()));
 	auto target_force = std::make_shared<Vector6d>(Vector6d::Zero());
 	auto p_gain = std::make_shared<Vector6d>(Vector6d::Ones() * 0.005);
 	auto d_gain = std::make_shared<Vector6d>(Vector6d::Ones() * 0.00005);
 	auto selection = std::make_shared<Vector6d>(Vector6d::Zero());
 	target_force->z() = 10.; selection->z() = 1.;
-	safety_controller.add("force control", ForceControl(robot->controlPointExternalForce(), target_force, 0.001, p_gain, d_gain, selection));
+	safety_controller.add("force control", ForceControl(target_force, 0.001, p_gain, d_gain, selection));
 	run_benchmark();
 
 	return 0;

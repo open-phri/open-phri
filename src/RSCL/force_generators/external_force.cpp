@@ -3,10 +3,12 @@
 using namespace RSCL;
 
 ExternalForce::ExternalForce(RobotConstPtr robot) :
-	force_(robot->controlPointExternalForce())
+	ForceGenerator(ReferenceFrame::TCP),
+	external_force_(robot->controlPointExternalForce())
 {
 }
 
 Vector6d ExternalForce::compute() {
-	return *force_;
+	force_ = *external_force_;
+	return ForceGenerator::compute();
 }

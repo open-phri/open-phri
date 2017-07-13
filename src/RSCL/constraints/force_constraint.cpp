@@ -8,6 +8,7 @@ using namespace Eigen;
 class ForceLimitationVelocityGenerator : public VelocityGenerator {
 public:
 	ForceLimitationVelocityGenerator(Vector6dConstPtr external_force, doubleConstPtr maximum_force) :
+		VelocityGenerator(ReferenceFrame::TCP),
 		external_force_(external_force),
 		maximum_force_(maximum_force)
 	{
@@ -15,14 +16,14 @@ public:
 	}
 
 	virtual Vector6d compute() override {
-		Vector6d vel = Vector6d::Zero();
+		velocity_ = Vector6d::Zero();
 		double f_norm = external_force_->norm();
 
 		if(f_norm > *maximum_force_) {
-			vel = *external_force_ * 1e12; // Just something huge
+			velocity_ = *external_force_ * 1e12; // Just something huge
 		}
 
-		return vel;
+		return VelocityGenerator::compute();
 	}
 
 private:

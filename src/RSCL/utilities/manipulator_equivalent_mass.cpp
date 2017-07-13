@@ -54,3 +54,7 @@ Vector3d ManipulatorEquivalentMass::closestObjectDirection() {
 
 	return direction;
 }
+
+double ManipulatorEquivalentMass::operator()() {
+	return compute();
+}

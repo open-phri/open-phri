@@ -73,6 +73,13 @@ public:
 	 * @return The equivalent mass.
 	 */
 	double compute();
+
+	/**
+	 * @brief Call operator, shortcut for compute()
+	 * @return The new output data.
+	 */
+	virtual double operator()() final;
+
 private:
 	Vector3d closestObjectDirection();
 

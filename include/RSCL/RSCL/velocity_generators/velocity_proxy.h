@@ -37,15 +37,17 @@ namespace RSCL {
  */
 class VelocityProxy : public VelocityGenerator {
 public:
-	VelocityProxy(Vector6dConstPtr velocity);
-	VelocityProxy(Vector6dConstPtr velocity, Matrix6dConstPtr spatial_transformation);
+	/** @brief Construct a velocity proxy given an externally managed velocity
+	 *  @param frame The reference frame in which the velocity is expressed
+	 */
+	VelocityProxy(Vector6dConstPtr velocity, ReferenceFrame frame = ReferenceFrame::TCP);
 	~VelocityProxy() = default;
 
 	virtual Vector6d compute() override;
 
 private:
-	Vector6dConstPtr velocity_;
-	Matrix6dConstPtr spatial_transformation_;
+	Vector6dConstPtr external_velocity_;
+	ReferenceFrame frame_;
 };
 
 using VelocityProxyPtr = std::shared_ptr<VelocityProxy>;

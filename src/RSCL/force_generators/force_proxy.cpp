@@ -2,11 +2,12 @@
 
 using namespace RSCL;
 
-ForceProxy::ForceProxy(Vector6dConstPtr force) :
+ForceProxy::ForceProxy(Vector6dConstPtr force, ReferenceFrame frame) :
+	ForceGenerator(frame),
 	force_(force)
 {
 }
 
 Vector6d ForceProxy::compute() {
-	return *force_;
+	return transform(*force_);
 }

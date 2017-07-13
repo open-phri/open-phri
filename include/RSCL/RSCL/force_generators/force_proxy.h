@@ -38,8 +38,9 @@ namespace RSCL {
 class ForceProxy : public ForceGenerator {
 public:
 	/** @brief Construct a force proxy given an externally managed force
+	 *  @param frame The reference frame in which the force is expressed
 	 */
-	ForceProxy(Vector6dConstPtr force);
+	ForceProxy(Vector6dConstPtr force, ReferenceFrame frame = ReferenceFrame::TCP);
 	~ForceProxy() = default;
 
 	virtual Vector6d compute() override;

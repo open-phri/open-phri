@@ -30,6 +30,8 @@
 #include <memory>
 
 #include <RSCL/definitions.h>
+#include <RSCL/robot.h>
+#include <RSCL/fwd_decl.h>
 
 namespace RSCL {
 
@@ -38,7 +40,6 @@ namespace RSCL {
  */
 class VelocityGenerator {
 public:
-	VelocityGenerator() = default;
 	~VelocityGenerator() = default;
 
 	/**
@@ -52,6 +53,24 @@ public:
 	 * @return The velocity generator's evaluated value.
 	 */
 	virtual Vector6d operator()() final;
+
+protected:
+	/**
+	 * @brief Construct a velocity generator
+	 * @param frame The reference frame in which the velocity is expressed.
+	 */
+	VelocityGenerator(ReferenceFrame frame);
+
+	/**
+	 * @brief Transform the given force in the TCP frame, if necessary.
+	 * @param velocity The velocity to transform.
+	 */
+	virtual Vector6d transform(Vector6d velocity) final;
+
+	friend class SafetyController;
+	RobotConstPtr robot_;
+	ReferenceFrame frame_;
+	Vector6d velocity_;
 };
 
 using VelocityGeneratorPtr = std::shared_ptr<VelocityGenerator>;

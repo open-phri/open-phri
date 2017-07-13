@@ -103,7 +103,7 @@ void VREPDriver::pauseSimulation() const {
 	simxPauseSimulation(client_id_, simx_opmode_oneshot_wait);
 }
 
-bool VREPDriver::readTCPPose(RSCL::Vector6dPtr pose, ReferenceFrame frame) const {
+bool VREPDriver::readTCPPose(RSCL::Vector6dPtr pose, RSCL::ReferenceFrame frame) const {
 	bool all_ok = true;
 	float data[6];
 
@@ -122,7 +122,7 @@ bool VREPDriver::readTCPPose(RSCL::Vector6dPtr pose, ReferenceFrame frame) const
 	return all_ok;
 }
 
-bool VREPDriver::readTCPVelocity(RSCL::Vector6dPtr velocity, ReferenceFrame frame) const {
+bool VREPDriver::readTCPVelocity(RSCL::Vector6dPtr velocity, RSCL::ReferenceFrame frame) const {
 	using namespace Eigen;
 
 	bool all_ok = true;
@@ -152,7 +152,7 @@ bool VREPDriver::readTCPVelocity(RSCL::Vector6dPtr velocity, ReferenceFrame fram
 	return all_ok;
 }
 
-bool VREPDriver::readTCPTargetPose(RSCL::Vector6dPtr pose, ReferenceFrame frame) const {
+bool VREPDriver::readTCPTargetPose(RSCL::Vector6dPtr pose, RSCL::ReferenceFrame frame) const {
 	bool all_ok = true;
 	float data[6];
 
@@ -171,7 +171,7 @@ bool VREPDriver::readTCPTargetPose(RSCL::Vector6dPtr pose, ReferenceFrame frame)
 	return all_ok;
 }
 
-bool VREPDriver::sendTCPtargetVelocity(RSCL::Vector6dConstPtr velocity, ReferenceFrame frame) const {
+bool VREPDriver::sendTCPtargetVelocity(RSCL::Vector6dConstPtr velocity, RSCL::ReferenceFrame frame) const {
 	bool all_ok = true;
 
 	auto pose = make_shared<RSCL::Vector6d>();
@@ -267,7 +267,7 @@ bool VREPDriver::readTransformationMatrix(RSCL::Matrix4dPtr matrix) const {
 	return all_ok;
 }
 
-RSCL::Vector6dConstPtr VREPDriver::trackObjectPosition(const std::string& name, ReferenceFrame frame) {
+RSCL::Vector6dConstPtr VREPDriver::trackObjectPosition(const std::string& name, RSCL::ReferenceFrame frame) {
 	int handle = -1;
 	int ref_frame = getFrameHandle(frame);
 	float data[3];
@@ -416,7 +416,7 @@ bool VREPDriver::getObjectHandles() {
 void VREPDriver::startStreaming() const {
 	float data[6];
 
-	ReferenceFrame frames[] = {ReferenceFrame::TCP, ReferenceFrame::Base, ReferenceFrame::World};
+	RSCL::ReferenceFrame frames[] = {RSCL::ReferenceFrame::TCP, RSCL::ReferenceFrame::Base, RSCL::ReferenceFrame::World};
 	string objects[] = {"_tcp", "_tcp_target"};
 
 	for(auto& object : objects) {
@@ -449,15 +449,15 @@ void VREPDriver::startStreaming() const {
 	simxReadStringStream(client_id_, ("RotMat-"+robot_->name()).c_str(), &jacobian_str, &sLength, simx_opmode_streaming);
 }
 
-int VREPDriver::getFrameHandle(ReferenceFrame frame) const {
+int VREPDriver::getFrameHandle(RSCL::ReferenceFrame frame) const {
 	switch(frame) {
-	case ReferenceFrame::TCP:
+	case RSCL::ReferenceFrame::TCP:
 		return object_handles_.at(robot_->name() + "_tcp" + suffix_);
 		break;
-	case ReferenceFrame::Base:
+	case RSCL::ReferenceFrame::Base:
 		return object_handles_.at(robot_->name() + "_base_frame" + suffix_);
 		break;
-	case ReferenceFrame::World:
+	case RSCL::ReferenceFrame::World:
 		return object_handles_.at(robot_->name() + "_world_frame" + suffix_);
 		break;
 	}
@@ -472,7 +472,7 @@ void VREPDriver::computeSpatialTransformation(RSCL::Matrix4dConstPtr transformat
 	mat.block<3,3>(3,3) = rot_mat;
 }
 
-bool VREPDriver::getSimulationData(ReferenceFrame frame_velocities, ReferenceFrame frame_positions) {
+bool VREPDriver::getSimulationData(RSCL::ReferenceFrame frame_velocities, RSCL::ReferenceFrame frame_positions) {
 	bool all_ok = true;
 
 	all_ok &= readTCPPose(robot_->controlPointCurrentPose(), frame_positions);
@@ -490,7 +490,7 @@ bool VREPDriver::getSimulationData(ReferenceFrame frame_velocities, ReferenceFra
 	return all_ok;
 }
 
-bool VREPDriver::sendSimulationData(ReferenceFrame frame_velocities) {
+bool VREPDriver::sendSimulationData(RSCL::ReferenceFrame frame_velocities) {
 	bool all_ok = true;
 
 	// Make sure all commands are sent at the same time

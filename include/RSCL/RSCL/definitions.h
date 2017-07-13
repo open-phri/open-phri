@@ -34,6 +34,14 @@ namespace RSCL {
 
 #define assert_msg(msg,cond) assert(((void) msg, cond ))
 
+/** @enum RSCL::ReferenceFrame
+ *  @brief Specify an object's reference frame.
+ */
+enum class ReferenceFrame {
+	TCP,    /**< Controlled frame. Tool control frame */
+	Base,   /**< Frame fixed relative to the robot's base */
+	World   /**< Frame fixed relative to the environment */
+};
 
 /***		Useful typedefs		***/
 using Eigen::MatrixXd;
