@@ -48,6 +48,8 @@ public:
 	void reset();
 	void process();
 	void operator()();
+	void writeStoredDataToDisk();
+	void closeFiles();
 
 private:
 	std::ofstream& createLog(const std::string& data_name, size_t data_count);

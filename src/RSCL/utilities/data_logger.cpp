@@ -26,12 +26,8 @@ DataLogger::DataLogger(
 }
 
 DataLogger::~DataLogger() {
-	for(auto& data: stored_data_) {
-		*data.first << data.second.str();
-	}
-	for(auto& file: log_files_) {
-		file.second.close();
-	}
+	writeStoredDataToDisk();
+	closeFiles();
 }
 
 void DataLogger::logSafetyControllerData(SafetyController* controller) {
@@ -191,4 +187,16 @@ void DataLogger::process() {
 
 void DataLogger::operator()() {
 	process();
+}
+
+void DataLogger::writeStoredDataToDisk() {
+	for(auto& data: stored_data_) {
+		*data.first << data.second.str();
+	}
+}
+
+void DataLogger::closeFiles() {
+	for(auto& file: log_files_) {
+		file.second.close();
+	}
 }
