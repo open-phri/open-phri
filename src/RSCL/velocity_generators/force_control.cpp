@@ -36,11 +36,12 @@ void ForceControl::configureFilter(double sample_time, double time_constant) {
 
 Vector6d ForceControl::compute() {
 	Vector6d error;
+	// TODO Find how to chose between the targeted force applied to the environment or applied to the robot
 	if(frame_ == ReferenceFrame::TCP) {
-		error = *external_force_target_ - *robot_->controlPointExternalForce();
+		error = *external_force_target_ + *robot_->controlPointExternalForce();
 	}
 	else {
-		error = *external_force_target_ - *robot_->spatialTransformationMatrix() * *robot_->controlPointExternalForce();
+		error = *external_force_target_ + *robot_->spatialTransformationMatrix() * *robot_->controlPointExternalForce();
 
 	}
 	applySelection(error);
