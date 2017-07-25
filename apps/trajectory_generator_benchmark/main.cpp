@@ -10,23 +10,23 @@ constexpr double SAMPLE_TIME = 0.010;
 constexpr bool USE_LOOP = false;
 
 int main(int argc, char const *argv[]) {
-	auto x_point_1 = make_shared<TrajectoryPoint>(0,    0.,     0.);
-	auto x_point_2 = make_shared<TrajectoryPoint>(0.1,  0.,     0.);
-	auto x_point_3 = make_shared<TrajectoryPoint>(0.3,  0.,     0.);
+	auto x_point_1 = make_shared<TrajectoryPoint<double>>(0,    0.,     0.);
+	auto x_point_2 = make_shared<TrajectoryPoint<double>>(0.1,  0.,     0.);
+	auto x_point_3 = make_shared<TrajectoryPoint<double>>(0.3,  0.,     0.);
 
-	auto y_point_1 = make_shared<TrajectoryPoint>(0.,   0.,     0.);
-	auto y_point_2 = make_shared<TrajectoryPoint>(0.2, 0.1,    0.05);
-	auto y_point_3 = make_shared<TrajectoryPoint>(0.3,  0.,     0.);
+	auto y_point_1 = make_shared<TrajectoryPoint<double>>(0.,   0.,     0.);
+	auto y_point_2 = make_shared<TrajectoryPoint<double>>(0.2, 0.1,    0.05);
+	auto y_point_3 = make_shared<TrajectoryPoint<double>>(0.3,  0.,     0.);
 
-	auto z_point_1 = make_shared<TrajectoryPoint>(0.,   0.1,    0.1);
-	auto z_point_2 = make_shared<TrajectoryPoint>(0.2,  0.05,   -0.05);
-	auto z_point_3 = make_shared<TrajectoryPoint>(0.1,  -0.1,    0.1);
+	auto z_point_1 = make_shared<TrajectoryPoint<double>>(0.,   0.1,    0.1);
+	auto z_point_2 = make_shared<TrajectoryPoint<double>>(0.2,  0.05,   -0.05);
+	auto z_point_3 = make_shared<TrajectoryPoint<double>>(0.1,  -0.1,    0.1);
 
 	double x_vel, y_vel, z_vel;
 
-	auto x_traj = make_shared<Trajectory>(TrajectoryOutputType::Velocity, x_point_1, &x_vel, SAMPLE_TIME);
-	auto y_traj = make_shared<Trajectory>(TrajectoryOutputType::Velocity, y_point_1, &y_vel, SAMPLE_TIME);
-	auto z_traj = make_shared<Trajectory>(TrajectoryOutputType::Velocity, z_point_1, &z_vel, SAMPLE_TIME);
+	auto x_traj = make_shared<Trajectory<double>>(TrajectoryOutputType::Velocity, x_point_1, &x_vel, SAMPLE_TIME);
+	auto y_traj = make_shared<Trajectory<double>>(TrajectoryOutputType::Velocity, y_point_1, &y_vel, SAMPLE_TIME);
+	auto z_traj = make_shared<Trajectory<double>>(TrajectoryOutputType::Velocity, z_point_1, &z_vel, SAMPLE_TIME);
 
 
 	x_traj->addPathTo(x_point_2, 0.05, 0.01);
@@ -61,7 +61,6 @@ int main(int argc, char const *argv[]) {
 	// trajectory_generator.add("z_traj", z_traj);
 
 	// constexpr size_t N = 100000;
-	extern size_t _compute_timings_total_iter;
 	Clock clock;
 	DataLogger logger(
 		"/mnt/tmpfs/rscl_logs",
@@ -79,7 +78,7 @@ int main(int argc, char const *argv[]) {
 		[&]() {
 			std::cout << "Benchmark started" << std::endl;
 			for (size_t i = 0; i < Tries; ++i) {
-				_compute_timings_total_iter = 0;
+				Trajectory<double>::resetComputeTimingsIterations();
 				if(USE_LOOP) {
 					for (size_t j = 0; j < NCalls; ++j) {
 						t_start = clock();
@@ -96,7 +95,7 @@ int main(int argc, char const *argv[]) {
 					t_avg = getAvgTime();
 				}
 				t_avg *= 1e6;
-				iter_avg = double(_compute_timings_total_iter) / double(NCalls);
+				iter_avg = double(Trajectory<double>::getComputeTimingsIterations()) / double(NCalls);
 				// std::cout << "Average time (us): " << t_avg << std::endl;
 				logger();
 			}

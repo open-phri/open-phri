@@ -51,7 +51,7 @@ bool PathFollower::compute() {
 	return all_ok;
 }
 
-bool PathFollower::add(const std::string& name, TrajectoryPtr item, doubleConstPtr current_value, doubleConstPtr target_value, doubleConstPtr max_error, bool force) {
+bool PathFollower::add(const std::string& name, TrajectoryPtr<double> item, doubleConstPtr current_value, doubleConstPtr target_value, doubleConstPtr max_error, bool force) {
 	bool ok = TrajectoryGenerator::add(name, item, force);
 	if(ok) {
 		traj_params_[item] = {current_value, target_value, max_error};
@@ -59,7 +59,7 @@ bool PathFollower::add(const std::string& name, TrajectoryPtr item, doubleConstP
 	return ok;
 }
 
-bool PathFollower::add(const std::string& name, TrajectoryPtr item, const double* current_value, const double* target_value, double max_error, bool force) {
+bool PathFollower::add(const std::string& name, TrajectoryPtr<double> item, const double* current_value, const double* target_value, double max_error, bool force) {
 	doubleConstPtr current_value_ptr = doubleConstPtr(current_value, [](auto ptr){});
 	doubleConstPtr target_value_ptr = doubleConstPtr(target_value, [](auto ptr){});
 	doubleConstPtr max_error_ptr = std::make_shared<const double>(max_error);
@@ -67,7 +67,7 @@ bool PathFollower::add(const std::string& name, TrajectoryPtr item, const double
 }
 
 bool PathFollower::remove(const std::string& name) {
-	TrajectoryPtr traj = TrajectoryGenerator::get(name);
+	TrajectoryPtr<double> traj = TrajectoryGenerator::get(name);
 	bool ok = TrajectoryGenerator::remove(name);
 	if(ok) {
 		traj_params_.erase(traj);

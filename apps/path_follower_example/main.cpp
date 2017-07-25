@@ -49,13 +49,13 @@ int main(int argc, char const *argv[]) {
 	auto external_force_generator = make_shared<ForceProxy>(ext_force);
 	safety_controller.addForceGenerator("external force", external_force_generator);
 
-	auto x_point_1 = make_shared<TrajectoryPoint>(-0.197,  0.,     0.);
-	auto x_point_2 = make_shared<TrajectoryPoint>(-0.25,    0.,     0.);
-	auto x_point_3 = make_shared<TrajectoryPoint>(-0.15,    0.,     0.);
+	auto x_point_1 = make_shared<TrajectoryPoint<double>>(-0.197,  0.,     0.);
+	auto x_point_2 = make_shared<TrajectoryPoint<double>>(-0.25,    0.,     0.);
+	auto x_point_3 = make_shared<TrajectoryPoint<double>>(-0.15,    0.,     0.);
 
-	auto z_point_1 = make_shared<TrajectoryPoint>(1.1249,  0.,     0.);
-	auto z_point_2 = make_shared<TrajectoryPoint>(1.,      -0.025, 0.);
-	auto z_point_3 = make_shared<TrajectoryPoint>(0.85,    0.,     0.);
+	auto z_point_1 = make_shared<TrajectoryPoint<double>>(1.1249,  0.,     0.);
+	auto z_point_2 = make_shared<TrajectoryPoint<double>>(1.,      -0.025, 0.);
+	auto z_point_3 = make_shared<TrajectoryPoint<double>>(0.85,    0.,     0.);
 
 	auto robot_position = robot->controlPointCurrentPose();
 	auto target_position = robot->controlPointTargetPose();
@@ -68,8 +68,8 @@ int main(int argc, char const *argv[]) {
 
 	safety_controller.add("stiffness", stiffness);
 
-	auto x_traj = make_shared<Trajectory>(TrajectoryOutputType::Position, x_point_1, &(target_position->x()), SAMPLE_TIME);
-	auto z_traj = make_shared<Trajectory>(TrajectoryOutputType::Position, z_point_1, &(target_position->z()), SAMPLE_TIME);
+	auto x_traj = make_shared<Trajectory<double>>(TrajectoryOutputType::Position, x_point_1, &(target_position->x()), SAMPLE_TIME);
+	auto z_traj = make_shared<Trajectory<double>>(TrajectoryOutputType::Position, z_point_1, &(target_position->z()), SAMPLE_TIME);
 #else
 	auto traj_vel = make_shared<Vector6d>(Vector6d::Zero());
 	auto traj_vel_gen = make_shared<VelocityProxy>(traj_vel);
@@ -78,8 +78,8 @@ int main(int argc, char const *argv[]) {
 		"traj vel",
 		traj_vel_gen);
 
-	auto x_traj = make_shared<Trajectory>(TrajectoryOutputType::Velocity, x_point_1, &(traj_vel->x()), SAMPLE_TIME);
-	auto z_traj = make_shared<Trajectory>(TrajectoryOutputType::Velocity, z_point_1, &(traj_vel->z()), SAMPLE_TIME);
+	auto x_traj = make_shared<Trajectory<double>>(TrajectoryOutputType::Velocity, x_point_1, &(traj_vel->x()), SAMPLE_TIME);
+	auto z_traj = make_shared<Trajectory<double>>(TrajectoryOutputType::Velocity, z_point_1, &(traj_vel->z()), SAMPLE_TIME);
 #endif
 
 

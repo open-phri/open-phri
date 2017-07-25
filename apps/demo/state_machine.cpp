@@ -331,9 +331,9 @@ bool StateMachine::setupTrajectoryGenerator() {
 	trajectory_generator_->removeAll();
 
 	for (size_t i = 0; i < 6; ++i) {
-		auto point_from = std::make_shared<RSCL::TrajectoryPoint>(from(i), 0., 0.);
-		auto point_to = std::make_shared<RSCL::TrajectoryPoint>(to(i), 0., 0.);
-		auto trajectory = std::make_shared<RSCL::Trajectory>(RSCL::TrajectoryOutputType::Velocity, point_from, target_velocity_->data()+i, SAMPLE_TIME);
+		auto point_from = std::make_shared<RSCL::TrajectoryPoint<double>>(from(i), 0., 0.);
+		auto point_to = std::make_shared<RSCL::TrajectoryPoint<double>>(to(i), 0., 0.);
+		auto trajectory = std::make_shared<RSCL::Trajectory<double>>(RSCL::TrajectoryOutputType::Velocity, point_from, target_velocity_->data()+i, SAMPLE_TIME);
 		if(i < 3) {
 			trajectory->addPathTo(point_to, REPLAY_VMAX, REPLAY_AMAX);
 		}

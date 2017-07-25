@@ -34,44 +34,47 @@ namespace RSCL {
 /** @brief Description of a point used by the TrajectoryGenerator.
  *  @details A TrajectoryPoint is described by a 2D point (x,y) and its first and second derivatives
  */
+template<typename T>
 struct TrajectoryPoint {
 	TrajectoryPoint(
-		doublePtr y,
-		doublePtr dy,
-		doublePtr d2y) :
+		std::shared_ptr<T> y,
+		std::shared_ptr<T> dy,
+		std::shared_ptr<T> d2y) :
 		y(y), dy(dy), d2y(d2y)
 	{
 	}
 
 	TrajectoryPoint(
-		double y,
-		double dy,
-		double d2y) :
-		y(std::make_shared<double>(y)),
-		dy(std::make_shared<double>(dy)),
-		d2y(std::make_shared<double>(d2y))
+		T y,
+		T dy,
+		T d2y) :
+		y(std::make_shared<T>(y)),
+		dy(std::make_shared<T>(dy)),
+		d2y(std::make_shared<T>(d2y))
 	{
 	}
 
-	doublePtr y;   // value
-	doublePtr dy;  // first derivative
-	doublePtr d2y; // second derivative
+	std::shared_ptr<T> y;   // value
+	std::shared_ptr<T> dy;  // first derivative
+	std::shared_ptr<T> d2y; // second derivative
 };
 
-using TrajectoryPointPtr = std::shared_ptr<TrajectoryPoint>;
-using TrajectoryPointConstPtr = std::shared_ptr<const TrajectoryPoint>;
+template<typename T>
+using TrajectoryPointPtr = std::shared_ptr<TrajectoryPoint<T>>;
+template<typename T>
+using TrajectoryPointConstPtr = std::shared_ptr<const TrajectoryPoint<T>>;
 
 
 /** @brief Description of a point used by the PolynomialInterpolator.
  *  @details A PolynomialPoint is described by a 2D point (x,y) and its first and second derivatives
  */
-struct PolynomialPoint : public TrajectoryPoint {
+struct PolynomialPoint : public TrajectoryPoint<double> {
 	PolynomialPoint(
 		doublePtr x,
 		doublePtr y,
 		doublePtr dy,
 		doublePtr d2y) :
-		TrajectoryPoint(y, dy, d2y),
+		TrajectoryPoint<double>(y, dy, d2y),
 		x(x)
 	{
 	}
@@ -81,7 +84,7 @@ struct PolynomialPoint : public TrajectoryPoint {
 		double y,
 		double dy,
 		double d2y) :
-		TrajectoryPoint(y, dy, d2y),
+		TrajectoryPoint<double>(y, dy, d2y),
 		x(std::make_shared<double>(x))
 	{
 	}

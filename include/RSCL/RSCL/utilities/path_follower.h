@@ -48,8 +48,8 @@ public:
 
 	virtual bool compute() override;
 
-	virtual bool add(const std::string& name, TrajectoryPtr item, doubleConstPtr current_value, doubleConstPtr target_value, doubleConstPtr max_error, bool force = false);
-	virtual bool add(const std::string& name, TrajectoryPtr item, const double* current_value, const double* target_value, double max_error, bool force = false);
+	virtual bool add(const std::string& name, TrajectoryPtr<double> item, doubleConstPtr current_value, doubleConstPtr target_value, doubleConstPtr max_error, bool force = false);
+	virtual bool add(const std::string& name, TrajectoryPtr<double> item, const double* current_value, const double* target_value, double max_error, bool force = false);
 	virtual bool remove(const std::string& name) override;
 
 private:
@@ -61,7 +61,7 @@ private:
 
 	using TrajectoryGenerator::add;
 	PathStopAction action_;
-	std::unordered_map<TrajectoryPtr, TrajectoryParameters> traj_params_;
+	std::unordered_map<TrajectoryPtr<double>, TrajectoryParameters> traj_params_;
 };
 
 } // namespace RSCL
