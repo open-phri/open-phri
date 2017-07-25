@@ -267,6 +267,12 @@ public:
 	 */
 	std::shared_ptr<JointVelocityGenerator> getJointVelocityGenerator(const std::string& name);
 
+	std::shared_ptr<VectorXd> getNullSpaceVelocityVector() const;
+
+	void enableDampedLeastSquares(double lambda);
+
+	void enableDynamicDampedLeastSquares(double lambda_max, double sigma_min_threshold);
+
 	/**
 	 * @brief Use all the generators and constraints to compute the robot velocities
 	 */
@@ -310,11 +316,6 @@ public:
 
 
 protected:
-	/**
-	 * @brief Construct a default safety controller. The robot must be set by the parent class.
-	 */
-	SafetyController();
-
 	double computeConstraintValue();
 	const Vector6d& computeForceSum();
 	const VectorXd& computeTorqueSum();
@@ -330,6 +331,11 @@ protected:
 
 	RobotPtr robot_;
 	bool skip_jacobian_inverse_computation_;
+	std::shared_ptr<VectorXd> null_space_velocity_;
+
+	bool dynamic_dls_;
+	double lambda2_;
+	double sigma_min_threshold_;
 };
 
 } // namespace RSCL

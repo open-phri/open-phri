@@ -7,20 +7,24 @@
 #include <RSCL/joint_velocity_generators/joint_velocity_generator.h>
 #include <RSCL/utilities/demangle.h>
 
+#include <Eigen/SVD>
+
 #include <limits>
 #include <iostream>
 
 using namespace RSCL;
 
-SafetyController::SafetyController() : skip_jacobian_inverse_computation_(false) {
-	addConstraint("default constraint", std::make_shared<DefaultConstraint>());
-}
-
 SafetyController::SafetyController(
 	RobotPtr robot) :
-	SafetyController()
+	skip_jacobian_inverse_computation_(false)
 {
+	addConstraint("default constraint", std::make_shared<DefaultConstraint>());
 	robot_ = robot;
+	null_space_velocity_ = std::make_shared<VectorXd>(robot_->jointCount());
+	null_space_velocity_->setZero();
+	dynamic_dls_ = false;
+	lambda2_ = -1.;
+	sigma_min_threshold_ = -1.;
 }
 
 void SafetyController::setVerbose(bool on) {
@@ -96,6 +100,23 @@ JointVelocityGeneratorPtr SafetyController::getJointVelocityGenerator(const std:
 	return joint_velocity_generators_.get(name).object;
 }
 
+std::shared_ptr<VectorXd> SafetyController::getNullSpaceVelocityVector() const {
+	return null_space_velocity_;
+}
+
+void SafetyController::enableDampedLeastSquares(double lambda) {
+	assert(lambda > 0.);
+	lambda2_ = lambda*lambda;
+	dynamic_dls_ = false;
+}
+
+void SafetyController::enableDynamicDampedLeastSquares(double lambda_max, double sigma_min_threshold) {
+	assert(lambda_max > 0. and sigma_min_threshold > 0.);
+	lambda2_ = lambda_max*lambda_max;
+	sigma_min_threshold_ = sigma_min_threshold;
+	dynamic_dls_ = true;
+}
+
 
 void SafetyController::compute() {
 	// std::cout << "###################################################################\n";
@@ -150,6 +171,12 @@ void SafetyController::compute() {
 
 	// Scale the joint velocities to comply with the constraints
 	*robot_->joint_velocity_ = constraint_value * *robot_->joint_total_velocity_;
+	// TODO move this to a joint velocity generator so that it is accounted by the constraints
+	if(null_space_velocity_.use_count() > 1) {
+		RSCL::MatrixXd eye(robot_->jointCount(), robot_->jointCount());
+		eye.setIdentity();
+		*robot_->joint_velocity_ += (eye - *robot_->jacobianInverse() * *robot_->jacobian()) * *null_space_velocity_;;
+	}
 	// std::cout << "joint vel: " << robot_->joint_velocity_->transpose() << std::endl;
 
 	// Scale the control point velocities to comply with the constraints
@@ -286,10 +313,36 @@ const MatrixXd& SafetyController::computeJacobianInverse() const {
 		jac_inv = jac.inverse();
 	}
 	else {
-		// Compute the pseudo inverse in the non square case based on SVD decomposition
-		Eigen::JacobiSVD<MatrixXd> svd(jac, Eigen::ComputeThinU | Eigen::ComputeThinV);
-		double tolerance = std::numeric_limits<double>::epsilon() * std::max(jac.cols(), jac.rows()) * svd.singularValues().array().abs()(0);
-		jac_inv = svd.matrixV() * (svd.singularValues().array().abs() > tolerance).select(svd.singularValues().array().inverse(), 0).matrix().asDiagonal() * svd.matrixU().adjoint();
+		if(lambda2_ > 0.) {
+			double lambda2;
+
+			if(dynamic_dls_ > 0.) {
+				Eigen::JacobiSVD<Eigen::MatrixXd> svd(jac);
+				double sigma_min = svd.singularValues()(5);
+				if(sigma_min > sigma_min_threshold_) {
+					lambda2 = 0.;
+				}
+				else {
+					lambda2 = lambda2_ * (1. - pow(sigma_min/sigma_min_threshold_, 2.));
+				}
+			}
+			else {
+				lambda2 = lambda2_;
+			}
+
+			Eigen::Matrix<double, 6, 6> tmp;
+			tmp = jac*jac.transpose();
+			tmp += lambda2*Eigen::Matrix<double, 6, 6>::Identity();
+			tmp = tmp.inverse();
+
+			jac_inv = jac.transpose() * tmp;
+		}
+		else {
+			// Compute the pseudo inverse in the non square case based on SVD decomposition
+			Eigen::JacobiSVD<MatrixXd> svd(jac, Eigen::ComputeThinU | Eigen::ComputeThinV);
+			double tolerance = std::numeric_limits<double>::epsilon() * std::max(jac.cols(), jac.rows()) * svd.singularValues().array().abs()(0);
+			jac_inv = svd.matrixV() * (svd.singularValues().array().abs() > tolerance).select(svd.singularValues().array().inverse(), 0).matrix().asDiagonal() * svd.matrixU().adjoint();
+		}
 	}
 
 	return jac_inv;
