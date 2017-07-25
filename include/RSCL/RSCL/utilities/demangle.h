@@ -28,10 +28,15 @@
 #pragma once
 
 #include <string>
+#include <typeinfo>
+
+namespace RSCL {
 
 std::string demangle(const char* name);
 
 template<typename TT>
 std::string getTypeName(const TT& t) {
 	return demangle(typeid(t).name());
+}
+
 }

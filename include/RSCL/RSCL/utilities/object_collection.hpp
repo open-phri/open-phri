@@ -51,7 +51,7 @@ public:
 	 */
 	void setVerbose(bool on) {
 		if(on) {
-			class_name_ = getTypeName(*this);
+			class_name_ = RSCL::getTypeName(*this);
 			collection_name_ = "Object";
 		}
 		verbose_ = on;
