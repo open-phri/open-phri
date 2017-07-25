@@ -38,3 +38,4 @@
 #include <RSCL/utilities/data_logger.h>
 #include <RSCL/utilities/clock.h>
 #include <RSCL/utilities/benchmark.hpp>
+#include <RSCL/utilities/deadband.hpp>
