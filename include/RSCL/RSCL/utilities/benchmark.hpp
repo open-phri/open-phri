@@ -43,20 +43,22 @@ inline void run_function_once<0>(std::function<void(void)> todo) {
 	return;
 }
 
-template<int N, typename std::enable_if<(N <= 900), bool>::type = 0>
+constexpr size_t __MAX_TEMPLATE_INSTANCIATION_DEPTH = 256;
+
+template<int N, typename std::enable_if<(N <= __MAX_TEMPLATE_INSTANCIATION_DEPTH), bool>::type = 0>
 inline void run_function(std::function<void(void)> todo) {
 	run_function_once<N>(todo);
 }
 
-// Use a loop if N>900 to avoid reaching the template maximum instantiation depth. (should be 1024 for C++11 but gcc set it to 900)
-template<int N, typename std::enable_if<not (N <= 900), bool>::type = 0> // use <= to remove parsing error in atom when using >
+// Use a loop if N>__MAX_TEMPLATE_INSTANCIATION_DEPTH to avoid reaching the template maximum instantiation depth. (should be 1024 for C++11 but gcc set it to 900 and clang 3.9 to 256 (v4.0 is ok))
+template<int N, typename std::enable_if<not (N <= __MAX_TEMPLATE_INSTANCIATION_DEPTH), bool>::type = 0> // use <= to remove parsing error in atom when using >
 inline void run_function(std::function<void(void)> todo) {
 	size_t iter = N;
-	while(iter >= 900) {
-		run_function_once<900>(todo);
-		iter -= 900;
+	while(iter >= __MAX_TEMPLATE_INSTANCIATION_DEPTH) {
+		run_function_once<__MAX_TEMPLATE_INSTANCIATION_DEPTH>(todo);
+		iter -= __MAX_TEMPLATE_INSTANCIATION_DEPTH;
 	}
-	run_function_once<N%900>(todo);
+	run_function_once<N%__MAX_TEMPLATE_INSTANCIATION_DEPTH>(todo);
 }
 
 
