@@ -59,7 +59,7 @@ public:
 				out[i] = in[i] + th[i];
 			}
 			else {
-				out[i] = in[i];
+				out[i] = 0.;
 			}
 		}
 	}
