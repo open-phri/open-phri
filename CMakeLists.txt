@@ -24,7 +24,7 @@ if(NOT FORCE_CMAKE_BUILD AND EXISTS ${WORKSPACE_DIR}/share/cmake/system)
 				DESCRIPTION "OpenPHRI: a generic framework to easily and safely control robots in interactions with humans"
 	)
 
-	set_PID_Package_Version(0 5 0)
+	set_PID_Package_Version(0 6 0)
 
 	check_PID_Platform(CONFIGURATION posix)
 
