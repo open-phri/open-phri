@@ -1,9 +1,9 @@
 #undef NDEBUG
 
-#include <RSCL/RSCL.h>
+#include <OpenPHRI/OpenPHRI.h>
 #include <iostream>
 
-using namespace RSCL;
+using namespace OpenPHRI;
 using namespace std;
 
 int main(int argc, char const *argv[]) {

@@ -7,7 +7,7 @@ function(create_test test)
 
     declare_PID_Component_Dependency(
         COMPONENT ${test}
-        EXPORT NATIVE rscl
+        NATIVE open-phri
     )
 
     run_PID_Test(

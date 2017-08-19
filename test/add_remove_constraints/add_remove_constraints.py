@@ -1,5 +1,5 @@
 from minieigen import *
-from pyrscl import *
+from openphri import *
 import sys
 
 

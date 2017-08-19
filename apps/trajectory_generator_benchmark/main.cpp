@@ -1,10 +1,10 @@
 #include <iostream>
 #include <type_traits>
 
-#include <RSCL/RSCL.h>
+#include <OpenPHRI/OpenPHRI.h>
 
 using namespace std;
-using namespace RSCL;
+using namespace OpenPHRI;
 
 constexpr double SAMPLE_TIME = 0.010;
 constexpr bool USE_LOOP = false;
@@ -63,13 +63,13 @@ int main(int argc, char const *argv[]) {
 	// constexpr size_t N = 100000;
 	Clock clock;
 	DataLogger logger(
-		"/mnt/tmpfs/rscl_logs",
+		"/mnt/tmpfs/open-phri_logs",
 		clock.getTime(),
 		true,   // create gnuplot files
 		true);  // delay disk write
 
 	double t_start, t_end, t_avg = 0., iter_avg = 0.;
-	constexpr int NCalls = 900;
+	constexpr int NCalls = 2000;
 	constexpr int Tries = 100;
 	auto getAvgTime = [&t_start, &t_end, NCalls](){return (t_end-t_start)/double(NCalls);};
 	std::function<void(void)> runner = std::bind(&TrajectoryGenerator::computeParameters, &trajectory_generator, 1e-6, 1e-6);

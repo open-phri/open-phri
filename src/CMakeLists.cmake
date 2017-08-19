@@ -3,20 +3,20 @@ find_package(Eigen3)
 find_package(Threads)
 
 
-###					RSCL library					###
-set(RSCL_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include/RSCL;${EIGEN3_INCLUDE_DIRS}" CACHE INTERNAL "")
-include_directories(${RSCL_INCLUDE_DIRS})
+###					OpenPHRI library					###
+set(OpenPHRI_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include/OpenPHRI;${EIGEN3_INCLUDE_DIRS}" CACHE INTERNAL "")
+include_directories(${OpenPHRI_INCLUDE_DIRS})
 file(
     GLOB_RECURSE
-    rscl_source_files
-    ${CMAKE_CURRENT_SOURCE_DIR}/RSCL/*
+    open-phri_source_files
+    ${CMAKE_CURRENT_SOURCE_DIR}/OpenPHRI/*
 )
 
-add_library(RSCL SHARED ${rscl_source_files})
-set_property(TARGET RSCL PROPERTY CXX_STANDARD 14)
+add_library(OpenPHRI SHARED ${open-phri_source_files})
+set_property(TARGET OpenPHRI PROPERTY CXX_STANDARD 14)
 
 if(USE_OPENMP)
-    set_target_properties(RSCL PROPERTIES COMPILE_FLAGS "${OpenMP_CXX_FLAGS}" LINK_FLAGS "${OpenMP_CXX_FLAGS}")
+    set_target_properties(OpenPHRI PROPERTIES COMPILE_FLAGS "${OpenMP_CXX_FLAGS}" LINK_FLAGS "${OpenMP_CXX_FLAGS}")
 endif()
 
 
@@ -44,7 +44,7 @@ target_compile_definitions(vrep_remote_api PRIVATE ${VREP_CFLAGS})
 
 
 ###				vrep_driver library				###
-set(VREP_DRIVER_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include/vrep_driver;${RSCL_INCLUDE_DIRS};${VREP_REMOTE_API_INCLUDE_DIRS}" CACHE INTERNAL "")
+set(VREP_DRIVER_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include/vrep_driver;${OpenPHRI_INCLUDE_DIRS};${VREP_REMOTE_API_INCLUDE_DIRS}" CACHE INTERNAL "")
 include_directories(${VREP_DRIVER_INCLUDE_DIRS})
 file(
     GLOB_RECURSE
@@ -58,25 +58,25 @@ set_property(TARGET vrep_driver PROPERTY CXX_STANDARD 14)
 
 
 if(GEN_PYTHON_BINDINGS)
-    ###				pyrscl library				###
+    ###				pyopen-phri library				###
     find_package(Boost COMPONENTS python3 REQUIRED)
     find_package(PythonLibs REQUIRED)
 
-    include_directories(${RSCL_INCLUDE_DIRS})
+    include_directories(${OpenPHRI_INCLUDE_DIRS})
     include_directories(${VREP_DRIVER_INCLUDE_DIRS})
     include_directories(${Boost_INCLUDE_DIRS})
     include_directories(${PYTHON_INCLUDE_DIRS})
 
     file(
         GLOB_RECURSE
-        pyrscl_source_files
-        ${CMAKE_CURRENT_SOURCE_DIR}/pyRSCL/*.cpp
+        pyopen-phri_source_files
+        ${CMAKE_CURRENT_SOURCE_DIR}/pyOpenPHRI/*.cpp
     )
 
-    add_library(pyrscl SHARED ${pyrscl_source_files})
-    target_link_libraries(pyrscl ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} RSCL vrep_driver)
-    set_property(TARGET pyrscl PROPERTY CXX_STANDARD 14)
-    set_target_properties(pyrscl PROPERTIES PREFIX "") # python needs a pyrscl.so file, without prefix
+    add_library(pyopen-phri SHARED ${pyopen-phri_source_files})
+    target_link_libraries(pyopen-phri ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} OpenPHRI vrep_driver)
+    set_property(TARGET pyopen-phri PROPERTY CXX_STANDARD 14)
+    set_target_properties(pyopen-phri PROPERTIES PREFIX "") # python needs a pyopen-phri.so file, without prefix
 
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/pyRSCL/__init__.py ${CMAKE_CURRENT_BINARY_DIR}/__init__.py COPYONLY)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/pyOpenPHRI/__init__.py ${CMAKE_CURRENT_BINARY_DIR}/__init__.py COPYONLY)
 endif()

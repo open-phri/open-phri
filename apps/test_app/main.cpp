@@ -1,9 +1,9 @@
 #include <iostream>
 
-#include <RSCL/RSCL.h>
+#include <OpenPHRI/OpenPHRI.h>
 
 using namespace std;
-using namespace RSCL;
+using namespace OpenPHRI;
 
 constexpr double SAMPLE_TIME = 0.001;
 
@@ -51,7 +51,7 @@ int main(int argc, char const *argv[]) {
 
 	Clock clock(SAMPLE_TIME);
 	DataLogger logger(
-		"/mnt/tmpfs/rscl_logs",
+		"/mnt/tmpfs/open-phri_logs",
 		clock.getTime(),
 		true, // create gnuplot files
 		true);

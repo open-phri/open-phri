@@ -1,26 +1,26 @@
 /*
  *  Copyright (C) 2017 Benjamin Navarro <contact@bnavarro.info>
  *
- *  This file is part of RSCL <https://gite.lirmm.fr/navarro/RSCL>.
+ *  This file is part of OpenPHRI <https://gite.lirmm.fr/navarro/OpenPHRI>.
  *
- *  RSCL is free software: you can redistribute it and/or modify
+ *  OpenPHRI is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  RSCL is distributed in the hope that it will be useful,
+ *  OpenPHRI is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public License
- *  along with RSCL.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with OpenPHRI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /**
  * @file vrep_driver.h
  * @author Benjamin Navarro
- * @brief Definition of the VREPDriver class and the RSCL::ReferenceFrame enum.
+ * @brief Definition of the VREPDriver class and the OpenPHRI::ReferenceFrame enum.
  * @date April 2017
  * @ingroup VREP
  */
@@ -41,8 +41,8 @@
 #include <vector>
 #include <utility>
 
-#include <RSCL/definitions.h>
-#include <RSCL/robot.h>
+#include <OpenPHRI/definitions.h>
+#include <OpenPHRI/robot.h>
 
 namespace vrep {
 
@@ -71,7 +71,7 @@ public:
 	 * @param port [optional] Can be used to specify a port different thant the default one.
 	 */
 	VREPDriver(
-		RSCL::RobotPtr robot,
+		OpenPHRI::RobotPtr robot,
 		ControlLevel control_level,
 		double sample_time,
 		const std::string& suffix = "",
@@ -86,7 +86,7 @@ public:
 	 * @param suffix [optional] Can be used to specify a suffix for all the basic objects.
 	 */
 	VREPDriver(
-		RSCL::RobotPtr robot,
+		OpenPHRI::RobotPtr robot,
 		ControlLevel control_level,
 		double sample_time,
 		int client_id,
@@ -139,7 +139,7 @@ public:
 	 * @param frame [in] The reference frame.
 	 * @return True if correctly read, false otherwise.
 	 */
-	bool readTCPPose(RSCL::Vector6dPtr pose, RSCL::ReferenceFrame frame) const;
+	bool readTCPPose(OpenPHRI::Vector6dPtr pose, OpenPHRI::ReferenceFrame frame) const;
 
 	/**
 	 * @brief Get the TCP velocity in the given frame.
@@ -147,7 +147,7 @@ public:
 	 * @param frame [in] The reference frame.
 	 * @return True if correctly read, false otherwise.
 	 */
-	bool readTCPVelocity(RSCL::Vector6dPtr velocity, RSCL::ReferenceFrame frame) const;
+	bool readTCPVelocity(OpenPHRI::Vector6dPtr velocity, OpenPHRI::ReferenceFrame frame) const;
 
 	/**
 	 * @brief Get the target TCP pose in the given frame.
@@ -155,7 +155,7 @@ public:
 	 * @param frame [in] The reference frame.
 	 * @return True if correctly read, false otherwise.
 	 */
-	bool readTCPTargetPose(RSCL::Vector6dPtr pose, RSCL::ReferenceFrame frame) const;
+	bool readTCPTargetPose(OpenPHRI::Vector6dPtr pose, OpenPHRI::ReferenceFrame frame) const;
 
 	/**
 	 * @brief Send the target TCP velocity in the given frame.
@@ -163,28 +163,28 @@ public:
 	 * @param frame [in] The reference frame.
 	 * @return True if correctly read, false otherwise.
 	 */
-	bool sendTCPtargetVelocity(RSCL::Vector6dConstPtr velocity, RSCL::ReferenceFrame frame) const;
+	bool sendTCPtargetVelocity(OpenPHRI::Vector6dConstPtr velocity, OpenPHRI::ReferenceFrame frame) const;
 
 	/**
 	 * @brief Get the TCP wrench in the TCP frame.
 	 * @param wrench [out] The current TCP wrench.
 	 * @return True if correctly read, false otherwise.
 	 */
-	bool readTCPWrench(RSCL::Vector6dPtr wrench) const;
+	bool readTCPWrench(OpenPHRI::Vector6dPtr wrench) const;
 
 	/**
 	 * @brief Get the Jacobian matrix associated with the TCP.
 	 * @param jacobian [out] The current Jacobian matrix.
 	 * @return True if correctly read, false otherwise.
 	 */
-	bool readJacobian(RSCL::MatrixXdPtr jacobian) const;
+	bool readJacobian(OpenPHRI::MatrixXdPtr jacobian) const;
 
 	/**
 	 * @brief Get the transformation matrix associated with the TCP.
 	 * @param matrix [out] The current transformation matrix.
 	 * @return True if correctly read, false otherwise.
 	 */
-	bool readTransformationMatrix(RSCL::Matrix4dPtr matrix) const;
+	bool readTransformationMatrix(OpenPHRI::Matrix4dPtr matrix) const;
 
 	/**
 	 * @brief Start tracking a given object in the specified frame.
@@ -192,7 +192,7 @@ public:
 	 * @param frame [in] The reference frame.
 	 * @return A shared pointer to the object's postion. Updated on VREPDriver::updateTrackedObjectsPosition.
 	 */
-	RSCL::Vector6dConstPtr trackObjectPosition(const std::string& name, RSCL::ReferenceFrame frame);
+	OpenPHRI::Vector6dConstPtr trackObjectPosition(const std::string& name, OpenPHRI::ReferenceFrame frame);
 
 	/**
 	 * @brief Update all tracked objects' position.
@@ -200,34 +200,34 @@ public:
 	 */
 	bool updateTrackedObjectsPosition();
 
-	RSCL::VectorXdConstPtr initLaserScanner(const std::string& name);
+	OpenPHRI::VectorXdConstPtr initLaserScanner(const std::string& name);
 	bool updateLaserScanners();
 
-	bool readJointPosition(RSCL::VectorXdPtr position) const;
-	bool sendJointTargetPosition(RSCL::VectorXdConstPtr position) const;
-	bool sendJointTargetVelocity(RSCL::VectorXdConstPtr velocity) const;
+	bool readJointPosition(OpenPHRI::VectorXdPtr position) const;
+	bool sendJointTargetPosition(OpenPHRI::VectorXdConstPtr position) const;
+	bool sendJointTargetVelocity(OpenPHRI::VectorXdConstPtr velocity) const;
 
-	bool getSimulationData(RSCL::ReferenceFrame frame_velocities = RSCL::ReferenceFrame::TCP, RSCL::ReferenceFrame frame_positions = RSCL::ReferenceFrame::Base);
-	bool sendSimulationData(RSCL::ReferenceFrame frame_velocities = RSCL::ReferenceFrame::TCP);
+	bool getSimulationData(OpenPHRI::ReferenceFrame frame_velocities = OpenPHRI::ReferenceFrame::TCP, OpenPHRI::ReferenceFrame frame_positions = OpenPHRI::ReferenceFrame::Base);
+	bool sendSimulationData(OpenPHRI::ReferenceFrame frame_velocities = OpenPHRI::ReferenceFrame::TCP);
 
 private:
 	void init(const std::string& ip, int port);
 	void init(int client_id);
 	bool getObjectHandles();
 	void startStreaming() const;
-	int getFrameHandle(RSCL::ReferenceFrame frame) const;
-	void computeSpatialTransformation(RSCL::Matrix4dConstPtr transformation, RSCL::Matrix6dPtr spatial_transformation) const;
+	int getFrameHandle(OpenPHRI::ReferenceFrame frame) const;
+	void computeSpatialTransformation(OpenPHRI::Matrix4dConstPtr transformation, OpenPHRI::Matrix6dPtr spatial_transformation) const;
 
 	ControlLevel control_level_;
 	double sample_time_;
 	bool sync_mode_;
-	RSCL::RobotPtr robot_;
+	OpenPHRI::RobotPtr robot_;
 	std::string suffix_;
 	int client_id_;
 
 	std::unordered_map<std::string, int> object_handles_;
-	std::map<std::string, RSCL::VectorXdPtr> lasers_data_;
-	std::map<std::pair<int,int>, RSCL::Vector6dPtr> tracked_objects_;
+	std::map<std::string, OpenPHRI::VectorXdPtr> lasers_data_;
+	std::map<std::pair<int,int>, OpenPHRI::Vector6dPtr> tracked_objects_;
 
 };
 

@@ -1,6 +1,6 @@
 set(PID_WS_FOUND FALSE)
 
-project(RobotSafetyControlLibrary)
+project(OpenPHRI)
 
 find_package(Doxygen)
 option(BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" ${DOXYGEN_FOUND})

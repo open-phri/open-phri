@@ -1,8 +1,8 @@
 #undef NDEBUG
 
-#include <RSCL/RSCL.h>
+#include <OpenPHRI/OpenPHRI.h>
 
-using namespace RSCL;
+using namespace OpenPHRI;
 using namespace std;
 using namespace Eigen;
 

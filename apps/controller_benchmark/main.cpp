@@ -1,6 +1,6 @@
-#include <RSCL/RSCL.h>
+#include <OpenPHRI/OpenPHRI.h>
 
-using namespace RSCL;
+using namespace OpenPHRI;
 using namespace std;
 
 constexpr bool USE_LOOP = false;
@@ -18,7 +18,7 @@ int main(int argc, char const *argv[]) {
 
 	Clock clock;
 	DataLogger logger(
-		"/mnt/tmpfs/rscl_logs",
+		"/mnt/tmpfs/open-phri_logs",
 		clock.getTime(),
 		true,   // create gnuplot files
 		true);  // delay disk write

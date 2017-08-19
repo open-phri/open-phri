@@ -12,7 +12,7 @@ using namespace vrep;
 using namespace std;
 
 VREPDriver::VREPDriver(
-	RSCL::RobotPtr robot,
+	OpenPHRI::RobotPtr robot,
 	ControlLevel control_level,
 	double sample_time,
 	const std::string& suffix,
@@ -28,7 +28,7 @@ VREPDriver::VREPDriver(
 }
 
 VREPDriver::VREPDriver(
-	RSCL::RobotPtr robot,
+	OpenPHRI::RobotPtr robot,
 	ControlLevel control_level,
 	double sample_time,
 	int client_id,
@@ -103,7 +103,7 @@ void VREPDriver::pauseSimulation() const {
 	simxPauseSimulation(client_id_, simx_opmode_oneshot_wait);
 }
 
-bool VREPDriver::readTCPPose(RSCL::Vector6dPtr pose, RSCL::ReferenceFrame frame) const {
+bool VREPDriver::readTCPPose(OpenPHRI::Vector6dPtr pose, OpenPHRI::ReferenceFrame frame) const {
 	bool all_ok = true;
 	float data[6];
 
@@ -122,7 +122,7 @@ bool VREPDriver::readTCPPose(RSCL::Vector6dPtr pose, RSCL::ReferenceFrame frame)
 	return all_ok;
 }
 
-bool VREPDriver::readTCPVelocity(RSCL::Vector6dPtr velocity, RSCL::ReferenceFrame frame) const {
+bool VREPDriver::readTCPVelocity(OpenPHRI::Vector6dPtr velocity, OpenPHRI::ReferenceFrame frame) const {
 	using namespace Eigen;
 
 	bool all_ok = true;
@@ -152,7 +152,7 @@ bool VREPDriver::readTCPVelocity(RSCL::Vector6dPtr velocity, RSCL::ReferenceFram
 	return all_ok;
 }
 
-bool VREPDriver::readTCPTargetPose(RSCL::Vector6dPtr pose, RSCL::ReferenceFrame frame) const {
+bool VREPDriver::readTCPTargetPose(OpenPHRI::Vector6dPtr pose, OpenPHRI::ReferenceFrame frame) const {
 	bool all_ok = true;
 	float data[6];
 
@@ -171,10 +171,10 @@ bool VREPDriver::readTCPTargetPose(RSCL::Vector6dPtr pose, RSCL::ReferenceFrame 
 	return all_ok;
 }
 
-bool VREPDriver::sendTCPtargetVelocity(RSCL::Vector6dConstPtr velocity, RSCL::ReferenceFrame frame) const {
+bool VREPDriver::sendTCPtargetVelocity(OpenPHRI::Vector6dConstPtr velocity, OpenPHRI::ReferenceFrame frame) const {
 	bool all_ok = true;
 
-	auto pose = make_shared<RSCL::Vector6d>();
+	auto pose = make_shared<OpenPHRI::Vector6d>();
 	all_ok &= readTCPTargetPose(pose, frame);
 	*pose += *velocity * sample_time_;
 
@@ -191,7 +191,7 @@ bool VREPDriver::sendTCPtargetVelocity(RSCL::Vector6dConstPtr velocity, RSCL::Re
 	return all_ok;
 }
 
-bool VREPDriver::readTCPWrench(RSCL::Vector6dPtr wrench) const {
+bool VREPDriver::readTCPWrench(OpenPHRI::Vector6dPtr wrench) const {
 	bool all_ok = true;
 	float data[6];
 	uint8_t ft_state;
@@ -210,7 +210,7 @@ bool VREPDriver::readTCPWrench(RSCL::Vector6dPtr wrench) const {
 	return all_ok;
 }
 
-bool VREPDriver::readJacobian(RSCL::MatrixXdPtr jacobian) const {
+bool VREPDriver::readJacobian(OpenPHRI::MatrixXdPtr jacobian) const {
 	bool all_ok = false;
 
 	simxUChar* jacobian_buf;
@@ -245,7 +245,7 @@ bool VREPDriver::readJacobian(RSCL::MatrixXdPtr jacobian) const {
 	return all_ok;
 }
 
-bool VREPDriver::readTransformationMatrix(RSCL::Matrix4dPtr matrix) const {
+bool VREPDriver::readTransformationMatrix(OpenPHRI::Matrix4dPtr matrix) const {
 	bool all_ok = false;
 
 	simxUChar* matrix_buf;
@@ -267,7 +267,7 @@ bool VREPDriver::readTransformationMatrix(RSCL::Matrix4dPtr matrix) const {
 	return all_ok;
 }
 
-RSCL::Vector6dConstPtr VREPDriver::trackObjectPosition(const std::string& name, RSCL::ReferenceFrame frame) {
+OpenPHRI::Vector6dConstPtr VREPDriver::trackObjectPosition(const std::string& name, OpenPHRI::ReferenceFrame frame) {
 	int handle = -1;
 	int ref_frame = getFrameHandle(frame);
 	float data[3];
@@ -278,7 +278,7 @@ RSCL::Vector6dConstPtr VREPDriver::trackObjectPosition(const std::string& name, 
 
 	simxGetObjectPosition(client_id_, handle, ref_frame, data, simx_opmode_streaming);
 
-	auto ptr = make_shared<RSCL::Vector6d>(RSCL::Vector6d::Zero());
+	auto ptr = make_shared<OpenPHRI::Vector6d>(OpenPHRI::Vector6d::Zero());
 
 	tracked_objects_[make_pair(handle, ref_frame)] = ptr;
 
@@ -303,14 +303,14 @@ bool VREPDriver::updateTrackedObjectsPosition() {
 	return all_ok;
 }
 
-RSCL::VectorXdConstPtr VREPDriver::initLaserScanner(const std::string& name) {
+OpenPHRI::VectorXdConstPtr VREPDriver::initLaserScanner(const std::string& name) {
 	std::string data_name = name + "_data";
 	simxUChar* sigVal;
 	simxInt sigLen;
 
 	simxReadStringStream(client_id_, data_name.c_str(), &sigVal, &sigLen, simx_opmode_streaming);
 
-	auto ptr = std::make_shared<RSCL::VectorXd>();
+	auto ptr = std::make_shared<OpenPHRI::VectorXd>();
 	lasers_data_[data_name] = ptr;
 
 	return ptr;
@@ -344,7 +344,7 @@ bool VREPDriver::updateLaserScanners() {
 	return all_ok;
 }
 
-bool VREPDriver::readJointPosition(RSCL::VectorXdPtr position) const {
+bool VREPDriver::readJointPosition(OpenPHRI::VectorXdPtr position) const {
 	bool all_ok = true;
 
 	float positions[robot_->jointCount()];
@@ -361,7 +361,7 @@ bool VREPDriver::readJointPosition(RSCL::VectorXdPtr position) const {
 	return all_ok;
 }
 
-bool VREPDriver::sendJointTargetPosition(RSCL::VectorXdConstPtr position) const {
+bool VREPDriver::sendJointTargetPosition(OpenPHRI::VectorXdConstPtr position) const {
 	bool all_ok = true;
 
 	const auto& position_data = *position;
@@ -373,7 +373,7 @@ bool VREPDriver::sendJointTargetPosition(RSCL::VectorXdConstPtr position) const 
 	return all_ok;
 }
 
-bool VREPDriver::sendJointTargetVelocity(RSCL::VectorXdConstPtr velocity) const {
+bool VREPDriver::sendJointTargetVelocity(OpenPHRI::VectorXdConstPtr velocity) const {
 	bool all_ok = true;
 
 	const auto& velocity_vec = *velocity;
@@ -416,7 +416,7 @@ bool VREPDriver::getObjectHandles() {
 void VREPDriver::startStreaming() const {
 	float data[6];
 
-	RSCL::ReferenceFrame frames[] = {RSCL::ReferenceFrame::TCP, RSCL::ReferenceFrame::Base, RSCL::ReferenceFrame::World};
+	OpenPHRI::ReferenceFrame frames[] = {OpenPHRI::ReferenceFrame::TCP, OpenPHRI::ReferenceFrame::Base, OpenPHRI::ReferenceFrame::World};
 	string objects[] = {"_tcp", "_tcp_target"};
 
 	for(auto& object : objects) {
@@ -449,21 +449,21 @@ void VREPDriver::startStreaming() const {
 	simxReadStringStream(client_id_, ("RotMat-"+robot_->name()).c_str(), &jacobian_str, &sLength, simx_opmode_streaming);
 }
 
-int VREPDriver::getFrameHandle(RSCL::ReferenceFrame frame) const {
+int VREPDriver::getFrameHandle(OpenPHRI::ReferenceFrame frame) const {
 	switch(frame) {
-	case RSCL::ReferenceFrame::TCP:
+	case OpenPHRI::ReferenceFrame::TCP:
 		return object_handles_.at(robot_->name() + "_tcp" + suffix_);
 		break;
-	case RSCL::ReferenceFrame::Base:
+	case OpenPHRI::ReferenceFrame::Base:
 		return object_handles_.at(robot_->name() + "_base_frame" + suffix_);
 		break;
-	case RSCL::ReferenceFrame::World:
+	case OpenPHRI::ReferenceFrame::World:
 		return object_handles_.at(robot_->name() + "_world_frame" + suffix_);
 		break;
 	}
 }
 
-void VREPDriver::computeSpatialTransformation(RSCL::Matrix4dConstPtr transformation, RSCL::Matrix6dPtr spatial_transformation) const {
+void VREPDriver::computeSpatialTransformation(OpenPHRI::Matrix4dConstPtr transformation, OpenPHRI::Matrix6dPtr spatial_transformation) const {
 	auto& mat = *spatial_transformation;
 	const auto& rot_mat = transformation->block<3,3>(0,0);
 	mat.block<3,3>(3,0).setZero();
@@ -472,7 +472,7 @@ void VREPDriver::computeSpatialTransformation(RSCL::Matrix4dConstPtr transformat
 	mat.block<3,3>(3,3) = rot_mat;
 }
 
-bool VREPDriver::getSimulationData(RSCL::ReferenceFrame frame_velocities, RSCL::ReferenceFrame frame_positions) {
+bool VREPDriver::getSimulationData(OpenPHRI::ReferenceFrame frame_velocities, OpenPHRI::ReferenceFrame frame_positions) {
 	bool all_ok = true;
 
 	all_ok &= readTCPPose(robot_->controlPointCurrentPose(), frame_positions);
@@ -490,7 +490,7 @@ bool VREPDriver::getSimulationData(RSCL::ReferenceFrame frame_velocities, RSCL::
 	return all_ok;
 }
 
-bool VREPDriver::sendSimulationData(RSCL::ReferenceFrame frame_velocities) {
+bool VREPDriver::sendSimulationData(OpenPHRI::ReferenceFrame frame_velocities) {
 	bool all_ok = true;
 
 	// Make sure all commands are sent at the same time

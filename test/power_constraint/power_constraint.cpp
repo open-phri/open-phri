@@ -1,10 +1,10 @@
 #undef NDEBUG
 
-#include <RSCL/RSCL.h>
+#include <OpenPHRI/OpenPHRI.h>
 
 #include <iostream>
 
-using namespace RSCL;
+using namespace OpenPHRI;
 using namespace std;
 
 bool isClose(double v1, double v2, double eps = 1e-3) {

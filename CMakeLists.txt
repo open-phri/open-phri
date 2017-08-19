@@ -12,16 +12,16 @@ if(NOT FORCE_CMAKE_BUILD AND EXISTS ${WORKSPACE_DIR}/share/cmake/system)
 	include(Package_Definition NO_POLICY_SCOPE)
 	set(PID_WS_FOUND TRUE)
 
-	PROJECT(rscl)
+	PROJECT(open-phri)
 
 	declare_PID_Package(
 				AUTHOR 		Benjamin Navarro
 				INSTITUTION	LIRMM
 				MAIL		navarro@lirmm.fr
-				ADDRESS 	git@gite.lirmm.fr:navarro/RSCL.git
+				ADDRESS 	git@github.com:BenjaminNavarro/OpenPHRI.git
 				YEAR 		2017
 				LICENSE 	GNULGPL
-				DESCRIPTION "Robot Safety Control Library: provides a generic framework to easily control robots in operational space with safety constraints"
+				DESCRIPTION "OpenPHRI: a generic framework to easily and safely control robots in interactions with humans"
 	)
 
 	set_PID_Package_Version(0 5 0)

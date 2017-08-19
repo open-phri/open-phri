@@ -4,12 +4,12 @@
 #include <chrono>
 #include <list>
 
-#include <RSCL/RSCL.h>
+#include <OpenPHRI/OpenPHRI.h>
 #include <vrep_driver/vrep_driver.h>
 
 #include "state_machine.h"
 
-using namespace RSCL;
+using namespace OpenPHRI;
 using namespace vrep;
 
 bool _stop = false;
@@ -53,7 +53,7 @@ int main(int argc, char const *argv[]) {
 
 	Clock clock(SAMPLE_TIME);
 	DataLogger logger(
-		"/mnt/tmpfs/rscl_logs",
+		"/mnt/tmpfs/open-phri_logs",
 		clock.getTime(),
 		true,   // create gnuplot files
 		true);  // delay disk write

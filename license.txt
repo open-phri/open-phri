@@ -1,7 +1,7 @@
 
-Software license for the software named : rscl
+Software license for the software named : open-phri
 
-Software description : Robot Safety Control Library: provides a generic framework to easily control robots in operational space with safety constraints
+Software description : OpenPHRI: a generic framework to easily and safely control robots in interactions with humans
 
 Copyright (C) 2017  Benjamin Navarro (LIRMM)
 
