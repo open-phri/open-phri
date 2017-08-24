@@ -9,13 +9,84 @@ constexpr double SAMPLE_TIME = 0.001;
 
 int main(int argc, char const *argv[]) {
 
-	std::cout << "Blah?\n";
-	auto foo = make_shared<TrajectoryPoint<Vector6d>>(Vector6d::Zero(), Vector6d::Zero(), Vector6d::Zero());
-	auto foofoo = make_shared<TrajectoryPoint<Vector6d>>(Vector6d::Ones(), Vector6d::Zero(), Vector6d::Zero());
-	auto bar = Trajectory<Vector6d>(TrajectoryOutputType::Position, foo, SAMPLE_TIME);
-	bar.addPathTo(foofoo, Vector6d::Ones(), Vector6d::Ones());
-	bar.computeParameters();
+	std::cout << "Testing the Trajectory class on double\n";
+	auto p1 = TrajectoryPoint<double>(0.,0.,0.);
+	auto p2 = TrajectoryPoint<double>(1.,0.,0.);
+	auto tg = TrajectoryGenerator<double>(TrajectoryOutputType::Position, p1, SAMPLE_TIME, TrajectorySynchronization::SynchronizeWaypoints);
+	tg.addPathTo(p2, 0.5, 1.);
+	tg.addPathTo(p1, 0.1, 0.5);
+	tg.computeTimings();
+	cout << "Trajectory: " << tg.getTrajectoryDuration() << "\n";
+	for (size_t i = 0; i < 2; ++i) {
+		cout << "\tSegment " << i+1 << ": " << tg.getSegmentDuration(i) << "\n";
+		cout << "\t\tComponent " << 1 << ": " << tg.getSegmentDuration(i, 0) << "\n";
+	}
 
+
+	std::cout << "Testing the Trajectory class on Vector6d\n";
+	Vector6d y, vmax, amax;
+	y << 1., 0.9, 0.8, 0.7, 0.6, 0.5;
+	vmax << 1., 2., 3., 4., 5., 6.;
+	amax << 1., 2., 3., 4., 5., 6.;
+	auto point_1 = TrajectoryPoint<Vector6d>(Vector6d::Zero(), Vector6d::Zero(), Vector6d::Zero());
+	auto point_2 = TrajectoryPoint<Vector6d>(y, Vector6d::Zero(), Vector6d::Zero());
+	auto trajectory_generator = TrajectoryGenerator<Vector6d>(TrajectoryOutputType::Position, point_1, SAMPLE_TIME, TrajectorySynchronization::SynchronizeTrajectory);
+	trajectory_generator.addPathTo(point_2, vmax, amax);
+	trajectory_generator.addPathTo(point_1, vmax * 0.5, amax * 0.25);
+	// get<1>(trajectory_generator[0][3]) = 0.1; // get<1> => dy, [0] => 1st point, [3] => 4th component
+	trajectory_generator.computeTimings();
+
+	cout << "Trajectory: " << trajectory_generator.getTrajectoryDuration() << "\n";
+	for (size_t i = 0; i < 2; ++i) {
+		cout << "\tSegment " << i+1 << ": " << trajectory_generator.getSegmentDuration(i) << "\n";
+		for (size_t j = 0; j < 6; ++j) {
+			cout << "\t\tComponent " << j+1 << ": " << trajectory_generator.getSegmentDuration(i, j) << "\n";
+		}
+	}
+
+	auto reference = std::make_shared<Vector6d>(Vector6d::Zero());
+	Vector6d threshold;
+	threshold.setConstant(0.01);
+	trajectory_generator.enableErrorTracking(reference, threshold, true);
+
+	Clock clock(SAMPLE_TIME);
+	DataLogger logger(
+		"/tmp",
+		clock.getTime(),
+		true
+		);
+
+	logger.logExternalData("traj6d", trajectory_generator.getOutput()->data(), 6);
+	while(not trajectory_generator()) {
+		clock();
+		logger();
+
+		if(not (*clock.getTime() > 1.5 and *clock.getTime() < 2.5)) {
+			*reference = *trajectory_generator.getOutput();
+		}
+		else {
+			reference->block<5,1>(1,0) = trajectory_generator.getOutput()->block<5,1>(1,0);
+		}
+	}
+
+	std::cout << "Reset & recomputeTimings" << std::endl;
+
+	trajectory_generator.reset();
+	trajectory_generator.computeTimings();
+	double start = *clock.getTime();
+	while(not trajectory_generator()) {
+		clock();
+		logger();
+
+		if(not (*clock.getTime()-start > 4. and *clock.getTime()-start < 5.)) {
+			*reference = *trajectory_generator.getOutput();
+		}
+		else {
+			reference->block<5,1>(1,0) = trajectory_generator.getOutput()->block<5,1>(1,0);
+		}
+	}
+
+#if 0
 	auto x_point_1 = make_shared<TrajectoryPoint<double>>(0.,  0.,     0.);
 	auto x_point_2 = make_shared<TrajectoryPoint<double>>(1.,  0.,     0.);
 	auto x_point_3 = make_shared<TrajectoryPoint<double>>(-1,  0.,     0.);
@@ -86,7 +157,7 @@ int main(int argc, char const *argv[]) {
 		logger();
 	} while(not trajectory_generator.compute());
 
-
+#endif
 
 	return 0;
 }

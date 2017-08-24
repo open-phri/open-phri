@@ -6,6 +6,8 @@
 
 using namespace phri;
 
+size_t FifthOrderPolynomial::compute_timings_total_iter = 0;
+
 /* Simplified coefficient for xi = 0 and dx = xf-xi
  * a = -(12*yi - 12*yf + 6*dx*dyf + 6*dx*dyi - d2yf*dx^2 + d2yi*dx^2)/(2*dx^5)
  * b = (30*yi - 30*yf + 14*dx*dyf + 16*dx*dyi - 2*d2yf*dx^2 + 3*d2yi*dx^2)/(2*dx^4)
@@ -25,6 +27,72 @@ void FifthOrderPolynomial::computeParameters(FifthOrderPolynomial::Parameters& p
 	params.d =  params.d2yi/2.;
 	params.e =  params.dyi;
 	params.f =  params.yi;
+}
+
+FifthOrderPolynomial::ConstraintError FifthOrderPolynomial::computeParametersWithConstraints(FifthOrderPolynomial::Parameters& parameters, double dymax, double d2ymax, double dyeps, double d2yeps, double initial_guess) {
+	FifthOrderPolynomial::ConstraintError error = FifthOrderPolynomial::ConstraintError::NoError;
+	if(dymax < std::abs(parameters.dyi)) {
+		error = FifthOrderPolynomial::ConstraintError::InitialVelocity;
+	}
+	if(dymax < std::abs(parameters.dyf)) {
+		error = FifthOrderPolynomial::ConstraintError::FinalVelocity;
+	}
+	if(d2ymax < std::abs(parameters.d2yi)) {
+		error = FifthOrderPolynomial::ConstraintError::InitialAcceleration;
+	}
+	if(d2ymax < std::abs(parameters.d2yf)) {
+		error = FifthOrderPolynomial::ConstraintError::FinalAcceleration;
+	}
+
+	if(error != FifthOrderPolynomial::ConstraintError::NoError) {
+		return error;
+	}
+
+	FifthOrderPolynomial::Parameters poly_params_dy = FifthOrderPolynomial::Constraints {0, initial_guess, parameters.yi, parameters.yf, parameters.dyi, parameters.dyf, parameters.d2yi, parameters.d2yf};
+	FifthOrderPolynomial::Parameters poly_params_d2y = FifthOrderPolynomial::Constraints {0, initial_guess, parameters.yi, parameters.yf, parameters.dyi, parameters.dyf, parameters.d2yi, parameters.d2yf};
+
+	bool dymax_found = false;
+	bool d2ymax_found = false;
+	double v_max, a_max;
+	auto get_dymax_error = [&poly_params_dy, dymax, &v_max]() {
+							   v_max = FifthOrderPolynomial::getFirstDerivativeMaximum(poly_params_dy);
+							   return v_max - dymax;
+						   };
+	auto get_d2ymax_error = [&poly_params_d2y, d2ymax, &a_max]() {
+								a_max = FifthOrderPolynomial::getSecondDerivativeMaximum(poly_params_d2y);
+								return a_max - d2ymax;
+							};
+
+	while(not (dymax_found and d2ymax_found)) {
+
+		if(not dymax_found) {
+			FifthOrderPolynomial::computeParameters(poly_params_dy);
+			++FifthOrderPolynomial::compute_timings_total_iter;
+			double v_error_abs = std::abs(get_dymax_error());
+			dymax_found = v_error_abs < dyeps;
+			if(not dymax_found) {
+				poly_params_dy.xf = poly_params_dy.xf*v_max/dymax;
+			}
+		}
+		if(not d2ymax_found) {
+			FifthOrderPolynomial::computeParameters(poly_params_d2y);
+			++FifthOrderPolynomial::compute_timings_total_iter;
+			double a_error_abs = std::abs(get_d2ymax_error());
+			d2ymax_found = a_error_abs < d2yeps;
+			if(not d2ymax_found) {
+				poly_params_d2y.xf = poly_params_d2y.xf*(std::sqrt(a_max/d2ymax));
+			}
+		}
+	}
+
+	if(poly_params_dy.xf > poly_params_d2y.xf) {
+		parameters = poly_params_dy;
+	}
+	else {
+		parameters = poly_params_d2y;
+	}
+
+	return error;
 }
 
 double FifthOrderPolynomial::compute(double x, const Parameters& params) {

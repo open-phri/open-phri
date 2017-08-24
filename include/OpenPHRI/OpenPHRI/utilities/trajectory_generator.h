@@ -40,407 +40,512 @@ enum class TrajectoryOutputType {
 	Acceleration
 };
 
-template<typename T>
-class Trajectory {
-public:
-	Trajectory(TrajectoryOutputType output_type, TrajectoryPointPtr<T> start, std::shared_ptr<T> output, double sample_time) :
-		total_minimum_time_(0.),
-		current_section_(0),
-		sample_time_(sample_time),
-		output_type_(output_type)
-	{
-		points_.push_back(start);
-		output_ = output;
-	}
-
-	Trajectory(TrajectoryOutputType output_type, TrajectoryPointPtr<T> start, T* output, double sample_time) :
-		Trajectory(output_type, start, std::shared_ptr<T>(output, [](auto p){}), sample_time)
-	{
-	}
-
-	Trajectory(TrajectoryOutputType output_type, TrajectoryPointPtr<T> start, double sample_time) :
-		Trajectory(output_type, start, std::make_shared<T>(), sample_time)
-	{
-	}
-
-	template<typename U = T>
-	void addPathTo(TrajectoryPointPtr<T> to, T max_velocity, T max_acceleration, typename std::enable_if<std::is_arithmetic<U>::value>::type* = 0) {
-		points_.push_back(to);
-		PathParams<U> params;
-		params.max_velocity = max_velocity;
-		params.max_acceleration = max_acceleration;
-		params.isFixedTime = false;
-		path_params_.push_back(params);
-	}
-
-	template<typename U = T>
-	void addPathTo(TrajectoryPointPtr<T> to, double duration, typename std::enable_if<std::is_arithmetic<U>::value>::type* = 0) {
-		points_.push_back(to);
-		PathParams<U> params;
-		params.minimum_time = duration;
-		params.isFixedTime = true;
-		path_params_.push_back(params);
-	}
-
-	template<typename U = T>
-	void addPathTo(TrajectoryPointPtr<T> to, T max_velocity, T max_acceleration, typename std::enable_if<not std::is_arithmetic<U>::value>::type* = 0) {
-		points_.push_back(to);
-		PathParams<U> params;
-		params.max_velocity = max_velocity;
-		params.max_acceleration = max_acceleration;
-		params.isFixedTime = false;
-		params.poly_params.resize(to->y->size());
-		path_params_.push_back(params);
-	}
-
-	template<typename U = T>
-	void addPathTo(TrajectoryPointPtr<T> to, double duration, typename std::enable_if<not std::is_arithmetic<U>::value>::type* = 0) {
-		points_.push_back(to);
-		PathParams<U> params;
-		params.minimum_time = duration;
-		params.isFixedTime = true;
-		params.poly_params.resize(to->y->size());
-		path_params_.push_back(params);
-	}
-
-	std::shared_ptr<const T> getOutput() {
-		return output_;
-	}
-
-	double getCurrentPathMinimumTime() {
-		return path_params_[current_section_].minimum_time;
-	}
-
-	double getTrajectoryMinimumTime() {
-		return total_minimum_time_;
-	}
-
-	double getTrajectoryDuration() {
-		double total = 0.;
-		for (size_t i = 0; i < getSegmentCount(); ++i) {
-			total += getPathDuration(i);
-		}
-		return total;
-	}
-
-	double getPathMinimumTime(size_t idx) {
-		if(idx < points_.size()-1) {
-			return path_params_[idx].minimum_time;
-		}
-		else {
-			return 0.;
-		}
-	}
-
-	double getPathDuration(size_t idx) {
-		if(idx < points_.size()-1) {
-			return path_params_[idx].minimum_time + path_params_[idx].padding_time;
-		}
-		else {
-			return 0.;
-		}
-	}
-
-	size_t getSegmentCount() {
-		return points_.size()-1;
-	}
-
-	void setPaddingTime(size_t idx, double time) {
-		if(idx < points_.size()-1) {
-			path_params_[idx].padding_time = time;
-		}
-	}
-
-	void setPathCurrentTime(size_t idx, double time) {
-		if(idx < points_.size()-1) {
-			path_params_[idx].current_time = time;
-		}
-	}
-
-	template<typename U = T>
-	bool computeParameters(typename std::enable_if<std::is_arithmetic<U>::value>::type* = 0) {
-		int segments = points_.size()-1;
-		if(segments < 1) {
-			return false;
-		}
-
-		for (size_t i = 0; i < segments; ++i) {
-			TrajectoryPoint<T>& from = *points_[i];
-			TrajectoryPoint<T>& to = *points_[i+1];
-
-			auto& params = path_params_[i];
-			auto& poly_params = params.poly_params;
-
-			poly_params = {0, params.minimum_time + params.padding_time, *from.y, *to.y, *from.dy, *to.dy, *from.d2y, *to.d2y};
-			FifthOrderPolynomial::computeParameters(poly_params);
-
-			params.current_time = 0.;
-		}
-
-		return true;
-	}
-
-	template<typename U = T>
-	bool computeParameters(typename std::enable_if<not std::is_arithmetic<U>::value>::type* = 0) {
-		int segments = points_.size()-1;
-		if(segments < 1) {
-			return false;
-		}
-
-		std::cout << "I'm here!" << std::endl;
-		for (size_t i = 0; i < segments; ++i) {
-			TrajectoryPoint<T>& from = *points_[i];
-			TrajectoryPoint<T>& to = *points_[i+1];
-
-			auto& params = path_params_[i];
-
-			for (size_t j = 0; j < from.y->size(); ++j) {
-				auto& poly_params = params.poly_params[j];
-				poly_params = {0, params.minimum_time + params.padding_time, (*from.y)[j], (*to.y)[j], (*from.dy)[j], (*to.dy)[j], (*from.d2y)[j], (*to.d2y)[j]};
-				FifthOrderPolynomial::computeParameters(poly_params);
-			}
-
-			params.current_time = 0.;
-		}
-		return true;
-	}
-
-	template<typename U = T>
-	bool computeTimings(double v_eps = 1e-6, double a_eps = 1e-6, typename std::enable_if<std::is_arithmetic<U>::value>::type* = 0) {
-		int segments = points_.size()-1;
-		if(segments < 1) {
-			return false;
-		}
-
-		bool ret = true;
-		total_minimum_time_ = 0.;
-
-		#pragma omp parallel for
-		for (size_t i = 0; i < segments; ++i) {
-			auto& params = path_params_[i];
-			if(not params.isFixedTime) {
-				TrajectoryPoint<T>& from = *points_[i];
-				TrajectoryPoint<T>& to = *points_[i+1];
-				bool ok = true;
-				if(params.max_velocity < std::abs(*from.dy) or params.max_velocity < std::abs(*to.dy)) {
-					std::cerr << "In computeTimings: initial or final velocity for segment " << i+1 << " is higher than the maximum" << std::endl;
-					ok = false;
-				}
-				if(params.max_acceleration < std::abs(*from.d2y) or params.max_acceleration < std::abs(*to.d2y)) {
-					std::cerr << "In computeTimings: initial or final acceleration for segment " << i+1 << " is higher than the maximum" << std::endl;
-					ok = false;
-				}
-				if(not ok) {
-					ret = false;
-					continue;
-				}
-
-				auto& poly_params = params.poly_params;
-				FifthOrderPolynomial::Parameters poly_params_v {0, 1., *from.y, *to.y, *from.dy, *to.dy, *from.d2y, *to.d2y};
-				FifthOrderPolynomial::Parameters poly_params_a {0, 1., *from.y, *to.y, *from.dy, *to.dy, *from.d2y, *to.d2y};
-
-				bool vmax_found = false;
-				bool amax_found = false;
-				double v_max, a_max;
-				auto get_vmax_error = [&poly_params_v, &params, &v_max]() {
-										  v_max = FifthOrderPolynomial::getFirstDerivativeMaximum(poly_params_v);
-										  return v_max - params.max_velocity;
-									  };
-				auto get_amax_error = [&poly_params_a, &params, &a_max]() {
-										  a_max = FifthOrderPolynomial::getSecondDerivativeMaximum(poly_params_a);
-										  return a_max - params.max_acceleration;
-									  };
-				// std::cout << "--------------------------------------\n";
-				extern size_t _compute_timings_total_iter;
-				while(not (vmax_found and amax_found)) {
-
-					if(not vmax_found) {
-						FifthOrderPolynomial::computeParameters(poly_params_v);
-						++_compute_timings_total_iter;
-						double v_error_abs = std::abs(get_vmax_error());
-						vmax_found = v_error_abs < v_eps;
-						if(not vmax_found) {
-							poly_params_v.xf = poly_params_v.xf*v_max/params.max_velocity;
-						}
-					}
-					if(not amax_found) {
-						FifthOrderPolynomial::computeParameters(poly_params_a);
-						++_compute_timings_total_iter;
-						double a_error_abs = std::abs(get_amax_error());
-						amax_found = a_error_abs < a_eps;
-						if(not amax_found) {
-							poly_params_a.xf = poly_params_a.xf*(std::sqrt(a_max/params.max_acceleration));
-						}
-					}
-					// std::cout << "vmax found: " << vmax_found << ", amax found: " << amax_found << std::endl;
-				}
-
-				if(poly_params_v.xf > poly_params_a.xf) {
-					params.poly_params = poly_params_v;
-				}
-				else {
-					params.poly_params = poly_params_a;
-				}
-				params.minimum_time = params.poly_params.xf;
-			}
-
-			total_minimum_time_ += params.minimum_time;
-		}
-
-		return ret;
-	}
-
-	template<typename U = T>
-	bool computeTimings(double v_eps = 1e-6, double a_eps = 1e-6, typename std::enable_if<not std::is_arithmetic<U>::value>::type* = 0) {
-
-		// TODO
-
-		return true;
-	}
-
-	template<typename U = T>
-	bool compute(typename std::enable_if<std::is_arithmetic<U>::value>::type* = 0) {
-		if(current_section_ == points_.size()-1) {
-			return true;
-		}
-
-		auto& params = path_params_[current_section_];
-
-		double dt = (params.minimum_time + params.padding_time) - params.current_time;
-		if(dt < 0.) {
-			++current_section_;
-			setPathCurrentTime(current_section_, -dt);
-		}
-
-		switch(output_type_) {
-		case TrajectoryOutputType::Position:
-			*output_ = FifthOrderPolynomial::compute(params.current_time, params.poly_params);
-			break;
-		case TrajectoryOutputType::Velocity:
-			*output_ = FifthOrderPolynomial::computeFirstDerivative(params.current_time, params.poly_params);
-			break;
-		case TrajectoryOutputType::Acceleration:
-			*output_ = FifthOrderPolynomial::computeSecondDerivative(params.current_time, params.poly_params);
-			break;
-		}
-
-		params.current_time += sample_time_;
-
-		return false;
-	}
-
-	template<typename U = T>
-	bool compute(typename std::enable_if<not std::is_arithmetic<U>::value>::type* = 0) {
-
-		// TODO
-
-		return true;
-	}
-
-	double operator()() {
-		return compute();
-	}
-
-	void reset() {
-		current_section_ = 0;
-		for(auto& param: path_params_) {
-			param.current_time = 0.;
-		}
-	}
-
-	static size_t getComputeTimingsIterations() {
-		extern size_t _compute_timings_total_iter;
-		return _compute_timings_total_iter;
-	}
-
-	static void resetComputeTimingsIterations() {
-		extern size_t _compute_timings_total_iter;
-		_compute_timings_total_iter = 0;
-	}
-
-private:
-	template<typename U, typename Enable = void>
-	struct PathParams {};
-
-	template<typename U>
-	struct PathParams<U, typename std::enable_if<std::is_arithmetic<U>::value>::type > {
-		U max_velocity;
-		U max_acceleration;
-		bool isFixedTime;
-		double minimum_time;
-		double current_time;
-		double padding_time;
-		FifthOrderPolynomial::Parameters poly_params;
-	};
-
-	template<typename U>
-	struct PathParams<U, typename std::enable_if<not std::is_arithmetic<U>::value>::type > {
-		U max_velocity;
-		U max_acceleration;
-		bool isFixedTime;
-		double minimum_time;
-		double current_time;
-		double padding_time;
-		std::vector<FifthOrderPolynomial::Parameters> poly_params;
-	};
-
-	std::vector<TrajectoryPointPtr<T>> points_;
-	std::vector<PathParams<T>> path_params_;
-	double total_minimum_time_;
-	size_t current_section_;
-	double sample_time_;
-	std::shared_ptr<T> output_;
-	TrajectoryOutputType output_type_;
-};
-
-template<typename T>
-using TrajectoryPtr = std::shared_ptr<Trajectory<T>>;
-template<typename T>
-using TrajectoryConstPtr = std::shared_ptr<const Trajectory<T>>;
-
-extern template class Trajectory<double>;
-extern template class Trajectory<VectorXd>;
-extern template class Trajectory<Vector6d>;
-
 enum class TrajectorySynchronization {
 	NoSynchronization,
 	SynchronizeWaypoints,
 	SynchronizeTrajectory
 };
 
-/** @brief A trajectory generator with velocity and acceleration constraints.
- *  @details Can be used to generate multiple trajectories at once with or without synchronization (at waypoint or trajectory level).
- */
-class TrajectoryGenerator : public ObjectCollection<TrajectoryPtr<double>> {
+template<typename T>
+class TrajectoryGenerator {
 public:
+	TrajectoryGenerator(TrajectoryOutputType output_type, const TrajectoryPoint<T>& start, std::shared_ptr<T> output, double sample_time, TrajectorySynchronization sync = TrajectorySynchronization::NoSynchronization) :
+		sample_time_(sample_time),
+		output_type_(output_type),
+		sync_(sync)
+	{
+		current_segement_.resize(start.size(), 0);
+		points_.push_back(start);
+		output_ = output;
+		createRefs();
+		disableErrorTracking();
+	}
 
-	/**
-	 * @brief Construct a polynomial interpolator given starting and ending points and a user defined input
-	 * @param from Starting point.
-	 * @param to Ending point.
-	 * @param input A shared pointer to the input value used by the interpolator.
-	 */
-	TrajectoryGenerator(TrajectorySynchronization sync = TrajectorySynchronization::NoSynchronization);
+	TrajectoryGenerator(TrajectoryOutputType output_type, const TrajectoryPoint<T>& start, T* output, double sample_time, TrajectorySynchronization sync = TrajectorySynchronization::NoSynchronization) :
+		TrajectoryGenerator(output_type, start, std::shared_ptr<T>(output, [](auto p){}), sample_time, sync)
+	{
+	}
 
-	~TrajectoryGenerator() = default;
+	TrajectoryGenerator(TrajectoryOutputType output_type, const TrajectoryPoint<T>& start, double sample_time, TrajectorySynchronization sync = TrajectorySynchronization::NoSynchronization) :
+		TrajectoryGenerator(output_type, start, std::make_shared<T>(), sample_time, sync)
+	{
+	}
 
-	void setSynchronizationMethod(TrajectorySynchronization sync);
 
-	virtual void computeParameters(double v_eps = 1e-6, double a_eps = 1e-6);
-	virtual bool compute();
-	/**
-	 * @brief Call operator, shortcut for compute()
-	 * @return The new output data.
-	 */
-	virtual double operator()() final;
+	template<typename U = T>
+	void addPathTo(const TrajectoryPoint<T>& to, const T& max_velocity, const T& max_acceleration, typename std::enable_if<std::is_same<U, double>::value>::type* = 0) {
+		assert(getComponentCount() == to.size());
+		points_.push_back(to);
+		SegmentParams params;
+		for (size_t i = 0; i < to.size(); ++i) {
+			params.max_velocity.push_back(max_velocity);
+			params.max_acceleration.push_back(max_acceleration);
+		}
+		params.minimum_time.resize(1, 0.);
+		params.padding_time.resize(1, 0.);
+		params.current_time.resize(1, 0.);
+		params.isFixedTime = false;
+		params.poly_params.resize(to.size());
+		segment_params_.push_back(params);
+	}
 
-	void reset();
+	template<typename U = T>
+	void addPathTo(const TrajectoryPoint<T>& to, const T& max_velocity, const T& max_acceleration, typename std::enable_if<not std::is_same<U, double>::value>::type* = 0) {
+		assert(getComponentCount() == to.size());
+		points_.push_back(to);
+		SegmentParams params;
+		for (size_t i = 0; i < to.size(); ++i) {
+			params.max_velocity.push_back(max_velocity[i]);
+			params.max_acceleration.push_back(max_acceleration[i]);
+		}
+		params.minimum_time.resize(to.size(), 0.);
+		params.padding_time.resize(to.size(), 0.);
+		params.current_time.resize(to.size(), 0.);
+		params.isFixedTime = false;
+		params.poly_params.resize(to.size());
+		segment_params_.push_back(params);
+	}
+
+	void addPathTo(const TrajectoryPoint<T>& to, double duration) {
+		assert(getComponentCount() == to.size());
+		points_.push_back(to);
+		SegmentParams params;
+		params.minimum_time.resize(to.size(), duration);
+		params.padding_time.resize(to.size(), 0.);
+		params.current_time.resize(to.size(), 0.);
+		params.isFixedTime = true;
+		params.poly_params.resize(to.size());
+		segment_params_.push_back(params);
+	}
+
+	std::shared_ptr<const T> getOutput() {
+		return output_;
+	}
+
+	double getCurrentSegmentMinimumTime(size_t component) {
+		return segment_params_[current_segement_.at(component)].minimum_time.at(component);
+	}
+
+	double getTrajectoryMinimumTime(size_t starting_segment = 0) {
+		double total_minimum_time = 0;
+		for (size_t segment = starting_segment; segment < getSegmentCount(); ++segment) {
+			total_minimum_time += *std::max_element(segment_params_[segment].minimum_time.begin(), segment_params_[segment].minimum_time.end());
+		}
+		return total_minimum_time;
+	}
+
+	double getComponentMinimumTime(size_t component, size_t starting_segment = 0) {
+		double min_time = 0.;
+		for (size_t segment = starting_segment; segment < getSegmentCount(); ++segment) {
+			min_time += segment_params_[segment].minimum_time[component];
+		}
+		return min_time;
+	}
+
+	double getTrajectoryDuration() {
+		double total = 0.;
+		for (size_t i = 0; i < getSegmentCount(); ++i) {
+			total += getSegmentDuration(i);
+		}
+		return total;
+	}
+
+	double getSegmentMinimumTime(size_t segment, size_t component) {
+		if(segment < getSegmentCount()) {
+			return segment_params_[segment].minimum_time[component];
+		}
+		else {
+			return 0.;
+		}
+	}
+
+	double getSegmentDuration(size_t segment, size_t component) {
+		return segment_params_[segment].minimum_time[component] + segment_params_[segment].padding_time[component];
+	}
+
+	double getSegmentDuration(size_t segment) {
+		double max = 0.;
+		for (size_t component = 0; component < getComponentCount(); ++component) {
+			max = std::max(max, getSegmentDuration(segment, component));
+		}
+		return max;
+	}
+
+	size_t getSegmentCount() {
+		return points_.size()-1;
+	}
+
+	size_t getComponentCount() {
+		return points_[0].size();
+	}
+
+	void setPaddingTime(size_t segment, size_t component, double time) {
+		segment_params_[segment].padding_time[component] = time;
+	}
+
+	void setCurrentTime(size_t segment, size_t component, double time) {
+		segment_params_[segment].current_time[component] = time;
+	}
+
+	bool computeParameters() {
+		int segments = getSegmentCount();
+		if(segments < 1) {
+			return false;
+		}
+
+		for (size_t segment = 0; segment < segments; ++segment) {
+			TrajectoryPoint<T>& from = points_[segment];
+			TrajectoryPoint<T>& to = points_[segment+1];
+
+			auto& params = segment_params_[segment];
+
+			for (size_t component = 0; component < from.size(); ++component) {
+				auto& poly_params = params.poly_params[component];
+				poly_params = {0, params.minimum_time[component] + params.padding_time[component], from.yrefs_[component], to.yrefs_[component], from.dyrefs_[component], to.dyrefs_[component], from.d2yrefs_[component], to.d2yrefs_[component]};
+				FifthOrderPolynomial::computeParameters(poly_params);
+				params.current_time[component] = 0.;
+			}
+
+		}
+		return true;
+	}
+
+	bool computeTimings(double v_eps = 1e-6, double a_eps = 1e-6) {
+		if(getSegmentCount() < 1) {
+			return false;
+		}
+
+		bool ret = true;
+
+		#pragma omp parallel for
+		for (size_t segment = 0; segment < getSegmentCount(); ++segment) {
+			auto& from = points_[segment];
+			auto& to = points_[segment+1];
+			auto& params = segment_params_[segment];
+			for (size_t component = 0; component < getComponentCount(); ++component) {
+				ret &= computeTimings(from, to, params, segment, component, v_eps, a_eps);
+			}
+		}
+
+		computePaddingTime();
+		computeParameters();
+
+		return ret;
+	}
+
+	bool compute() {
+		auto check_error =
+			[this](size_t component) -> bool {
+				return std::abs(output_refs_[component] - error_tracking_params_.reference_refs[component]) > error_tracking_params_.threshold_refs[component];
+			};
+
+		if(error_tracking_params_) {
+			for (size_t component = 0; component < getComponentCount(); ++component) {
+				if(check_error(component)) {
+					// If we have no synchronization we stop only this component, otherwise we stop all of them
+					if(sync_ == TrajectorySynchronization::NoSynchronization) {
+						error_tracking_params_.state[component] = ErrorTrackingState::Paused;
+					}
+					else {
+						for_each(error_tracking_params_.state.begin(), error_tracking_params_.state.end(), [](auto& state) {state = ErrorTrackingState::Paused;});
+						return false;
+					}
+				}
+			}
+		}
+
+		bool all_ok = true;
+		for (size_t component = 0; component < getComponentCount(); ++component) {
+			auto& current_component_segment = current_segement_[component];
+			if(current_component_segment < getSegmentCount()) {
+				all_ok = false;
+			}
+			else {
+				continue;
+			}
+
+			auto& params = segment_params_[current_component_segment];
+			double& current_time = params.current_time[component];
+
+			if (error_tracking_params_.state[component] == ErrorTrackingState::Paused) {
+				// Recompute a polynomial with zero initial velocity and acceleration starting from the current positon
+				auto recompute_from_here =
+					[this](size_t component) {
+						auto& params = segment_params_[current_segement_[component]];
+						FifthOrderPolynomial::Parameters& poly_params = params.poly_params[component];
+
+						poly_params.yi = error_tracking_params_.reference_refs[component];
+						poly_params.dyi = 0.;
+						poly_params.d2yi = 0.;
+
+						if(params.isFixedTime) {
+							poly_params.xf = params.minimum_time[component];
+							FifthOrderPolynomial::computeParameters(poly_params);
+						}
+						else {
+							FifthOrderPolynomial::computeParametersWithConstraints(poly_params, params.max_velocity[component], params.max_acceleration[component], 1e-6, 1e-6);
+							params.minimum_time[component] = poly_params.xf;
+						}
+						params.current_time[component] = 0.;
+					};
+
+				if(sync_ == TrajectorySynchronization::NoSynchronization) {
+					// If we're still to far, skip to the next component, otherwise resume the generation and recompte from current position is required
+					if(check_error(component)) {
+						continue;
+					}
+					else {
+						error_tracking_params_.state[component] = ErrorTrackingState::Running;
+						if(error_tracking_params_.recompute_when_resumed) {
+							recompute_from_here(component);
+						}
+					}
+				}
+				else if(error_tracking_params_.recompute_when_resumed) {
+					// If we're here it means that all components have returned to the expected output and that trajectories need to be recomputed from the current position
+					for (size_t idx = 0; idx < getComponentCount(); ++idx) {
+						error_tracking_params_.state[idx] = ErrorTrackingState::Running;
+						recompute_from_here(idx);
+					}
+					// Update the padding times to respect the imposed synchronization
+					computePaddingTime();
+					for (size_t seg = 0; seg < getSegmentCount(); ++seg) {
+						auto& params = segment_params_[seg];
+						for (size_t idx = 0; idx < getComponentCount(); ++idx) {
+							auto& poly_params = params.poly_params[idx];
+							// Update the polynomial length and recompute it
+							poly_params.xf = params.minimum_time[idx] + params.padding_time[idx];
+							FifthOrderPolynomial::computeParameters(poly_params);
+						}
+					}
+				}
+			}
+
+			double dt = getSegmentDuration(current_component_segment, component) - current_time;
+			if(dt < 0.) {
+				++current_component_segment;
+				if(current_component_segment < getSegmentCount()) {
+					setCurrentTime(current_component_segment, component, -dt);
+				}
+			}
+
+			double& out = output_refs_[component];
+			switch(output_type_) {
+			case TrajectoryOutputType::Position:
+				out = FifthOrderPolynomial::compute(current_time, params.poly_params[component]);
+				break;
+			case TrajectoryOutputType::Velocity:
+				out = FifthOrderPolynomial::computeFirstDerivative(current_time, params.poly_params[component]);
+				break;
+			case TrajectoryOutputType::Acceleration:
+				out = FifthOrderPolynomial::computeSecondDerivative(current_time, params.poly_params[component]);
+				break;
+			}
+
+			current_time += sample_time_;
+		}
+		return all_ok;
+	}
+
+	double operator()() {
+		return compute();
+	}
+
+	const TrajectoryPoint<T>& operator [](size_t point) const {
+		return points_.at(point);
+	}
+
+	TrajectoryPoint<T>& operator [](size_t point) {
+		return points_.at(point);
+	}
+
+	void setSynchronizationMethod(TrajectorySynchronization sync) {
+		sync_ = sync;
+	}
+	template<typename U = T>
+	void enableErrorTracking(std::shared_ptr<T> reference, const T& threshold, bool recompute_when_resumed, typename std::enable_if<std::is_same<U, double>::value>::type* = 0) {
+		error_tracking_params_.reference = reference;
+		error_tracking_params_.threshold = threshold;
+		error_tracking_params_.recompute_when_resumed = recompute_when_resumed;
+		error_tracking_params_.reference_refs.push_back(std::ref(*reference));
+		error_tracking_params_.threshold_refs.push_back(std::ref(error_tracking_params_.threshold));
+	}
+
+	template<typename U = T>
+	void enableErrorTracking(std::shared_ptr<T> reference, const T& threshold, bool recompute_when_resumed, typename std::enable_if<not std::is_same<U, double>::value>::type* = 0) {
+		error_tracking_params_.reference = reference;
+		error_tracking_params_.threshold = threshold;
+		error_tracking_params_.recompute_when_resumed = recompute_when_resumed;
+		for (size_t i = 0; i < reference->size(); ++i) {
+			error_tracking_params_.reference_refs.push_back(std::ref((*error_tracking_params_.reference)[i]));
+			error_tracking_params_.threshold_refs.push_back(std::ref(error_tracking_params_.threshold[i]));
+		}
+	}
+
+	void enableErrorTracking(T* reference, const T& threshold, bool recompute_when_resumed) {
+		enableErrorTracking(std::shared_ptr<T>(reference, [](auto p){}), threshold, recompute_when_resumed);
+	}
+
+	void disableErrorTracking() {
+		error_tracking_params_.reference.reset();
+		error_tracking_params_.state.resize(getComponentCount());
+		for_each(error_tracking_params_.state.begin(), error_tracking_params_.state.end(), [](auto& state){state = ErrorTrackingState::Running;});
+	}
+
+	void reset() {
+		for (size_t component = 0; component < getComponentCount(); ++component) {
+			current_segement_[component] = 0;
+			for(auto& param: segment_params_) {
+				param.current_time[component] = 0.;
+			}
+		}
+	}
+
+	static size_t getComputeTimingsIterations() {
+		return FifthOrderPolynomial::compute_timings_total_iter;
+	}
+
+	static void resetComputeTimingsIterations() {
+		FifthOrderPolynomial::compute_timings_total_iter = 0;
+	}
 
 private:
+	struct SegmentParams {
+		std::vector<double> max_velocity;
+		std::vector<double> max_acceleration;
+		bool isFixedTime;
+		std::vector<double> minimum_time;
+		std::vector<double> current_time;
+		std::vector<double> padding_time;
+		std::vector<FifthOrderPolynomial::Parameters> poly_params;
+	};
+
+	enum class ErrorTrackingState {
+		Running,
+		Paused
+	};
+
+	struct ErrorTracking {
+		operator bool() const {
+			return static_cast<bool>(reference);
+		}
+
+		std::shared_ptr<T> reference;
+		T threshold;
+		std::vector<ErrorTrackingState> state;
+		bool recompute_when_resumed;
+		std::vector<std::reference_wrapper<double>> reference_refs;
+		std::vector<std::reference_wrapper<double>> threshold_refs;
+	};
+
+
+	template<typename U = T>
+	void createRefs(typename std::enable_if<std::is_same<U, double>::value>::type* = 0) {
+		output_refs_.clear();
+		output_refs_.push_back(std::ref(*output_));
+	}
+
+	template<typename U = T>
+	void createRefs(typename std::enable_if<not std::is_same<U, double>::value>::type* = 0) {
+		output_refs_.clear();
+		auto& vec = *output_;
+		for (size_t i = 0; i < static_cast<size_t>(vec.size()); ++i) {
+			output_refs_.push_back(std::ref(vec[i]));
+		}
+	}
+
+	bool computeTimings(const TrajectoryPoint<T>& from, const TrajectoryPoint<T>& to, SegmentParams& params, size_t segment, size_t component, double v_eps, double a_eps) {
+		bool ok = true;
+		if(params.isFixedTime) {
+			params.poly_params[component] = FifthOrderPolynomial::Constraints {0, params.minimum_time[component], from.yrefs_[component], to.yrefs_[component], from.dyrefs_[component], to.dyrefs_[component], from.d2yrefs_[component], to.d2yrefs_[component]};
+		}
+		else {
+			auto error_msg =
+				[&ok, segment, component] (const std::string& where, const std::string& what) {
+					std::cerr << "In computeTimings: " << where << " " << what << " for segment " << segment+1 << ", component " << component+1 << " is higher than the maximum" << std::endl;
+				};
+
+			FifthOrderPolynomial::Parameters poly_params = FifthOrderPolynomial::Constraints {0, 1., from.yrefs_[component], to.yrefs_[component], from.dyrefs_[component], to.dyrefs_[component], from.d2yrefs_[component], to.d2yrefs_[component]};
+			auto error = FifthOrderPolynomial::computeParametersWithConstraints(poly_params, params.max_velocity[component], params.max_acceleration[component], v_eps, a_eps);
+			switch(error) {
+			case FifthOrderPolynomial::ConstraintError::InitialVelocity:
+				error_msg("initial", "velocity");
+				ok = false;
+				break;
+			case FifthOrderPolynomial::ConstraintError::FinalVelocity:
+				error_msg("final", "velocity");
+				ok = false;
+				break;
+			case FifthOrderPolynomial::ConstraintError::InitialAcceleration:
+				error_msg("initial", "acceleration");
+				ok = false;
+				break;
+			case FifthOrderPolynomial::ConstraintError::FinalAcceleration:
+				error_msg("final", "acceleration");
+				ok = false;
+				break;
+			default:
+				break;
+			}
+
+			if(ok) {
+				params.poly_params[component] = poly_params;
+				params.minimum_time[component] = params.poly_params[component].xf;
+			}
+		}
+
+		return ok;
+	}
+
+	void computePaddingTime(size_t component) {
+		size_t starting_segment = current_segement_[component];
+		if(sync_ == TrajectorySynchronization::SynchronizeWaypoints) {
+			for (size_t segment = starting_segment; segment < getSegmentCount(); ++segment) {
+				double max_time = 0.;
+				for (size_t component_idx = 0; component_idx < getComponentCount(); ++component_idx) {
+					max_time = std::max(max_time, getSegmentMinimumTime(segment, component_idx));
+				}
+				setPaddingTime(segment, component, max_time - getSegmentMinimumTime(segment, component));
+			}
+		}
+		else if(sync_ == TrajectorySynchronization::SynchronizeTrajectory) {
+			double padding = (getTrajectoryMinimumTime(starting_segment) - getComponentMinimumTime(component, starting_segment))/double(getSegmentCount()-starting_segment);
+			for (size_t segment = starting_segment; segment < getSegmentCount(); ++segment) {
+				setPaddingTime(segment, component, padding);
+			}
+		}
+		else {
+			for (size_t segment = starting_segment; segment < getSegmentCount(); ++segment) {
+				setPaddingTime(segment, component, 0.);
+			}
+		}
+	}
+
+	void computePaddingTime() {
+		for (size_t component = 0; component < getComponentCount(); ++component) {
+			computePaddingTime(component);
+		}
+	}
+
+
+	std::vector<TrajectoryPoint<T>> points_;
+	std::vector<SegmentParams> segment_params_;
+	std::vector<size_t> current_segement_;
+	ErrorTracking error_tracking_params_;
+	double sample_time_;
+	std::shared_ptr<T> output_;
+	std::vector<std::reference_wrapper<double>> output_refs_;
+	TrajectoryOutputType output_type_;
 	TrajectorySynchronization sync_;
 };
 
-using TrajectoryGeneratorPtr = std::shared_ptr<TrajectoryGenerator>;
-using TrajectoryGeneratorConstPtr = std::shared_ptr<const TrajectoryGenerator>;
+template<typename T>
+using TrajectoryGeneratorPtr = std::shared_ptr<TrajectoryGenerator<T>>;
+template<typename T>
+using TrajectoryGeneratorConstPtr = std::shared_ptr<const TrajectoryGenerator<T>>;
 
-} // namespace OpenPHRI
+extern template class TrajectoryGenerator<double>;
+extern template class TrajectoryGenerator<VectorXd>;
+extern template class TrajectoryGenerator<Vector6d>;
+
+} // namespace phri

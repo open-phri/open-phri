@@ -27,12 +27,13 @@
 
 #pragma once
 
+#include <cstddef>
+
 namespace phri {
 
 class FifthOrderPolynomial {
 public:
-	struct Parameters {
-		// User defined constraints
+	struct Constraints {
 		double xi;
 		double xf;
 		double yi;
@@ -41,8 +42,9 @@ public:
 		double dyf;
 		double d2yi;
 		double d2yf;
+	};
 
-		// Polynomial coefficients
+	struct Coefficients {
 		double a;
 		double b;
 		double c;
@@ -51,16 +53,68 @@ public:
 		double f;
 	};
 
+	struct Parameters : public Constraints, public Coefficients {
+		Parameters() = default;
+
+		Parameters(const Constraints& constraints) {
+			*this = constraints;
+		}
+
+		Parameters(const Coefficients& coefficients) {
+			*this = coefficients;
+		}
+
+		Parameters(const Constraints& constraints, const Coefficients& coefficients) {
+			*this = constraints;
+			*this = coefficients;
+		}
+
+		Parameters& operator=(const Constraints& other) {
+			xi = other.xi;
+			xf = other.xf;
+			yi = other.yi;
+			yf = other.yf;
+			dyi = other.dyi;
+			dyf = other.dyf;
+			d2yi = other.d2yi;
+			d2yf = other.d2yf;
+
+			return *this;
+		}
+
+		Parameters& operator=(const Coefficients& other) {
+			a = other.a;
+			b = other.b;
+			c = other.c;
+			d = other.d;
+			e = other.e;
+			f = other.f;
+
+			return *this;
+		}
+	};
+
+	enum ConstraintError {
+		NoError             = 0,
+		InitialVelocity     = 1<<0,
+		FinalVelocity       = 1<<1,
+		InitialAcceleration = 1<<2,
+		FinalAcceleration   = 1<<3
+	};
+
 	static void computeParameters(FifthOrderPolynomial::Parameters& params);
+	static ConstraintError computeParametersWithConstraints(FifthOrderPolynomial::Parameters& parameters, double dymax, double d2ymax, double dyeps, double d2yeps, double initial_guess = 1);
 	static double compute(double x, const Parameters& params);
 	static double computeFirstDerivative(double x, const Parameters& params);
 	static double computeSecondDerivative(double x, const Parameters& params);
 	static double getFirstDerivativeMaximum(const Parameters& params);
 	static double getSecondDerivativeMaximum(const Parameters& params);
 
+	static size_t compute_timings_total_iter;
+
 private:
 	FifthOrderPolynomial() = default;
 	~FifthOrderPolynomial() = default;
 };
 
-} // namespace OpenPHRI;
+} // namespace phri;

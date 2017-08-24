@@ -28,8 +28,15 @@
 #pragma once
 
 #include <OpenPHRI/definitions.h>
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <tuple>
 
 namespace phri {
+
+template<typename T>
+class TrajectoryGenerator;
 
 /** @brief Description of a point used by the TrajectoryGenerator.
  *  @details A TrajectoryPoint is described by a 2D point (x,y) and its first and second derivatives
@@ -42,21 +49,88 @@ struct TrajectoryPoint {
 		std::shared_ptr<T> d2y) :
 		y(y), dy(dy), d2y(d2y)
 	{
+		createRefs();
 	}
 
 	TrajectoryPoint(
-		T y,
-		T dy,
-		T d2y) :
+		const T& y,
+		const T& dy,
+		const T& d2y) :
 		y(std::make_shared<T>(y)),
 		dy(std::make_shared<T>(dy)),
 		d2y(std::make_shared<T>(d2y))
 	{
+		createRefs();
+	}
+
+	void print() const {
+		std::cout << "[";
+		std::cout << "(";
+		for(auto pt: yrefs_) {
+			std::cout << pt << " ";
+		}
+		std::cout << ")";
+		std::cout << "(";
+		for(auto pt: dyrefs_) {
+			std::cout << pt << " ";
+		}
+		std::cout << ")";
+		std::cout << "(";
+		for(auto pt: d2yrefs_) {
+			std::cout << pt << " ";
+		}
+		std::cout << ")";
+		std::cout << "]";
+	}
+
+	size_t size() const {
+		return size_;
+	}
+
+	std::tuple<double&, double&, double&> operator[] (size_t n) {
+		assert(n < size_);
+		return std::make_tuple(yrefs_[n], dyrefs_[n], d2yrefs_[n]);
 	}
 
 	std::shared_ptr<T> y;   // value
 	std::shared_ptr<T> dy;  // first derivative
 	std::shared_ptr<T> d2y; // second derivative
+private:
+	friend class TrajectoryGenerator<T>;
+
+	size_t size_;
+	std::vector<std::reference_wrapper<double>> yrefs_;
+	std::vector<std::reference_wrapper<double>> dyrefs_;
+	std::vector<std::reference_wrapper<double>> d2yrefs_;
+
+	template<typename U = T>
+	void createRefs(typename std::enable_if<std::is_same<U, double>::value>::type* = 0) {
+		size_ = 1;
+		yrefs_.clear();
+		dyrefs_.clear();
+		d2yrefs_.clear();
+		yrefs_.push_back(std::ref(*y));
+		dyrefs_.push_back(std::ref(*dy));
+		d2yrefs_.push_back(std::ref(*d2y));
+	}
+
+	template<typename U = T>
+	void createRefs(typename std::enable_if<not std::is_same<U, double>::value>::type* = 0) {
+		assert(y->size() == dy->size() and y->size() == d2y->size());
+		size_ = y->size();
+		yrefs_.clear();
+		dyrefs_.clear();
+		d2yrefs_.clear();
+		auto& yvec = *y;
+		auto& dyvec = *dy;
+		auto& d2yvec = *d2y;
+		for (size_t i = 0; i < static_cast<size_t>(yvec.size()); ++i) {
+			yrefs_.push_back(std::ref(yvec[i]));
+			dyrefs_.push_back(std::ref(dyvec[i]));
+			d2yrefs_.push_back(std::ref(d2yvec[i]));
+		}
+	}
+
 };
 
 template<typename T>
