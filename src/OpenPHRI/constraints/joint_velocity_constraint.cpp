@@ -1,6 +1,6 @@
 #include <OpenPHRI/constraints/joint_velocity_constraint.h>
 
-using namespace OpenPHRI;
+using namespace phri;
 
 using namespace Eigen;
 

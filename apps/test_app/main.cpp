@@ -3,7 +3,7 @@
 #include <OpenPHRI/OpenPHRI.h>
 
 using namespace std;
-using namespace OpenPHRI;
+using namespace phri;
 
 constexpr double SAMPLE_TIME = 0.001;
 

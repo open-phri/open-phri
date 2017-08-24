@@ -30,11 +30,11 @@
 #include <Eigen/Dense>
 #include <memory>
 
-namespace OpenPHRI {
+namespace phri {
 
 #define assert_msg(msg,cond) assert(((void) msg, cond ))
 
-/** @enum OpenPHRI::ReferenceFrame
+/** @enum phri::ReferenceFrame
  *  @brief Specify an object's reference frame.
  */
 enum class ReferenceFrame {

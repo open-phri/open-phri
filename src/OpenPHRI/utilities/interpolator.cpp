@@ -1,6 +1,6 @@
 #include <OpenPHRI/utilities/interpolator.h>
 
-using namespace OpenPHRI;
+using namespace phri;
 
 doubleConstPtr Interpolator::getOutput() const {
 	return output_;

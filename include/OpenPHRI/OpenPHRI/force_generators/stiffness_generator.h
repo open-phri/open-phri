@@ -30,7 +30,7 @@
 #include <OpenPHRI/force_generators/force_generator.h>
 #include <OpenPHRI/definitions.h>
 
-namespace OpenPHRI {
+namespace phri {
 
 /** @brief Generates a force as if a virtual spring is attached to the robot.
  */
@@ -63,4 +63,4 @@ private:
 using StiffnessGeneratorPtr = std::shared_ptr<StiffnessGenerator>;
 using StiffnessGeneratorConstPtr = std::shared_ptr<const StiffnessGenerator>;
 
-} // namespace OpenPHRI
+} // namespace phri

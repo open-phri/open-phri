@@ -1,6 +1,6 @@
 #include <OpenPHRI/velocity_generators/velocity_generator.h>
 
-using namespace OpenPHRI;
+using namespace phri;
 
 VelocityGenerator::VelocityGenerator(ReferenceFrame frame) {
 	frame_ = frame;

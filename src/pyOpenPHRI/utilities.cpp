@@ -4,7 +4,7 @@
 #include <boost/python.hpp>
 #include <iostream>
 
-namespace OpenPHRI {
+namespace phri {
 
 template<typename T>
 std::shared_ptr<Integrator<T>> NewIntegrator(std::shared_ptr<const T> input, double sample_time)
@@ -21,7 +21,7 @@ std::shared_ptr<Derivator<T>> NewDerivator(std::shared_ptr<const T> input, doubl
 }
 
 
-} // namespace OpenPHRI
+} // namespace phri
 
 #define CREATE_INTEGRATOR(type) \
 	void (Integrator< type >:: *force_val_##type)(const type &)                       = &Integrator<type>::force; \
@@ -49,7 +49,7 @@ std::shared_ptr<Derivator<T>> NewDerivator(std::shared_ptr<const T> input, doubl
 	.def("get",             &ObjectCollection<type>::get); \
 
 void wrapUtilities() {
-	using namespace OpenPHRI;
+	using namespace phri;
 	using namespace boost::python;
 
 	/*********************************************************************************/

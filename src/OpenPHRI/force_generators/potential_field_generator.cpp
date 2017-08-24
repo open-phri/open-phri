@@ -1,6 +1,6 @@
 #include <OpenPHRI/force_generators/potential_field_generator.h>
 
-using namespace OpenPHRI;
+using namespace phri;
 using namespace Eigen;
 
 

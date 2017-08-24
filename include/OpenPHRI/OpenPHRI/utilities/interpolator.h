@@ -29,7 +29,7 @@
 
 #include <OpenPHRI/definitions.h>
 
-namespace OpenPHRI {
+namespace phri {
 
 /** @brief Base class for all interpolators.
  *  @details Provides two pure virtual method to update the internal parameters and to compute a new value.
@@ -78,4 +78,4 @@ protected:
 using InterpolatorPtr = std::shared_ptr<Interpolator>;
 using InterpolatorConstPtr = std::shared_ptr<const Interpolator>;
 
-} // namespace OpenPHRI
+} // namespace phri

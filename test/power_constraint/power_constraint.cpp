@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-using namespace OpenPHRI;
+using namespace phri;
 using namespace std;
 
 bool isClose(double v1, double v2, double eps = 1e-3) {

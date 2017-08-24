@@ -16,7 +16,7 @@ T* get_pointer(std::shared_ptr<T> p)
 } // namespace boost
 
 
-namespace OpenPHRI {
+namespace phri {
 
 void assert_msg_py(std::string msg, bool cond) {
 	if(not cond) {
@@ -62,10 +62,10 @@ void SetIdentity(std::shared_ptr<Matrix6d> mat)
 	mat->setIdentity();
 }
 
-} // namespace OpenPHRI
+} // namespace phri
 
 void wrapMisc() {
-	using namespace OpenPHRI;
+	using namespace phri;
 	using namespace boost::python;
 
 	def("assert_msg",                &assert_msg_py,           "Call assert and print a message if it failts");

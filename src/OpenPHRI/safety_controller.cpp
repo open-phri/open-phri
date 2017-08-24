@@ -12,7 +12,7 @@
 #include <limits>
 #include <iostream>
 
-using namespace OpenPHRI;
+using namespace phri;
 
 SafetyController::SafetyController(
 	RobotPtr robot) :
@@ -28,11 +28,11 @@ SafetyController::SafetyController(
 }
 
 void SafetyController::setVerbose(bool on) {
-	constraints_.setVerbose                 (on, "OpenPHRI::SafetyController", "Constraint");
-	force_generators_.setVerbose            (on, "OpenPHRI::SafetyController", "ForceGenerator");
-	torque_generators_.setVerbose           (on, "OpenPHRI::SafetyController", "TorqueGenerator");
-	velocity_generators_.setVerbose         (on, "OpenPHRI::SafetyController", "VelocityGenerator");
-	joint_velocity_generators_.setVerbose   (on, "OpenPHRI::SafetyController", "JointVelocityGenerator");
+	constraints_.setVerbose                 (on, "phri::SafetyController", "Constraint");
+	force_generators_.setVerbose            (on, "phri::SafetyController", "ForceGenerator");
+	torque_generators_.setVerbose           (on, "phri::SafetyController", "TorqueGenerator");
+	velocity_generators_.setVerbose         (on, "phri::SafetyController", "VelocityGenerator");
+	joint_velocity_generators_.setVerbose   (on, "phri::SafetyController", "JointVelocityGenerator");
 }
 
 void SafetyController::skipJacobianInverseComputation(bool on) {
@@ -173,7 +173,7 @@ void SafetyController::compute() {
 	*robot_->joint_velocity_ = constraint_value * *robot_->joint_total_velocity_;
 	// TODO move this to a joint velocity generator so that it is accounted by the constraints
 	if(null_space_velocity_.use_count() > 1) {
-		OpenPHRI::MatrixXd eye(robot_->jointCount(), robot_->jointCount());
+		phri::MatrixXd eye(robot_->jointCount(), robot_->jointCount());
 		eye.setIdentity();
 		*robot_->joint_velocity_ += (eye - *robot_->jacobianInverse() * *robot_->jacobian()) * *null_space_velocity_;;
 	}

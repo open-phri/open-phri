@@ -34,7 +34,7 @@
 #include <OpenPHRI/fwd_decl.h>
 #include <OpenPHRI/utilities/object_collection.hpp>
 
-namespace OpenPHRI {
+namespace phri {
 
 /** @brief The controller class. Deals with all the generators (velocity & force) and the constraints to compute the TCP velocity command.
  *  @details Provides mechanisms to add/get/remove constraints and generators (can be done at any time) and to get the velocity command as well as intermediate computation values (mainly used by constraints).
@@ -338,4 +338,4 @@ protected:
 	double sigma_min_threshold_;
 };
 
-} // namespace OpenPHRI
+} // namespace phri

@@ -1,6 +1,6 @@
 #include <OpenPHRI/constraints/kinetic_energy_constraint.h>
 
-using namespace OpenPHRI;
+using namespace phri;
 using namespace std;
 
 /***		Constructor & destructor		***/

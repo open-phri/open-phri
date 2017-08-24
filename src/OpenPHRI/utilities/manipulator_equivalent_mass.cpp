@@ -1,6 +1,6 @@
 #include <OpenPHRI/utilities/manipulator_equivalent_mass.h>
 
-using namespace OpenPHRI;
+using namespace phri;
 
 ManipulatorEquivalentMass::ManipulatorEquivalentMass(
 	MatrixXdConstPtr inertia_matrix,

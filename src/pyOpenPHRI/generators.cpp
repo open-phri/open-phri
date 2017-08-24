@@ -3,7 +3,7 @@
 #include <boost/python.hpp>
 #include <iostream>
 
-namespace OpenPHRI {
+namespace phri {
 
 std::shared_ptr<VelocityProxy> NewVelocityProxy(Vector6dConstPtr velocity)
 {
@@ -54,10 +54,10 @@ std::shared_ptr<MassGenerator> NewMassGenerator(Matrix6dConstPtr mass, Vector6dC
 }
 BOOST_PYTHON_FUNCTION_OVERLOADS(NewMassGenerator_overloads, NewMassGenerator, 2, 3)
 
-} // namespace OpenPHRI
+} // namespace phri
 
 void wrapGenerators() {
-	using namespace OpenPHRI;
+	using namespace phri;
 	using namespace boost::python;
 
 	/**********************************************************************************/

@@ -31,7 +31,7 @@
 #include <OpenPHRI/constraints/velocity_constraint.h>
 #include <OpenPHRI/velocity_generators/velocity_generator.h>
 
-namespace OpenPHRI {
+namespace phri {
 
 /** @brief A constraint to limit the external force.
  *  @details MUST NOT BE USED FOR NOW
@@ -64,4 +64,4 @@ private:
 using ForceConstraintPtr = std::shared_ptr<ForceConstraint>;
 using ForceConstraintConstPtr = std::shared_ptr<const ForceConstraint>;
 
-} // namespace OpenPHRI
+} // namespace phri

@@ -31,7 +31,7 @@
 #include <OpenPHRI/robot.h>
 #include <OpenPHRI/fwd_decl.h>
 
-namespace OpenPHRI {
+namespace phri {
 
 /** @brief Base class for all torque generators.
  *  @details Provides a pure virtual compute method.
@@ -61,4 +61,4 @@ protected:
 using TorqueGeneratorPtr = std::shared_ptr<TorqueGenerator>;
 using TorqueGeneratorConstPtr = std::shared_ptr<const TorqueGenerator>;
 
-} // namespace OpenPHRI
+} // namespace phri

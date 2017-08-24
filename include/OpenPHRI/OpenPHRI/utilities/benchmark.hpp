@@ -30,7 +30,7 @@
 #include <functional>
 #include <type_traits>
 
-namespace OpenPHRI {
+namespace phri {
 
 template<int N>
 inline void run_function_once(std::function<void (void)> todo) {
@@ -62,4 +62,4 @@ inline void run_function(std::function<void(void)> todo) {
 }
 
 
-} // namespace OpenPHRI
+} // namespace phri

@@ -33,7 +33,7 @@
 #include <OpenPHRI/utilities/manipulator_equivalent_mass.h>
 #include <OpenPHRI/utilities/interpolators.h>
 #include <OpenPHRI/utilities/trajectory_generator.h>
-#include <OpenPHRI/utilities/path_follower.h>
+// #include <OpenPHRI/utilities/path_follower.h>
 #include <OpenPHRI/utilities/laser_scanner_detector.h>
 #include <OpenPHRI/utilities/data_logger.h>
 #include <OpenPHRI/utilities/clock.h>

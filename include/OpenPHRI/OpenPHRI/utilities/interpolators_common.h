@@ -29,7 +29,7 @@
 
 #include <OpenPHRI/definitions.h>
 
-namespace OpenPHRI {
+namespace phri {
 
 /** @brief Description of a point used by the TrajectoryGenerator.
  *  @details A TrajectoryPoint is described by a 2D point (x,y) and its first and second derivatives

@@ -1,7 +1,7 @@
 #include <OpenPHRI/force_generators/stiffness_generator.h>
 #include <iostream>
 
-using namespace OpenPHRI;
+using namespace phri;
 
 StiffnessGenerator::StiffnessGenerator(
 	Matrix6dConstPtr stiffness,

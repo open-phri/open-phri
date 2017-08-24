@@ -1,6 +1,6 @@
 #include <OpenPHRI/constraints/separation_distance_constraint.h>
 
-using namespace OpenPHRI;
+using namespace phri;
 
 SeparationDistanceConstraint::SeparationDistanceConstraint(
 	ConstraintPtr constraint,

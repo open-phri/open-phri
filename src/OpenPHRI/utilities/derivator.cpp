@@ -1,6 +1,6 @@
 #include <OpenPHRI/utilities/derivator.hpp>
 
-namespace OpenPHRI {
+namespace phri {
 
 template class Derivator<double>;
 template class Derivator<Vector2d>;

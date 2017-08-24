@@ -13,9 +13,9 @@ constexpr double FORCE_DURATION = 2.;
 constexpr double STIFFNESS = 1000.;
 
 StateMachine::StateMachine(
-	OpenPHRI::RobotPtr robot_,
-	OpenPHRI::SafetyController& controller,
-	OpenPHRI::LaserScannerDetector& laser_detector_,
+	phri::RobotPtr robot_,
+	phri::SafetyController& controller,
+	phri::LaserScannerDetector& laser_detector_,
 	bool skip_teaching) :
 	robot_(robot_),
 	controller_(controller),
@@ -26,7 +26,7 @@ StateMachine::StateMachine(
 
 	if(skip_teaching) {
 
-		OpenPHRI::Vector6d wp;
+		phri::Vector6d wp;
 
 		wp << -0.176542, -0.0672858,   0.772875,    1.57698, -0.0115612,    1.56215;
 		waypoints_.push_back(wp);
@@ -40,35 +40,35 @@ StateMachine::StateMachine(
 		teach_state_ = TeachStates::End;
 	}
 
-	target_velocity_ = std::make_shared<OpenPHRI::Vector6d>(OpenPHRI::Vector6d::Zero());
-	trajectory_generator_ = std::make_shared<OpenPHRI::TrajectoryGenerator>(OpenPHRI::TrajectorySynchronization::SynchronizeTrajectory);
-	target_integrator_ = std::make_shared<OpenPHRI::Integrator<OpenPHRI::Vector6d>>(target_velocity_, robot_->controlPointTargetPose(), SAMPLE_TIME);
+	target_velocity_ = std::make_shared<phri::Vector6d>(phri::Vector6d::Zero());
+	trajectory_generator_ = std::make_shared<phri::TrajectoryGenerator>(phri::TrajectorySynchronization::SynchronizeTrajectory);
+	target_integrator_ = std::make_shared<phri::Integrator<phri::Vector6d>>(target_velocity_, robot_->controlPointTargetPose(), SAMPLE_TIME);
 
 	operator_position_laser_ = laser_detector_.getPosition();
-	operator_position_tcp_ = std::make_shared<OpenPHRI::Vector6d>();
+	operator_position_tcp_ = std::make_shared<phri::Vector6d>();
 
-	max_vel_interpolator_ = std::make_shared<OpenPHRI::LinearInterpolator>(
-		std::make_shared<OpenPHRI::LinearPoint>(0.1, 0.),     // 0m/s at 0.1m
-		std::make_shared<OpenPHRI::LinearPoint>(0.5, 0.15));   // 0.15m/s at 0.5m
+	max_vel_interpolator_ = std::make_shared<phri::LinearInterpolator>(
+		std::make_shared<phri::LinearPoint>(0.1, 0.),     // 0m/s at 0.1m
+		std::make_shared<phri::LinearPoint>(0.5, 0.15));   // 0.15m/s at 0.5m
 	max_vel_interpolator_->enableSaturation(true);
 
 	vmax_interpolator_output_ = max_vel_interpolator_->getOutput();
 
 	// Fixed transformation between the laser and the arm's base. Matches the configuration on the Bazar robot_.
-	laser_base_transform_ = OpenPHRI::Matrix4d::Identity();
-	OpenPHRI::Matrix3d laser_base_rot {    Eigen::AngleAxisd   (-M_PI/2.,         OpenPHRI::Vector3d::UnitX())
-		                               * Eigen::AngleAxisd (0.,               OpenPHRI::Vector3d::UnitY())
-		                               * Eigen::AngleAxisd (-35.*M_PI/180.,   OpenPHRI::Vector3d::UnitZ())};
+	laser_base_transform_ = phri::Matrix4d::Identity();
+	phri::Matrix3d laser_base_rot {    Eigen::AngleAxisd   (-M_PI/2.,         phri::Vector3d::UnitX())
+		                               * Eigen::AngleAxisd (0.,               phri::Vector3d::UnitY())
+		                               * Eigen::AngleAxisd (-35.*M_PI/180.,   phri::Vector3d::UnitZ())};
 	laser_base_transform_.block<3,3>(0,0) = laser_base_rot;
-	laser_base_transform_.block<3,1>(0,3) = OpenPHRI::Vector3d(+4.2856e-01, 0., +2.6822e-02);
+	laser_base_transform_.block<3,1>(0,3) = phri::Vector3d(+4.2856e-01, 0., +2.6822e-02);
 
 
-	init_position_ = std::make_shared<OpenPHRI::Vector6d>();
-	traj_vel_ = std::make_shared<OpenPHRI::Vector6d>(OpenPHRI::Vector6d::Zero());
-	stiffness_mat_ = std::make_shared<OpenPHRI::Matrix6d>(OpenPHRI::Matrix6d::Identity() * STIFFNESS);
+	init_position_ = std::make_shared<phri::Vector6d>();
+	traj_vel_ = std::make_shared<phri::Vector6d>(phri::Vector6d::Zero());
+	stiffness_mat_ = std::make_shared<phri::Matrix6d>(phri::Matrix6d::Identity() * STIFFNESS);
 	stiffness_mat_->block<3,3>(3,3).setZero();
-	tcp_collision_sphere_center_ = std::make_shared<OpenPHRI::Vector6d>(OpenPHRI::Vector6d::Zero());
-	tcp_collision_sphere_offset_ = OpenPHRI::Vector3d(0.,0.,-7.44e-2);
+	tcp_collision_sphere_center_ = std::make_shared<phri::Vector6d>(phri::Vector6d::Zero());
+	tcp_collision_sphere_offset_ = phri::Vector3d(0.,0.,-7.44e-2);
 	end_of_teach_ = false;
 }
 
@@ -106,12 +106,12 @@ bool StateMachine::compute() {
 		switch(teach_state_) {
 		case TeachStates::Init:
 		{
-			auto velocity_constraint = std::make_shared<OpenPHRI::VelocityConstraint>(std::make_shared<double>(0.1));
+			auto velocity_constraint = std::make_shared<phri::VelocityConstraint>(std::make_shared<double>(0.1));
 			controller_.add(
 				"velocity constraint",
 				velocity_constraint);
 
-			auto ext_force_generator = std::make_shared<OpenPHRI::ForceProxy>(robot_->controlPointExternalForce());
+			auto ext_force_generator = std::make_shared<phri::ForceProxy>(robot_->controlPointExternalForce());
 			controller_.add(
 				"ext force proxy",
 				ext_force_generator);
@@ -162,35 +162,35 @@ bool StateMachine::compute() {
 		switch(replay_state_) {
 		case ReplayStates::Init:
 		{
-			auto stiffness = std::make_shared<OpenPHRI::StiffnessGenerator>(
+			auto stiffness = std::make_shared<phri::StiffnessGenerator>(
 				stiffness_mat_,
 				robot_->controlPointTargetPose(),
-				OpenPHRI::ReferenceFrame::TCP,
-				OpenPHRI::ReferenceFrame::Base);
+				phri::ReferenceFrame::TCP,
+				phri::ReferenceFrame::Base);
 
 			controller_.add("stiffness", stiffness);
 			target_integrator_->force(*robot_->controlPointCurrentPose());
 
 			controller_.add(
 				"traj vel",
-				OpenPHRI::VelocityProxy(target_velocity_, OpenPHRI::ReferenceFrame::Base));
+				phri::VelocityProxy(target_velocity_, phri::ReferenceFrame::Base));
 
-			auto potential_field_generator = std::make_shared<OpenPHRI::PotentialFieldGenerator>(
-				std::make_shared<OpenPHRI::Vector3d>(tcp_collision_sphere_offset_),
-				OpenPHRI::ReferenceFrame::Base);
+			auto potential_field_generator = std::make_shared<phri::PotentialFieldGenerator>(
+				std::make_shared<phri::Vector3d>(tcp_collision_sphere_offset_),
+				phri::ReferenceFrame::Base);
 
-			auto obstacle_position = std::make_shared<OpenPHRI::Vector6d>();
+			auto obstacle_position = std::make_shared<phri::Vector6d>();
 			*obstacle_position << +6.3307e-03, -1.5126e-01, +9.9744e-01, 0., 0., 0.;
-			auto obstacle = std::make_shared<OpenPHRI::PotentialFieldObject>(
-				OpenPHRI::PotentialFieldType::Repulsive,
+			auto obstacle = std::make_shared<phri::PotentialFieldObject>(
+				phri::PotentialFieldType::Repulsive,
 				std::make_shared<double>(300.),   // gain
 				std::make_shared<double>(0.16),   // threshold distance
 				obstacle_position);
 
 			potential_field_generator->add("obstacle", obstacle);
 
-			auto separation_dist_vel_cstr = std::make_shared<OpenPHRI::SeparationDistanceConstraint>(
-				std::make_shared<OpenPHRI::VelocityConstraint>(vmax_interpolator_output_),
+			auto separation_dist_vel_cstr = std::make_shared<phri::SeparationDistanceConstraint>(
+				std::make_shared<phri::VelocityConstraint>(vmax_interpolator_output_),
 				max_vel_interpolator_);
 
 			separation_dist_vel_cstr->add("operator", operator_position_tcp_);
@@ -242,19 +242,19 @@ bool StateMachine::compute() {
 		case ReplayStates::ForceControlInit:
 		{
 
-			auto velocity_constraint = std::make_shared<OpenPHRI::VelocityConstraint>(std::make_shared<double>(0.1));
-			auto acceleration_constraint = std::make_shared<OpenPHRI::AccelerationConstraint>(std::make_shared<double>(0.5), SAMPLE_TIME);
+			auto velocity_constraint = std::make_shared<phri::VelocityConstraint>(std::make_shared<double>(0.1));
+			auto acceleration_constraint = std::make_shared<phri::AccelerationConstraint>(std::make_shared<double>(0.5), SAMPLE_TIME);
 
 
-			auto target_force = std::make_shared<OpenPHRI::Vector6d>(OpenPHRI::Vector6d::Zero());
-			auto p_gain = std::make_shared<OpenPHRI::Vector6d>(OpenPHRI::Vector6d::Ones() * 0.005);
-			auto d_gain = std::make_shared<OpenPHRI::Vector6d>(OpenPHRI::Vector6d::Ones() * 0.00005);
-			auto selection = std::make_shared<OpenPHRI::Vector6d>(OpenPHRI::Vector6d::Zero());
+			auto target_force = std::make_shared<phri::Vector6d>(phri::Vector6d::Zero());
+			auto p_gain = std::make_shared<phri::Vector6d>(phri::Vector6d::Ones() * 0.005);
+			auto d_gain = std::make_shared<phri::Vector6d>(phri::Vector6d::Ones() * 0.00005);
+			auto selection = std::make_shared<phri::Vector6d>(phri::Vector6d::Zero());
 
 			target_force->z() = FORCE_TARGET;
 			selection->z() = 1.;
 
-			auto force_control = std::make_shared<OpenPHRI::ForceControl>(
+			auto force_control = std::make_shared<phri::ForceControl>(
 				target_force,
 				SAMPLE_TIME,
 				p_gain,
@@ -331,9 +331,9 @@ bool StateMachine::setupTrajectoryGenerator() {
 	trajectory_generator_->removeAll();
 
 	for (size_t i = 0; i < 6; ++i) {
-		auto point_from = std::make_shared<OpenPHRI::TrajectoryPoint<double>>(from(i), 0., 0.);
-		auto point_to = std::make_shared<OpenPHRI::TrajectoryPoint<double>>(to(i), 0., 0.);
-		auto trajectory = std::make_shared<OpenPHRI::Trajectory<double>>(OpenPHRI::TrajectoryOutputType::Velocity, point_from, target_velocity_->data()+i, SAMPLE_TIME);
+		auto point_from = std::make_shared<phri::TrajectoryPoint<double>>(from(i), 0., 0.);
+		auto point_to = std::make_shared<phri::TrajectoryPoint<double>>(to(i), 0., 0.);
+		auto trajectory = std::make_shared<phri::Trajectory<double>>(phri::TrajectoryOutputType::Velocity, point_from, target_velocity_->data()+i, SAMPLE_TIME);
 		if(i < 3) {
 			trajectory->addPathTo(point_to, REPLAY_VMAX, REPLAY_AMAX);
 		}
@@ -351,23 +351,23 @@ bool StateMachine::setupTrajectoryGenerator() {
 	return true;
 }
 
-void StateMachine::computeLaserDistanceInTCPFrame(OpenPHRI::Vector6dPtr obstacle_position) {
-	OpenPHRI::Vector4d position_laser = OpenPHRI::Vector4d::Ones();
+void StateMachine::computeLaserDistanceInTCPFrame(phri::Vector6dPtr obstacle_position) {
+	phri::Vector4d position_laser = phri::Vector4d::Ones();
 	position_laser.x() = operator_position_laser_->x();
 	position_laser.y() = operator_position_laser_->y();
 	position_laser.z() = 0.;
 
-	OpenPHRI::Vector4d position_base = laser_base_transform_ * position_laser;
+	phri::Vector4d position_base = laser_base_transform_ * position_laser;
 
 	const auto& tcp_base_transform = *robot_->transformationMatrix();
-	OpenPHRI::Matrix4d base_tcp_transform = OpenPHRI::Matrix4d::Identity();
+	phri::Matrix4d base_tcp_transform = phri::Matrix4d::Identity();
 	base_tcp_transform.block<3,3>(0,0) = tcp_base_transform.block<3,3>(0,0).transpose();
 	base_tcp_transform.block<3,1>(0,3) = -tcp_base_transform.block<3,3>(0,0).transpose() * tcp_base_transform.block<3,1>(0,3);
 
-	OpenPHRI::Vector4d position_tcp = base_tcp_transform * position_base;
+	phri::Vector4d position_tcp = base_tcp_transform * position_base;
 
 	// The following is to remove the vertical component from the position
-	OpenPHRI::Vector3d position_tcp_rbase = tcp_base_transform.block<3,3>(0,0) * position_tcp.block<3,1>(0,0);
+	phri::Vector3d position_tcp_rbase = tcp_base_transform.block<3,3>(0,0) * position_tcp.block<3,1>(0,0);
 	position_tcp_rbase.y() = 0.;
 
 	obstacle_position->setZero();

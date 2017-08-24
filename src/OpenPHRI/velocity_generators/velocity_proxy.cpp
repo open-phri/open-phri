@@ -1,6 +1,6 @@
 #include <OpenPHRI/velocity_generators/velocity_proxy.h>
 
-using namespace OpenPHRI;
+using namespace phri;
 
 VelocityProxy::VelocityProxy(Vector6dConstPtr velocity, ReferenceFrame frame) :
 	VelocityGenerator(frame),

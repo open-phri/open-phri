@@ -30,7 +30,7 @@
 #include <OpenPHRI/force_generators/force_generator.h>
 #include <OpenPHRI/definitions.h>
 
-namespace OpenPHRI {
+namespace phri {
 
 /** @brief Generates a force as if a virtual mass is attached to the robot.
  */
@@ -63,4 +63,4 @@ private:
 using MassGeneratorPtr = std::shared_ptr<MassGenerator>;
 using MassGeneratorConstPtr = std::shared_ptr<const MassGenerator>;
 
-} // namespace OpenPHRI
+} // namespace phri

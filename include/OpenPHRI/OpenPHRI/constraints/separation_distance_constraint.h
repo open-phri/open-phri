@@ -33,7 +33,7 @@
 #include <OpenPHRI/utilities/object_collection.hpp>
 #include <map>
 
-namespace OpenPHRI {
+namespace phri {
 
 /** @brief A meta-constraint to adapt a given constraint depending on the distance to the closest object.
  *  @details You have to provide preconfigured constraint and interpolator.
@@ -88,4 +88,4 @@ private:
 using SeparationDistanceConstraintPtr = std::shared_ptr<SeparationDistanceConstraint>;
 using SeparationDistanceConstraintConstPtr = std::shared_ptr<const SeparationDistanceConstraint>;
 
-} // namespace OpenPHRI
+} // namespace phri

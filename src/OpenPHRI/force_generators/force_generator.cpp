@@ -1,6 +1,6 @@
 #include <OpenPHRI/force_generators/force_generator.h>
 
-using namespace OpenPHRI;
+using namespace phri;
 
 ForceGenerator::ForceGenerator(ReferenceFrame frame) {
 	frame_ = frame;

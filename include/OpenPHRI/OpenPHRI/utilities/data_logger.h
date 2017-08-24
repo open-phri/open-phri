@@ -31,7 +31,7 @@
 #include <fstream>
 #include <sstream>
 
-namespace OpenPHRI {
+namespace phri {
 
 class DataLogger {
 public:
@@ -73,4 +73,4 @@ private:
 	std::map<std::ofstream*, external_data_t> external_data_;
 };
 
-} // namespace OpenPHRI
+} // namespace phri

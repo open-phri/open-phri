@@ -30,7 +30,7 @@
 #include <memory>
 #include <chrono>
 
-namespace OpenPHRI {
+namespace phri {
 
 class Clock {
 public:
@@ -50,4 +50,4 @@ private:
 	std::shared_ptr<double> time_;
 };
 
-} // namespace OpenPHRI
+} // namespace phri

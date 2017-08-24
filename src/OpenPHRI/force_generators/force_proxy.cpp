@@ -1,6 +1,6 @@
 #include <OpenPHRI/force_generators/force_proxy.h>
 
-using namespace OpenPHRI;
+using namespace phri;
 
 ForceProxy::ForceProxy(Vector6dConstPtr force, ReferenceFrame frame) :
 	ForceGenerator(frame),

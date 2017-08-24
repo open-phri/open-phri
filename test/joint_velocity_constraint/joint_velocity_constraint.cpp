@@ -2,7 +2,7 @@
 
 #include <OpenPHRI/OpenPHRI.h>
 
-using namespace OpenPHRI;
+using namespace phri;
 using namespace std;
 
 bool isLessOrEqual(VectorXd v1, VectorXd v2) {

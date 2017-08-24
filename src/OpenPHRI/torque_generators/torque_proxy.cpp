@@ -1,6 +1,6 @@
 #include <OpenPHRI/torque_generators/torque_proxy.h>
 
-using namespace OpenPHRI;
+using namespace phri;
 
 TorqueProxy::TorqueProxy(VectorXdConstPtr torque) :
 	torque_(torque)

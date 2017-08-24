@@ -29,7 +29,7 @@
 
 #include <OpenPHRI/definitions.h>
 
-namespace OpenPHRI {
+namespace phri {
 
 template<class T>
 class Deadband {
@@ -74,8 +74,8 @@ private:
 	std::shared_ptr<const T> threshold_;
 };
 
-extern template class Deadband<OpenPHRI::Vector3d>;
-extern template class Deadband<OpenPHRI::Vector6d>;
-extern template class Deadband<OpenPHRI::VectorXd>;
+extern template class Deadband<phri::Vector3d>;
+extern template class Deadband<phri::Vector6d>;
+extern template class Deadband<phri::VectorXd>;
 
-} // namespace OpenPHRI
+} // namespace phri

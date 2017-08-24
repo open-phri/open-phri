@@ -29,7 +29,7 @@
 
 #include <OpenPHRI/constraints/velocity_constraint.h>
 
-namespace OpenPHRI {
+namespace phri {
 
 /** @brief A constraint to limit the robot's kinetic energy.
  *  @details Works with a point mass model. For a manipulator, see ManipulatorEquivalentMass to get its equivalent mass.
@@ -62,4 +62,4 @@ private:
 using KineticEnergyConstraintPtr = std::shared_ptr<KineticEnergyConstraint>;
 using KineticEnergyConstraintConstPtr = std::shared_ptr<const KineticEnergyConstraint>;
 
-} // namespace OpenPHRI
+} // namespace phri

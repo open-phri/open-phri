@@ -4,7 +4,7 @@
 #include <boost/python.hpp>
 #include <iostream>
 
-namespace OpenPHRI {
+namespace phri {
 
 using namespace vrep;
 
@@ -14,10 +14,10 @@ std::shared_ptr<VREPDriver> NewVREPDriver(double sample_time, const std::string&
 }
 BOOST_PYTHON_FUNCTION_OVERLOADS(NewVREPDriver_overloads, NewVREPDriver, 1, 5)
 
-} // namespace OpenPHRI
+} // namespace phri
 
 void wrapVREP() {
-	using namespace OpenPHRI;
+	using namespace phri;
 	using namespace vrep;
 	using namespace boost::python;
 

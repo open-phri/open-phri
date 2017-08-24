@@ -9,7 +9,7 @@
 
 #include "state_machine.h"
 
-using namespace OpenPHRI;
+using namespace phri;
 using namespace vrep;
 
 bool _stop = false;

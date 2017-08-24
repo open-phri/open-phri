@@ -31,7 +31,7 @@
 #include <OpenPHRI/utilities/interpolators_common.h>
 #include <OpenPHRI/utilities/fifth_order_polynomial.h>
 
-namespace OpenPHRI {
+namespace phri {
 
 /** @brief A fifth order polynomial interpolator.
  *  @details This interpolator is useful when you have constraints on the first and second derivatives at the starting and ending points.
@@ -70,4 +70,4 @@ private:
 using PolynomialInterpolatorPtr = std::shared_ptr<PolynomialInterpolator>;
 using PolynomialInterpolatorConstPtr = std::shared_ptr<const PolynomialInterpolator>;
 
-} // namespace OpenPHRI
+} // namespace phri

@@ -6,7 +6,7 @@
 #include <OpenPHRI/joint_velocity_generators/joint_velocity_generator.h>
 #include <iomanip>
 
-using namespace OpenPHRI;
+using namespace phri;
 
 
 DataLogger::DataLogger(

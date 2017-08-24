@@ -31,7 +31,7 @@
 #include <iostream>
 #include "demangle.h"
 
-namespace OpenPHRI {
+namespace phri {
 
 /** @brief Manage a collection of items.
  *  @details Provides add/get/remove methods and begin/end methods to iterate through the managed items
@@ -51,7 +51,7 @@ public:
 	 */
 	void setVerbose(bool on) {
 		if(on) {
-			class_name_ = OpenPHRI::getTypeName(*this);
+			class_name_ = phri::getTypeName(*this);
 			collection_name_ = "Object";
 		}
 		verbose_ = on;
@@ -179,4 +179,4 @@ private:
 	std::string collection_name_;
 };
 
-} // namespace OpenPHRI
+} // namespace phri

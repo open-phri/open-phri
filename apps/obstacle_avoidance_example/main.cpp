@@ -6,7 +6,7 @@
 #include <vrep_driver/vrep_driver.h>
 
 using namespace std;
-using namespace OpenPHRI;
+using namespace phri;
 using namespace vrep;
 
 constexpr double SAMPLE_TIME = 0.010;

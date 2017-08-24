@@ -10,7 +10,7 @@ extern void wrapSafetyController();
 extern void wrapVREP();
 
 BOOST_PYTHON_MODULE(openphri) {
-	using namespace OpenPHRI;
+	using namespace phri;
 
 	using namespace boost::python;
 

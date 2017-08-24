@@ -31,7 +31,7 @@
 #include <OpenPHRI/robot.h>
 #include <OpenPHRI/fwd_decl.h>
 
-namespace OpenPHRI {
+namespace phri {
 
 /** @brief Base class for all constraints.
  *  @details Provides a ConstraintType and a pure virtual compute method.
@@ -70,4 +70,4 @@ protected:
 using ConstraintPtr = std::shared_ptr<Constraint>;
 using ConstraintConstPtr = std::shared_ptr<const Constraint>;
 
-} // namespace OpenPHRI
+} // namespace phri

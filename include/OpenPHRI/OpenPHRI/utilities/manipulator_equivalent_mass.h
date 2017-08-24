@@ -30,7 +30,7 @@
 #include <OpenPHRI/definitions.h>
 #include <OpenPHRI/utilities/object_collection.hpp>
 
-namespace OpenPHRI {
+namespace phri {
 
 /** @brief A utility to compute a manipulator's equivalent mass.
  *  @details Based on the manipulator's inertia matrix and Jacobian and a set of items that can collide with the its TCP.
@@ -89,4 +89,4 @@ private:
 	doublePtr mass_;
 };
 
-} // namespace OpenPHRI
+} // namespace phri

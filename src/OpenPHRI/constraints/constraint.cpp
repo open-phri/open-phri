@@ -1,6 +1,6 @@
 #include <OpenPHRI/constraints/constraint.h>
 
-using namespace OpenPHRI;
+using namespace phri;
 
 void Constraint::setRobot(RobotConstPtr robot) {
 	robot_ = robot;

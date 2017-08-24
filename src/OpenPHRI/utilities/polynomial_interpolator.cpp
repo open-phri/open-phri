@@ -1,6 +1,6 @@
 #include <OpenPHRI/utilities/polynomial_interpolator.h>
 
-using namespace OpenPHRI;
+using namespace phri;
 
 PolynomialInterpolator::PolynomialInterpolator(
 	PolynomialPointConstPtr from,

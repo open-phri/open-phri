@@ -29,7 +29,7 @@
 
 #include <OpenPHRI/definitions.h>
 
-namespace OpenPHRI {
+namespace phri {
 
 
 /** @brief A generic integrator class.
@@ -136,4 +136,4 @@ extern template class Integrator<Vector2d>;
 extern template class Integrator<Vector3d>;
 extern template class Integrator<Vector6d>;
 
-} // namespace OpenPHRI
+} // namespace phri

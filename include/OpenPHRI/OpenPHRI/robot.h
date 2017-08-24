@@ -29,7 +29,7 @@
 
 #include <OpenPHRI/definitions.h>
 
-namespace OpenPHRI {
+namespace phri {
 
 class Robot {
 public:

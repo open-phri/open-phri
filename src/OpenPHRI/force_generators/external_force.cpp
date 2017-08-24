@@ -1,6 +1,6 @@
 #include <OpenPHRI/force_generators/external_force.h>
 
-using namespace OpenPHRI;
+using namespace phri;
 
 ExternalForce::ExternalForce(RobotConstPtr robot) :
 	ForceGenerator(ReferenceFrame::TCP),

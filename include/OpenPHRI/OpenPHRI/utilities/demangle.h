@@ -30,7 +30,7 @@
 #include <string>
 #include <typeinfo>
 
-namespace OpenPHRI {
+namespace phri {
 
 std::string demangle(const char* name);
 

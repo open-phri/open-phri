@@ -1,7 +1,7 @@
 #include <OpenPHRI/constraints/force_constraint.h>
 #include <limits>
 
-using namespace OpenPHRI;
+using namespace phri;
 
 using namespace Eigen;
 

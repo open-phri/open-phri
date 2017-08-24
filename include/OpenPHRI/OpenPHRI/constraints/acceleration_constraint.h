@@ -30,7 +30,7 @@
 #include <OpenPHRI/definitions.h>
 #include <OpenPHRI/constraints/constraint.h>
 
-namespace OpenPHRI {
+namespace phri {
 
 /** @brief A constraint to limit the TCP acceleration.
  */
@@ -59,4 +59,4 @@ private:
 using AccelerationConstraintPtr = std::shared_ptr<AccelerationConstraint>;
 using AccelerationConstraintConstPtr = std::shared_ptr<const AccelerationConstraint>;
 
-} // namespace OpenPHRI
+} // namespace phri

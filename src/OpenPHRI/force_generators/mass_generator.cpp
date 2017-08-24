@@ -1,6 +1,6 @@
 #include <OpenPHRI/force_generators/mass_generator.h>
 
-using namespace OpenPHRI;
+using namespace phri;
 
 MassGenerator::MassGenerator(
 	Matrix6dConstPtr mass,

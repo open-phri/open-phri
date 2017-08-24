@@ -29,7 +29,7 @@
 
 #include <OpenPHRI/definitions.h>
 
-namespace OpenPHRI {
+namespace phri {
 
 class LaserScannerDetector {
 public:
@@ -61,4 +61,4 @@ private:
 	VectorXd maximum_distances_;
 };
 
-} // namespace OpenPHRI
+} // namespace phri

@@ -1,6 +1,6 @@
 #include <OpenPHRI/utilities/clock.h>
 
-using namespace OpenPHRI;
+using namespace phri;
 
 Clock::Clock() : sample_time_(-1.) {
 	reset();

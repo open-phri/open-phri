@@ -1,7 +1,7 @@
 #include <OpenPHRI/velocity_generators/force_control.h>
 #include <iostream>
 
-using namespace OpenPHRI;
+using namespace phri;
 
 ForceControl::ForceControl(
 	Vector6dConstPtr external_force_target,

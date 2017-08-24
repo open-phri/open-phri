@@ -27,7 +27,7 @@
 
 #pragma once
 
-namespace OpenPHRI {
+namespace phri {
 
 class SafetyController;
 class Constraint;

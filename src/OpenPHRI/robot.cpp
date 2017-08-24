@@ -1,6 +1,6 @@
 #include <OpenPHRI/robot.h>
 
-using namespace OpenPHRI;
+using namespace phri;
 
 Robot::Robot(const std::string& name,
              size_t joint_count) :

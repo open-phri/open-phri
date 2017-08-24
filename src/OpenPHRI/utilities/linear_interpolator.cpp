@@ -1,6 +1,6 @@
 #include <OpenPHRI/utilities/linear_interpolator.h>
 
-using namespace OpenPHRI;
+using namespace phri;
 
 LinearInterpolator::LinearInterpolator(
 	LinearPointConstPtr from,

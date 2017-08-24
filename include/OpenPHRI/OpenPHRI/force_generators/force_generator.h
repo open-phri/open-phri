@@ -31,7 +31,7 @@
 #include <OpenPHRI/robot.h>
 #include <OpenPHRI/fwd_decl.h>
 
-namespace OpenPHRI {
+namespace phri {
 
 /** @brief Base class for all force generators.
  *  @details Provides a pure virtual compute method.
@@ -74,4 +74,4 @@ protected:
 using ForceGeneratorPtr = std::shared_ptr<ForceGenerator>;
 using ForceGeneratorConstPtr = std::shared_ptr<const ForceGenerator>;
 
-} // namespace OpenPHRI
+} // namespace phri

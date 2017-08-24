@@ -30,7 +30,7 @@
 #include <OpenPHRI/definitions.h>
 #include <OpenPHRI/constraints/constraint.h>
 
-namespace OpenPHRI {
+namespace phri {
 
 /** @brief A constraint to limit the exchanged power.
  *  @details The power considered is the dot product of the total velocity with the external force.
@@ -69,4 +69,4 @@ private:
 using PowerConstraintPtr = std::shared_ptr<PowerConstraint>;
 using PowerConstraintConstPtr = std::shared_ptr<const PowerConstraint>;
 
-} // namespace OpenPHRI
+} // namespace phri

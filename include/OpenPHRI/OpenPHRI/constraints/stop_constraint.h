@@ -30,7 +30,7 @@
 #include <OpenPHRI/definitions.h>
 #include <OpenPHRI/constraints/constraint.h>
 
-namespace OpenPHRI {
+namespace phri {
 
 /** @brief A constraint to stop the robot when a contant occurs.
  *  @details Two thresholds are used. The robot is stopped when the external force is above the activation threshold and
@@ -80,4 +80,4 @@ private:
 using StopConstraintPtr = std::shared_ptr<StopConstraint>;
 using StopConstraintConstPtr = std::shared_ptr<const StopConstraint>;
 
-} // namespace OpenPHRI
+} // namespace phri

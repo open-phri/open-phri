@@ -1,6 +1,6 @@
 #include <OpenPHRI/constraints/default_constraint.h>
 
-using namespace OpenPHRI;
+using namespace phri;
 
 double DefaultConstraint::compute() {
 	return 1.;

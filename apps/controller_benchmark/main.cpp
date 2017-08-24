@@ -1,6 +1,6 @@
 #include <OpenPHRI/OpenPHRI.h>
 
-using namespace OpenPHRI;
+using namespace phri;
 using namespace std;
 
 constexpr bool USE_LOOP = false;

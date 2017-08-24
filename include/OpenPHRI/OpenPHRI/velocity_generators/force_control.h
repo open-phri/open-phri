@@ -30,7 +30,7 @@
 #include <OpenPHRI/velocity_generators/velocity_generator.h>
 #include <OpenPHRI/definitions.h>
 
-namespace OpenPHRI {
+namespace phri {
 
 /** @brief Generates a velocity to regulate the external force to a given target using PD control.
  */
@@ -68,4 +68,4 @@ private:
 using ForceControlPtr = std::shared_ptr<ForceControl>;
 using ForceControlConstPtr = std::shared_ptr<const ForceControl>;
 
-} // namespace OpenPHRI
+} // namespace phri

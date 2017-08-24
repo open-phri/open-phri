@@ -33,7 +33,7 @@
 #include <OpenPHRI/robot.h>
 #include <OpenPHRI/fwd_decl.h>
 
-namespace OpenPHRI {
+namespace phri {
 
 /** @brief Base class for all velocity generators.
  *  @details Provides a pure virtual compute method.
@@ -76,4 +76,4 @@ protected:
 using VelocityGeneratorPtr = std::shared_ptr<VelocityGenerator>;
 using VelocityGeneratorConstPtr = std::shared_ptr<const VelocityGenerator>;
 
-} // namespace OpenPHRI
+} // namespace phri

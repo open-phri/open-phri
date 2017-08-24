@@ -4,7 +4,7 @@
 #include <boost/python.hpp>
 #include <iostream>
 
-namespace OpenPHRI {
+namespace phri {
 
 struct TrajectoryWrap : public Trajectory {
 	using Trajectory::Trajectory;
@@ -75,10 +75,10 @@ std::shared_ptr<PolynomialInterpolatorWrap> NewPolynomialInterpolator(Polynomial
 BOOST_PYTHON_FUNCTION_OVERLOADS(NewPolynomialInterpolator_overloads, NewPolynomialInterpolator, 2, 3)
 
 
-} // namespace OpenPHRI
+} // namespace phri
 
 void wrapInterpolators() {
-	using namespace OpenPHRI;
+	using namespace phri;
 	using namespace boost::python;
 
 	/*********************************************************************************/

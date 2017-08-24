@@ -29,7 +29,7 @@
 
 #include <OpenPHRI/constraints/constraint.h>
 
-namespace OpenPHRI {
+namespace phri {
 
 /** @brief Default constraint. Always evaluate to one.
  */
@@ -51,4 +51,4 @@ public:
 using DefaultConstraintPtr = std::shared_ptr<DefaultConstraint>;
 using DefaultConstraintConstPtr = std::shared_ptr<const DefaultConstraint>;
 
-} // namespace OpenPHRI
+} // namespace phri

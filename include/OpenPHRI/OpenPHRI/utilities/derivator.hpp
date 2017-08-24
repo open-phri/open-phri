@@ -29,7 +29,7 @@
 
 #include <OpenPHRI/definitions.h>
 
-namespace OpenPHRI {
+namespace phri {
 
 /** @brief A generic derivator class.
  *  @details Works on primitive types and Eigen vectors
@@ -125,4 +125,4 @@ extern template class Derivator<Vector2d>;
 extern template class Derivator<Vector3d>;
 extern template class Derivator<Vector6d>;
 
-} // namespace OpenPHRI
+} // namespace phri

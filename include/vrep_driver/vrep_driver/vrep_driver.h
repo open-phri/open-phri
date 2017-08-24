@@ -20,7 +20,7 @@
 /**
  * @file vrep_driver.h
  * @author Benjamin Navarro
- * @brief Definition of the VREPDriver class and the OpenPHRI::ReferenceFrame enum.
+ * @brief Definition of the VREPDriver class and the phri::ReferenceFrame enum.
  * @date April 2017
  * @ingroup VREP
  */
@@ -71,7 +71,7 @@ public:
 	 * @param port [optional] Can be used to specify a port different thant the default one.
 	 */
 	VREPDriver(
-		OpenPHRI::RobotPtr robot,
+		phri::RobotPtr robot,
 		ControlLevel control_level,
 		double sample_time,
 		const std::string& suffix = "",
@@ -86,7 +86,7 @@ public:
 	 * @param suffix [optional] Can be used to specify a suffix for all the basic objects.
 	 */
 	VREPDriver(
-		OpenPHRI::RobotPtr robot,
+		phri::RobotPtr robot,
 		ControlLevel control_level,
 		double sample_time,
 		int client_id,
@@ -139,7 +139,7 @@ public:
 	 * @param frame [in] The reference frame.
 	 * @return True if correctly read, false otherwise.
 	 */
-	bool readTCPPose(OpenPHRI::Vector6dPtr pose, OpenPHRI::ReferenceFrame frame) const;
+	bool readTCPPose(phri::Vector6dPtr pose, phri::ReferenceFrame frame) const;
 
 	/**
 	 * @brief Get the TCP velocity in the given frame.
@@ -147,7 +147,7 @@ public:
 	 * @param frame [in] The reference frame.
 	 * @return True if correctly read, false otherwise.
 	 */
-	bool readTCPVelocity(OpenPHRI::Vector6dPtr velocity, OpenPHRI::ReferenceFrame frame) const;
+	bool readTCPVelocity(phri::Vector6dPtr velocity, phri::ReferenceFrame frame) const;
 
 	/**
 	 * @brief Get the target TCP pose in the given frame.
@@ -155,7 +155,7 @@ public:
 	 * @param frame [in] The reference frame.
 	 * @return True if correctly read, false otherwise.
 	 */
-	bool readTCPTargetPose(OpenPHRI::Vector6dPtr pose, OpenPHRI::ReferenceFrame frame) const;
+	bool readTCPTargetPose(phri::Vector6dPtr pose, phri::ReferenceFrame frame) const;
 
 	/**
 	 * @brief Send the target TCP velocity in the given frame.
@@ -163,28 +163,28 @@ public:
 	 * @param frame [in] The reference frame.
 	 * @return True if correctly read, false otherwise.
 	 */
-	bool sendTCPtargetVelocity(OpenPHRI::Vector6dConstPtr velocity, OpenPHRI::ReferenceFrame frame) const;
+	bool sendTCPtargetVelocity(phri::Vector6dConstPtr velocity, phri::ReferenceFrame frame) const;
 
 	/**
 	 * @brief Get the TCP wrench in the TCP frame.
 	 * @param wrench [out] The current TCP wrench.
 	 * @return True if correctly read, false otherwise.
 	 */
-	bool readTCPWrench(OpenPHRI::Vector6dPtr wrench) const;
+	bool readTCPWrench(phri::Vector6dPtr wrench) const;
 
 	/**
 	 * @brief Get the Jacobian matrix associated with the TCP.
 	 * @param jacobian [out] The current Jacobian matrix.
 	 * @return True if correctly read, false otherwise.
 	 */
-	bool readJacobian(OpenPHRI::MatrixXdPtr jacobian) const;
+	bool readJacobian(phri::MatrixXdPtr jacobian) const;
 
 	/**
 	 * @brief Get the transformation matrix associated with the TCP.
 	 * @param matrix [out] The current transformation matrix.
 	 * @return True if correctly read, false otherwise.
 	 */
-	bool readTransformationMatrix(OpenPHRI::Matrix4dPtr matrix) const;
+	bool readTransformationMatrix(phri::Matrix4dPtr matrix) const;
 
 	/**
 	 * @brief Start tracking a given object in the specified frame.
@@ -192,7 +192,7 @@ public:
 	 * @param frame [in] The reference frame.
 	 * @return A shared pointer to the object's postion. Updated on VREPDriver::updateTrackedObjectsPosition.
 	 */
-	OpenPHRI::Vector6dConstPtr trackObjectPosition(const std::string& name, OpenPHRI::ReferenceFrame frame);
+	phri::Vector6dConstPtr trackObjectPosition(const std::string& name, phri::ReferenceFrame frame);
 
 	/**
 	 * @brief Update all tracked objects' position.
@@ -200,34 +200,34 @@ public:
 	 */
 	bool updateTrackedObjectsPosition();
 
-	OpenPHRI::VectorXdConstPtr initLaserScanner(const std::string& name);
+	phri::VectorXdConstPtr initLaserScanner(const std::string& name);
 	bool updateLaserScanners();
 
-	bool readJointPosition(OpenPHRI::VectorXdPtr position) const;
-	bool sendJointTargetPosition(OpenPHRI::VectorXdConstPtr position) const;
-	bool sendJointTargetVelocity(OpenPHRI::VectorXdConstPtr velocity) const;
+	bool readJointPosition(phri::VectorXdPtr position) const;
+	bool sendJointTargetPosition(phri::VectorXdConstPtr position) const;
+	bool sendJointTargetVelocity(phri::VectorXdConstPtr velocity) const;
 
-	bool getSimulationData(OpenPHRI::ReferenceFrame frame_velocities = OpenPHRI::ReferenceFrame::TCP, OpenPHRI::ReferenceFrame frame_positions = OpenPHRI::ReferenceFrame::Base);
-	bool sendSimulationData(OpenPHRI::ReferenceFrame frame_velocities = OpenPHRI::ReferenceFrame::TCP);
+	bool getSimulationData(phri::ReferenceFrame frame_velocities = phri::ReferenceFrame::TCP, phri::ReferenceFrame frame_positions = phri::ReferenceFrame::Base);
+	bool sendSimulationData(phri::ReferenceFrame frame_velocities = phri::ReferenceFrame::TCP);
 
 private:
 	void init(const std::string& ip, int port);
 	void init(int client_id);
 	bool getObjectHandles();
 	void startStreaming() const;
-	int getFrameHandle(OpenPHRI::ReferenceFrame frame) const;
-	void computeSpatialTransformation(OpenPHRI::Matrix4dConstPtr transformation, OpenPHRI::Matrix6dPtr spatial_transformation) const;
+	int getFrameHandle(phri::ReferenceFrame frame) const;
+	void computeSpatialTransformation(phri::Matrix4dConstPtr transformation, phri::Matrix6dPtr spatial_transformation) const;
 
 	ControlLevel control_level_;
 	double sample_time_;
 	bool sync_mode_;
-	OpenPHRI::RobotPtr robot_;
+	phri::RobotPtr robot_;
 	std::string suffix_;
 	int client_id_;
 
 	std::unordered_map<std::string, int> object_handles_;
-	std::map<std::string, OpenPHRI::VectorXdPtr> lasers_data_;
-	std::map<std::pair<int,int>, OpenPHRI::Vector6dPtr> tracked_objects_;
+	std::map<std::string, phri::VectorXdPtr> lasers_data_;
+	std::map<std::pair<int,int>, phri::Vector6dPtr> tracked_objects_;
 
 };
 

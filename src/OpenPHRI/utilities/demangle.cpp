@@ -4,7 +4,7 @@
 #include <memory>
 #include <cxxabi.h>
 
-std::string OpenPHRI::demangle(const char* name) {
+std::string phri::demangle(const char* name) {
 	int status = -4; // some arbitrary value to eliminate the compiler warning
 
 	std::unique_ptr<char, void (*)(void*)> res {

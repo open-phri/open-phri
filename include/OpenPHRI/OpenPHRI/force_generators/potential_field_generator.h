@@ -32,9 +32,9 @@
 #include <OpenPHRI/definitions.h>
 #include <map>
 
-namespace OpenPHRI {
+namespace phri {
 
-/** @enum OpenPHRI::PotentialFieldType
+/** @enum phri::PotentialFieldType
  *  @brief Defines if a PotentialFieldObject is repulsive or attractive.
  */
 enum class PotentialFieldType {
@@ -97,4 +97,4 @@ private:
 using PotentialFieldGeneratorPtr = std::shared_ptr<PotentialFieldGenerator>;
 using PotentialFieldGeneratorConstPtr = std::shared_ptr<const PotentialFieldGenerator>;
 
-} // namespace OpenPHRI
+} // namespace phri

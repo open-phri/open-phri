@@ -30,7 +30,7 @@
 #include <OpenPHRI/definitions.h>
 #include <OpenPHRI/constraints/constraint.h>
 
-namespace OpenPHRI {
+namespace phri {
 
 /** @brief A constraint to limit the joint velocities.
  */
@@ -57,4 +57,4 @@ private:
 using JointVelocityConstraintPtr = std::shared_ptr<JointVelocityConstraint>;
 using JointVelocityConstraintConstPtr = std::shared_ptr<const JointVelocityConstraint>;
 
-} // namespace OpenPHRI
+} // namespace phri

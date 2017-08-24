@@ -1,6 +1,6 @@
 #include <OpenPHRI/utilities/integrator.hpp>
 
-namespace OpenPHRI {
+namespace phri {
 
 template class Integrator<double>;
 template class Integrator<Vector2d>;

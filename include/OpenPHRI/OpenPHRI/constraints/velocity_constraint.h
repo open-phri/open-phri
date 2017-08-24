@@ -30,7 +30,7 @@
 #include <OpenPHRI/definitions.h>
 #include <OpenPHRI/constraints/constraint.h>
 
-namespace OpenPHRI {
+namespace phri {
 
 /** @brief A constraint to limit the TCP velocity.
  */
@@ -58,4 +58,4 @@ protected:
 using VelocityConstraintPtr = std::shared_ptr<VelocityConstraint>;
 using VelocityConstraintConstPtr = std::shared_ptr<const VelocityConstraint>;
 
-} // namespace OpenPHRI
+} // namespace phri

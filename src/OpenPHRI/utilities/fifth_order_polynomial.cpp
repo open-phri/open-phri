@@ -4,7 +4,7 @@
 #include <iostream>
 #include <cmath>
 
-using namespace OpenPHRI;
+using namespace phri;
 
 /* Simplified coefficient for xi = 0 and dx = xf-xi
  * a = -(12*yi - 12*yf + 6*dx*dyf + 6*dx*dyi - d2yf*dx^2 + d2yi*dx^2)/(2*dx^5)

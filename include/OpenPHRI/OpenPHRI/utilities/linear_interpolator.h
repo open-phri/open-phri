@@ -30,7 +30,7 @@
 #include <OpenPHRI/utilities/interpolator.h>
 #include <OpenPHRI/utilities/interpolators_common.h>
 
-namespace OpenPHRI {
+namespace phri {
 
 /** @brief A linear interpolator with an optional saturation.
  */
@@ -85,4 +85,4 @@ private:
 using LinearInterpolatorPtr = std::shared_ptr<LinearInterpolator>;
 using LinearInterpolatorConstPtr = std::shared_ptr<const LinearInterpolator>;
 
-} // namespace OpenPHRI
+} // namespace phri

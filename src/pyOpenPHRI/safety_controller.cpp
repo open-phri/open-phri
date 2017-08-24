@@ -3,7 +3,7 @@
 #include <boost/python.hpp>
 #include <iostream>
 
-namespace OpenPHRI {
+namespace phri {
 
 std::shared_ptr<SafetyController> NewSafetyController(Matrix6dPtr damping_matrix)
 {
@@ -15,10 +15,10 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SafetyController_addConstraint_overloads,
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SafetyController_addVelocityGenerator_overloads, addVelocityGenerator,    2, 3)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SafetyController_addForceGenerator_overloads,    addForceGenerator,       2, 3)
 
-} // namespace OpenPHRI
+} // namespace phri
 
 void wrapSafetyController() {
-	using namespace OpenPHRI;
+	using namespace phri;
 	using namespace boost::python;
 
 	/*********************************************************************************/

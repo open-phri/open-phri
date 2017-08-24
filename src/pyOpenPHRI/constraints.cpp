@@ -4,7 +4,7 @@
 #include <boost/python.hpp>
 #include <iostream>
 
-namespace OpenPHRI {
+namespace phri {
 
 // Wrappers for classes returning pointers to double
 struct PowerConstraintWrap : public PowerConstraint {
@@ -55,10 +55,10 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(NewSeparationDistanceConstraint_overloads, NewSe
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SeparationDistanceConstraint_add_overloads, add, 2, 3)
 
 
-} // namespace OpenPHRI
+} // namespace phri
 
 void wrapConstraints() {
-	using namespace OpenPHRI;
+	using namespace phri;
 	using namespace boost::python;
 
 

@@ -1,7 +1,7 @@
 #include <OpenPHRI/constraints/stop_constraint.h>
 #include <iostream>
 
-using namespace OpenPHRI;
+using namespace phri;
 
 using namespace Eigen;
 

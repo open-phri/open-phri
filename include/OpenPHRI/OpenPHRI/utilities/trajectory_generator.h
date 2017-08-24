@@ -32,7 +32,7 @@
 #include <OpenPHRI/utilities/fifth_order_polynomial.h>
 #include <vector>
 
-namespace OpenPHRI {
+namespace phri {
 
 enum class TrajectoryOutputType {
 	Position,

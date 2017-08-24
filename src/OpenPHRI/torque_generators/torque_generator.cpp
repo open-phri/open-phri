@@ -1,6 +1,6 @@
 #include <OpenPHRI/torque_generators/torque_generator.h>
 
-using namespace OpenPHRI;
+using namespace phri;
 
 VectorXd TorqueGenerator::operator()() {
 	return compute();
