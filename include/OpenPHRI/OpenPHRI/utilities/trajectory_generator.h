@@ -37,7 +37,8 @@ namespace phri {
 enum class TrajectoryOutputType {
 	Position,
 	Velocity,
-	Acceleration
+	Acceleration,
+	All
 };
 
 enum class TrajectorySynchronization {
@@ -49,28 +50,19 @@ enum class TrajectorySynchronization {
 template<typename T>
 class TrajectoryGenerator {
 public:
-	TrajectoryGenerator(TrajectoryOutputType output_type, const TrajectoryPoint<T>& start, std::shared_ptr<T> output, double sample_time, TrajectorySynchronization sync = TrajectorySynchronization::NoSynchronization) :
+	TrajectoryGenerator(const TrajectoryPoint<T>& start, double sample_time, TrajectorySynchronization sync = TrajectorySynchronization::NoSynchronization, TrajectoryOutputType output_type = TrajectoryOutputType::All) :
 		sample_time_(sample_time),
 		output_type_(output_type),
 		sync_(sync)
 	{
 		current_segement_.resize(start.size(), 0);
 		points_.push_back(start);
-		output_ = output;
+		position_output_ = std::make_shared<T>();
+		velocity_output_ = std::make_shared<T>();
+		acceleration_output_ = std::make_shared<T>();
 		createRefs();
 		disableErrorTracking();
 	}
-
-	TrajectoryGenerator(TrajectoryOutputType output_type, const TrajectoryPoint<T>& start, T* output, double sample_time, TrajectorySynchronization sync = TrajectorySynchronization::NoSynchronization) :
-		TrajectoryGenerator(output_type, start, std::shared_ptr<T>(output, [](auto p){}), sample_time, sync)
-	{
-	}
-
-	TrajectoryGenerator(TrajectoryOutputType output_type, const TrajectoryPoint<T>& start, double sample_time, TrajectorySynchronization sync = TrajectorySynchronization::NoSynchronization) :
-		TrajectoryGenerator(output_type, start, std::make_shared<T>(), sample_time, sync)
-	{
-	}
-
 
 	template<typename U = T>
 	void addPathTo(const TrajectoryPoint<T>& to, const T& max_velocity, const T& max_acceleration, typename std::enable_if<std::is_same<U, double>::value>::type* = 0) {
@@ -118,8 +110,16 @@ public:
 		segment_params_.push_back(params);
 	}
 
-	std::shared_ptr<const T> getOutput() {
-		return output_;
+	std::shared_ptr<const T> getPositionOutput() {
+		return position_output_;
+	}
+
+	std::shared_ptr<const T> getVelocityOutput() {
+		return velocity_output_;
+	}
+
+	std::shared_ptr<const T> getAccelerationOutput() {
+		return acceleration_output_;
 	}
 
 	double getCurrentSegmentMinimumTime(size_t component) {
@@ -205,8 +205,12 @@ public:
 				FifthOrderPolynomial::computeParameters(poly_params);
 				params.current_time[component] = 0.;
 			}
-
 		}
+
+		*position_output_ = *points_[0].y;
+		*velocity_output_ = *points_[0].dy;
+		*acceleration_output_ = *points_[0].d2y;
+
 		return true;
 	}
 
@@ -236,7 +240,7 @@ public:
 	bool compute() {
 		auto check_error =
 			[this](size_t component) -> bool {
-				return std::abs(output_refs_[component] - error_tracking_params_.reference_refs[component]) > error_tracking_params_.threshold_refs[component];
+				return std::abs(position_output_refs_[component] - error_tracking_params_.reference_refs[component]) > error_tracking_params_.threshold_refs[component];
 			};
 
 		if(error_tracking_params_) {
@@ -245,9 +249,19 @@ public:
 					// If we have no synchronization we stop only this component, otherwise we stop all of them
 					if(sync_ == TrajectorySynchronization::NoSynchronization) {
 						error_tracking_params_.state[component] = ErrorTrackingState::Paused;
+						double& dy = velocity_output_refs_[component];
+						double& d2y = acceleration_output_refs_[component];
+						dy = 0.;
+						d2y = 0.;
 					}
 					else {
 						for_each(error_tracking_params_.state.begin(), error_tracking_params_.state.end(), [](auto& state) {state = ErrorTrackingState::Paused;});
+						for(double& dy: velocity_output_refs_) {
+							dy = 0.;
+						}
+						for(double& d2y: acceleration_output_refs_) {
+							d2y = 0.;
+						}
 						return false;
 					}
 				}
@@ -329,17 +343,35 @@ public:
 				}
 			}
 
-			double& out = output_refs_[component];
 			switch(output_type_) {
 			case TrajectoryOutputType::Position:
+			{
+				double& out = position_output_refs_[component];
 				out = FifthOrderPolynomial::compute(current_time, params.poly_params[component]);
-				break;
+			}
+			break;
 			case TrajectoryOutputType::Velocity:
+			{
+				double& out = velocity_output_refs_[component];
 				out = FifthOrderPolynomial::computeFirstDerivative(current_time, params.poly_params[component]);
-				break;
+			}
+			break;
 			case TrajectoryOutputType::Acceleration:
+			{
+				double& out = acceleration_output_refs_[component];
 				out = FifthOrderPolynomial::computeSecondDerivative(current_time, params.poly_params[component]);
-				break;
+			}
+			break;
+			case TrajectoryOutputType::All:
+			{
+				double& pos_out = position_output_refs_[component];
+				double& vel_out = velocity_output_refs_[component];
+				double& acc_out = acceleration_output_refs_[component];
+				pos_out = FifthOrderPolynomial::compute(current_time, params.poly_params[component]);
+				vel_out = FifthOrderPolynomial::computeFirstDerivative(current_time, params.poly_params[component]);
+				acc_out = FifthOrderPolynomial::computeSecondDerivative(current_time, params.poly_params[component]);
+			}
+			break;
 			}
 
 			current_time += sample_time_;
@@ -441,16 +473,26 @@ private:
 
 	template<typename U = T>
 	void createRefs(typename std::enable_if<std::is_same<U, double>::value>::type* = 0) {
-		output_refs_.clear();
-		output_refs_.push_back(std::ref(*output_));
+		position_output_refs_.clear();
+		velocity_output_refs_.clear();
+		acceleration_output_refs_.clear();
+		position_output_refs_.push_back(std::ref(*position_output_));
+		velocity_output_refs_.push_back(std::ref(*velocity_output_));
+		acceleration_output_refs_.push_back(std::ref(*acceleration_output_));
 	}
 
 	template<typename U = T>
 	void createRefs(typename std::enable_if<not std::is_same<U, double>::value>::type* = 0) {
-		output_refs_.clear();
-		auto& vec = *output_;
-		for (size_t i = 0; i < static_cast<size_t>(vec.size()); ++i) {
-			output_refs_.push_back(std::ref(vec[i]));
+		position_output_refs_.clear();
+		velocity_output_refs_.clear();
+		acceleration_output_refs_.clear();
+		auto& position_vec = *position_output_;
+		auto& velocity_vec = *velocity_output_;
+		auto& acceleration_vec = *acceleration_output_;
+		for (size_t i = 0; i < static_cast<size_t>(position_vec.size()); ++i) {
+			position_output_refs_.push_back(std::ref(position_vec[i]));
+			velocity_output_refs_.push_back(std::ref(velocity_vec[i]));
+			acceleration_output_refs_.push_back(std::ref(acceleration_vec[i]));
 		}
 	}
 
@@ -533,8 +575,12 @@ private:
 	std::vector<size_t> current_segement_;
 	ErrorTracking error_tracking_params_;
 	double sample_time_;
-	std::shared_ptr<T> output_;
-	std::vector<std::reference_wrapper<double>> output_refs_;
+	std::shared_ptr<T> position_output_;
+	std::shared_ptr<T> velocity_output_;
+	std::shared_ptr<T> acceleration_output_;
+	std::vector<std::reference_wrapper<double>> position_output_refs_;
+	std::vector<std::reference_wrapper<double>> velocity_output_refs_;
+	std::vector<std::reference_wrapper<double>> acceleration_output_refs_;
 	TrajectoryOutputType output_type_;
 	TrajectorySynchronization sync_;
 };
