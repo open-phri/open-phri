@@ -10,60 +10,24 @@ constexpr double SAMPLE_TIME = 0.010;
 constexpr bool USE_LOOP = false;
 
 int main(int argc, char const *argv[]) {
-	auto x_point_1 = make_shared<TrajectoryPoint<double>>(0,    0.,     0.);
-	auto x_point_2 = make_shared<TrajectoryPoint<double>>(0.1,  0.,     0.);
-	auto x_point_3 = make_shared<TrajectoryPoint<double>>(0.3,  0.,     0.);
-
-	auto y_point_1 = make_shared<TrajectoryPoint<double>>(0.,   0.,     0.);
-	auto y_point_2 = make_shared<TrajectoryPoint<double>>(0.2, 0.1,    0.05);
-	auto y_point_3 = make_shared<TrajectoryPoint<double>>(0.3,  0.,     0.);
-
-	auto z_point_1 = make_shared<TrajectoryPoint<double>>(0.,   0.1,    0.1);
-	auto z_point_2 = make_shared<TrajectoryPoint<double>>(0.2,  0.05,   -0.05);
-	auto z_point_3 = make_shared<TrajectoryPoint<double>>(0.1,  -0.1,    0.1);
-
-	double x_vel, y_vel, z_vel;
-
-	auto x_traj = make_shared<Trajectory<double>>(TrajectoryOutputType::Velocity, x_point_1, &x_vel, SAMPLE_TIME);
-	auto y_traj = make_shared<Trajectory<double>>(TrajectoryOutputType::Velocity, y_point_1, &y_vel, SAMPLE_TIME);
-	auto z_traj = make_shared<Trajectory<double>>(TrajectoryOutputType::Velocity, z_point_1, &z_vel, SAMPLE_TIME);
+	auto point_1 = TrajectoryPoint<Vector3d>(Vector3d(0.,  0.,  0.),    Vector3d(0., 0.,  0.1),     Vector3d(0., 0.,   0.1));
+	auto point_2 = TrajectoryPoint<Vector3d>(Vector3d(0.1, 0.2, 0.2),   Vector3d(0., 0.1, 0.05),    Vector3d(0., 0.05, -0.05));
+	auto point_3 = TrajectoryPoint<Vector3d>(Vector3d(0.3, 0.3, 0.1),   Vector3d(0., 0.,  -0.1),    Vector3d(0., 0.,   0.1));
 
 
-	x_traj->addPathTo(x_point_2, 0.05, 0.01);
-	x_traj->addPathTo(x_point_3, 0.1, 0.02);
-	x_traj->addPathTo(x_point_1, 0.05, 0.01);
-	x_traj->addPathTo(x_point_3, 0.1, 0.02);
-	x_traj->addPathTo(x_point_2, 0.05, 0.01);
-	x_traj->addPathTo(x_point_1, 0.05, 0.01);
+	auto trajectory_generator = TrajectoryGenerator<Vector3d>(point_1, SAMPLE_TIME);
 
-
-	y_traj->addPathTo(y_point_2, 0.15, 0.1);
-	y_traj->addPathTo(y_point_3, 0.25, 0.2);
-	y_traj->addPathTo(y_point_1, 0.15, 0.1);
-	y_traj->addPathTo(y_point_3, 0.25, 0.2);
-	y_traj->addPathTo(y_point_2, 0.15, 0.1);
-	y_traj->addPathTo(y_point_1, 0.25, 0.2);
-
-	z_traj->addPathTo(z_point_2, 0.2, 0.2);
-	z_traj->addPathTo(z_point_3, 0.2, 0.2);
-	z_traj->addPathTo(z_point_1, 0.2, 0.2);
-	z_traj->addPathTo(z_point_3, 0.2, 0.2);
-	z_traj->addPathTo(z_point_2, 0.2, 0.2);
-	z_traj->addPathTo(z_point_1, 0.2, 0.2);
-
-	// Use these for fixed-time paths
-	// z_traj->addPathTo(z_point_2, 5.);
-	// z_traj->addPathTo(z_point_3, 5.);
-	// z_traj->addPathTo(z_point_1, 10.);
-
-	auto trajectory_generator = TrajectoryGenerator(TrajectorySynchronization::NoSynchronization);
-	// trajectory_generator.add("y_traj", y_traj);
-	// trajectory_generator.add("z_traj", z_traj);
+	trajectory_generator.addPathTo(point_2, Vector3d(0.05, 0.15, 0.2), Vector3d(0.01, 0.1, 0.2));
+	trajectory_generator.addPathTo(point_3, Vector3d(0.1,  0.25, 0.2), Vector3d(0.02, 0.2, 0.2));
+	trajectory_generator.addPathTo(point_1, Vector3d(0.05, 0.15, 0.2), Vector3d(0.01, 0.1, 0.2));
+	trajectory_generator.addPathTo(point_3, Vector3d(0.1,  0.25, 0.2), Vector3d(0.02, 0.2, 0.2));
+	trajectory_generator.addPathTo(point_2, Vector3d(0.05, 0.15, 0.2), Vector3d(0.01, 0.1, 0.2));
+	trajectory_generator.addPathTo(point_1, Vector3d(0.05, 0.25, 0.2), Vector3d(0.01, 0.2, 0.2));
 
 	// constexpr size_t N = 100000;
 	Clock clock;
 	DataLogger logger(
-		"/mnt/tmpfs/open-phri_logs",
+		"/tmp/open-phri_logs",
 		clock.getTime(),
 		true,   // create gnuplot files
 		true);  // delay disk write
@@ -72,13 +36,13 @@ int main(int argc, char const *argv[]) {
 	constexpr int NCalls = 2000;
 	constexpr int Tries = 100;
 	auto getAvgTime = [&t_start, &t_end, NCalls](){return (t_end-t_start)/double(NCalls);};
-	std::function<void(void)> runner = std::bind(&TrajectoryGenerator::computeParameters, &trajectory_generator, 1e-6, 1e-6);
+	std::function<void(void)> runner = [&trajectory_generator](){trajectory_generator.computeTimings(1e-6, 1e-6);};
 
 	auto run_benchmark =
 		[&]() {
 			std::cout << "Benchmark started" << std::endl;
 			for (size_t i = 0; i < Tries; ++i) {
-				Trajectory<double>::resetComputeTimingsIterations();
+				TrajectoryGenerator<Vector3d>::resetComputeTimingsIterations();
 				if(USE_LOOP) {
 					for (size_t j = 0; j < NCalls; ++j) {
 						t_start = clock();
@@ -95,7 +59,7 @@ int main(int argc, char const *argv[]) {
 					t_avg = getAvgTime();
 				}
 				t_avg *= 1e6;
-				iter_avg = double(Trajectory<double>::getComputeTimingsIterations()) / double(NCalls);
+				iter_avg = double(TrajectoryGenerator<Vector3d>::getComputeTimingsIterations()) / double(NCalls);
 				// std::cout << "Average time (us): " << t_avg << std::endl;
 				logger();
 			}
@@ -109,36 +73,36 @@ int main(int argc, char const *argv[]) {
 
 #if 1
 	map<string, std::function<void(void)>> epsilons;
-	epsilons["_eps_1e-6"] = std::bind(&TrajectoryGenerator::computeParameters, &trajectory_generator, 1e-6, 1e-6);
-	epsilons["_eps_1e-3"] = std::bind(&TrajectoryGenerator::computeParameters, &trajectory_generator, 1e-3, 1e-3);
+	epsilons["_eps_1e-6"] = [&trajectory_generator](){trajectory_generator.computeTimings(1e-6, 1e-6);};
+	epsilons["_eps_1e-3"] = [&trajectory_generator](){trajectory_generator.computeTimings(1e-3, 1e-3);};
 
-	for(auto eps: epsilons) {
-		runner = eps.second;
-
-		clock.reset();
-		logger.reset();
-		logger.logExternalData("tavg_compute_param_x"+eps.first, &t_avg, 1);
-		logger.logExternalData("iter_avg_compute_param_x"+eps.first, &iter_avg, 1);
-		trajectory_generator.add("x_traj", x_traj);
-		run_benchmark();
-		trajectory_generator.remove("x_traj");
-
-		clock.reset();
-		logger.reset();
-		logger.logExternalData("tavg_compute_param_y"+eps.first, &t_avg, 1);
-		logger.logExternalData("iter_avg_compute_param_y"+eps.first, &iter_avg, 1);
-		trajectory_generator.add("y_traj", y_traj);
-		run_benchmark();
-		trajectory_generator.remove("y_traj");
-
-		clock.reset();
-		logger.reset();
-		logger.logExternalData("tavg_compute_param_z"+eps.first, &t_avg, 1);
-		logger.logExternalData("iter_avg_compute_param_z"+eps.first, &iter_avg, 1);
-		trajectory_generator.add("z_traj", z_traj);
-		run_benchmark();
-		trajectory_generator.remove("z_traj");
-	}
+	// for(auto eps: epsilons) {
+	//  runner = eps.second;
+	//
+	//  clock.reset();
+	//  logger.reset();
+	//  logger.logExternalData("tavg_compute_param_x"+eps.first, &t_avg, 1);
+	//  logger.logExternalData("iter_avg_compute_param_x"+eps.first, &iter_avg, 1);
+	//  trajectory_generator.add("x_traj", x_traj);
+	//  run_benchmark();
+	//  trajectory_generator.remove("x_traj");
+	//
+	//  clock.reset();
+	//  logger.reset();
+	//  logger.logExternalData("tavg_compute_param_y"+eps.first, &t_avg, 1);
+	//  logger.logExternalData("iter_avg_compute_param_y"+eps.first, &iter_avg, 1);
+	//  trajectory_generator.add("y_traj", y_traj);
+	//  run_benchmark();
+	//  trajectory_generator.remove("y_traj");
+	//
+	//  clock.reset();
+	//  logger.reset();
+	//  logger.logExternalData("tavg_compute_param_z"+eps.first, &t_avg, 1);
+	//  logger.logExternalData("iter_avg_compute_param_z"+eps.first, &iter_avg, 1);
+	//  trajectory_generator.add("z_traj", z_traj);
+	//  run_benchmark();
+	//  trajectory_generator.remove("z_traj");
+	// }
 
 	runner = epsilons["_eps_1e-6"];
 
@@ -146,9 +110,9 @@ int main(int argc, char const *argv[]) {
 	sync_modes[TrajectorySynchronization::NoSynchronization] = "no_sync";
 	sync_modes[TrajectorySynchronization::SynchronizeWaypoints] = "wp_sync";
 	sync_modes[TrajectorySynchronization::SynchronizeTrajectory] = "traj_sync";
-	trajectory_generator.add("x_traj", x_traj);
-	trajectory_generator.add("y_traj", y_traj);
-	trajectory_generator.add("z_traj", z_traj);
+	// trajectory_generator.add("x_traj", x_traj);
+	// trajectory_generator.add("y_traj", y_traj);
+	// trajectory_generator.add("z_traj", z_traj);
 	for(auto mode: sync_modes) {
 		trajectory_generator.setSynchronizationMethod(mode.first);
 		clock.reset();
@@ -157,9 +121,9 @@ int main(int argc, char const *argv[]) {
 		logger.logExternalData("iter_avg_compute_param_xyz_"+mode.second, &iter_avg, 1);
 		run_benchmark();
 	}
-	trajectory_generator.remove("x_traj");
-	trajectory_generator.remove("y_traj");
-	trajectory_generator.remove("z_traj");
+	// trajectory_generator.remove("x_traj");
+	// trajectory_generator.remove("y_traj");
+	// trajectory_generator.remove("z_traj");
 #endif
 #if 0
 	runner = std::bind(&TrajectoryGenerator::compute, &trajectory_generator);

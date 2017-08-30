@@ -12,6 +12,10 @@
 using namespace phri;
 using namespace vrep;
 
+double SAMPLE_TIME = 0.005;
+
+constexpr bool USE_LASER_SCANNER = false;
+
 bool _stop = false;
 
 void sigint_handler(int sig) {
@@ -34,16 +38,22 @@ int main(int argc, char const *argv[]) {
 		);
 
 	driver.startSimulation();
-	auto laser_data = driver.initLaserScanner("Hokuyo");
+
+	std::shared_ptr<LaserScannerDetector> laser_detector;
+	std::shared_ptr<const VectorXd> laser_data;
+	if(USE_LASER_SCANNER) {
+		laser_data = driver.initLaserScanner("Hokuyo");
+		laser_detector = std::make_shared<LaserScannerDetector>(
+			laser_data,
+			270. * M_PI / 180.,
+			0.2,
+			3.);
+	}
 
 	/***			Controller configuration			***/
 	auto safety_controller = SafetyController(robot);
 
-	auto laser_detector = LaserScannerDetector(
-		laser_data,
-		270. * M_PI / 180.,
-		0.2,
-		3.);
+
 
 	auto state_machine = StateMachine(
 		robot,
@@ -82,11 +92,13 @@ int main(int argc, char const *argv[]) {
 
 	driver.enableSynchonous(true);
 	size_t count = 10;
-	while(not (driver.getSimulationData(ReferenceFrame::Base, ReferenceFrame::Base) and laser_data->size() == 1080 and count-- == 0 )and not _stop) {
+	while(not (driver.getSimulationData(ReferenceFrame::Base, ReferenceFrame::Base) and ( not laser_data or laser_data->size() == 1080) and count-- == 0 )and not _stop) {
 		driver.nextStep();
 	}
 
-	laser_detector.init();
+	if(laser_detector) {
+		laser_detector->init();
+	}
 	state_machine.init();
 
 	if(not _stop)

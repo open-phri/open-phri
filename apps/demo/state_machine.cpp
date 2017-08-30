@@ -8,43 +8,69 @@ constexpr double REPLAY_VMAX = 0.1;
 constexpr double REPLAY_AMAX = 0.1;
 constexpr double REPLAY_WMAX = 1.;
 constexpr double REPLAY_DWMAX = 1.;
-constexpr double FORCE_TARGET = 10.;
+constexpr double REPLAY_DQMAX = 1.;
+constexpr double REPLAY_D2QMAX = 0.3;
+constexpr double REPLAY_ERROR_THRESHOLD_TRANS = 0.01;
+constexpr double REPLAY_ERROR_THRESHOLD_ROT = 100.;
 constexpr double FORCE_DURATION = 2.;
-constexpr double STIFFNESS = 1000.;
+constexpr double FORCE_TARGET = 10.;
+constexpr double FORCE_CTRL_VLIM = 0.1;
+constexpr double FORCE_CTRL_ALIM = 0.5;
+constexpr double FORCE_CTRL_PGAIN = 0.005;
+constexpr double FORCE_CTRL_DGAIN = 0.0005;
+constexpr double STIFFNESS = 100.;
+
+extern double SAMPLE_TIME;
 
 StateMachine::StateMachine(
-	phri::RobotPtr robot_,
+	phri::RobotPtr robot,
 	phri::SafetyController& controller,
-	phri::LaserScannerDetector& laser_detector_,
+	std::shared_ptr<phri::LaserScannerDetector> laser_detector_,
 	bool skip_teaching) :
-	robot_(robot_),
+	robot_(robot),
 	controller_(controller),
-	laser_detector_(laser_detector_)
+	laser_detector_(laser_detector_),
+	force_control_at_next_wp_(true),
+	is_robot_stopped_(false)
 {
+	init_state_ = InitStates::SetupTrajectory;
 	teach_state_ = TeachStates::Init;
 	replay_state_ = ReplayStates::Init;
 
 	if(skip_teaching) {
-
 		phri::Vector6d wp;
-
 		wp << -0.176542, -0.0672858,   0.772875,    1.57698, -0.0115612,    1.56215;
-		waypoints_.push_back(wp);
+		waypoints_.push_back(wp); waypoints_.push_back(wp);
 		wp << -0.173713, -0.0660992,   0.959651,    1.56696, -0.0120195,    1.55371;
-		waypoints_.push_back(wp);
+		waypoints_.push_back(wp); waypoints_.push_back(wp);
 		wp << 0.156179, -0.0612425,   0.949056,    1.56838, 0.00866731,    1.54394;
-		waypoints_.push_back(wp);
+		waypoints_.push_back(wp); waypoints_.push_back(wp);
 		wp << 0.150482, -0.0590984,   0.777583,    1.57879, 0.00644068,    1.53824;
-		waypoints_.push_back(wp);
-
+		waypoints_.push_back(wp); waypoints_.push_back(wp);
 		teach_state_ = TeachStates::End;
 	}
 
-	target_velocity_ = std::make_shared<phri::Vector6d>(phri::Vector6d::Zero());
-	trajectory_generator_ = std::make_shared<phri::TrajectoryGenerator>(phri::TrajectorySynchronization::SynchronizeTrajectory);
-	target_integrator_ = std::make_shared<phri::Integrator<phri::Vector6d>>(target_velocity_, robot_->controlPointTargetPose(), SAMPLE_TIME);
+	joint_trajectory_generator_ = std::make_shared<phri::TrajectoryGenerator<phri::VectorXd>>(joint_start_point_, SAMPLE_TIME, phri::TrajectorySynchronization::SynchronizeTrajectory);
+	phri::VectorXd dqmax(robot_->jointCount()), d2qmax(robot_->jointCount());
+	dqmax.setConstant(REPLAY_DQMAX);
+	d2qmax.setConstant(REPLAY_D2QMAX);
+	joint_trajectory_generator_->addPathTo(joint_end_point_, dqmax, d2qmax);
 
-	operator_position_laser_ = laser_detector_.getPosition();
+	trajectory_generator_ = std::make_shared<phri::TrajectoryGenerator<phri::Vector6d>>(start_point_, SAMPLE_TIME, phri::TrajectorySynchronization::SynchronizeTrajectory);
+	phri::Vector6d vmax, amax, err_th;
+	vmax.block<3,1>(0,0).setConstant(REPLAY_VMAX); vmax.block<3,1>(3,0).setConstant(REPLAY_WMAX);
+	amax.block<3,1>(0,0).setConstant(REPLAY_AMAX); amax.block<3,1>(3,0).setConstant(REPLAY_DWMAX);
+	trajectory_generator_->addPathTo(end_point_, vmax, amax);
+	err_th.block<3,1>(0,0).setConstant(REPLAY_ERROR_THRESHOLD_TRANS);
+	err_th.block<3,1>(3,0).setConstant(REPLAY_ERROR_THRESHOLD_ROT);
+	trajectory_generator_->enableErrorTracking(robot_->controlPointCurrentPose(), err_th, true);
+
+	if(static_cast<bool>(laser_detector_)) {
+		operator_position_laser_ = laser_detector_->getPosition();
+	}
+	else {
+		operator_position_laser_ = std::make_shared<phri::Vector2d>(3.,0.);
+	}
 	operator_position_tcp_ = std::make_shared<phri::Vector6d>();
 
 	max_vel_interpolator_ = std::make_shared<phri::LinearInterpolator>(
@@ -66,7 +92,8 @@ StateMachine::StateMachine(
 	init_position_ = std::make_shared<phri::Vector6d>();
 	traj_vel_ = std::make_shared<phri::Vector6d>(phri::Vector6d::Zero());
 	stiffness_mat_ = std::make_shared<phri::Matrix6d>(phri::Matrix6d::Identity() * STIFFNESS);
-	stiffness_mat_->block<3,3>(3,3).setZero();
+	// stiffness_mat_->block<3,3>(3,3).setZero();
+	(*stiffness_mat_)(4,4) = 0.; // TODO it works but it should be z axis, fix it
 	tcp_collision_sphere_center_ = std::make_shared<phri::Vector6d>(phri::Vector6d::Zero());
 	tcp_collision_sphere_offset_ = phri::Vector3d(0.,0.,-7.44e-2);
 	end_of_teach_ = false;
@@ -90,11 +117,19 @@ double StateMachine::getSeparationDistanceVelocityLimitation() const {
 
 void StateMachine::init() {
 	robot_->controlPointDampingMatrix()->setOnes();
-	*robot_->controlPointDampingMatrix() *= 250.;
+	robot_->controlPointDampingMatrix()->block<3,1>(0,0) *= 250.;
+	robot_->controlPointDampingMatrix()->block<3,1>(3,0) *= 500.;
 	*init_position_ = *robot_->controlPointCurrentPose();
-	target_integrator_->force(*robot_->controlPointCurrentPose());
 	*robot_->jointTargetPosition() = *robot_->jointCurrentPosition();
 }
+
+void StateMachine::useNullSpaceMotion(double null_space_gain, phri::VectorXd&& joint_min_positions, phri::VectorXd&& joint_max_positions) {
+	null_space_velocity_ = controller_.getNullSpaceVelocityVector();
+	joint_min_positions_ = joint_min_positions;
+	joint_max_positions_ = joint_max_positions;
+	null_space_gain_ = null_space_gain;
+}
+
 
 bool StateMachine::compute() {
 	bool end = false;
@@ -137,6 +172,7 @@ bool StateMachine::compute() {
 			}
 			else if(dt > RECORD_WAYPOINT_WAIT) {
 				waypoints_.push_back(*robot_->controlPointCurrentPose());
+				waypoints_.push_back(*robot_->controlPointCurrentPose());
 				teach_state_ = TeachStates::WaitForMotion;
 				std::cout << "Waypoint added" << std::endl;
 			}
@@ -156,7 +192,9 @@ bool StateMachine::compute() {
 		}
 	}
 	else {
-		laser_detector_.compute();
+		if(static_cast<bool>(laser_detector_)) {
+			laser_detector_->compute();
+		}
 		computeLaserDistanceInTCPFrame(operator_position_tcp_);
 
 		switch(replay_state_) {
@@ -169,11 +207,11 @@ bool StateMachine::compute() {
 				phri::ReferenceFrame::Base);
 
 			controller_.add("stiffness", stiffness);
-			target_integrator_->force(*robot_->controlPointCurrentPose());
+			*robot_->controlPointTargetPose() = *robot_->controlPointCurrentPose();
 
 			controller_.add(
 				"traj vel",
-				phri::VelocityProxy(target_velocity_, phri::ReferenceFrame::Base));
+				phri::VelocityProxy(trajectory_generator_->getVelocityOutput(), phri::ReferenceFrame::Base));
 
 			auto potential_field_generator = std::make_shared<phri::PotentialFieldGenerator>(
 				std::make_shared<phri::Vector3d>(tcp_collision_sphere_offset_),
@@ -188,6 +226,7 @@ bool StateMachine::compute() {
 				obstacle_position);
 
 			potential_field_generator->add("obstacle", obstacle);
+
 
 			auto separation_dist_vel_cstr = std::make_shared<phri::SeparationDistanceConstraint>(
 				std::make_shared<phri::VelocityConstraint>(vmax_interpolator_output_),
@@ -209,46 +248,76 @@ bool StateMachine::compute() {
 		break;
 		case ReplayStates::SetupTrajectory:
 		{
+			if(force_control_at_next_wp_) {
+				controller_.add(
+					"emergency stop",
+					phri::StopConstraint(
+						std::make_shared<double>(10.),
+						std::make_shared<double>(1.)));
+			}
+
 			(*stiffness_mat_)(0,0) = STIFFNESS;
 			(*stiffness_mat_)(1,1) = STIFFNESS;
 			(*stiffness_mat_)(2,2) = STIFFNESS;
+			*robot_->controlPointTargetPose() = *robot_->controlPointCurrentPose();
+
 			if(setupTrajectoryGenerator()) {
 				std::cout << "Trajectory setup done" << std::endl;
 				replay_state_ = ReplayStates::ReachingWaypoint;
 			}
 			else {
-				std::cout << "No more waypoints_" << std::endl;
+				std::cout << "No more waypoints" << std::endl;
 				replay_state_ = ReplayStates::End;
 			}
+			// trajectory_generator_->compute();
 		}
 
 		break;
 		case ReplayStates::ReachingWaypoint:
 		{
+			*robot_->controlPointTargetPose() = *trajectory_generator_->getPositionOutput();
 			double error = (*robot_->controlPointTargetPose() - *robot_->controlPointCurrentPose()).block<3,1>(0,0).norm();
 			// std::cout << "error: " << error << std::endl;
+			// bool stopped = *robot_->scalingFactor() < 0.001;
+			// if(not stopped and is_robot_stopped_) {
+			//  std::cout << "Recomputing the trajectory\n";
+			//  setupTrajectoryGenerator();
+			// }
+			// if(stopped and not is_robot_stopped_) {
+			//  std::cout << "/!\\ Emergency stop /!\\ \n";
+			// }
+			// is_robot_stopped_ = stopped;
+			// if(not stopped and trajectory_generator_->compute() and error < 0.001) {
 			if(trajectory_generator_->compute() and error < 0.001) {
 				std::cout << "Waypoint reached" << std::endl;
+				waypoints_.pop_front();
 				if(waypoints_.size() > 0) {
-					replay_state_ = ReplayStates::ForceControlInit;
+					if(force_control_at_next_wp_) {
+						replay_state_ = ReplayStates::ForceControlInit;
+					}
+					else {
+						replay_state_ = ReplayStates::SetupTrajectory;
+					}
+					force_control_at_next_wp_ = not force_control_at_next_wp_;
 				}
 				else {
 					replay_state_ = ReplayStates::End;
 				}
 			}
-			target_integrator_->compute();
 		}
 		break;
 		case ReplayStates::ForceControlInit:
 		{
+			controller_.removeConstraint(
+				"emergency stop");
 
-			auto velocity_constraint = std::make_shared<phri::VelocityConstraint>(std::make_shared<double>(0.1));
-			auto acceleration_constraint = std::make_shared<phri::AccelerationConstraint>(std::make_shared<double>(0.5), SAMPLE_TIME);
+			auto velocity_constraint = std::make_shared<phri::VelocityConstraint>(std::make_shared<double>(FORCE_CTRL_VLIM));
+			auto acceleration_constraint = std::make_shared<phri::AccelerationConstraint>(std::make_shared<double>(FORCE_CTRL_ALIM), SAMPLE_TIME);
 
 
 			auto target_force = std::make_shared<phri::Vector6d>(phri::Vector6d::Zero());
-			auto p_gain = std::make_shared<phri::Vector6d>(phri::Vector6d::Ones() * 0.005);
-			auto d_gain = std::make_shared<phri::Vector6d>(phri::Vector6d::Ones() * 0.00005);
+			auto p_gain = std::make_shared<phri::Vector6d>(phri::Vector6d::Ones() * FORCE_CTRL_PGAIN);
+			auto d_gain = std::make_shared<phri::Vector6d>(phri::Vector6d::Ones() * FORCE_CTRL_DGAIN);
 			auto selection = std::make_shared<phri::Vector6d>(phri::Vector6d::Zero());
 
 			target_force->z() = FORCE_TARGET;
@@ -292,7 +361,7 @@ bool StateMachine::compute() {
 				last_time_point_ = current_time;
 			}
 
-			is_force_ok_ = std::abs(robot_->controlPointExternalForce()->z() - FORCE_TARGET) < 0.5;
+			is_force_ok_ = std::abs(robot_->controlPointExternalForce()->z() + FORCE_TARGET) < 0.1*FORCE_TARGET;
 
 			if(dt > FORCE_DURATION) {
 				replay_state_ = ReplayStates::ForceControlEnd;
@@ -316,7 +385,32 @@ bool StateMachine::compute() {
 		}
 	}
 
+	computeNullSpaceVelocityVector();
+
 	return end;
+}
+
+bool StateMachine::goToInitPose() {
+	switch(init_state_) {
+	case InitStates::SetupTrajectory:
+		setupJointTrajectoryGenerator();
+		controller_.add(
+			"init joint traj vel",
+			phri::JointVelocityProxy(joint_trajectory_generator_->getVelocityOutput()));
+		init_state_ = InitStates::GoToInitPose;
+		break;
+	case InitStates::GoToInitPose:
+		if(joint_trajectory_generator_->compute()) {
+			controller_.removeJointVelocityGenerator("init joint traj vel");
+			init_state_ = InitStates::InitPoseReached;
+		}
+		break;
+	case InitStates::InitPoseReached:
+		init_state_ = InitStates::SetupTrajectory;
+		break;
+	}
+
+	return init_state_ == InitStates::InitPoseReached;
 }
 
 bool StateMachine::setupTrajectoryGenerator() {
@@ -325,28 +419,29 @@ bool StateMachine::setupTrajectoryGenerator() {
 
 	auto& from = *robot_->controlPointCurrentPose();
 	auto to = waypoints_.front();
-	waypoints_.pop_front();
 	std::cout << "Going from [" << from.transpose() << "] to [" << to.transpose() << "]" << std::endl;
 
-	trajectory_generator_->removeAll();
+	*(start_point_.y) = from;
+	*(end_point_.y) = to;
 
-	for (size_t i = 0; i < 6; ++i) {
-		auto point_from = std::make_shared<phri::TrajectoryPoint<double>>(from(i), 0., 0.);
-		auto point_to = std::make_shared<phri::TrajectoryPoint<double>>(to(i), 0., 0.);
-		auto trajectory = std::make_shared<phri::Trajectory<double>>(phri::TrajectoryOutputType::Velocity, point_from, target_velocity_->data()+i, SAMPLE_TIME);
-		if(i < 3) {
-			trajectory->addPathTo(point_to, REPLAY_VMAX, REPLAY_AMAX);
-		}
-		else {
-			trajectory->addPathTo(point_to, REPLAY_WMAX, REPLAY_DWMAX);
-		}
+	trajectory_generator_->reset();
+	trajectory_generator_->computeTimings();
 
-		trajectory_generator_->add("traj"+std::to_string(i), trajectory);
-	}
+	return true;
+}
 
-	trajectory_generator_->computeParameters();
+bool StateMachine::setupJointTrajectoryGenerator() {
+	const auto& from = *robot_->jointCurrentPosition();
+	phri::VectorXd to(7);
+	to << 90., -45., 0., -90., 0., 45., 0.;
+	to *= M_PI/180.;
 
-	target_integrator_->force(from);
+	std::cout << "Going from [" << from.transpose() << "] to [" << to.transpose() << "]" << std::endl;
+
+	*(start_point_.y) = from;
+	*(end_point_.y) = to;
+
+	trajectory_generator_->computeTimings();
 
 	return true;
 }
@@ -372,4 +467,16 @@ void StateMachine::computeLaserDistanceInTCPFrame(phri::Vector6dPtr obstacle_pos
 
 	obstacle_position->setZero();
 	obstacle_position->block<3,1>(0,0) = tcp_base_transform.block<3,3>(0,0).transpose() * position_tcp_rbase;
+}
+
+void StateMachine::computeNullSpaceVelocityVector() {
+	if(static_cast<bool>(null_space_velocity_)) {
+		phri::VectorXd grad(robot_->jointCount());
+		const auto& joint_pos = *robot_->jointCurrentPosition();
+		for (size_t i = 0; i < robot_->jointCount(); ++i) {
+			double avg = 0.5 * (joint_max_positions_(i) + joint_min_positions_(i));
+			grad(i) = 2.*(joint_pos(i) - avg) / std::pow(joint_max_positions_(i) - joint_min_positions_(i), 2);
+		}
+		*null_space_velocity_ = null_space_gain_ * grad;
+	}
 }

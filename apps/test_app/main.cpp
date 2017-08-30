@@ -12,7 +12,7 @@ int main(int argc, char const *argv[]) {
 	std::cout << "Testing the Trajectory class on double\n";
 	auto p1 = TrajectoryPoint<double>(0.,0.,0.);
 	auto p2 = TrajectoryPoint<double>(1.,0.,0.);
-	auto tg = TrajectoryGenerator<double>(TrajectoryOutputType::Position, p1, SAMPLE_TIME, TrajectorySynchronization::SynchronizeWaypoints);
+	auto tg = TrajectoryGenerator<double>(p1, SAMPLE_TIME, TrajectorySynchronization::SynchronizeWaypoints);
 	tg.addPathTo(p2, 0.5, 1.);
 	tg.addPathTo(p1, 0.1, 0.5);
 	tg.computeTimings();
@@ -30,7 +30,7 @@ int main(int argc, char const *argv[]) {
 	amax << 1., 2., 3., 4., 5., 6.;
 	auto point_1 = TrajectoryPoint<Vector6d>(Vector6d::Zero(), Vector6d::Zero(), Vector6d::Zero());
 	auto point_2 = TrajectoryPoint<Vector6d>(y, Vector6d::Zero(), Vector6d::Zero());
-	auto trajectory_generator = TrajectoryGenerator<Vector6d>(TrajectoryOutputType::Position, point_1, SAMPLE_TIME, TrajectorySynchronization::SynchronizeTrajectory);
+	auto trajectory_generator = TrajectoryGenerator<Vector6d>(point_1, SAMPLE_TIME, TrajectorySynchronization::SynchronizeTrajectory);
 	trajectory_generator.addPathTo(point_2, vmax, amax);
 	trajectory_generator.addPathTo(point_1, vmax * 0.5, amax * 0.25);
 	// get<1>(trajectory_generator[0][3]) = 0.1; // get<1> => dy, [0] => 1st point, [3] => 4th component
@@ -56,16 +56,16 @@ int main(int argc, char const *argv[]) {
 		true
 		);
 
-	logger.logExternalData("traj6d", trajectory_generator.getOutput()->data(), 6);
+	logger.logExternalData("traj6d", trajectory_generator.getPositionOutput()->data(), 6);
 	while(not trajectory_generator()) {
 		clock();
 		logger();
 
 		if(not (*clock.getTime() > 1.5 and *clock.getTime() < 2.5)) {
-			*reference = *trajectory_generator.getOutput();
+			*reference = *trajectory_generator.getPositionOutput();
 		}
 		else {
-			reference->block<5,1>(1,0) = trajectory_generator.getOutput()->block<5,1>(1,0);
+			reference->block<5,1>(1,0) = trajectory_generator.getPositionOutput()->block<5,1>(1,0);
 		}
 	}
 
@@ -79,10 +79,10 @@ int main(int argc, char const *argv[]) {
 		logger();
 
 		if(not (*clock.getTime()-start > 4. and *clock.getTime()-start < 5.)) {
-			*reference = *trajectory_generator.getOutput();
+			*reference = *trajectory_generator.getPositionOutput();
 		}
 		else {
-			reference->block<5,1>(1,0) = trajectory_generator.getOutput()->block<5,1>(1,0);
+			reference->block<5,1>(1,0) = trajectory_generator.getPositionOutput()->block<5,1>(1,0);
 		}
 	}
 
