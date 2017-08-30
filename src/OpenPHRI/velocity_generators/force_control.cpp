@@ -9,7 +9,8 @@ ForceControl::ForceControl(
 	Vector6dConstPtr p_gain,
 	Vector6dConstPtr d_gain,
 	Vector6dConstPtr selection,
-	ReferenceFrame frame) :
+	ReferenceFrame frame,
+	ForceControlTargetType type) :
 	VelocityGenerator(frame),
 	external_force_target_(external_force_target),
 	sample_time_(sample_time),
@@ -17,6 +18,7 @@ ForceControl::ForceControl(
 	d_gain_(d_gain),
 	selection_(selection),
 	frame_(frame),
+	type_(type),
 	filter_coeff_(1.)
 {
 	prev_error_.setZero();
@@ -36,12 +38,18 @@ void ForceControl::configureFilter(double sample_time, double time_constant) {
 
 Vector6d ForceControl::compute() {
 	Vector6d error;
-	// TODO Find how to chose between the targeted force applied to the environment or applied to the robot
-	if(frame_ == ReferenceFrame::TCP) {
-		error = *external_force_target_ + *robot_->controlPointExternalForce();
+	Vector6d target;
+	if(type_ == ForceControlTargetType::Environment) {
+		target = *external_force_target_;
 	}
 	else {
-		error = *external_force_target_ + *robot_->spatialTransformationMatrix() * *robot_->controlPointExternalForce();
+		target = -*external_force_target_;
+	}
+	if(frame_ == ReferenceFrame::TCP) {
+		error = target + *robot_->controlPointExternalForce();
+	}
+	else {
+		error = target + *robot_->spatialTransformationMatrix() * *robot_->controlPointExternalForce();
 
 	}
 	applySelection(error);

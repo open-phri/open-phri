@@ -32,6 +32,11 @@
 
 namespace phri {
 
+enum class ForceControlTargetType {
+	Environment,    /**< The target force is the one applied to the environment */
+	Robot           /**< The target force is the one applied to the robot */
+};
+
 /** @brief Generates a velocity to regulate the external force to a given target using PD control.
  */
 class ForceControl : public VelocityGenerator {
@@ -42,7 +47,8 @@ public:
 		Vector6dConstPtr p_gain,
 		Vector6dConstPtr d_gain,
 		Vector6dConstPtr selection,
-		ReferenceFrame frame = ReferenceFrame::TCP);
+		ReferenceFrame frame = ReferenceFrame::TCP,
+		ForceControlTargetType type = ForceControlTargetType::Environment);
 
 	~ForceControl() = default;
 
@@ -59,6 +65,7 @@ private:
 	Vector6dConstPtr d_gain_;
 	Vector6dConstPtr selection_;
 	ReferenceFrame frame_;
+	ForceControlTargetType type_;
 
 	double filter_coeff_;
 
