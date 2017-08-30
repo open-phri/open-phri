@@ -203,7 +203,7 @@ bool VREPDriver::readTCPWrench(phri::Vector6dPtr wrench) const {
 	if(all_ok) {
 		double* wrench_data = wrench->data();
 		for (size_t i = 0; all_ok and i < 6; ++i) {
-			wrench_data[i] = data[i];
+			wrench_data[i] = -data[i]; // V-REP inverts the measured forces
 		}
 	}
 
