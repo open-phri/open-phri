@@ -136,6 +136,13 @@ stages:
         - pid
         - arm_32_abi11
 
+#platform arm_32_linux_abi98
+
+.selection_platform_arm_32_linux_abi98_: &selection_platform_arm_32_linux_abi98
+    tags:
+        - pid
+        - arm_32_linux_abi98
+
 #platform x86_32_linux_abi11
 
 .selection_platform_x86_32_linux_abi11_: &selection_platform_x86_32_linux_abi11
@@ -233,6 +240,44 @@ deploy_release_arm_32_abi11:
 cleanup_release_arm_32_abi11:
   <<: *cleanup_release
   <<: *selection_platform_arm_32_abi11
+
+#pipeline generated for platform: arm_32_linux_abi98
+
+#integration jobs for platform arm_32_linux_abi98
+
+configure_integration_arm_32_linux_abi98:
+  <<: *configure_integration
+  <<: *selection_platform_arm_32_linux_abi98
+
+build_integration_arm_32_linux_abi98:
+  <<: *build_integration
+  <<: *selection_platform_arm_32_linux_abi98
+
+deploy_integration_arm_32_linux_abi98:
+  <<: *deploy_integration
+  <<: *selection_platform_arm_32_linux_abi98
+
+cleanup_integration_arm_32_linux_abi98:
+  <<: *cleanup_integration
+  <<: *selection_platform_arm_32_linux_abi98
+
+#release jobs for platform arm_32_linux_abi98
+
+configure_release_arm_32_linux_abi98:
+  <<: *configure_release
+  <<: *selection_platform_arm_32_linux_abi98
+
+build_release_arm_32_linux_abi98:
+  <<: *build_release
+  <<: *selection_platform_arm_32_linux_abi98
+
+deploy_release_arm_32_linux_abi98:
+  <<: *deploy_release
+  <<: *selection_platform_arm_32_linux_abi98
+
+cleanup_release_arm_32_linux_abi98:
+  <<: *cleanup_release
+  <<: *selection_platform_arm_32_linux_abi98
 
 #pipeline generated for platform: x86_32_linux_abi11
 
