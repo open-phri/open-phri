@@ -63,6 +63,23 @@ struct TrajectoryPoint {
 		createRefs();
 	}
 
+	TrajectoryPoint() :
+		y(std::make_shared<T>()),
+		dy(std::make_shared<T>()),
+		d2y(std::make_shared<T>())
+	{
+		createRefs();
+
+		for (size_t i = 0; i < size(); ++i) {
+			double& y = yrefs_[i];
+			double& dy = dyrefs_[i];
+			double& d2y = d2yrefs_[i];
+			y = 0.;
+			dy = 0.;
+			d2y = 0.;
+		}
+	}
+
 	void print() const {
 		std::cout << "[";
 		std::cout << "(";

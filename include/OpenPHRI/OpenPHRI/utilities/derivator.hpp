@@ -43,14 +43,23 @@ public:
 	/**
 	 * @brief Construct a Derivator for a given input and sample time.
 	 * @param input A shared pointer to the input data
+	 * @param output A shared pointer to the output data
+	 * @param sample_time Time step between each call to Derivator::compute().
+	 */
+	Derivator(std::shared_ptr<const T> input, std::shared_ptr<T> output, double sample_time) :
+		input_(input), output_(output), frequency_(1./sample_time)
+	{
+		reset();
+	}
+
+	/**
+	 * @brief Construct a Derivator for a given input and sample time.
+	 * @param input A shared pointer to the input data
 	 * @param sample_time Time step between each call to Derivator::compute().
 	 */
 	Derivator(std::shared_ptr<const T> input, double sample_time) :
-		input_(input), frequency_(1./sample_time)
+		Derivator(input, std::make_shared<T>(), sample_time)
 	{
-		output_ = std::make_shared<T>();
-
-		reset();
 	}
 
 	virtual ~Derivator() = default;
