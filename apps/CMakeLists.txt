@@ -1,8 +1,20 @@
-if(PID_WS_FOUND)
-    include(CMakeLists.pid)
-else()
-    include(CMakeLists.cmake)
-endif()
+function(add_application app)
+  declare_PID_Component(
+    EXAMPLE_APPLICATION
+    NAME ${app}
+    DIRECTORY ${app}
+  )
+
+  declare_PID_Component_Dependency(
+    COMPONENT ${app}
+    NATIVE open-phri
+  )
+
+  declare_PID_Component_Dependency(
+    COMPONENT ${app}
+    NATIVE open-phri-vrep-driver
+  )
+endfunction()
 
 add_application(stop_constraint_example)
 add_application(velocity_constraint_example)
