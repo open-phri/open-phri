@@ -9,7 +9,7 @@ The license that applies to the whole package content is **GNULGPL**. Please loo
 Installation and Usage
 =======================
 
-The procedures for installing the open-phri package and for using its components is based on the [PID](https://gite.lirmm.fr/pid/pid-workspace/wikis/home) build and deployment system called PID. Just follow and read the links to understand how to install, use and call its API and/or applications.
+The procedures for installing the open-phri package and for using its components is based on the [PID](http://pid.lirmm.net/pid-framework/pages/introduction.html) build and deployment system called PID. Just follow and read the links to understand how to install, use and call its API and/or applications.
 
 Until PID is publicly available (should arrive soon), pure CMake support is maintained. Make sure to have [Eigen3](http://eigen.tuxfamily.org/) installed on your system then use git, cmake and make as you would do with any project:
  * `git clone git@github.com:BenjaminNavarro/OpenPHRI.git`
