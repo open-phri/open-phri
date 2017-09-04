@@ -22,8 +22,8 @@ endif()
 
 declare_PID_Component_Dependency(
     COMPONENT open-phri
-    EXPORT EXTERNAL eigen
-    INCLUDE_DIRS <eigen>/include
+    EXPORT NATIVE eigen-extensions
+    PACKAGE eigen-extensions
 )
 
 
