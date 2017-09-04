@@ -28,9 +28,7 @@ int main(int argc, char const *argv[]) {
 	VREPDriver driver(
 		robot,
 		ControlLevel::TCP,
-		SAMPLE_TIME,
-		"", "127.0.0.1", -1000
-		);
+		SAMPLE_TIME);
 
 	driver.startSimulation();
 
