@@ -376,7 +376,7 @@ bool VREPDriver::readJointPosition(phri::VectorXdPtr position) const {
 		int joint_handle = object_handles_.at(robot_->name() + "_joint" + std::to_string(i+1) + suffix_);
 		all_ok &= (simxGetJointPosition(client_id_, joint_handle, positions+i, simx_opmode_buffer) != -1);
 	}
-	double* position_data = robot_->jointCurrentPosition()->data();
+	double* position_data = position->data();
 	for (size_t i = 0; all_ok and i < robot_->jointCount(); ++i) {
 		position_data[i] = positions[i];
 	}
