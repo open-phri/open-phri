@@ -505,7 +505,7 @@ private:
 		else {
 			auto error_msg =
 				[&ok, segment, component] (const std::string& where, const std::string& what) {
-					std::cerr << "In computeTimings: " << where << " " << what << " for segment " << segment+1 << ", component " << component+1 << " is higher than the maximum" << std::endl;
+					throw std::runtime_error(OPEN_PHRI_ERROR(where + " " + what + " for segment " + std::to_string(segment+1) + ", component " + std::to_string(component+1) + " is higher than the maximum"));
 				};
 
 			FifthOrderPolynomial::Parameters poly_params = FifthOrderPolynomial::Constraints {0, 1., from.yrefs_[component], to.yrefs_[component], from.dyrefs_[component], to.dyrefs_[component], from.d2yrefs_[component], to.d2yrefs_[component]};

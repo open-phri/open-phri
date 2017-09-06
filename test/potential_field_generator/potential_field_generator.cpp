@@ -52,8 +52,13 @@ int main(int argc, char const *argv[]) {
 	assert_msg("Step #4", ok == true);
 
 	// Step #5 : re-remove
-	ok = potential_field_generator->remove("obstacle");
-	assert_msg("Step #5", ok == false);
+	try {
+		potential_field_generator->remove("obstacle");
+		assert_msg("Step #5", false);
+	}
+	catch(std::domain_error& err) {
+		std::cerr << "Expected exception: " << err.what() << std::endl;
+	}
 
 	// Step #6 : get
 	potential_field_generator->add("obstacle", obstacle);

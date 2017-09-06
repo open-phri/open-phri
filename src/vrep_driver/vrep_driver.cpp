@@ -18,6 +18,7 @@
 */
 
 #include <vrep_driver/vrep_driver.h>
+#include <OpenPHRI/utilities/exceptions.h>
 
 #include <stdexcept>
 #include <sstream>
@@ -292,7 +293,7 @@ phri::Vector6dConstPtr VREPDriver::trackObjectPosition(const std::string& name, 
 	float data[3];
 
 	if(simxGetObjectHandle(client_id_, name.c_str(), &handle, simx_opmode_oneshot_wait) != simx_return_ok) {
-		cerr << "In VREPDriver::trackObjectPosition: can't get the handle of object " << name << endl;
+		throw std::runtime_error(OPEN_PHRI_ERROR("Can't get the handle of object " + name));
 	}
 
 	simxGetObjectPosition(client_id_, handle, ref_frame, data, simx_opmode_streaming);
@@ -316,7 +317,7 @@ bool VREPDriver::updateTrackedObjectsPosition() {
 			}
 		}
 		else {
-			cerr << "In VREPDriver::updateTrackedObjectsPosition: can't get position of object with handle " << obj.first.first << endl;
+			throw std::runtime_error(OPEN_PHRI_ERROR("Can't get position of object with handle " + std::to_string(obj.first.first)));
 		}
 	}
 	return all_ok;
@@ -414,7 +415,7 @@ bool VREPDriver::getObjectHandles() {
 			string obj_name = robot_->name() + "_" + name + suffix_;
 			bool ok = simxGetObjectHandle(client_id_, obj_name.c_str(), &object_handles_[obj_name], simx_opmode_oneshot_wait) == simx_return_ok;
 			if(not ok) {
-				cerr << "In VREPDriver::getObjectHandles: can't get the handle of object " << obj_name << endl;
+				throw std::runtime_error(OPEN_PHRI_ERROR("Can't get the handle of object " + obj_name));
 			}
 			return ok;
 		};

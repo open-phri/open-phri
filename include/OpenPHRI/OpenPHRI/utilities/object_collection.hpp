@@ -31,6 +31,7 @@
 #include <map>
 #include <iostream>
 #include "demangle.h"
+#include "exceptions.h"
 
 namespace phri {
 
@@ -100,10 +101,7 @@ public:
 	virtual bool remove(const std::string& name) {
 		auto item = items_.find(name);
 		if(item == items_.end()) {
-			if(verbose_) {
-				std::cerr << "In " << class_name_ << "::remove" << collection_name_ << ": no item called \"" << name << "\"" << std::endl;
-			}
-			return false;
+			throw std::domain_error(OPEN_PHRI_ERROR("No item called " + name));
 		}
 		items_.erase(item);
 		return true;
@@ -130,8 +128,8 @@ public:
 		if(elem != items_.end()) {
 			item = elem->second;
 		}
-		else if(verbose_) {
-			std::cerr << "In " << class_name_ << "::get" << collection_name_ << ": no item called \"" << name << "\"" << std::endl;
+		else {
+			throw std::domain_error(OPEN_PHRI_ERROR("No item called " + name));
 		}
 		return item;
 	}
