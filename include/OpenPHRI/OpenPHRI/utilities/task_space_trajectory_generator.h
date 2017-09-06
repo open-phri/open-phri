@@ -136,14 +136,18 @@ private:
 	};
 
 	void updatePoints() {
+		*pose_output_ = *start_pose_.y;
+		*twist_output_ = *start_pose_.dy;
+		*task_space_acceleration_output_ = *start_pose_.d2y;
+
 		super::removeAllPoints();
+
 		auto wp = waypoints_.begin();
 		if(wp != waypoints_.end()) {
 			start_vec_.y->block<3,1>(0,0) = start_pose_.y->translation();
 			start_vec_.y->block<3,1>(3,0).setZero();
-			*start_vec_.dy = *(*wp).pose.dy;
-			*start_vec_.d2y = *(*wp).pose.d2y;
-			*pose_output_ = *start_pose_.y;
+			*start_vec_.dy = static_cast<Vector6d>(*start_pose_.dy);
+			*start_vec_.d2y = static_cast<Vector6d>(*start_pose_.d2y);
 
 			Point prev(start_pose_, Twist(), Acceleration());
 			while(wp != waypoints_.end()) {
