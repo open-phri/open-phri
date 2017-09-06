@@ -22,6 +22,7 @@
 #include "polynomial_root_finder.h"
 #include <iostream>
 #include <cmath>
+#include <limits>
 
 using namespace phri;
 
@@ -69,6 +70,13 @@ FifthOrderPolynomial::ConstraintError FifthOrderPolynomial::computeParametersWit
 
 	FifthOrderPolynomial::Parameters poly_params_dy = FifthOrderPolynomial::Constraints {0, initial_guess, parameters.yi, parameters.yf, parameters.dyi, parameters.dyf, parameters.d2yi, parameters.d2yf};
 	FifthOrderPolynomial::Parameters poly_params_d2y = FifthOrderPolynomial::Constraints {0, initial_guess, parameters.yi, parameters.yf, parameters.dyi, parameters.dyf, parameters.d2yi, parameters.d2yf};
+
+	if(parameters.yi == parameters.yf) {
+		poly_params_dy.xf = std::numeric_limits<double>::min();
+		FifthOrderPolynomial::computeParameters(poly_params_dy);
+		parameters = poly_params_dy;
+		return error;
+	}
 
 	bool dymax_found = false;
 	bool d2ymax_found = false;
