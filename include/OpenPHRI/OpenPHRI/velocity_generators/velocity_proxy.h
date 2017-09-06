@@ -41,14 +41,13 @@ public:
 	/** @brief Construct a velocity proxy given an externally managed velocity
 	 *  @param frame The reference frame in which the velocity is expressed
 	 */
-	VelocityProxy(Vector6dConstPtr velocity, ReferenceFrame frame = ReferenceFrame::TCP);
+	VelocityProxy(TwistConstPtr velocity, ReferenceFrame frame = ReferenceFrame::TCP);
 	~VelocityProxy() = default;
 
-	virtual Vector6d compute() override;
+	virtual Twist compute() override;
 
 private:
-	Vector6dConstPtr external_velocity_;
-	ReferenceFrame frame_;
+	TwistConstPtr external_velocity_;
 };
 
 using VelocityProxyPtr = std::shared_ptr<VelocityProxy>;

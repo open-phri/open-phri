@@ -21,13 +21,13 @@
 
 using namespace phri;
 
-VelocityProxy::VelocityProxy(Vector6dConstPtr velocity, ReferenceFrame frame) :
+VelocityProxy::VelocityProxy(TwistConstPtr velocity, ReferenceFrame frame) :
 	VelocityGenerator(frame),
 	external_velocity_(velocity)
 {
 }
 
-Vector6d VelocityProxy::compute() {
+Twist VelocityProxy::compute() {
 	velocity_ = *external_velocity_;
 	return VelocityGenerator::compute();;
 }

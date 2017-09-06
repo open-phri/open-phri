@@ -46,7 +46,7 @@ public:
 	 */
 	MassGenerator(
 		Matrix6dConstPtr mass,
-		Vector6dConstPtr target_acceleration,
+		AccelerationConstPtr target_acceleration,
 		ReferenceFrame mass_frame = ReferenceFrame::TCP,
 		ReferenceFrame target_acceleration_frame = ReferenceFrame::TCP);
 
@@ -56,7 +56,7 @@ public:
 
 private:
 	Matrix6dConstPtr mass_;
-	Vector6dConstPtr target_acceleration_;
+	AccelerationConstPtr target_acceleration_;
 	ReferenceFrame mass_frame_;
 	ReferenceFrame target_acceleration_frame_;
 };

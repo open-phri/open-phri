@@ -46,7 +46,7 @@ public:
 	 */
 	StiffnessGenerator(
 		Matrix6dConstPtr stiffness,
-		Vector6dConstPtr target_position,
+		PoseConstPtr target_position,
 		ReferenceFrame stiffness_frame = ReferenceFrame::TCP,
 		ReferenceFrame target_position_frame = ReferenceFrame::TCP);
 
@@ -56,7 +56,7 @@ public:
 
 private:
 	Matrix6dConstPtr stiffness_;
-	Vector6dConstPtr target_position_;
+	PoseConstPtr target_position_;
 	ReferenceFrame stiffness_frame_;
 	ReferenceFrame target_position_frame_;
 };

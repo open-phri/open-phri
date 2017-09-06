@@ -40,7 +40,7 @@ namespace phri {
  *  @details You have to provide preconfigured constraint and interpolator.
  *  The interpolator input is set to the serapration distance.
  */
-class SeparationDistanceConstraint : public Constraint, public ObjectCollection<Vector6dConstPtr> {
+class SeparationDistanceConstraint : public Constraint, public ObjectCollection<PoseConstPtr> {
 public:
 
 	/**

@@ -36,79 +36,85 @@ class Acceleration;
 class Pose {
 public:
 	Pose();
-	Pose(std::shared_ptr<phri::Vector3d> translation, std::shared_ptr<Eigen::Quaterniond> orientation);
 	Pose(phri::Vector3d translation, Eigen::Quaterniond orientation);
 	Pose(phri::Vector3d translation, phri::Vector3d euler_angles);
-	explicit Pose(phri::AffineTransform transformation);
+	Pose(phri::AffineTransform transformation);
 
 	const phri::Vector3d&                       translation() const;
 	const Eigen::Quaterniond&                   orientation() const;
 	phri::Vector3d&                             translation();
 	Eigen::Quaterniond&                         orientation();
 
-	std::shared_ptr<const phri::Vector3d>       translationPtr() const;
-	std::shared_ptr<const Eigen::Quaterniond>   orientationPtr() const;
-	std::shared_ptr<phri::Vector3d>             translationPtr();
-	std::shared_ptr<Eigen::Quaterniond>         orientationPtr();
-
 	phri::Vector6d getErrorWith(const Pose& other) const;
 	Pose& integrate(const Twist& twist, double sample_time);
 
 	operator phri::AffineTransform() const;
+	explicit operator phri::Vector6d() const;
+	Pose& operator= (const phri::Vector6d& pos_euler);
+
+	friend std ::ostream& operator<< (std::ostream& out, const Pose& pose){
+		out << pose.translation().x() << "x + " << pose.translation().y() << "y + " << pose.translation().z() << "z; ";
+		out << pose.orientation().w() << " + " << pose.orientation().x() << "i + " << pose.orientation().y() << "j + " << pose.orientation().z() << "k";
+		return (out);
+	}
 
 private:
-	std::shared_ptr<phri::Vector3d> translation_;
-	std::shared_ptr<Eigen::Quaterniond> orientation_;
+	phri::Vector3d translation_;
+	Eigen::Quaterniond orientation_;
 };
+
+using PosePtr = std::shared_ptr<Pose>;
+using PoseConstPtr = std::shared_ptr<const Pose>;
 
 class Twist {
 public:
 	Twist();
-	Twist(std::shared_ptr<phri::Vector3d> translation, std::shared_ptr<phri::Vector3d> rotation);
 	Twist(phri::Vector3d translation, phri::Vector3d rotation);
-	explicit Twist(phri::Vector6d twist);
+	Twist(phri::Vector6d twist);
 
-	const phri::Vector3d&                   translation() const;
-	const phri::Vector3d&                   rotation() const;
-	phri::Vector3d&                         translation();
-	phri::Vector3d&                         rotation();
-
-	std::shared_ptr<const phri::Vector3d>   translationPtr() const;
-	std::shared_ptr<const phri::Vector3d>   rotationPtr() const;
-	std::shared_ptr<phri::Vector3d>         translationPtr();
-	std::shared_ptr<phri::Vector3d>         rotationPtr();
+	Eigen::Ref<const phri::Vector3d>    translation() const;
+	Eigen::Ref<const phri::Vector3d>    rotation() const;
+	Eigen::Ref<phri::Vector3d>          translation();
+	Eigen::Ref<phri::Vector3d>          rotation();
 
 	Twist& integrate(const Acceleration& acceleration, double sample_time);
 
-	operator phri::Vector6d() const;
+	operator const phri::Vector6d& () const;
+	operator phri::Vector6d& ();
+
+	const double* data() const;
+
+	Twist& operator=(const phri::Vector6d& twist);
 
 private:
-	std::shared_ptr<phri::Vector3d> translation_;
-	std::shared_ptr<phri::Vector3d> rotation_;
+	phri::Vector6d twist_;
 };
+
+using TwistPtr = std::shared_ptr<Twist>;
+using TwistConstPtr = std::shared_ptr<const Twist>;
 
 class Acceleration {
 public:
 	Acceleration();
-	Acceleration(std::shared_ptr<phri::Vector3d> translation, std::shared_ptr<phri::Vector3d> rotation);
 	Acceleration(phri::Vector3d translation, phri::Vector3d rotation);
-	explicit Acceleration(phri::Vector6d acceleration);
+	Acceleration(phri::Vector6d acceleration);
 
-	const phri::Vector3d&                   translation() const;
-	const phri::Vector3d&                   rotation() const;
-	phri::Vector3d&                         translation();
-	phri::Vector3d&                         rotation();
+	Eigen::Ref<const phri::Vector3d>    translation() const;
+	Eigen::Ref<const phri::Vector3d>    rotation() const;
+	Eigen::Ref<phri::Vector3d>          translation();
+	Eigen::Ref<phri::Vector3d>          rotation();
 
-	std::shared_ptr<const phri::Vector3d>   translationPtr() const;
-	std::shared_ptr<const phri::Vector3d>   rotationPtr() const;
-	std::shared_ptr<phri::Vector3d>         translationPtr();
-	std::shared_ptr<phri::Vector3d>         rotationPtr();
+	operator const phri::Vector6d& () const;
+	operator phri::Vector6d& ();
 
-	operator phri::Vector6d() const;
+	const double* data() const;
 
+	Acceleration& operator=(const phri::Vector6d& acceleration);
 private:
-	std::shared_ptr<phri::Vector3d> translation_;
-	std::shared_ptr<phri::Vector3d> rotation_;
+	phri::Vector6d acceleration_;
 };
+
+using AccelerationPtr = std::shared_ptr<Acceleration>;
+using AccelerationConstPtr = std::shared_ptr<const Acceleration>;
 
 } // namespace phri

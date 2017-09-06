@@ -55,7 +55,7 @@ void ForceControl::configureFilter(double sample_time, double time_constant) {
 
 }
 
-Vector6d ForceControl::compute() {
+Twist ForceControl::compute() {
 	Vector6d error;
 	Vector6d target;
 	if(type_ == ForceControlTargetType::Environment) {
@@ -79,6 +79,7 @@ Vector6d ForceControl::compute() {
 	cmd += d_gain_->cwiseProduct((error - prev_error_)/sample_time_);
 	prev_error_ = error;
 
+	// TODO use velocity_ and VelocityGenerator::compute()
 	return cmd;
 }
 

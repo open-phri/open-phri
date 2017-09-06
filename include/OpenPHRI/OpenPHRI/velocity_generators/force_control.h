@@ -53,7 +53,7 @@ public:
 
 	~ForceControl() = default;
 
-	virtual Vector6d compute() override;
+	virtual Twist compute() override;
 
 	void configureFilter(double sample_time, double time_constant);
 

@@ -11,8 +11,8 @@ bool isClose(double v1, double v2, double eps = 1e-3) {
 	return std::abs(v1-v2) < eps;
 }
 
-double power(Vector6dConstPtr velocity, Vector6dConstPtr force) {
-	return force->dot(*velocity);
+double power(TwistConstPtr velocity, Vector6dConstPtr force) {
+	return force->dot(static_cast<Vector6d>(*velocity));
 }
 
 int main(int argc, char const *argv[]) {
@@ -30,7 +30,7 @@ int main(int argc, char const *argv[]) {
 	auto external_force = robot->controlPointExternalForce();
 	auto power_constraint = make_shared<PowerConstraint>(maximum_power);
 
-	auto constant_vel = make_shared<Vector6d>(Vector6d::Zero());
+	auto constant_vel = make_shared<Twist>();
 	auto constant_velocity_generator = make_shared<VelocityProxy>(constant_vel);
 
 	safety_controller.add("power constraint", power_constraint);
@@ -42,7 +42,7 @@ int main(int argc, char const *argv[]) {
 	assert_msg("Step #1", isClose(power(robot->controlPointVelocity(), external_force), 0.));
 
 	// Step #2 : velocity 1 axis, no force
-	(*constant_vel)(0) = 0.2;
+	constant_vel->translation().x() = 0.2;
 	safety_controller.compute();
 
 	assert_msg("Step #2", isClose(power(robot->controlPointVelocity(), external_force), 0.));
@@ -69,7 +69,7 @@ int main(int argc, char const *argv[]) {
 	(*external_force)(0) = 100.;
 	safety_controller.compute();
 
-	assert_msg("Step #6", robot->controlPointVelocity()->isApprox(*robot->controlPointTotalVelocity()));
+	assert_msg("Step #6", static_cast<Vector6d>(*robot->controlPointVelocity()).isApprox(static_cast<Vector6d>(*robot->controlPointTotalVelocity())));
 
 	return 0;
 }

@@ -151,6 +151,61 @@ private:
 
 };
 
+template<>
+struct TrajectoryPoint<Pose> {
+	TrajectoryPoint(
+		std::shared_ptr<Pose> y,
+		std::shared_ptr<Twist> dy,
+		std::shared_ptr<Acceleration> d2y) :
+		y(y), dy(dy), d2y(d2y)
+	{
+	}
+
+	TrajectoryPoint(
+		const Pose& y,
+		const Twist& dy,
+		const Acceleration& d2y) :
+		y(std::make_shared<Pose>(y)),
+		dy(std::make_shared<Twist>(dy)),
+		d2y(std::make_shared<Acceleration>(d2y))
+	{
+	}
+
+	TrajectoryPoint() :
+		y(std::make_shared<Pose>()),
+		dy(std::make_shared<Twist>()),
+		d2y(std::make_shared<Acceleration>())
+	{
+	}
+
+	void print() const {
+		std::cout << "[";
+		std::cout << "(";
+		std::cout << y->translation().transpose() << "; ";
+		std::cout << y->orientation().w() << " + ";
+		std::cout << y->orientation().x() << "i + ";
+		std::cout << y->orientation().y() << "j + ";
+		std::cout << y->orientation().z() << "k";
+		std::cout << ")";
+		std::cout << "(";
+		std::cout << static_cast<Vector6d>(*dy).transpose();
+		std::cout << ")";
+		std::cout << "(";
+		std::cout << static_cast<Vector6d>(*d2y).transpose();
+		std::cout << ")";
+		std::cout << "]";
+	}
+
+	// std::tuple<double&, double&, double&> operator[] (size_t n) {
+	//  assert(n < size_);
+	//  return std::make_tuple(yrefs_[n], dyrefs_[n], d2yrefs_[n]);
+	// }
+
+	std::shared_ptr<Pose> y;   // value
+	std::shared_ptr<Twist> dy;  // first derivative
+	std::shared_ptr<Acceleration> d2y; // second derivative
+};
+
 template<typename T>
 using TrajectoryPointPtr = std::shared_ptr<TrajectoryPoint<T>>;
 template<typename T>

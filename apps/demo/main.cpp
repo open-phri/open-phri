@@ -52,7 +52,8 @@ int main(int argc, char const *argv[]) {
 	VREPDriver driver(
 		robot,
 		ControlLevel::Joint,
-		SAMPLE_TIME);
+		SAMPLE_TIME,
+		"","",-1000);
 
 	driver.startSimulation();
 
@@ -80,7 +81,7 @@ int main(int argc, char const *argv[]) {
 
 	Clock clock(SAMPLE_TIME);
 	DataLogger logger(
-		"/mnt/tmpfs/open-phri_logs",
+		"/tmp",
 		clock.getTime(),
 		true,   // create gnuplot files
 		true);  // delay disk write

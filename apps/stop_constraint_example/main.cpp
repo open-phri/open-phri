@@ -61,7 +61,7 @@ int main(int argc, char const *argv[]) {
 
 	auto stop_constraint = make_shared<StopConstraint>(activation_force_threshold, deactivation_force_threshold);
 
-	auto constant_vel = make_shared<Vector6d>(Vector6d::Zero());
+	auto constant_vel = make_shared<Twist>();
 	auto constant_velocity_generator = make_shared<VelocityProxy>(constant_vel);
 	auto external_force_generator = make_shared<ForceProxy>(ext_force);
 
@@ -81,10 +81,10 @@ int main(int argc, char const *argv[]) {
 		}
 
 		if(t < 5.) {
-			(*constant_vel)(0) = 0.05;
+			constant_vel->translation().x() = 0.05;
 		}
 		else if(t < 10.) {
-			(*constant_vel)(0) = -0.05;
+			constant_vel->translation().x() = -0.05;
 		}
 		else {
 			t = 0.;

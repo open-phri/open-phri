@@ -56,13 +56,7 @@ public:
 		output_type_(output_type),
 		sync_(sync)
 	{
-		current_segement_.resize(start.size(), 0);
-		points_.push_back(start);
-		position_output_ = std::make_shared<T>();
-		velocity_output_ = std::make_shared<T>();
-		acceleration_output_ = std::make_shared<T>();
-		createRefs();
-		disableErrorTracking();
+		create(start);
 	}
 
 	template<typename U = T>
@@ -215,7 +209,7 @@ public:
 		return true;
 	}
 
-	bool computeTimings(double v_eps = 1e-6, double a_eps = 1e-6) {
+	virtual bool computeTimings(double v_eps = 1e-6, double a_eps = 1e-6) {
 		if(getSegmentCount() < 1) {
 			return false;
 		}
@@ -238,7 +232,7 @@ public:
 		return ret;
 	}
 
-	bool compute() {
+	virtual bool compute() {
 		auto check_error =
 			[this](size_t component) -> bool {
 				return std::abs(position_output_refs_[component] - error_tracking_params_.reference_refs[component]) > error_tracking_params_.threshold_refs[component];
@@ -396,27 +390,27 @@ public:
 		sync_ = sync;
 	}
 	template<typename U = T>
-	void enableErrorTracking(std::shared_ptr<T> reference, const T& threshold, bool recompute_when_resumed, typename std::enable_if<std::is_same<U, double>::value>::type* = 0) {
+	void enableErrorTracking(std::shared_ptr<const T> reference, const T& threshold, bool recompute_when_resumed, typename std::enable_if<std::is_same<U, double>::value>::type* = 0) {
 		error_tracking_params_.reference = reference;
 		error_tracking_params_.threshold = threshold;
 		error_tracking_params_.recompute_when_resumed = recompute_when_resumed;
-		error_tracking_params_.reference_refs.push_back(std::ref(*reference));
-		error_tracking_params_.threshold_refs.push_back(std::ref(error_tracking_params_.threshold));
+		error_tracking_params_.reference_refs.push_back(std::cref(*reference));
+		error_tracking_params_.threshold_refs.push_back(std::cref(error_tracking_params_.threshold));
 	}
 
 	template<typename U = T>
-	void enableErrorTracking(std::shared_ptr<T> reference, const T& threshold, bool recompute_when_resumed, typename std::enable_if<not std::is_same<U, double>::value>::type* = 0) {
+	void enableErrorTracking(std::shared_ptr<const T> reference, const T& threshold, bool recompute_when_resumed, typename std::enable_if<not std::is_same<U, double>::value>::type* = 0) {
 		error_tracking_params_.reference = reference;
 		error_tracking_params_.threshold = threshold;
 		error_tracking_params_.recompute_when_resumed = recompute_when_resumed;
 		for (size_t i = 0; i < reference->size(); ++i) {
-			error_tracking_params_.reference_refs.push_back(std::ref((*error_tracking_params_.reference)[i]));
-			error_tracking_params_.threshold_refs.push_back(std::ref(error_tracking_params_.threshold[i]));
+			error_tracking_params_.reference_refs.push_back(std::cref((*error_tracking_params_.reference)[i]));
+			error_tracking_params_.threshold_refs.push_back(std::cref(error_tracking_params_.threshold[i]));
 		}
 	}
 
-	void enableErrorTracking(T* reference, const T& threshold, bool recompute_when_resumed) {
-		enableErrorTracking(std::shared_ptr<T>(reference, [](auto p){}), threshold, recompute_when_resumed);
+	void enableErrorTracking(const T* reference, const T& threshold, bool recompute_when_resumed) {
+		enableErrorTracking(std::shared_ptr<const T>(reference, [](auto p){}), threshold, recompute_when_resumed);
 	}
 
 	void disableErrorTracking() {
@@ -434,6 +428,14 @@ public:
 		}
 	}
 
+	virtual void removeAllPoints() {
+		for(auto& segment: current_segement_) {
+			segment = 0;
+		}
+		points_.resize(1);
+		segment_params_.clear();
+	}
+
 	static size_t getComputeTimingsIterations() {
 		return FifthOrderPolynomial::compute_timings_total_iter;
 	}
@@ -442,7 +444,7 @@ public:
 		FifthOrderPolynomial::compute_timings_total_iter = 0;
 	}
 
-private:
+protected:
 	struct SegmentParams {
 		std::vector<double> max_velocity;
 		std::vector<double> max_acceleration;
@@ -463,14 +465,30 @@ private:
 			return static_cast<bool>(reference);
 		}
 
-		std::shared_ptr<T> reference;
+		std::shared_ptr<const T> reference;
 		T threshold;
 		std::vector<ErrorTrackingState> state;
 		bool recompute_when_resumed;
-		std::vector<std::reference_wrapper<double>> reference_refs;
-		std::vector<std::reference_wrapper<double>> threshold_refs;
+		std::vector<std::reference_wrapper<const double>> reference_refs;
+		std::vector<std::reference_wrapper<const double>> threshold_refs;
 	};
 
+	TrajectoryGenerator(double sample_time, TrajectorySynchronization sync = TrajectorySynchronization::NoSynchronization, TrajectoryOutputType output_type = TrajectoryOutputType::All) :
+		sample_time_(sample_time),
+		output_type_(output_type),
+		sync_(sync)
+	{
+	}
+
+	void create(const TrajectoryPoint<T>& start) {
+		current_segement_.resize(start.size(), 0);
+		points_.push_back(start);
+		position_output_ = std::make_shared<T>();
+		velocity_output_ = std::make_shared<T>();
+		acceleration_output_ = std::make_shared<T>();
+		createRefs();
+		disableErrorTracking();
+	}
 
 	template<typename U = T>
 	void createRefs(typename std::enable_if<std::is_same<U, double>::value>::type* = 0) {
@@ -509,6 +527,9 @@ private:
 				};
 
 			FifthOrderPolynomial::Parameters poly_params = FifthOrderPolynomial::Constraints {0, 1., from.yrefs_[component], to.yrefs_[component], from.dyrefs_[component], to.dyrefs_[component], from.d2yrefs_[component], to.d2yrefs_[component]};
+			// std::cout << "Segment " << segment+1 << ", component " << component+1 << "\n";
+			// std::cout << "\tfrom (" << from.yrefs_[component] << "," << from.dyrefs_[component] << "," << from.d2yrefs_[component] << ")\n";
+			// std::cout << "\tto (" << to.yrefs_[component] << "," << to.dyrefs_[component] << "," << to.d2yrefs_[component] << ")\n";
 			auto error = FifthOrderPolynomial::computeParametersWithConstraints(poly_params, params.max_velocity[component], params.max_acceleration[component], v_eps, a_eps);
 			switch(error) {
 			case FifthOrderPolynomial::ConstraintError::InitialVelocity:

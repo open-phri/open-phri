@@ -47,13 +47,13 @@ public:
 	 * @brief Compute the value associated with the velocity generator.
 	 * @return The velocity generator's evaluated value.
 	 */
-	virtual Vector6d compute() = 0;
+	virtual Twist compute() = 0;
 
 	/**
 	 * @brief Call operator, shortcut for compute().
 	 * @return The velocity generator's evaluated value.
 	 */
-	virtual Vector6d operator()() final;
+	virtual Twist operator()() final;
 
 protected:
 	/**
@@ -71,7 +71,7 @@ protected:
 	friend class SafetyController;
 	RobotConstPtr robot_;
 	ReferenceFrame frame_;
-	Vector6d velocity_;
+	Twist velocity_;
 };
 
 using VelocityGeneratorPtr = std::shared_ptr<VelocityGenerator>;

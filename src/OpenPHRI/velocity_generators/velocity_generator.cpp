@@ -25,17 +25,17 @@ VelocityGenerator::VelocityGenerator(ReferenceFrame frame) {
 	frame_ = frame;
 }
 
-Vector6d VelocityGenerator::compute() {
+Twist VelocityGenerator::compute() {
 	return transform(velocity_);
 }
 
-Vector6d VelocityGenerator::transform(Vector6d force) {
+Vector6d VelocityGenerator::transform(Vector6d velocity) {
 	if(frame_ != ReferenceFrame::TCP) {
-		return robot_->spatialTransformationMatrix()->transpose() * force;
+		return robot_->spatialTransformationMatrix()->transpose() * velocity;
 	}
-	return force;
+	return velocity;
 }
 
-Vector6d VelocityGenerator::operator()() {
+Twist VelocityGenerator::operator()() {
 	return compute();
 }

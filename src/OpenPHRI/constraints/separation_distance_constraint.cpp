@@ -64,7 +64,7 @@ double SeparationDistanceConstraint::closestObjectDistance() {
 
 	double min_dist = std::numeric_limits<double>::infinity();
 	for(const auto& item : items_) {
-		Vector3d obj_rob_vec = item.second->block<3,1>(0,0) - rob_pos;
+		Vector3d obj_rob_vec = item.second->translation() - rob_pos;
 
 		min_dist = std::min(min_dist, obj_rob_vec.norm());
 	}

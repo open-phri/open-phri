@@ -16,7 +16,7 @@ int main(int argc, char const *argv[]) {
 
 	safety_controller.compute();
 
-	assert(robot->controlPointVelocity()->isZero());
+	assert(static_cast<const Vector6d&>(*robot->controlPointVelocity()).isZero());
 
 	return 0;
 }

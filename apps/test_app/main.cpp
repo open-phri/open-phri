@@ -27,7 +27,14 @@ using namespace phri;
 constexpr double SAMPLE_TIME = 0.001;
 
 int main(int argc, char const *argv[]) {
+	Clock clock(SAMPLE_TIME);
+	DataLogger logger(
+		"/tmp",
+		clock.getTime(),
+		true
+		);
 
+#if 0
 	std::cout << "Testing the Trajectory class on double\n";
 	auto p1 = TrajectoryPoint<double>(0.,0.,0.);
 	auto p2 = TrajectoryPoint<double>(1.,0.,0.);
@@ -68,13 +75,6 @@ int main(int argc, char const *argv[]) {
 	threshold.setConstant(0.01);
 	trajectory_generator.enableErrorTracking(reference, threshold, true);
 
-	Clock clock(SAMPLE_TIME);
-	DataLogger logger(
-		"/tmp",
-		clock.getTime(),
-		true
-		);
-
 	logger.logExternalData("traj6d", trajectory_generator.getPositionOutput()->data(), 6);
 	while(not trajectory_generator()) {
 		clock();
@@ -103,6 +103,30 @@ int main(int argc, char const *argv[]) {
 		else {
 			reference->block<5,1>(1,0) = trajectory_generator.getPositionOutput()->block<5,1>(1,0);
 		}
+	}
+#endif
+	std::cout << "Testing the Trajectory class on Pose\n";
+	Pose target_pose(Vector3d(0.5, 1., 2.), Vector3d(0.1, 1., 2.));
+	// target_pose.translation() = Vector3d(0.5, 1., 2.);
+	// target_pose.orientation().integrate(Vector3d(0.1, 1., 2.));
+	Twist max_twist(Vector3d(1., 2., 0.5), Vector3d(0.5, 0.5, 0.5));
+	Acceleration max_acceleration(Vector3d(10., 1., 2.), Vector3d(1., 0.25, 0.75));
+	auto pose_1 = TrajectoryPoint<Pose>();
+	auto pose_2 = TrajectoryPoint<Pose>(target_pose, Twist(), Acceleration());
+	auto pose_generator = TrajectoryGenerator<Pose>(pose_1, SAMPLE_TIME, TrajectorySynchronization::SynchronizeWaypoints);
+	pose_generator.addPathTo(pose_2, max_twist, max_acceleration);
+	pose_generator.addPathTo(pose_1, Twist(static_cast<Vector6d>(max_twist) * 0.5), Acceleration(static_cast<Vector6d>(max_acceleration) * 0.25));
+	pose_generator.computeTimings();
+
+	clock.reset();
+	logger.reset();
+	logger.logExternalData("traj_position", pose_generator.getPoseOutput()->translation().data(), 3);
+	logger.logExternalData("traj_orientation", pose_generator.getPoseOutput()->orientation().coeffs().data(), 4);
+	logger.logExternalData("traj_twist", pose_generator.getTwistOutput()->data(), 6);
+	logger.logExternalData("traj_acceleration", pose_generator.getAccelerationOutput()->data(), 6);
+	while(not pose_generator()) {
+		clock();
+		logger();
 	}
 
 #if 0

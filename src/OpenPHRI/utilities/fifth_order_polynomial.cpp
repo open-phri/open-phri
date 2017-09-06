@@ -175,6 +175,9 @@ double FifthOrderPolynomial::getFirstDerivativeMaximum(const Parameters& params)
 	double roots_img[MAXDEGREE];
 
 	rpoly_ak1(coeffs, &degree, roots_real, roots_img);
+	if(degree == 0) {
+		throw std::runtime_error("In FifthOrderPolynomial::getFirstDerivativeMaximum, rpoly_ak1 failed");
+	}
 
 	auto poly = [&params](double x) -> double
 				{
@@ -197,6 +200,9 @@ double FifthOrderPolynomial::getSecondDerivativeMaximum(const Parameters& params
 	double roots_img[MAXDEGREE];
 
 	rpoly_ak1(coeffs, &degree, roots_real, roots_img);
+	if(degree == 0) {
+		throw std::runtime_error("In FifthOrderPolynomial::getSecondDerivativeMaximum, rpoly_ak1 failed");
+	}
 
 	auto poly = [&params](double x) -> double
 				{

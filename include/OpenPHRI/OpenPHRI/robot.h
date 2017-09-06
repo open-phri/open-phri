@@ -121,13 +121,14 @@ public:
 	 * @brief Control point velocity outputed by the controller.
 	 * @return A shared pointer to the velocity.
 	 */
-	Vector6dConstPtr controlPointVelocity() const;
+	TwistConstPtr controlPointVelocity() const;
 
 	/**
 	 * @brief Sum of all control point velocity inputs.
 	 * @return A shared pointer to the velocity.
 	 */
-	Vector6dConstPtr controlPointVelocitySum() const;
+	TwistConstPtr controlPointVelocitySum() const;
+
 
 	/**
 	 * @brief Sum of all control point force inputs.
@@ -139,13 +140,13 @@ public:
 	 * @brief Output of the control point-level admittance controller
 	 * @return A shared pointer to the velocity.
 	 */
-	Vector6dConstPtr controlPointVelocityCommand() const;
+	TwistConstPtr controlPointVelocityCommand() const;
 
 	/**
 	 * @brief Cumulative effect on the control point velocity of all inputs. Same as controlPointVelocity but without the scaling factor.
 	 * @return A shared pointer to the velocity.
 	 */
-	Vector6dConstPtr controlPointTotalVelocity() const;
+	TwistConstPtr controlPointTotalVelocity() const;
 
 	/**
 	 * @brief Cumulative effect of both control point force and joint torque inputs.
@@ -157,25 +158,25 @@ public:
 	 * @brief Current control point pose.
 	 * @return A shared pointer to the pose.
 	 */
-	Vector6dPtr controlPointCurrentPose() const;
+	PosePtr controlPointCurrentPose() const;
 
 	/**
 	 * @brief Current target control point pose.
 	 * @return A shared pointer to the pose.
 	 */
-	Vector6dPtr controlPointTargetPose() const;
+	PosePtr controlPointTargetPose() const;
 
 	/**
 	 * @brief Current control point veloicty.
 	 * @return A shared pointer to the velocity.
 	 */
-	Vector6dPtr controlPointCurrentVelocity() const;
+	TwistPtr controlPointCurrentVelocity() const;
 
 	/**
 	 * @brief Current control point acceleration.
 	 * @return A shared pointer to the acceleration.
 	 */
-	Vector6dPtr controlPointCurrentAcceleration() const;
+	AccelerationPtr controlPointCurrentAcceleration() const;
 
 	/**
 	 * @brief Current control point pose external, read from the robot.
@@ -232,17 +233,17 @@ private:
 	VectorXdPtr joint_target_position_;
 	VectorXdPtr joint_external_torque_;
 
-	Vector6dPtr control_point_velocity_;
-	Vector6dPtr control_point_velocity_sum_;
+	TwistPtr control_point_velocity_;
+	TwistPtr control_point_velocity_sum_;
 	Vector6dPtr control_point_force_sum_;
-	Vector6dPtr control_point_velocity_command_;
-	Vector6dPtr control_point_total_velocity_;
+	TwistPtr control_point_velocity_command_;
+	TwistPtr control_point_total_velocity_;
 	Vector6dPtr control_point_total_force_;
 
-	Vector6dPtr control_point_current_pose_;
-	Vector6dPtr control_point_target_pose_;
-	Vector6dPtr control_point_current_velocity_;
-	Vector6dPtr control_point_current_acceleration_;
+	PosePtr control_point_current_pose_;
+	PosePtr control_point_target_pose_;
+	TwistPtr control_point_current_velocity_;
+	AccelerationPtr control_point_current_acceleration_;
 	Vector6dPtr control_point_external_force_;
 
 	doublePtr scaling_factor_;

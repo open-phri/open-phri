@@ -47,12 +47,12 @@ Vector6d PotentialFieldGenerator::compute() {
 		rob_pos = *offset_;
 	}
 	else {
-		rob_pos = robot_->controlPointCurrentPose()->block<3,1>(0,0) + robot_->transformationMatrix()->block<3,3>(0,0) * *offset_;
+		rob_pos = robot_->controlPointCurrentPose()->translation() + robot_->transformationMatrix()->block<3,3>(0,0) * *offset_;
 	}
 
 	for(const auto& item : items_) {
 		const PotentialFieldObject& obj = *(item.second);
-		Vector3d obj_rob_vec = obj.object_position->block<3,1>(0,0) - rob_pos;
+		Vector3d obj_rob_vec = obj.object_position->translation() - rob_pos;
 
 		double distance = obj_rob_vec.norm();
 		if(std::abs(distance) > 1e-3) {

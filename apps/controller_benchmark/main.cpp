@@ -115,8 +115,8 @@ int main(int argc, char const *argv[]) {
 	logger.reset();
 	logger.logExternalData("tavg_controller_3cstr_3gen", &t_avg, 1);
 	auto potential_field_generator = make_shared<PotentialFieldGenerator>();
-	auto obstacle = make_shared<PotentialFieldObject>(PotentialFieldType::Repulsive, make_shared<double>(10.), make_shared<double>(0.2), make_shared<Vector6d>(Vector6d::Ones()));
-	auto target = make_shared<PotentialFieldObject>(PotentialFieldType::Attractive, make_shared<double>(10.), make_shared<double>(std::numeric_limits<double>::infinity()), make_shared<Vector6d>(Vector6d::Ones()*2.));
+	auto obstacle = make_shared<PotentialFieldObject>(PotentialFieldType::Repulsive, make_shared<double>(10.), make_shared<double>(0.2), make_shared<Pose>(Vector3d::Ones(), Eigen::Quaterniond::Identity()));
+	auto target = make_shared<PotentialFieldObject>(PotentialFieldType::Attractive, make_shared<double>(10.), make_shared<double>(std::numeric_limits<double>::infinity()), make_shared<Pose>(Vector3d::Ones()*2., Eigen::Quaterniond::Identity()));
 	potential_field_generator->add("obstacle", obstacle);
 	potential_field_generator->add("target", target);
 	safety_controller.add("pfm", potential_field_generator);

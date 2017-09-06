@@ -24,7 +24,7 @@ using namespace phri;
 
 StiffnessGenerator::StiffnessGenerator(
 	Matrix6dConstPtr stiffness,
-	Vector6dConstPtr target_position,
+	PoseConstPtr target_position,
 	ReferenceFrame stiffness_frame,
 	ReferenceFrame target_position_frame) :
 	ForceGenerator(stiffness_frame),
@@ -41,18 +41,18 @@ Vector6d StiffnessGenerator::compute() {
 
 	if(stiffness_frame_ == ReferenceFrame::TCP) {
 		if(target_position_frame_ == ReferenceFrame::TCP) {
-			error = *target_position_;
+			error = static_cast<Vector6d>(*target_position_);
 		}
 		else {
-			error = robot_->spatialTransformationMatrix()->transpose() * (*target_position_ - *robot_->controlPointCurrentPose());
+			error = robot_->spatialTransformationMatrix()->transpose() * (target_position_->getErrorWith(*robot_->controlPointCurrentPose()));
 		}
 	}
 	else {
 		if(target_position_frame_ == ReferenceFrame::TCP) {
-			error = *robot_->spatialTransformationMatrix() * *target_position_;
+			error = *robot_->spatialTransformationMatrix() * static_cast<Vector6d>(*target_position_);
 		}
 		else {
-			error = *target_position_ - *robot_->controlPointCurrentPose();
+			error = target_position_->getErrorWith(*robot_->controlPointCurrentPose());
 		}
 	}
 

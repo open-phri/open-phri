@@ -34,7 +34,7 @@ public:
 
 	}
 
-	virtual Vector6d compute() override {
+	virtual Twist compute() override {
 		velocity_ = Vector6d::Zero();
 		double f_norm = external_force_->norm();
 

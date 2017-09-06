@@ -58,14 +58,14 @@ int main(int argc, char const *argv[]) {
 	auto point_2 = TrajectoryPoint<Vector2d>(Vector2d(-0.25,    1.),        Vector2d(0., -0.025),   Vector2d(0., 0.));
 	auto point_3 = TrajectoryPoint<Vector2d>(Vector2d(-0.15,    0.85),      Vector2d(0., 0.),       Vector2d(0., 0.));
 
-	auto target = make_shared<Vector6d>(Vector6d::Zero());
+	auto target = make_shared<Pose>();
 
 	auto trajectory_generator = TrajectoryGenerator<Vector2d>(point_1, SAMPLE_TIME, TrajectorySynchronization::SynchronizeWaypoints);
 
 	*robot->controlPointDampingMatrix() *= 250.;
 	auto robot_position = robot->controlPointCurrentPose();
 
-	auto velocity_target = make_shared<Vector6d>();
+	auto velocity_target = make_shared<Twist>();
 	safety_controller.add(
 		"traj vel",
 		VelocityProxy(velocity_target));
@@ -97,8 +97,8 @@ int main(int argc, char const *argv[]) {
 		if(driver.getSimulationData()) {
 			end = trajectory_generator();
 
-			velocity_target->x() = (*trajectory_generator.getVelocityOutput())[0];
-			velocity_target->z() = (*trajectory_generator.getVelocityOutput())[1];
+			velocity_target->translation().x() = (*trajectory_generator.getVelocityOutput())[0];
+			velocity_target->translation().z() = (*trajectory_generator.getVelocityOutput())[1];
 
 			safety_controller();
 			driver.sendSimulationData();

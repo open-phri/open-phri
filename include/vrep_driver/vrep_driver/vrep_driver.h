@@ -140,7 +140,7 @@ public:
 	 * @param frame [in] The reference frame.
 	 * @return True if correctly read, false otherwise.
 	 */
-	bool readTCPPose(phri::Vector6dPtr pose, phri::ReferenceFrame frame) const;
+	bool readTCPPose(phri::PosePtr pose, phri::ReferenceFrame frame) const;
 
 	/**
 	 * @brief Get the TCP velocity in the given frame.
@@ -148,7 +148,7 @@ public:
 	 * @param frame [in] The reference frame.
 	 * @return True if correctly read, false otherwise.
 	 */
-	bool readTCPVelocity(phri::Vector6dPtr velocity, phri::ReferenceFrame frame) const;
+	bool readTCPVelocity(phri::TwistPtr velocity, phri::ReferenceFrame frame) const;
 
 	/**
 	 * @brief Get the target TCP pose in the given frame.
@@ -156,7 +156,7 @@ public:
 	 * @param frame [in] The reference frame.
 	 * @return True if correctly read, false otherwise.
 	 */
-	bool readTCPTargetPose(phri::Vector6dPtr pose, phri::ReferenceFrame frame) const;
+	bool readTCPTargetPose(phri::PosePtr pose, phri::ReferenceFrame frame) const;
 
 	/**
 	 * @brief Send the target TCP velocity in the given frame.
@@ -164,7 +164,7 @@ public:
 	 * @param frame [in] The reference frame.
 	 * @return True if correctly read, false otherwise.
 	 */
-	bool sendTCPtargetVelocity(phri::Vector6dConstPtr velocity, phri::ReferenceFrame frame) const;
+	bool sendTCPtargetVelocity(phri::TwistConstPtr velocity, phri::ReferenceFrame frame) const;
 
 	/**
 	 * @brief Get the TCP wrench in the TCP frame.
@@ -193,7 +193,7 @@ public:
 	 * @param frame [in] The reference frame.
 	 * @return A shared pointer to the object's postion. Updated on VREPDriver::updateTrackedObjectsPosition.
 	 */
-	phri::Vector6dConstPtr trackObjectPosition(const std::string& name, phri::ReferenceFrame frame);
+	phri::PoseConstPtr trackObjectPosition(const std::string& name, phri::ReferenceFrame frame);
 
 	/**
 	 * @brief Update all tracked objects' position.
@@ -228,7 +228,7 @@ private:
 
 	std::unordered_map<std::string, int> object_handles_;
 	std::map<std::string, phri::VectorXdPtr> lasers_data_;
-	std::map<std::pair<int,int>, phri::Vector6dPtr> tracked_objects_;
+	std::map<std::pair<int,int>, phri::PosePtr> tracked_objects_;
 
 };
 

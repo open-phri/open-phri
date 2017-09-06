@@ -23,7 +23,7 @@ using namespace phri;
 
 MassGenerator::MassGenerator(
 	Matrix6dConstPtr mass,
-	Vector6dConstPtr target_acceleration,
+	AccelerationConstPtr target_acceleration,
 	ReferenceFrame mass_frame,
 	ReferenceFrame target_acceleration_frame) :
 	ForceGenerator(mass_frame),
@@ -43,16 +43,16 @@ Vector6d MassGenerator::compute() {
 			error = *target_acceleration_;
 		}
 		else {
-			error = robot_->spatialTransformationMatrix()->transpose() * (*target_acceleration_ - *robot_->controlPointCurrentAcceleration());
+			error = robot_->spatialTransformationMatrix()->transpose() * (static_cast<const Vector6d&>(*target_acceleration_) - static_cast<const Vector6d&>(*robot_->controlPointCurrentAcceleration()));
 		}
 		force_ = *mass_ * error;
 	}
 	else {
 		if(target_acceleration_frame_ == ReferenceFrame::TCP) {
-			error = *robot_->spatialTransformationMatrix() * *target_acceleration_;
+			error = *robot_->spatialTransformationMatrix() * static_cast<const Vector6d&>(*target_acceleration_);
 		}
 		else {
-			error = *target_acceleration_ - *robot_->controlPointCurrentAcceleration();
+			error = static_cast<const Vector6d&>(*target_acceleration_) - static_cast<const Vector6d&>(*robot_->controlPointCurrentAcceleration());
 		}
 		force_ = *mass_ * error;
 	}

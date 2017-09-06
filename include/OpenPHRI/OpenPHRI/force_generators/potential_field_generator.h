@@ -50,7 +50,7 @@ struct PotentialFieldObject {
 		PotentialFieldType type,
 		doubleConstPtr gain,
 		doubleConstPtr threshold_distance,
-		Vector6dConstPtr object_position) :
+		PoseConstPtr object_position) :
 		type(type),
 		gain(gain),
 		threshold_distance(threshold_distance),
@@ -62,7 +62,7 @@ struct PotentialFieldObject {
 	PotentialFieldType type;            /**< Type of object. See PotentialFieldType. */
 	doubleConstPtr gain;                /**< Gain applied to get the resulting force. */
 	doubleConstPtr threshold_distance;  /**< Distance at which the object's attractive or repulsive effect will start. */
-	Vector6dConstPtr object_position;   /**< Object position in the chosen frame. */
+	PoseConstPtr object_position;   /**< Object position in the chosen frame. */
 };
 
 using PotentialFieldObjectPtr = std::shared_ptr<PotentialFieldObject>;

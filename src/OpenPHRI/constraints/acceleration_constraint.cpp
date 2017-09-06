@@ -35,10 +35,10 @@ AccelerationConstraint::AccelerationConstraint(
 /***		Algorithm		***/
 double AccelerationConstraint::compute() {
 	double constraint = 1.;
-	double v_norm = robot_->controlPointTotalVelocity()->block<3,1>(0,0).norm();
+	double v_norm = robot_->controlPointTotalVelocity()->translation().norm();
 
 	if(v_norm > 0.) {
-		double prev_v_norm = robot_->controlPointVelocity()->block<3,1>(0,0).norm();
+		double prev_v_norm = robot_->controlPointVelocity()->translation().norm();
 		double vmax = prev_v_norm + std::abs(*maximum_acceleration_) * sample_time_;
 		constraint = vmax / v_norm;
 	}

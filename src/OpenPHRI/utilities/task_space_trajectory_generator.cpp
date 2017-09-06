@@ -1,4 +1,4 @@
-/*      File: utilities.h
+/*      File: task_space_trajectory_generator.cpp
 *       This file is part of the program open-phri
 *       Program description : OpenPHRI: a generic framework to easily and safely control robots in interactions with humans
 *       Copyright (C) 2017 -  Benjamin Navarro (LIRMM). All Right reserved.
@@ -17,26 +17,8 @@
 *       If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-/**
- * @file utilities.h
- * @author Benjamin Navarro
- * @brief Include all available utilities
- * @date April 2017
- * @ingroup OpenPHRI
- */
-
- #pragma once
-
-#include <OpenPHRI/utilities/derivator.hpp>
-#include <OpenPHRI/utilities/integrator.hpp>
-#include <OpenPHRI/utilities/object_collection.hpp>
-#include <OpenPHRI/utilities/manipulator_equivalent_mass.h>
-#include <OpenPHRI/utilities/interpolators.h>
-#include <OpenPHRI/utilities/trajectory_generator.h>
 #include <OpenPHRI/utilities/task_space_trajectory_generator.h>
-#include <OpenPHRI/utilities/laser_scanner_detector.h>
-#include <OpenPHRI/utilities/data_logger.h>
-#include <OpenPHRI/utilities/clock.h>
-#include <OpenPHRI/utilities/benchmark.hpp>
-#include <OpenPHRI/utilities/deadband.hpp>
+
+namespace phri {
+template class TrajectoryGenerator<Pose>;
+}

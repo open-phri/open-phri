@@ -75,8 +75,10 @@ void DataLogger::logRobotData(RobotConstPtr robot) {
 	logExternalData("controlPointVelocityCommand", robot->controlPointVelocityCommand()->data(), 6);
 	logExternalData("controlPointTotalVelocity", robot->controlPointTotalVelocity()->data(), 6);
 	logExternalData("controlPointTotalForce", robot->controlPointTotalForce()->data(), 6);
-	logExternalData("controlPointCurrentPose", robot->controlPointCurrentPose()->data(), 6);
-	logExternalData("controlPointTargetPose", robot->controlPointTargetPose()->data(), 6);
+	logExternalData("controlPointCurrentPosition", robot->controlPointCurrentPose()->translation().data(), 3);
+	logExternalData("controlPointCurrentOrientation", robot->controlPointCurrentPose()->orientation().coeffs().data(), 4);
+	logExternalData("controlPointTargetPosition", robot->controlPointTargetPose()->translation().data(), 3);
+	logExternalData("controlPointTargetOrientation", robot->controlPointTargetPose()->orientation().coeffs().data(), 4);
 	logExternalData("controlPointCurrentVelocity", robot->controlPointCurrentVelocity()->data(), 6);
 	logExternalData("controlPointExternalForce", robot->controlPointExternalForce()->data(), 6);
 

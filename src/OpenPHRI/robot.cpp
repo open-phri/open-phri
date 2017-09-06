@@ -40,17 +40,17 @@ Robot::Robot(const std::string& name,
 	joint_target_position_              = std::make_shared<Eigen::VectorXd>();
 	joint_external_torque_              = std::make_shared<Eigen::VectorXd>();
 
-	control_point_velocity_             = std::make_shared<Vector6d>(Vector6d::Zero());
-	control_point_velocity_sum_         = std::make_shared<Vector6d>(Vector6d::Zero());
+	control_point_velocity_             = std::make_shared<Twist>();
+	control_point_velocity_sum_         = std::make_shared<Twist>();
 	control_point_force_sum_            = std::make_shared<Vector6d>(Vector6d::Zero());
-	control_point_velocity_command_     = std::make_shared<Vector6d>(Vector6d::Zero());
-	control_point_total_velocity_       = std::make_shared<Vector6d>(Vector6d::Zero());
+	control_point_velocity_command_     = std::make_shared<Twist>();
+	control_point_total_velocity_       = std::make_shared<Twist>();
 	control_point_total_force_          = std::make_shared<Vector6d>(Vector6d::Zero());
 
-	control_point_current_pose_         = std::make_shared<Vector6d>(Vector6d::Zero());
-	control_point_target_pose_          = std::make_shared<Vector6d>(Vector6d::Zero());
-	control_point_current_velocity_     = std::make_shared<Vector6d>(Vector6d::Zero());
-	control_point_current_acceleration_ = std::make_shared<Vector6d>(Vector6d::Zero());
+	control_point_current_pose_         = std::make_shared<Pose>();
+	control_point_target_pose_          = std::make_shared<Pose>();
+	control_point_current_velocity_     = std::make_shared<Twist>();
+	control_point_current_acceleration_ = std::make_shared<Acceleration>();
 	control_point_external_force_       = std::make_shared<Vector6d>(Vector6d::Zero());
 
 	scaling_factor_                     = std::make_shared<double>();
@@ -142,11 +142,11 @@ VectorXdPtr Robot::jointExternalTorque() const {
 }
 
 
-Vector6dConstPtr Robot::controlPointVelocity() const {
+TwistConstPtr Robot::controlPointVelocity() const {
 	return control_point_velocity_;
 }
 
-Vector6dConstPtr Robot::controlPointVelocitySum() const {
+TwistConstPtr Robot::controlPointVelocitySum() const {
 	return control_point_velocity_sum_;
 }
 
@@ -154,11 +154,11 @@ Vector6dConstPtr Robot::controlPointForceSum() const {
 	return control_point_force_sum_;
 }
 
-Vector6dConstPtr Robot::controlPointVelocityCommand() const {
+TwistConstPtr Robot::controlPointVelocityCommand() const {
 	return control_point_velocity_command_;
 }
 
-Vector6dConstPtr Robot::controlPointTotalVelocity() const {
+TwistConstPtr Robot::controlPointTotalVelocity() const {
 	return control_point_total_velocity_;
 }
 
@@ -166,19 +166,19 @@ Vector6dConstPtr Robot::controlPointTotalForce() const {
 	return control_point_total_force_;
 }
 
-Vector6dPtr Robot::controlPointCurrentPose() const {
+PosePtr Robot::controlPointCurrentPose() const {
 	return control_point_current_pose_;
 }
 
-Vector6dPtr Robot::controlPointTargetPose() const {
+PosePtr Robot::controlPointTargetPose() const {
 	return control_point_target_pose_;
 }
 
-Vector6dPtr Robot::controlPointCurrentVelocity() const {
+TwistPtr Robot::controlPointCurrentVelocity() const {
 	return control_point_current_velocity_;
 }
 
-Vector6dPtr Robot::controlPointCurrentAcceleration() const {
+AccelerationPtr Robot::controlPointCurrentAcceleration() const {
 	return control_point_current_acceleration_;
 }
 
