@@ -41,7 +41,8 @@ Vector6d StiffnessGenerator::compute() {
 
 	if(stiffness_frame_ == ReferenceFrame::TCP) {
 		if(target_position_frame_ == ReferenceFrame::TCP) {
-			error = static_cast<Vector6d>(*target_position_);
+			// TODO check why static_cast fails with Eigen 3.3.4
+			error = target_position_->getErrorWith(Pose());
 		}
 		else {
 			error = robot_->spatialTransformationMatrix()->transpose() * (target_position_->getErrorWith(*robot_->controlPointCurrentPose()));
@@ -49,7 +50,7 @@ Vector6d StiffnessGenerator::compute() {
 	}
 	else {
 		if(target_position_frame_ == ReferenceFrame::TCP) {
-			error = *robot_->spatialTransformationMatrix() * static_cast<Vector6d>(*target_position_);
+			error = *robot_->spatialTransformationMatrix() * target_position_->getErrorWith(Pose());
 		}
 		else {
 			error = target_position_->getErrorWith(*robot_->controlPointCurrentPose());

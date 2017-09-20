@@ -201,7 +201,7 @@ bool VREPDriver::sendTCPtargetVelocity(phri::TwistConstPtr velocity, phri::Refer
 	pose->integrate(*velocity, sample_time_);
 
 	float data[6];
-	phri::Vector6d pose_vec = static_cast<phri::Vector6d>(*pose);
+	phri::Vector6d pose_vec = pose->getErrorWith(phri::Pose());
 	for (size_t i = 0; all_ok and i < 6; ++i) {
 		data[i] = pose_vec[i];
 	}
