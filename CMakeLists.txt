@@ -26,10 +26,10 @@ check_PID_Platform(CONFIGURATION posix)
 #now finding packages
 declare_PID_Package_Dependency (PACKAGE api-driver-vrep NATIVE VERSION 0.7)
 
-declare_PID_Package_Dependency(PACKAGE eigen-extensions NATIVE VERSION 0.5.0)
+declare_PID_Package_Dependency(PACKAGE eigen-extensions NATIVE VERSION 0.6.0)
 
 if(GEN_PYTHON_BINDINGS)
-	declare_PID_Package_Dependency(PACKAGE boost EXTERNAL VERSION 1.63.0)
+	declare_PID_Package_Dependency(PACKAGE boost EXTERNAL VERSION 1.63.0 VERSION 1.64.0)
 
 	find_package(PythonLibs REQUIRED)
 endif()
