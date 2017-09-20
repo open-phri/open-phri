@@ -4,7 +4,8 @@ if(USE_OPENMP)
         SHARED_LIB
         NAME open-phri
         DIRECTORY OpenPHRI
-        EXPORTED COMPILER_OPTIONS -std=c++14 -fopenmp
+        CXX_STANDARD 14
+        EXPORTED COMPILER_OPTIONS -fopenmp
     )
 
     declare_PID_Component_Dependency(
@@ -16,7 +17,7 @@ else()
         SHARED_LIB
         NAME open-phri
         DIRECTORY OpenPHRI
-        EXPORTED COMPILER_OPTIONS -std=c++14
+        CXX_STANDARD 14
     )
 endif()
 
@@ -47,8 +48,6 @@ declare_PID_Component_Dependency(
 
 ###         pyOpenPHRI        ###
 if(GEN_PYTHON_BINDINGS)
-    # find_package(Boost COMPONENTS python3 REQUIRED)
-
     declare_PID_Component(
         MODULE_LIB
         NAME openphri
@@ -67,9 +66,8 @@ if(GEN_PYTHON_BINDINGS)
 
     declare_PID_Component_Dependency(
   		COMPONENT openphri
-  		EXPORT EXTERNAL boost
-  		INCLUDE_DIRS <boost>/include
-        LINKS SHARED <boost>/lib/libboost_python3.so.1.63.0
+  		EXPORT EXTERNAL boost-python
+        PACKAGE boost
     )
 
     declare_PID_Component_Dependency(
