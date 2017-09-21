@@ -1,21 +1,22 @@
-/*
- *  Copyright (C) 2017 Benjamin Navarro <contact@bnavarro.info>
- *
- *  This file is part of OpenPHRI <https://gite.lirmm.fr/navarro/OpenPHRI>.
- *
- *  OpenPHRI is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  OpenPHRI is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with OpenPHRI.  If not, see <http://www.gnu.org/licenses/>.
- */
+/*      File: interpolators_common.h
+*       This file is part of the program open-phri
+*       Program description : OpenPHRI: a generic framework to easily and safely control robots in interactions with humans
+*       Copyright (C) 2017 -  Benjamin Navarro (LIRMM). All Right reserved.
+*
+*       This software is free software: you can redistribute it and/or modify
+*       it under the terms of the LGPL license as published by
+*       the Free Software Foundation, either version 3
+*       of the License, or (at your option) any later version.
+*       This software is distributed in the hope that it will be useful,
+*       but WITHOUT ANY WARRANTY without even the implied warranty of
+*       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+*       LGPL License for more details.
+*
+*       You should have received a copy of the GNU Lesser General Public License version 3 and the
+*       General Public License version 3 along with this program.
+*       If not, see <http://www.gnu.org/licenses/>.
+*/
+
 
 /**
  * @file interpolators_common.h
@@ -148,6 +149,61 @@ private:
 		}
 	}
 
+};
+
+template<>
+struct TrajectoryPoint<Pose> {
+	TrajectoryPoint(
+		std::shared_ptr<Pose> y,
+		std::shared_ptr<Twist> dy,
+		std::shared_ptr<Acceleration> d2y) :
+		y(y), dy(dy), d2y(d2y)
+	{
+	}
+
+	TrajectoryPoint(
+		const Pose& y,
+		const Twist& dy,
+		const Acceleration& d2y) :
+		y(std::make_shared<Pose>(y)),
+		dy(std::make_shared<Twist>(dy)),
+		d2y(std::make_shared<Acceleration>(d2y))
+	{
+	}
+
+	TrajectoryPoint() :
+		y(std::make_shared<Pose>()),
+		dy(std::make_shared<Twist>()),
+		d2y(std::make_shared<Acceleration>())
+	{
+	}
+
+	void print() const {
+		std::cout << "[";
+		std::cout << "(";
+		std::cout << y->translation().transpose() << "; ";
+		std::cout << y->orientation().w() << " + ";
+		std::cout << y->orientation().x() << "i + ";
+		std::cout << y->orientation().y() << "j + ";
+		std::cout << y->orientation().z() << "k";
+		std::cout << ")";
+		std::cout << "(";
+		std::cout << static_cast<Vector6d>(*dy).transpose();
+		std::cout << ")";
+		std::cout << "(";
+		std::cout << static_cast<Vector6d>(*d2y).transpose();
+		std::cout << ")";
+		std::cout << "]";
+	}
+
+	// std::tuple<double&, double&, double&> operator[] (size_t n) {
+	//  assert(n < size_);
+	//  return std::make_tuple(yrefs_[n], dyrefs_[n], d2yrefs_[n]);
+	// }
+
+	std::shared_ptr<Pose> y;   // value
+	std::shared_ptr<Twist> dy;  // first derivative
+	std::shared_ptr<Acceleration> d2y; // second derivative
 };
 
 template<typename T>

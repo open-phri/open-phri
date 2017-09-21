@@ -20,14 +20,14 @@ int main(int argc, char const *argv[]) {
 
 	safety_controller.add("potential field", potential_field_generator);
 
-	auto obs_pos = make_shared<Vector6d>(Vector6d::Zero());
+	auto obs_pos = make_shared<Pose>();
 	auto obstacle = make_shared<PotentialFieldObject>(
 		PotentialFieldType::Repulsive,
 		make_shared<double>(10.),   // gain
 		make_shared<double>(0.2),   // threshold distance
 		obs_pos);
 
-	auto tgt_pos = make_shared<Vector6d>(Vector6d::Zero());
+	auto tgt_pos = make_shared<Pose>();
 	auto target = make_shared<PotentialFieldObject>(
 		PotentialFieldType::Attractive,
 		make_shared<double>(10.),  // gain
@@ -52,8 +52,13 @@ int main(int argc, char const *argv[]) {
 	assert_msg("Step #4", ok == true);
 
 	// Step #5 : re-remove
-	ok = potential_field_generator->remove("obstacle");
-	assert_msg("Step #5", ok == false);
+	try {
+		potential_field_generator->remove("obstacle");
+		assert_msg("Step #5", false);
+	}
+	catch(std::domain_error& err) {
+		std::cerr << "Expected exception: " << err.what() << std::endl;
+	}
 
 	// Step #6 : get
 	potential_field_generator->add("obstacle", obstacle);
@@ -61,22 +66,22 @@ int main(int argc, char const *argv[]) {
 	assert_msg("Step #6", obj == obstacle);
 
 	// Step #7 : 1 obstacle > threshold distance
-	(*obs_pos)(0) = 0.3;
+	obs_pos->translation().x() = 0.3;
 	safety_controller.compute();
-	assert_msg("Step #7", robot->controlPointVelocity()->isZero());
+	assert_msg("Step #7", static_cast<Vector6d>(*robot->controlPointVelocity()).isZero());
 
 	// Step #8 : 1 obstacle < threshold distance
-	(*obs_pos)(0) = 0.1;
+	obs_pos->translation().x() = 0.1;
 	safety_controller.compute();
-	assert_msg("Step #8", robot->controlPointVelocity()->dot(*obs_pos) < 0.);
+	assert_msg("Step #8", robot->controlPointVelocity()->translation().dot(obs_pos->translation()) < 0.);
 
 	// Step #9 : 1 target
 	ok = potential_field_generator->remove("obstacle");
 	potential_field_generator->add("target", target);
-	(*tgt_pos)(0) = 0.1;
-	(*tgt_pos)(1) = 0.2;
+	tgt_pos->translation().x() = 0.1;
+	tgt_pos->translation().y() = 0.2;
 	safety_controller.compute();
-	assert_msg("Step #9", robot->controlPointVelocity()->dot(*tgt_pos) > 0.);
+	assert_msg("Step #9", robot->controlPointVelocity()->translation().dot(tgt_pos->translation()) > 0.);
 
 	return 0;
 }

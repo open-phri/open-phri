@@ -33,11 +33,21 @@ int main(int argc, char const *argv[]) {
 	ok = safety_controller.removeConstraint("velocity limit");
 	assert_msg("Step #5", ok == true);
 
-	ok = safety_controller.removeConstraint("velocity limit");
-	assert_msg("Step #6", ok == false);
+	try {
+		safety_controller.removeConstraint("velocity limit");
+		assert_msg("Step #6", false);
+	}
+	catch(std::domain_error& err) {
+		std::cerr << "Expected exception: " << err.what() << std::endl;
+	}
 
-	cstr = safety_controller.getConstraint("velocity limit");
-	assert_msg("Step #7", static_cast<bool>(cstr) == false);
+	try {
+		safety_controller.getConstraint("velocity limit");
+		assert_msg("Step #7", false);
+	}
+	catch(std::domain_error& err) {
+		std::cerr << "Expected exception: " << err.what() << std::endl;
+	}
 
 	return 0;
 }

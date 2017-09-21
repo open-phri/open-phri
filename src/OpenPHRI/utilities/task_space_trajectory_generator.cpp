@@ -1,4 +1,4 @@
-/*      File: clock.h
+/*      File: task_space_trajectory_generator.cpp
 *       This file is part of the program open-phri
 *       Program description : OpenPHRI: a generic framework to easily and safely control robots in interactions with humans
 *       Copyright (C) 2017 -  Benjamin Navarro (LIRMM). All Right reserved.
@@ -17,38 +17,8 @@
 *       If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-/**
- * @file clock.h
- * @author Benjamin Navarro
- * @brief Definition of the Clock class
- * @date June 2017
- * @ingroup OpenPHRI
- */
-
-#pragma once
-
-#include <memory>
-#include <chrono>
+#include <OpenPHRI/utilities/task_space_trajectory_generator.h>
 
 namespace phri {
-
-class Clock {
-public:
-	Clock();
-	Clock(double sample_time);
-	~Clock() = default;
-
-	void reset();
-	std::shared_ptr<double> getTime() const;
-
-	double update();
-	double operator()();
-
-private:
-	std::chrono::high_resolution_clock::time_point init_time_;
-	double sample_time_;
-	std::shared_ptr<double> time_;
-};
-
-} // namespace phri
+template class TrajectoryGenerator<Pose>;
+}

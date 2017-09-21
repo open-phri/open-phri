@@ -1,3 +1,22 @@
+/*      File: robot.cpp
+*       This file is part of the program open-phri
+*       Program description : OpenPHRI: a generic framework to easily and safely control robots in interactions with humans
+*       Copyright (C) 2017 -  Benjamin Navarro (LIRMM). All Right reserved.
+*
+*       This software is free software: you can redistribute it and/or modify
+*       it under the terms of the LGPL license as published by
+*       the Free Software Foundation, either version 3
+*       of the License, or (at your option) any later version.
+*       This software is distributed in the hope that it will be useful,
+*       but WITHOUT ANY WARRANTY without even the implied warranty of
+*       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+*       LGPL License for more details.
+*
+*       You should have received a copy of the GNU Lesser General Public License version 3 and the
+*       General Public License version 3 along with this program.
+*       If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include <OpenPHRI/robot.h>
 
 using namespace phri;
@@ -21,17 +40,17 @@ Robot::Robot(const std::string& name,
 	joint_target_position_              = std::make_shared<Eigen::VectorXd>();
 	joint_external_torque_              = std::make_shared<Eigen::VectorXd>();
 
-	control_point_velocity_             = std::make_shared<Vector6d>(Vector6d::Zero());
-	control_point_velocity_sum_         = std::make_shared<Vector6d>(Vector6d::Zero());
+	control_point_velocity_             = std::make_shared<Twist>();
+	control_point_velocity_sum_         = std::make_shared<Twist>();
 	control_point_force_sum_            = std::make_shared<Vector6d>(Vector6d::Zero());
-	control_point_velocity_command_     = std::make_shared<Vector6d>(Vector6d::Zero());
-	control_point_total_velocity_       = std::make_shared<Vector6d>(Vector6d::Zero());
+	control_point_velocity_command_     = std::make_shared<Twist>();
+	control_point_total_velocity_       = std::make_shared<Twist>();
 	control_point_total_force_          = std::make_shared<Vector6d>(Vector6d::Zero());
 
-	control_point_current_pose_         = std::make_shared<Vector6d>(Vector6d::Zero());
-	control_point_target_pose_          = std::make_shared<Vector6d>(Vector6d::Zero());
-	control_point_current_velocity_     = std::make_shared<Vector6d>(Vector6d::Zero());
-	control_point_current_acceleration_ = std::make_shared<Vector6d>(Vector6d::Zero());
+	control_point_current_pose_         = std::make_shared<Pose>();
+	control_point_target_pose_          = std::make_shared<Pose>();
+	control_point_current_velocity_     = std::make_shared<Twist>();
+	control_point_current_acceleration_ = std::make_shared<Acceleration>();
 	control_point_external_force_       = std::make_shared<Vector6d>(Vector6d::Zero());
 
 	scaling_factor_                     = std::make_shared<double>();
@@ -123,11 +142,11 @@ VectorXdPtr Robot::jointExternalTorque() const {
 }
 
 
-Vector6dConstPtr Robot::controlPointVelocity() const {
+TwistConstPtr Robot::controlPointVelocity() const {
 	return control_point_velocity_;
 }
 
-Vector6dConstPtr Robot::controlPointVelocitySum() const {
+TwistConstPtr Robot::controlPointVelocitySum() const {
 	return control_point_velocity_sum_;
 }
 
@@ -135,11 +154,11 @@ Vector6dConstPtr Robot::controlPointForceSum() const {
 	return control_point_force_sum_;
 }
 
-Vector6dConstPtr Robot::controlPointVelocityCommand() const {
+TwistConstPtr Robot::controlPointVelocityCommand() const {
 	return control_point_velocity_command_;
 }
 
-Vector6dConstPtr Robot::controlPointTotalVelocity() const {
+TwistConstPtr Robot::controlPointTotalVelocity() const {
 	return control_point_total_velocity_;
 }
 
@@ -147,19 +166,19 @@ Vector6dConstPtr Robot::controlPointTotalForce() const {
 	return control_point_total_force_;
 }
 
-Vector6dPtr Robot::controlPointCurrentPose() const {
+PosePtr Robot::controlPointCurrentPose() const {
 	return control_point_current_pose_;
 }
 
-Vector6dPtr Robot::controlPointTargetPose() const {
+PosePtr Robot::controlPointTargetPose() const {
 	return control_point_target_pose_;
 }
 
-Vector6dPtr Robot::controlPointCurrentVelocity() const {
+TwistPtr Robot::controlPointCurrentVelocity() const {
 	return control_point_current_velocity_;
 }
 
-Vector6dPtr Robot::controlPointCurrentAcceleration() const {
+AccelerationPtr Robot::controlPointCurrentAcceleration() const {
 	return control_point_current_acceleration_;
 }
 

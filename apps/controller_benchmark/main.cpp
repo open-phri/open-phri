@@ -1,3 +1,22 @@
+/*      File: main.cpp
+*       This file is part of the program open-phri
+*       Program description : OpenPHRI: a generic framework to easily and safely control robots in interactions with humans
+*       Copyright (C) 2017 -  Benjamin Navarro (LIRMM). All Right reserved.
+*
+*       This software is free software: you can redistribute it and/or modify
+*       it under the terms of the LGPL license as published by
+*       the Free Software Foundation, either version 3
+*       of the License, or (at your option) any later version.
+*       This software is distributed in the hope that it will be useful,
+*       but WITHOUT ANY WARRANTY without even the implied warranty of
+*       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+*       LGPL License for more details.
+*
+*       You should have received a copy of the GNU Lesser General Public License version 3 and the
+*       General Public License version 3 along with this program.
+*       If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include <OpenPHRI/OpenPHRI.h>
 
 using namespace phri;
@@ -96,8 +115,8 @@ int main(int argc, char const *argv[]) {
 	logger.reset();
 	logger.logExternalData("tavg_controller_3cstr_3gen", &t_avg, 1);
 	auto potential_field_generator = make_shared<PotentialFieldGenerator>();
-	auto obstacle = make_shared<PotentialFieldObject>(PotentialFieldType::Repulsive, make_shared<double>(10.), make_shared<double>(0.2), make_shared<Vector6d>(Vector6d::Ones()));
-	auto target = make_shared<PotentialFieldObject>(PotentialFieldType::Attractive, make_shared<double>(10.), make_shared<double>(std::numeric_limits<double>::infinity()), make_shared<Vector6d>(Vector6d::Ones()*2.));
+	auto obstacle = make_shared<PotentialFieldObject>(PotentialFieldType::Repulsive, make_shared<double>(10.), make_shared<double>(0.2), make_shared<Pose>(Vector3d::Ones(), Eigen::Quaterniond::Identity()));
+	auto target = make_shared<PotentialFieldObject>(PotentialFieldType::Attractive, make_shared<double>(10.), make_shared<double>(std::numeric_limits<double>::infinity()), make_shared<Pose>(Vector3d::Ones()*2., Eigen::Quaterniond::Identity()));
 	potential_field_generator->add("obstacle", obstacle);
 	potential_field_generator->add("target", target);
 	safety_controller.add("pfm", potential_field_generator);

@@ -1,3 +1,22 @@
+/*      File: data_logger.cpp
+*       This file is part of the program open-phri
+*       Program description : OpenPHRI: a generic framework to easily and safely control robots in interactions with humans
+*       Copyright (C) 2017 -  Benjamin Navarro (LIRMM). All Right reserved.
+*
+*       This software is free software: you can redistribute it and/or modify
+*       it under the terms of the LGPL license as published by
+*       the Free Software Foundation, either version 3
+*       of the License, or (at your option) any later version.
+*       This software is distributed in the hope that it will be useful,
+*       but WITHOUT ANY WARRANTY without even the implied warranty of
+*       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+*       LGPL License for more details.
+*
+*       You should have received a copy of the GNU Lesser General Public License version 3 and the
+*       General Public License version 3 along with this program.
+*       If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include <OpenPHRI/utilities/data_logger.h>
 #include <OpenPHRI/constraints/constraint.h>
 #include <OpenPHRI/force_generators/force_generator.h>
@@ -56,8 +75,10 @@ void DataLogger::logRobotData(RobotConstPtr robot) {
 	logExternalData("controlPointVelocityCommand", robot->controlPointVelocityCommand()->data(), 6);
 	logExternalData("controlPointTotalVelocity", robot->controlPointTotalVelocity()->data(), 6);
 	logExternalData("controlPointTotalForce", robot->controlPointTotalForce()->data(), 6);
-	logExternalData("controlPointCurrentPose", robot->controlPointCurrentPose()->data(), 6);
-	logExternalData("controlPointTargetPose", robot->controlPointTargetPose()->data(), 6);
+	logExternalData("controlPointCurrentPosition", robot->controlPointCurrentPose()->translation().data(), 3);
+	logExternalData("controlPointCurrentOrientation", robot->controlPointCurrentPose()->orientation().coeffs().data(), 4);
+	logExternalData("controlPointTargetPosition", robot->controlPointTargetPose()->translation().data(), 3);
+	logExternalData("controlPointTargetOrientation", robot->controlPointTargetPose()->orientation().coeffs().data(), 4);
 	logExternalData("controlPointCurrentVelocity", robot->controlPointCurrentVelocity()->data(), 6);
 	logExternalData("controlPointExternalForce", robot->controlPointExternalForce()->data(), 6);
 

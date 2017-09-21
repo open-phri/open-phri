@@ -57,7 +57,7 @@ int main(int argc, char const *argv[]) {
 	(*constant_vel)(2) = 1.5;
 	safety_controller.compute();
 
-	assert_msg("Step #4", robot->controlPointVelocity()->isApprox(*robot->controlPointTotalVelocity()));
+	assert_msg("Step #4", static_cast<Vector6d>(*robot->controlPointVelocity()).isApprox(static_cast<Vector6d>(*robot->controlPointTotalVelocity())));
 
 	// Step #5 : velocity 3 axes > max
 	(*constant_vel)(0) = 1.5;

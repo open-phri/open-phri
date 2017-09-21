@@ -1,21 +1,22 @@
-/*
- *  Copyright (C) 2017 Benjamin Navarro <contact@bnavarro.info>
- *
- *  This file is part of OpenPHRI <https://gite.lirmm.fr/navarro/OpenPHRI>.
- *
- *  OpenPHRI is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  OpenPHRI is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with OpenPHRI.  If not, see <http://www.gnu.org/licenses/>.
- */
+/*      File: mass_generator.h
+*       This file is part of the program open-phri
+*       Program description : OpenPHRI: a generic framework to easily and safely control robots in interactions with humans
+*       Copyright (C) 2017 -  Benjamin Navarro (LIRMM). All Right reserved.
+*
+*       This software is free software: you can redistribute it and/or modify
+*       it under the terms of the LGPL license as published by
+*       the Free Software Foundation, either version 3
+*       of the License, or (at your option) any later version.
+*       This software is distributed in the hope that it will be useful,
+*       but WITHOUT ANY WARRANTY without even the implied warranty of
+*       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+*       LGPL License for more details.
+*
+*       You should have received a copy of the GNU Lesser General Public License version 3 and the
+*       General Public License version 3 along with this program.
+*       If not, see <http://www.gnu.org/licenses/>.
+*/
+
 
 /**
  * @file mass_generator.h
@@ -45,7 +46,7 @@ public:
 	 */
 	MassGenerator(
 		Matrix6dConstPtr mass,
-		Vector6dConstPtr target_acceleration,
+		AccelerationConstPtr target_acceleration,
 		ReferenceFrame mass_frame = ReferenceFrame::TCP,
 		ReferenceFrame target_acceleration_frame = ReferenceFrame::TCP);
 
@@ -55,7 +56,7 @@ public:
 
 private:
 	Matrix6dConstPtr mass_;
-	Vector6dConstPtr target_acceleration_;
+	AccelerationConstPtr target_acceleration_;
 	ReferenceFrame mass_frame_;
 	ReferenceFrame target_acceleration_frame_;
 };

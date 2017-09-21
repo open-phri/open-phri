@@ -1,21 +1,22 @@
-/*
- *  Copyright (C) 2017 Benjamin Navarro <contact@bnavarro.info>
- *
- *  This file is part of OpenPHRI <https://gite.lirmm.fr/navarro/OpenPHRI>.
- *
- *  OpenPHRI is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  OpenPHRI is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with OpenPHRI.  If not, see <http://www.gnu.org/licenses/>.
- */
+/*      File: object_collection.hpp
+*       This file is part of the program open-phri
+*       Program description : OpenPHRI: a generic framework to easily and safely control robots in interactions with humans
+*       Copyright (C) 2017 -  Benjamin Navarro (LIRMM). All Right reserved.
+*
+*       This software is free software: you can redistribute it and/or modify
+*       it under the terms of the LGPL license as published by
+*       the Free Software Foundation, either version 3
+*       of the License, or (at your option) any later version.
+*       This software is distributed in the hope that it will be useful,
+*       but WITHOUT ANY WARRANTY without even the implied warranty of
+*       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+*       LGPL License for more details.
+*
+*       You should have received a copy of the GNU Lesser General Public License version 3 and the
+*       General Public License version 3 along with this program.
+*       If not, see <http://www.gnu.org/licenses/>.
+*/
+
 
 /**
  * @file itemect_collection.hpp
@@ -30,6 +31,7 @@
 #include <map>
 #include <iostream>
 #include "demangle.h"
+#include "exceptions.h"
 
 namespace phri {
 
@@ -99,10 +101,7 @@ public:
 	virtual bool remove(const std::string& name) {
 		auto item = items_.find(name);
 		if(item == items_.end()) {
-			if(verbose_) {
-				std::cerr << "In " << class_name_ << "::remove" << collection_name_ << ": no item called \"" << name << "\"" << std::endl;
-			}
-			return false;
+			throw std::domain_error(OPEN_PHRI_ERROR("No item called " + name));
 		}
 		items_.erase(item);
 		return true;
@@ -129,8 +128,8 @@ public:
 		if(elem != items_.end()) {
 			item = elem->second;
 		}
-		else if(verbose_) {
-			std::cerr << "In " << class_name_ << "::get" << collection_name_ << ": no item called \"" << name << "\"" << std::endl;
+		else {
+			throw std::domain_error(OPEN_PHRI_ERROR("No item called " + name));
 		}
 		return item;
 	}

@@ -1,3 +1,22 @@
+/*      File: state_machine.cpp
+*       This file is part of the program open-phri
+*       Program description : OpenPHRI: a generic framework to easily and safely control robots in interactions with humans
+*       Copyright (C) 2017 -  Benjamin Navarro (LIRMM). All Right reserved.
+*
+*       This software is free software: you can redistribute it and/or modify
+*       it under the terms of the LGPL license as published by
+*       the Free Software Foundation, either version 3
+*       of the License, or (at your option) any later version.
+*       This software is distributed in the hope that it will be useful,
+*       but WITHOUT ANY WARRANTY without even the implied warranty of
+*       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+*       LGPL License for more details.
+*
+*       You should have received a copy of the GNU Lesser General Public License version 3 and the
+*       General Public License version 3 along with this program.
+*       If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include "state_machine.h"
 
 
@@ -38,15 +57,16 @@ StateMachine::StateMachine(
 	replay_state_ = ReplayStates::Init;
 
 	if(skip_teaching) {
-		phri::Vector6d wp;
-		wp << -0.176542, -0.0672858,   0.772875,    1.57698, -0.0115612,    1.56215;
-		waypoints_.push_back(wp); waypoints_.push_back(wp);
-		wp << -0.173713, -0.0660992,   0.959651,    1.56696, -0.0120195,    1.55371;
-		waypoints_.push_back(wp); waypoints_.push_back(wp);
-		wp << 0.156179, -0.0612425,   0.949056,    1.56838, 0.00866731,    1.54394;
-		waypoints_.push_back(wp); waypoints_.push_back(wp);
-		wp << 0.150482, -0.0590984,   0.777583,    1.57879, 0.00644068,    1.53824;
-		waypoints_.push_back(wp); waypoints_.push_back(wp);
+		auto q = Eigen::Quaterniond(0.499977, 0.500029, -0.499972, 0.500021);
+		phri::Vector3d wp;
+		wp << -0.176542, -0.0672858,   0.772875;
+		waypoints_.emplace_back(wp, q); waypoints_.emplace_back(wp, q);
+		wp << -0.173713, -0.0660992,   0.959651;
+		waypoints_.emplace_back(wp, q); waypoints_.emplace_back(wp, q);
+		wp << 0.156179, -0.0612425,   0.949056;
+		waypoints_.emplace_back(wp, q); waypoints_.emplace_back(wp, q);
+		wp << 0.150482, -0.0590984,   0.777583;
+		waypoints_.emplace_back(wp, q); waypoints_.emplace_back(wp, q);
 		teach_state_ = TeachStates::End;
 	}
 
@@ -56,7 +76,7 @@ StateMachine::StateMachine(
 	d2qmax.setConstant(REPLAY_D2QMAX);
 	joint_trajectory_generator_->addPathTo(joint_end_point_, dqmax, d2qmax);
 
-	trajectory_generator_ = std::make_shared<phri::TrajectoryGenerator<phri::Vector6d>>(start_point_, SAMPLE_TIME, phri::TrajectorySynchronization::SynchronizeTrajectory);
+	trajectory_generator_ = std::make_shared<phri::TrajectoryGenerator<phri::Pose>>(start_point_, SAMPLE_TIME, phri::TrajectorySynchronization::SynchronizeTrajectory);
 	phri::Vector6d vmax, amax, err_th;
 	vmax.block<3,1>(0,0).setConstant(REPLAY_VMAX); vmax.block<3,1>(3,0).setConstant(REPLAY_WMAX);
 	amax.block<3,1>(0,0).setConstant(REPLAY_AMAX); amax.block<3,1>(3,0).setConstant(REPLAY_DWMAX);
@@ -71,7 +91,7 @@ StateMachine::StateMachine(
 	else {
 		operator_position_laser_ = std::make_shared<phri::Vector2d>(3.,0.);
 	}
-	operator_position_tcp_ = std::make_shared<phri::Vector6d>();
+	operator_position_tcp_ = std::make_shared<phri::Pose>();
 
 	max_vel_interpolator_ = std::make_shared<phri::LinearInterpolator>(
 		std::make_shared<phri::LinearPoint>(0.1, 0.),     // 0m/s at 0.1m
@@ -89,12 +109,12 @@ StateMachine::StateMachine(
 	laser_base_transform_.block<3,1>(0,3) = phri::Vector3d(+4.2856e-01, 0., +2.6822e-02);
 
 
-	init_position_ = std::make_shared<phri::Vector6d>();
-	traj_vel_ = std::make_shared<phri::Vector6d>(phri::Vector6d::Zero());
+	init_position_ = std::make_shared<phri::Pose>();
+	traj_vel_ = std::make_shared<phri::Twist>();
 	stiffness_mat_ = std::make_shared<phri::Matrix6d>(phri::Matrix6d::Identity() * STIFFNESS);
 	// stiffness_mat_->block<3,3>(3,3).setZero();
 	(*stiffness_mat_)(4,4) = 0.; // TODO it works but it should be z axis, fix it
-	tcp_collision_sphere_center_ = std::make_shared<phri::Vector6d>(phri::Vector6d::Zero());
+	tcp_collision_sphere_center_ = std::make_shared<phri::Pose>();
 	tcp_collision_sphere_offset_ = phri::Vector3d(0.,0.,-7.44e-2);
 	end_of_teach_ = false;
 }
@@ -108,7 +128,7 @@ StateMachine::ReplayStates StateMachine::getReplayState() const {
 }
 
 double StateMachine::getOperatorDistance() const {
-	return operator_position_tcp_->norm();
+	return operator_position_tcp_->translation().norm();
 }
 
 double StateMachine::getSeparationDistanceVelocityLimitation() const {
@@ -137,7 +157,7 @@ bool StateMachine::compute() {
 	auto dt = std::chrono::duration<double>(current_time - last_time_point_).count();
 
 	if(not end_of_teach_) {
-		double velocity = robot_->controlPointVelocity()->norm();
+		double velocity = static_cast<phri::Vector6d>(*robot_->controlPointVelocity()).norm();
 		switch(teach_state_) {
 		case TeachStates::Init:
 		{
@@ -178,13 +198,18 @@ bool StateMachine::compute() {
 			}
 			break;
 		case TeachStates::End:
-			controller_.removeConstraint("velocity constraint");
-			controller_.removeForceGenerator("ext force proxy");
+			// Will fail if the teaching has been skipped, so just discard the error
+			try {
+				controller_.removeConstraint("velocity constraint");
+				controller_.removeForceGenerator("ext force proxy");
+			}
+			catch(std::domain_error& err) {
+			}
 
 			std::cout << "End of Teach" << std::endl;
-			std::cout << "Recorded waypoints_: " << std::endl;
+			std::cout << "Recorded waypoints: " << std::endl;
 			for(const auto& waypoint: waypoints_) {
-				std::cout << waypoint.transpose() << std::endl;
+				std::cout << waypoint << std::endl;
 			}
 			waypoints_.push_back(*init_position_);
 			end_of_teach_ = true;
@@ -217,8 +242,7 @@ bool StateMachine::compute() {
 				std::make_shared<phri::Vector3d>(tcp_collision_sphere_offset_),
 				phri::ReferenceFrame::Base);
 
-			auto obstacle_position = std::make_shared<phri::Vector6d>();
-			*obstacle_position << +6.3307e-03, -1.5126e-01, +9.9744e-01, 0., 0., 0.;
+			auto obstacle_position = std::make_shared<phri::Pose>(phri::Vector3d(+6.3307e-03, -1.5126e-01, +9.9744e-01), phri::Vector3d(0., 0., 0.));
 			auto obstacle = std::make_shared<phri::PotentialFieldObject>(
 				phri::PotentialFieldType::Repulsive,
 				std::make_shared<double>(300.),   // gain
@@ -276,7 +300,7 @@ bool StateMachine::compute() {
 		case ReplayStates::ReachingWaypoint:
 		{
 			*robot_->controlPointTargetPose() = *trajectory_generator_->getPositionOutput();
-			double error = (*robot_->controlPointTargetPose() - *robot_->controlPointCurrentPose()).block<3,1>(0,0).norm();
+			double error = (robot_->controlPointTargetPose()->translation() - robot_->controlPointCurrentPose()->translation()).norm();
 			// std::cout << "error: " << error << std::endl;
 			// bool stopped = *robot_->scalingFactor() < 0.001;
 			// if(not stopped and is_robot_stopped_) {
@@ -419,7 +443,7 @@ bool StateMachine::setupTrajectoryGenerator() {
 
 	auto& from = *robot_->controlPointCurrentPose();
 	auto to = waypoints_.front();
-	std::cout << "Going from [" << from.transpose() << "] to [" << to.transpose() << "]" << std::endl;
+	std::cout << "Going from [" << from << "] to [" << to << "]" << std::endl;
 
 	*(start_point_.y) = from;
 	*(end_point_.y) = to;
@@ -446,7 +470,7 @@ bool StateMachine::setupJointTrajectoryGenerator() {
 	return true;
 }
 
-void StateMachine::computeLaserDistanceInTCPFrame(phri::Vector6dPtr obstacle_position) {
+void StateMachine::computeLaserDistanceInTCPFrame(phri::PosePtr obstacle_position) {
 	phri::Vector4d position_laser = phri::Vector4d::Ones();
 	position_laser.x() = operator_position_laser_->x();
 	position_laser.y() = operator_position_laser_->y();
@@ -465,8 +489,8 @@ void StateMachine::computeLaserDistanceInTCPFrame(phri::Vector6dPtr obstacle_pos
 	phri::Vector3d position_tcp_rbase = tcp_base_transform.block<3,3>(0,0) * position_tcp.block<3,1>(0,0);
 	position_tcp_rbase.y() = 0.;
 
-	obstacle_position->setZero();
-	obstacle_position->block<3,1>(0,0) = tcp_base_transform.block<3,3>(0,0).transpose() * position_tcp_rbase;
+	obstacle_position->orientation().setIdentity();
+	obstacle_position->translation() = tcp_base_transform.block<3,3>(0,0).transpose() * position_tcp_rbase;
 }
 
 void StateMachine::computeNullSpaceVelocityVector() {

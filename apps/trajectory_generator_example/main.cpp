@@ -1,3 +1,22 @@
+/*      File: main.cpp
+*       This file is part of the program open-phri
+*       Program description : OpenPHRI: a generic framework to easily and safely control robots in interactions with humans
+*       Copyright (C) 2017 -  Benjamin Navarro (LIRMM). All Right reserved.
+*
+*       This software is free software: you can redistribute it and/or modify
+*       it under the terms of the LGPL license as published by
+*       the Free Software Foundation, either version 3
+*       of the License, or (at your option) any later version.
+*       This software is distributed in the hope that it will be useful,
+*       but WITHOUT ANY WARRANTY without even the implied warranty of
+*       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+*       LGPL License for more details.
+*
+*       You should have received a copy of the GNU Lesser General Public License version 3 and the
+*       General Public License version 3 along with this program.
+*       If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include <iostream>
 #include <unistd.h>
 #include <signal.h>
@@ -27,60 +46,92 @@ int main(int argc, char const *argv[]) {
 	/***				V-REP driver				***/
 	VREPDriver driver(
 		robot,
-		ControlLevel::TCP,
+		ControlLevel::Joint,
 		SAMPLE_TIME);
 
 	driver.startSimulation();
+	driver.enableSynchonous(true);
+	while(not driver.getSimulationData()) {
+		driver.nextStep();
+	}
 
 	/***			Controller configuration			***/
 	auto safety_controller = SafetyController(robot);
 
-	auto point_1 = TrajectoryPoint<Vector2d>(Vector2d(-0.197,   1.1249),    Vector2d(0., 0.),       Vector2d(0., 0.));
-	auto point_2 = TrajectoryPoint<Vector2d>(Vector2d(-0.25,    1.),        Vector2d(0., -0.025),   Vector2d(0., 0.));
-	auto point_3 = TrajectoryPoint<Vector2d>(Vector2d(-0.15,    0.85),      Vector2d(0., 0.),       Vector2d(0., 0.));
+	// Pose, twist and acceleration at the waypoints
+	auto quat_1 = Eigen::Quaterniond::Identity();
+	auto quat_2 = quat_1.integrate(Vector3d(0., 0., 0.25));
+	auto quat_3 = quat_1.integrate(Vector3d(0., 0., -0.25));
+	auto pose_1 = TrajectoryPoint<Pose>(
+		Pose(Vector3d(-0.197, 0., 1.1249), quat_1),
+		Twist(),
+		Acceleration());
 
-	auto target = make_shared<Vector6d>(Vector6d::Zero());
+	auto pose_2 = TrajectoryPoint<Pose>(
+		Pose(Vector3d(-0.25, 0., 1.), quat_2),
+		Twist(),
+		Acceleration());
 
-	auto trajectory_generator = TrajectoryGenerator<Vector2d>(point_1, SAMPLE_TIME, TrajectorySynchronization::SynchronizeWaypoints);
+	auto pose_3 = TrajectoryPoint<Pose>(
+		Pose(Vector3d(-0.15, 0., 0.85), quat_3),
+		Twist(),
+		Acceleration());
 
-	*robot->controlPointDampingMatrix() *= 250.;
-	auto robot_position = robot->controlPointCurrentPose();
+	auto trajectory_generator = TaskSpaceTrajectoryGenerator(
+		pose_1,
+		SAMPLE_TIME,
+		TrajectorySynchronization::SynchronizeWaypoints);
 
-	auto velocity_target = make_shared<Vector6d>();
 	safety_controller.add(
 		"traj vel",
-		VelocityProxy(velocity_target));
+		VelocityProxy(
+			trajectory_generator.getTwistOutput(),
+			ReferenceFrame::Base));
 
-	trajectory_generator.addPathTo(point_2, Vector2d(0.05, 0.05), Vector2d(0.1, 0.1));
-	trajectory_generator.addPathTo(point_3, Vector2d(0.1, 0.05), Vector2d(0.2, 0.2));
-	trajectory_generator.addPathTo(point_1, Vector2d(0.05, 0.05), Vector2d(0.1, 0.1));
+	// Generate paths between waypoints with maximum twist and acceleration
+	trajectory_generator.addPathTo(
+		pose_2,
+		Twist(Vector3d(0.05, 1., 0.05), 0.5*Vector3d::Ones()),
+		Acceleration(Vector3d(0.1, 1., 0.1), 0.5*Vector3d::Ones()));
 
-	trajectory_generator.computeTimings();
+	trajectory_generator.addPathTo(
+		pose_3,
+		Twist(Vector3d(0.10, 1., 0.05), 0.5*Vector3d::Ones()),
+		Acceleration(Vector3d(0.2, 1., 0.2), 0.5*Vector3d::Ones()));
+
+	trajectory_generator.addPathTo(
+		pose_1,
+		Twist(Vector3d(0.05, 1., 0.05), 0.5*Vector3d::Ones()),
+		Acceleration(Vector3d(0.1, 1., 0.1), 0.5*Vector3d::Ones()));
+
+	try {
+		trajectory_generator.computeTimings();
+	}
+	catch(std::exception& err) {
+		driver.enableSynchonous(false);
+		driver.stopSimulation();
+		throw;
+	}
 
 	Clock clock(SAMPLE_TIME);
 	DataLogger logger(
 		"/tmp",
 		clock.getTime(),
-		true
-		);
+		true);
 
-	logger.logExternalData("traj2d-pos", trajectory_generator.getPositionOutput()->data(), 2);
-	logger.logExternalData("traj2d-vel", trajectory_generator.getVelocityOutput()->data(), 2);
+	logger.logExternalData("traj6d-pos", trajectory_generator.getPoseOutput()->translation().data(), 3);
+	logger.logExternalData("traj6d-quat", trajectory_generator.getPoseOutput()->orientation().coeffs().data(), 4);
+	logger.logExternalData("traj6d-vel", trajectory_generator.getTwistOutput()->data(), 6);
+	logger.logSafetyControllerData(&safety_controller);
+	logger.logRobotData(robot);
+
+	driver.readJointPosition(robot->jointTargetPosition());
 
 	signal(SIGINT, sigint_handler);
-
-	driver.enableSynchonous(true);
-	driver.nextStep();
-	driver.readTCPPose(target, ReferenceFrame::Base);
-
 	bool end = false;
 	while(not (_stop or end)) {
 		if(driver.getSimulationData()) {
 			end = trajectory_generator();
-
-			velocity_target->x() = (*trajectory_generator.getVelocityOutput())[0];
-			velocity_target->z() = (*trajectory_generator.getVelocityOutput())[1];
-
 			safety_controller();
 			driver.sendSimulationData();
 

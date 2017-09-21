@@ -1,3 +1,22 @@
+/*      File: main.cpp
+*       This file is part of the program open-phri
+*       Program description : OpenPHRI: a generic framework to easily and safely control robots in interactions with humans
+*       Copyright (C) 2017 -  Benjamin Navarro (LIRMM). All Right reserved.
+*
+*       This software is free software: you can redistribute it and/or modify
+*       it under the terms of the LGPL license as published by
+*       the Free Software Foundation, either version 3
+*       of the License, or (at your option) any later version.
+*       This software is distributed in the hope that it will be useful,
+*       but WITHOUT ANY WARRANTY without even the implied warranty of
+*       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+*       LGPL License for more details.
+*
+*       You should have received a copy of the GNU Lesser General Public License version 3 and the
+*       General Public License version 3 along with this program.
+*       If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include <iostream>
 #include <unistd.h>
 #include <signal.h>
@@ -42,7 +61,7 @@ int main(int argc, char const *argv[]) {
 
 	auto stop_constraint = make_shared<StopConstraint>(activation_force_threshold, deactivation_force_threshold);
 
-	auto constant_vel = make_shared<Vector6d>(Vector6d::Zero());
+	auto constant_vel = make_shared<Twist>();
 	auto constant_velocity_generator = make_shared<VelocityProxy>(constant_vel);
 	auto external_force_generator = make_shared<ForceProxy>(ext_force);
 
@@ -62,10 +81,10 @@ int main(int argc, char const *argv[]) {
 		}
 
 		if(t < 5.) {
-			(*constant_vel)(0) = 0.05;
+			constant_vel->translation().x() = 0.05;
 		}
 		else if(t < 10.) {
-			(*constant_vel)(0) = -0.05;
+			constant_vel->translation().x() = -0.05;
 		}
 		else {
 			t = 0.;

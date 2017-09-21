@@ -35,7 +35,7 @@ int main(int argc, char const *argv[]) {
 		activation_torque_threshold,
 		deactivation_torque_threshold);
 
-	auto constant_vel = make_shared<Vector6d>(Vector6d::Zero());
+	auto constant_vel = make_shared<Twist>();
 	auto constant_velocity_generator = make_shared<VelocityProxy>(constant_vel);
 	auto constant_force_generator = make_shared<ForceProxy>(ext_force);
 
@@ -43,73 +43,76 @@ int main(int argc, char const *argv[]) {
 	safety_controller.add("vel proxy", constant_velocity_generator);
 	safety_controller.add("force proxy", constant_force_generator);
 
+	const Vector6d& cp_velocity = *robot->controlPointVelocity();
+	const Vector6d& cp_total_velocity = *robot->controlPointTotalVelocity();
+
 	// Step #1 : no velocity, no force
 	safety_controller.compute();
 
-	assert_msg("Step #1", robot->controlPointVelocity()->isZero());
+	assert_msg("Step #1", cp_velocity.isZero());
 
 	// Step #2 : velocity, no force
-	(*constant_vel)(0) = 0.2;
+	constant_vel->translation().x() = 0.2;
 	safety_controller.compute();
 
-	assert_msg("Step #2", robot->controlPointVelocity()->isApprox(*robot->controlPointTotalVelocity()));
+	assert_msg("Step #2", cp_velocity.isApprox(cp_total_velocity));
 
 	// Step #3 : velocity, force < low
 	(*ext_force)(0) = 3;
 	safety_controller.compute();
 
-	assert_msg("Step #3", robot->controlPointVelocity()->isApprox(*robot->controlPointTotalVelocity()));
+	assert_msg("Step #3", cp_velocity.isApprox(cp_total_velocity));
 
 	// Step #4 : velocity, low < force < max
 	(*ext_force)(0) = 15;
 	safety_controller.compute();
 
-	assert_msg("Step #4", robot->controlPointVelocity()->isApprox(*robot->controlPointTotalVelocity()));
+	assert_msg("Step #4", cp_velocity.isApprox(cp_total_velocity));
 
 	// Step #5 : velocity, force > max
 	(*ext_force)(0) = 30;
 	safety_controller.compute();
 
-	assert_msg("Step #5", robot->controlPointVelocity()->isZero());
+	assert_msg("Step #5", cp_velocity.isZero());
 
 	// Step #6 : velocity, low < force < max
 	(*ext_force)(0) = 15;
 	safety_controller.compute();
 
-	assert_msg("Step #6", robot->controlPointVelocity()->isZero());
+	assert_msg("Step #6", cp_velocity.isZero());
 
 	// Step #7 : velocity, force < low
 	(*ext_force)(0) = 4;
 	safety_controller.compute();
 
-	assert_msg("Step #7", robot->controlPointVelocity()->isApprox(*robot->controlPointTotalVelocity()));
+	assert_msg("Step #7", cp_velocity.isApprox(cp_total_velocity));
 
 	// Step #8 : velocity, torque > high
 	(*ext_torque)(0) = 6;
 	safety_controller.compute();
 
-	assert_msg("Step #8", robot->controlPointVelocity()->isZero());
+	assert_msg("Step #8", cp_velocity.isZero());
 
 	// Step #9 : velocity, torque and force > high
 	(*ext_torque)(0) = 6;
 	(*ext_force)(0) = 30;
 	safety_controller.compute();
 
-	assert_msg("Step #9", robot->controlPointVelocity()->isZero());
+	assert_msg("Step #9", cp_velocity.isZero());
 
 	// Step #10 : velocity, torque < low and force > high
 	(*ext_torque)(0) = 0.5;
 	(*ext_force)(0) = 30;
 	safety_controller.compute();
 
-	assert_msg("Step #10", robot->controlPointVelocity()->isZero());
+	assert_msg("Step #10", cp_velocity.isZero());
 
 	// Step #11 : velocity, torque and force < low
 	(*ext_torque)(0) = 0.5;
 	(*ext_force)(0) = 2.;
 	safety_controller.compute();
 
-	assert_msg("Step #11", robot->controlPointVelocity()->isApprox(*robot->controlPointTotalVelocity()));
+	assert_msg("Step #11", cp_velocity.isApprox(cp_total_velocity));
 
 	return 0;
 }

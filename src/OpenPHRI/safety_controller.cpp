@@ -1,3 +1,22 @@
+/*      File: safety_controller.cpp
+*       This file is part of the program open-phri
+*       Program description : OpenPHRI: a generic framework to easily and safely control robots in interactions with humans
+*       Copyright (C) 2017 -  Benjamin Navarro (LIRMM). All Right reserved.
+*
+*       This software is free software: you can redistribute it and/or modify
+*       it under the terms of the LGPL license as published by
+*       the Free Software Foundation, either version 3
+*       of the License, or (at your option) any later version.
+*       This software is distributed in the hope that it will be useful,
+*       but WITHOUT ANY WARRANTY without even the implied warranty of
+*       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+*       LGPL License for more details.
+*
+*       You should have received a copy of the GNU Lesser General Public License version 3 and the
+*       General Public License version 3 along with this program.
+*       If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include <OpenPHRI/safety_controller.h>
 
 #include <OpenPHRI/constraints/default_constraint.h>
@@ -147,15 +166,15 @@ void SafetyController::compute() {
 	// std::cout << "joint vel cmd: " << robot_->joint_velocity_command_->transpose() << std::endl;
 
 	// Control point level damping control
-	*robot_->control_point_velocity_command_ = force_sum.cwiseQuotient(*robot_->control_point_damping_matrix_) + velocity_sum;
+	*robot_->control_point_velocity_command_ = force_sum.cwiseQuotient(*robot_->control_point_damping_matrix_) + static_cast<Vector6d>(velocity_sum);
 	// std::cout << "cp vel cmd: " << robot_->control_point_velocity_command_->transpose() << std::endl;
 
 	// Cumulative effect on the joint velocity of all inputs
-	*robot_->joint_total_velocity_ = jacobian_inverse * spatial_transformation * *robot_->control_point_velocity_command_ + *robot_->joint_velocity_command_;
+	*robot_->joint_total_velocity_ = jacobian_inverse * spatial_transformation * static_cast<Vector6d>(*robot_->control_point_velocity_command_) + *robot_->joint_velocity_command_;
 	// std::cout << "joint vel tot: " << robot_->joint_total_velocity_->transpose() << std::endl;
 
 	// Cumulative effect on the control point velocity of all inputs
-	*robot_->control_point_total_velocity_ = *robot_->control_point_velocity_command_ + spatial_transformation.transpose() * jacobian * *robot_->joint_velocity_command_;
+	*robot_->control_point_total_velocity_ = static_cast<Vector6d>(*robot_->control_point_velocity_command_) + spatial_transformation.transpose() * jacobian * *robot_->joint_velocity_command_;
 	// std::cout << "cp vel tot: " << robot_->control_point_total_velocity_->transpose() << std::endl;
 
 	// Cumulative effect on torques of both joint torque and control point force inputs
@@ -180,7 +199,7 @@ void SafetyController::compute() {
 	// std::cout << "joint vel: " << robot_->joint_velocity_->transpose() << std::endl;
 
 	// Scale the control point velocities to comply with the constraints
-	*robot_->control_point_velocity_ = constraint_value * *robot_->control_point_total_velocity_;
+	*robot_->control_point_velocity_ = constraint_value * static_cast<Vector6d>(*robot_->control_point_total_velocity_);
 	// std::cout << "cp vel: " << robot_->control_point_velocity_->transpose() << std::endl;
 }
 
@@ -191,7 +210,7 @@ void SafetyController::print() const {
 	}
 	std::cout << "Velocity generators:\n";
 	for (const auto& gen: velocity_generators_) {
-		std::cout << "\t- " << gen.first << " (" << getTypeName(*gen.second.object) << "): " << gen.second.last_value.transpose() << "\n";
+		std::cout << "\t- " << gen.first << " (" << getTypeName(*gen.second.object) << "): " << static_cast<const Vector6d&>(gen.second.last_value).transpose() << "\n";
 	}
 	std::cout << "Torque generators:\n";
 	for (const auto& gen: torque_generators_) {
@@ -282,12 +301,12 @@ const VectorXd&  SafetyController::computeTorqueSum() {
 }
 
 const Vector6d&  SafetyController::computeVelocitySum() {
-	auto& sum = *robot_->control_point_velocity_sum_;
+	Vector6d& sum = *robot_->control_point_velocity_sum_;
 	sum.setZero();
 
 	for(auto& velocity_generator : velocity_generators_) {
 		velocity_generator.second.last_value = velocity_generator.second.object->compute();
-		sum += velocity_generator.second.last_value;
+		sum += static_cast<const Vector6d&>(velocity_generator.second.last_value);
 	}
 
 	return sum;

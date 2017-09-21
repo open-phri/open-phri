@@ -1,4 +1,24 @@
+/*      File: vrep_driver.cpp
+*       This file is part of the program open-phri
+*       Program description : OpenPHRI: a generic framework to easily and safely control robots in interactions with humans
+*       Copyright (C) 2017 -  Benjamin Navarro (LIRMM). All Right reserved.
+*
+*       This software is free software: you can redistribute it and/or modify
+*       it under the terms of the LGPL license as published by
+*       the Free Software Foundation, either version 3
+*       of the License, or (at your option) any later version.
+*       This software is distributed in the hope that it will be useful,
+*       but WITHOUT ANY WARRANTY without even the implied warranty of
+*       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+*       LGPL License for more details.
+*
+*       You should have received a copy of the GNU Lesser General Public License version 3 and the
+*       General Public License version 3 along with this program.
+*       If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include <vrep_driver/vrep_driver.h>
+#include <OpenPHRI/utilities/exceptions.h>
 
 #include <stdexcept>
 #include <sstream>
@@ -103,7 +123,7 @@ void VREPDriver::pauseSimulation() const {
 	simxPauseSimulation(client_id_, simx_opmode_oneshot_wait);
 }
 
-bool VREPDriver::readTCPPose(phri::Vector6dPtr pose, phri::ReferenceFrame frame) const {
+bool VREPDriver::readTCPPose(phri::PosePtr pose, phri::ReferenceFrame frame) const {
 	bool all_ok = true;
 	float data[6];
 
@@ -113,16 +133,17 @@ bool VREPDriver::readTCPPose(phri::Vector6dPtr pose, phri::ReferenceFrame frame)
 	all_ok &= (simxGetObjectOrientation (client_id_, object_handle, frame_id, data+3,  simx_opmode_buffer) == simx_return_ok);
 
 	if(all_ok) {
-		double* pose_data = pose->data();
+		phri::Vector6d pose_vec;
 		for (size_t i = 0; all_ok and i < 6; ++i) {
-			pose_data[i] = data[i];
+			pose_vec[i] = data[i];
 		}
+		*pose = pose_vec;
 	}
 
 	return all_ok;
 }
 
-bool VREPDriver::readTCPVelocity(phri::Vector6dPtr velocity, phri::ReferenceFrame frame) const {
+bool VREPDriver::readTCPVelocity(phri::TwistPtr velocity, phri::ReferenceFrame frame) const {
 	using namespace Eigen;
 
 	bool all_ok = true;
@@ -134,9 +155,9 @@ bool VREPDriver::readTCPVelocity(phri::Vector6dPtr velocity, phri::ReferenceFram
 	all_ok &= (simxGetObjectVelocity(client_id_, object_handle, data, data+3, simx_opmode_buffer) == simx_return_ok);
 
 	if(all_ok) {
-		double* velocity_data = velocity->data();
+		phri::Vector6d& velocity_vec = *velocity;
 		for (size_t i = 0; all_ok and i < 6; ++i) {
-			velocity_data[i] = data[i];
+			velocity_vec[i] = data[i];
 		}
 
 		// With V-REP, the velocity is (sadly) always expressed in the absolute frame so we need to map it from the absolute frame to the given frame
@@ -145,14 +166,14 @@ bool VREPDriver::readTCPVelocity(phri::Vector6dPtr velocity, phri::ReferenceFram
 		          * AngleAxisd(angles[1], Vector3d::UnitY())
 		          * AngleAxisd(angles[2], Vector3d::UnitZ());
 
-		velocity->block<3,1>(0,0) = rot_mat.transpose() * velocity->block<3,1>(0,0);
-		velocity->block<3,1>(3,0) = rot_mat.transpose() * velocity->block<3,1>(3,0);
+		velocity_vec.block<3,1>(0,0) = rot_mat.transpose() * velocity_vec.block<3,1>(0,0);
+		velocity_vec.block<3,1>(3,0) = rot_mat.transpose() * velocity_vec.block<3,1>(3,0);
 	}
 
 	return all_ok;
 }
 
-bool VREPDriver::readTCPTargetPose(phri::Vector6dPtr pose, phri::ReferenceFrame frame) const {
+bool VREPDriver::readTCPTargetPose(phri::PosePtr pose, phri::ReferenceFrame frame) const {
 	bool all_ok = true;
 	float data[6];
 
@@ -162,26 +183,27 @@ bool VREPDriver::readTCPTargetPose(phri::Vector6dPtr pose, phri::ReferenceFrame 
 	all_ok &= (simxGetObjectOrientation (client_id_, object_handle, frame_id, data+3,  simx_opmode_buffer) == simx_return_ok);
 
 	if(all_ok) {
-		double* pose_data = pose->data();
+		phri::Vector6d pose_vec;
 		for (size_t i = 0; all_ok and i < 6; ++i) {
-			pose_data[i] = data[i];
+			pose_vec[i] = data[i];
 		}
+		*pose = pose_vec;
 	}
 
 	return all_ok;
 }
 
-bool VREPDriver::sendTCPtargetVelocity(phri::Vector6dConstPtr velocity, phri::ReferenceFrame frame) const {
+bool VREPDriver::sendTCPtargetVelocity(phri::TwistConstPtr velocity, phri::ReferenceFrame frame) const {
 	bool all_ok = true;
 
-	auto pose = make_shared<phri::Vector6d>();
+	auto pose = make_shared<phri::Pose>();
 	all_ok &= readTCPTargetPose(pose, frame);
-	*pose += *velocity * sample_time_;
+	pose->integrate(*velocity, sample_time_);
 
 	float data[6];
-	double* pose_data = pose->data();
+	phri::Vector6d pose_vec = pose->getErrorWith(phri::Pose());
 	for (size_t i = 0; all_ok and i < 6; ++i) {
-		data[i] = pose_data[i];
+		data[i] = pose_vec[i];
 	}
 	int object_handle = object_handles_.at(robot_->name() + "_tcp_target" + suffix_);
 	int frame_id = getFrameHandle(frame);
@@ -267,18 +289,18 @@ bool VREPDriver::readTransformationMatrix(phri::Matrix4dPtr matrix) const {
 	return all_ok;
 }
 
-phri::Vector6dConstPtr VREPDriver::trackObjectPosition(const std::string& name, phri::ReferenceFrame frame) {
+phri::PoseConstPtr VREPDriver::trackObjectPosition(const std::string& name, phri::ReferenceFrame frame) {
 	int handle = -1;
 	int ref_frame = getFrameHandle(frame);
 	float data[3];
 
 	if(simxGetObjectHandle(client_id_, name.c_str(), &handle, simx_opmode_oneshot_wait) != simx_return_ok) {
-		cerr << "In VREPDriver::trackObjectPosition: can't get the handle of object " << name << endl;
+		throw std::runtime_error(OPEN_PHRI_ERROR("Can't get the handle of object " + name));
 	}
 
 	simxGetObjectPosition(client_id_, handle, ref_frame, data, simx_opmode_streaming);
 
-	auto ptr = make_shared<phri::Vector6d>(phri::Vector6d::Zero());
+	auto ptr = make_shared<phri::Pose>();
 
 	tracked_objects_[make_pair(handle, ref_frame)] = ptr;
 
@@ -291,13 +313,14 @@ bool VREPDriver::updateTrackedObjectsPosition() {
 		float data[3];
 		all_ok &= (simxGetObjectPosition(client_id_, obj.first.first, obj.first.second, data, simx_opmode_buffer) == simx_return_ok);
 		if(all_ok) {
-			double* pose_data = obj.second->data();
+			phri::Vector6d pose_vec;
 			for (size_t i = 0; all_ok and i < 3; ++i) {
-				pose_data[i] = data[i];
+				pose_vec[i] = data[i];
 			}
+			*obj.second = pose_vec;
 		}
 		else {
-			cerr << "In VREPDriver::updateTrackedObjectsPosition: can't get position of object with handle " << obj.first.first << endl;
+			throw std::runtime_error(OPEN_PHRI_ERROR("Can't get position of object with handle " + std::to_string(obj.first.first)));
 		}
 	}
 	return all_ok;
@@ -353,7 +376,7 @@ bool VREPDriver::readJointPosition(phri::VectorXdPtr position) const {
 		int joint_handle = object_handles_.at(robot_->name() + "_joint" + std::to_string(i+1) + suffix_);
 		all_ok &= (simxGetJointPosition(client_id_, joint_handle, positions+i, simx_opmode_buffer) != -1);
 	}
-	double* position_data = robot_->jointCurrentPosition()->data();
+	double* position_data = position->data();
 	for (size_t i = 0; all_ok and i < robot_->jointCount(); ++i) {
 		position_data[i] = positions[i];
 	}
@@ -377,7 +400,7 @@ bool VREPDriver::sendJointTargetVelocity(phri::VectorXdConstPtr velocity) const 
 	bool all_ok = true;
 
 	const auto& velocity_vec = *velocity;
-	const auto& position_vec = *robot_->jointCurrentPosition();
+	// const auto& position_vec = *robot_->jointCurrentPosition();
 
 	*robot_->jointTargetPosition() += velocity_vec*sample_time_;
 
@@ -395,7 +418,7 @@ bool VREPDriver::getObjectHandles() {
 			string obj_name = robot_->name() + "_" + name + suffix_;
 			bool ok = simxGetObjectHandle(client_id_, obj_name.c_str(), &object_handles_[obj_name], simx_opmode_oneshot_wait) == simx_return_ok;
 			if(not ok) {
-				cerr << "In VREPDriver::getObjectHandles: can't get the handle of object " << obj_name << endl;
+				throw std::runtime_error(OPEN_PHRI_ERROR("Can't get the handle of object " + obj_name));
 			}
 			return ok;
 		};
