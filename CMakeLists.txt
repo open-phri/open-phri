@@ -20,7 +20,7 @@ declare_PID_Package(
 			DESCRIPTION     "OpenPHRI: a generic framework to easily and safely control robots in interactions with humans"
 )
 
-set_PID_Package_Version(0 7 0)
+set_PID_Package_Version(0 8 0)
 
 check_PID_Platform(CONFIGURATION posix)
 
