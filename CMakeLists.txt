@@ -10,13 +10,14 @@ option(USE_OPENMP 			"Make use of OpenMP to parallize certain parts of the libra
 PROJECT(open-phri)
 
 declare_PID_Package(
-			AUTHOR 		Benjamin Navarro
-			INSTITUTION	LIRMM
-			MAIL		navarro@lirmm.fr
-			ADDRESS 	git@github.com:BenjaminNavarro/open-phri.git
-			YEAR 		2017
-			LICENSE 	GNULGPL
-			DESCRIPTION "OpenPHRI: a generic framework to easily and safely control robots in interactions with humans"
+			AUTHOR 		    Benjamin Navarro
+			INSTITUTION	    LIRMM
+			MAIL		    navarro@lirmm.fr
+			ADDRESS 	    git@github.com:BenjaminNavarro/open-phri.git
+            PUBLIC_ADDRESS  https://github.com/BenjaminNavarro/open-phri.git
+			YEAR 		    2017
+			LICENSE 	    GNULGPL
+			DESCRIPTION     "OpenPHRI: a generic framework to easily and safely control robots in interactions with humans"
 )
 
 set_PID_Package_Version(0 7 0)
