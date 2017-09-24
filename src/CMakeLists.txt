@@ -56,12 +56,12 @@ if(GEN_PYTHON_BINDINGS)
 
     declare_PID_Component_Dependency(
         COMPONENT openphri
-        EXPORT NATIVE open-phri
+        NATIVE open-phri
     )
 
     declare_PID_Component_Dependency(
         COMPONENT openphri
-        EXPORT NATIVE open-phri-vrep-driver
+        NATIVE open-phri-vrep-driver
     )
 
     declare_PID_Component_Dependency(
