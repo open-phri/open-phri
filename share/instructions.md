@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/BenjaminNavarro/open-phri.svg?branch=master)](https://travis-ci.org/BenjaminNavarro/open-phri)
+
 Here are the basic steps to have OpenPHRI up and running:
  * Clone the PID workspace: `git clone https://github.com/lirmm/pid-workspace.git` or `git clone git@github.com:lirmm/pid-workspace.git` to use SSH instead of HTTPS
  * Go to the `pid` directory: `cd pid-workspace/pid`

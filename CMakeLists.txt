@@ -21,7 +21,7 @@ declare_PID_Package(
 			README			instructions.md
 )
 
-set_PID_Package_Version(0 8 0)
+set_PID_Package_Version(0 7 2)
 
 check_PID_Platform(CONFIGURATION posix)
 
