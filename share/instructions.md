@@ -1,11 +1,3 @@
-
-Overview
-=========
-
-OpenPHRI: a generic framework to easily and safely control robots in interactions with humans
-
-The license that applies to the whole package content is **GNULGPL**. Please look at the license.txt file at the root of this repository.
-
 Here are the basic steps to have OpenPHRI up and running:
  * Clone the PID workspace: `git clone https://github.com/lirmm/pid-workspace.git` or `git clone git@github.com:lirmm/pid-workspace.git` to use SSH instead of HTTPS
  * Go to the `pid` directory: `cd pid-workspace/pid`
@@ -16,20 +8,3 @@ Here are the basic steps to have OpenPHRI up and running:
  * Rebuild the package: `make build`
  * Find the applications under the `bin` folder of the install path `pid-workspace/instal/your-architecture/open-phri/current-version/`
  * Run apps (Start V-REP, open a scene (see OpenPHRI/share/scenes) and run the corresponding application e.g. `./apps/demo`)
-
-Installation and Usage
-=======================
-
-The procedures for installing the open-phri package and for using its components is based on the [PID](https://gite.lirmm.fr/pid/pid-workspace/wikis/home) build and deployment system called PID. Just follow and read the links to understand how to install, use and call its API and/or applications.
-
-About authors
-=====================
-
-open-phri has been developped by following authors: 
-+ Benjamin Navarro (LIRMM)
-
-Please contact Benjamin Navarro (navarro@lirmm.fr) - LIRMM for more information or questions.
-
-
-
-

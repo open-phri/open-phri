@@ -18,6 +18,7 @@ declare_PID_Package(
 			YEAR 		    2017
 			LICENSE 	    GNULGPL
 			DESCRIPTION     "OpenPHRI: a generic framework to easily and safely control robots in interactions with humans"
+			README			instructions.md
 )
 
 set_PID_Package_Version(0 8 0)
