@@ -28,13 +28,21 @@
 
 #pragma once
 
-#include <OpenPHRI/safety_controller.h>
+#include <OpenPHRI/type_aliases.h>
+#include <OpenPHRI/robot.h>
+#include <memory>
 #include <fstream>
 #include <sstream>
 
 namespace phri {
 
+class SafetyController;
+
 class DataLogger {
+	struct external_data;
+	template<typename T>
+	struct external_data_t;
+
 public:
 	DataLogger(
 		const std::string& directory,
@@ -45,7 +53,10 @@ public:
 
 	void logSafetyControllerData(SafetyController* controller);
 	void logRobotData(RobotConstPtr robot);
-	void logExternalData(const std::string& data_name, const double* data, size_t data_count);
+	template<typename T>
+	void logExternalData(const std::string& data_name, const T* data, size_t data_count) {
+		external_data_[&createLog(data_name, data_count)] = std::make_unique<external_data_t<T>>(data, data_count);
+	}
 	void reset();
 	void process();
 	void operator()();
@@ -56,6 +67,7 @@ private:
 	std::ofstream& createLog(const std::string& data_name, size_t data_count);
 	std::ostream& getStream(std::ofstream& file);
 	void logData(std::ofstream& file, const double* data, size_t data_count);
+	void logData(std::ofstream& file, const external_data& data);
 
 	SafetyController* controller_;
 	std::string directory_;
@@ -64,14 +76,32 @@ private:
 	bool delay_disk_write_;
 
 	RobotConstPtr robot_;
-	struct external_data_t {
-		const double* data;
+	struct external_data {
+		const void* data;
 		size_t size;
+
+		virtual void write(std::ostream& stream) const = 0;
+	};
+
+	template<typename T>
+	struct external_data_t : virtual public external_data {
+		external_data_t(const T* data, size_t size) {
+			this->data = static_cast<const void*>(data);
+			this->size = size;
+		}
+
+		virtual void write(std::ostream& stream) const override {
+			auto ptr = static_cast<const T*>(data);
+			for (size_t i = 0; i < size-1; ++i) {
+				stream << ptr[i] << '\t';
+			}
+			stream << ptr[size-1] << '\n';
+		}
 	};
 
 	std::map<std::string, std::ofstream> log_files_;
 	std::map<std::ofstream*, std::stringstream> stored_data_;
-	std::map<std::ofstream*, external_data_t> external_data_;
+	std::map<std::ofstream*, std::unique_ptr<external_data>> external_data_;
 };
 
 } // namespace phri
