@@ -80,7 +80,7 @@ FifthOrderPolynomial::ConstraintError FifthOrderPolynomial::computeParametersWit
 
 	bool dymax_found = false;
 	bool d2ymax_found = false;
-	double v_max, a_max;
+	double v_max = 0., a_max = 0.;
 	auto get_dymax_error = [&poly_params_dy, dymax, &v_max]() {
 							   v_max = FifthOrderPolynomial::getFirstDerivativeMaximum(poly_params_dy);
 							   return v_max - dymax;

@@ -78,7 +78,7 @@ public:
 	 * @brief Construct a potential field generator where objects position are given in the specified frame.
 	 * @param objects_frame The frame in which the positons of the objects are expressed .
 	 */
-	PotentialFieldGenerator(ReferenceFrame objects_frame = ReferenceFrame::TCP);
+	explicit PotentialFieldGenerator(ReferenceFrame objects_frame = ReferenceFrame::TCP);
 
 	/**
 	 * @brief Construct a potential field generator where objects position are given in the specified frame.
@@ -86,7 +86,7 @@ public:
 	 * @param objects_frame The frame in which the positons of the objects are expressed.
 	 */
 	PotentialFieldGenerator(Vector3dConstPtr offset, ReferenceFrame objects_frame = ReferenceFrame::TCP);
-	~PotentialFieldGenerator() = default;
+	virtual ~PotentialFieldGenerator() = default;
 
 	virtual Vector6d compute() override;
 

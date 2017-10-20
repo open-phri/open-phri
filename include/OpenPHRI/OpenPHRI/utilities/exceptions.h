@@ -6,7 +6,7 @@
 namespace phri {
 
 // Original solution found at http://stackoverflow.com/questions/37181621/easy-way-of-constructing-information-message-for-throwing-stdexception-using-p
-inline std::string make_open_phri_error(std::string msg,
+inline std::string make_open_phri_error(const std::string& msg,
                                         char const* file,
                                         char const* function,
                                         std::size_t line)

@@ -42,7 +42,7 @@ namespace phri {
 class JointVelocityGenerator {
 public:
 	JointVelocityGenerator() = default;
-	~JointVelocityGenerator() = default;
+	virtual ~JointVelocityGenerator() = default;
 
 	/**
 	 * @brief Compute the value associated with the joint_velocity generator.

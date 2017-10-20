@@ -23,10 +23,10 @@ using namespace phri;
 
 ForceProxy::ForceProxy(Vector6dConstPtr force, ReferenceFrame frame) :
 	ForceGenerator(frame),
-	force_(force)
+	force_ptr_(force)
 {
 }
 
 Vector6d ForceProxy::compute() {
-	return transform(*force_);
+	return transform(*force_ptr_);
 }

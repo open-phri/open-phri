@@ -40,7 +40,7 @@ namespace phri {
 class TorqueGenerator {
 public:
 	TorqueGenerator() = default;
-	~TorqueGenerator() = default;
+	virtual ~TorqueGenerator() = default;
 
 	/**
 	 * @brief Compute the value associated with the torque generator.

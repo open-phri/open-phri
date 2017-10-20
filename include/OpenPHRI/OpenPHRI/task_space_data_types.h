@@ -38,7 +38,7 @@ public:
 	Pose();
 	Pose(phri::Vector3d translation, Eigen::Quaterniond orientation);
 	Pose(phri::Vector3d translation, phri::Vector3d euler_angles);
-	Pose(phri::AffineTransform transformation);
+	explicit Pose(phri::AffineTransform transformation);
 
 	const phri::Vector3d&                       translation() const;
 	const Eigen::Quaterniond&                   orientation() const;
@@ -70,7 +70,7 @@ class Twist {
 public:
 	Twist();
 	Twist(phri::Vector3d translation, phri::Vector3d rotation);
-	Twist(phri::Vector6d twist);
+	explicit Twist(phri::Vector6d twist);
 
 	Eigen::Ref<const phri::Vector3d>    translation() const;
 	Eigen::Ref<const phri::Vector3d>    rotation() const;
@@ -97,7 +97,7 @@ class Acceleration {
 public:
 	Acceleration();
 	Acceleration(phri::Vector3d translation, phri::Vector3d rotation);
-	Acceleration(phri::Vector6d acceleration);
+	explicit Acceleration(phri::Vector6d acceleration);
 
 	Eigen::Ref<const phri::Vector3d>    translation() const;
 	Eigen::Ref<const phri::Vector3d>    rotation() const;

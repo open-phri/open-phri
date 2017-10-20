@@ -38,8 +38,8 @@ namespace phri {
  */
 class JointVelocityProxy : public JointVelocityGenerator {
 public:
-	JointVelocityProxy(VectorXdConstPtr joint_velocity);
-	~JointVelocityProxy() = default;
+	explicit JointVelocityProxy(VectorXdConstPtr joint_velocity);
+	virtual ~JointVelocityProxy() = default;
 
 	virtual VectorXd compute() override;
 

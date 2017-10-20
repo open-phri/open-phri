@@ -77,9 +77,9 @@ StateMachine::StateMachine(
 	joint_trajectory_generator_->addPathTo(joint_end_point_, dqmax, d2qmax);
 
 	trajectory_generator_ = std::make_shared<phri::TrajectoryGenerator<phri::Pose>>(start_point_, SAMPLE_TIME, phri::TrajectorySynchronization::SynchronizeTrajectory);
-	phri::Vector6d vmax, amax, err_th;
-	vmax.block<3,1>(0,0).setConstant(REPLAY_VMAX); vmax.block<3,1>(3,0).setConstant(REPLAY_WMAX);
-	amax.block<3,1>(0,0).setConstant(REPLAY_AMAX); amax.block<3,1>(3,0).setConstant(REPLAY_DWMAX);
+	phri::Vector6d err_th;
+	phri::Twist vmax(phri::Vector3d::Ones()*REPLAY_VMAX, phri::Vector3d::Ones()*REPLAY_WMAX);
+	phri::Acceleration amax(phri::Vector3d::Ones()*REPLAY_AMAX, phri::Vector3d::Ones()*REPLAY_DWMAX);
 	trajectory_generator_->addPathTo(end_point_, vmax, amax);
 	err_th.block<3,1>(0,0).setConstant(REPLAY_ERROR_THRESHOLD_TRANS);
 	err_th.block<3,1>(3,0).setConstant(REPLAY_ERROR_THRESHOLD_ROT);

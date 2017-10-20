@@ -43,7 +43,7 @@ public:
 	 * @brief Construct a velocity constraint with a given total and a maximum velocity.
 	 * @param maximum_velocity A shared pointer to the maximum velocity allowed.
 	 */
-	VelocityConstraint(
+	explicit VelocityConstraint(
 		doubleConstPtr maximum_velocity);
 
 	virtual ~VelocityConstraint() = default;

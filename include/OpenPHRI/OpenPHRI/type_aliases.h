@@ -38,7 +38,7 @@ using Matrix6d = Eigen::Matrix<double, 6, 6>;
 using Eigen::VectorXd;
 using Eigen::Vector2d;
 using Eigen::Vector3d;
-using Vector4d = Eigen::Matrix<double, 4, 1>;
+using Eigen::Vector4d;
 using Vector6d = Eigen::Matrix<double, 6, 1>;
 using AffineTransform = Eigen::Transform<double, 3, Eigen::Affine>;
 

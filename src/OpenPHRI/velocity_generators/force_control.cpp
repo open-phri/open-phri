@@ -36,7 +36,6 @@ ForceControl::ForceControl(
 	p_gain_(p_gain),
 	d_gain_(d_gain),
 	selection_(selection),
-	frame_(frame),
 	type_(type),
 	filter_coeff_(1.)
 {
@@ -80,10 +79,10 @@ Twist ForceControl::compute() {
 	prev_error_ = error;
 
 	// TODO use velocity_ and VelocityGenerator::compute()
-	return cmd;
+	return static_cast<Twist>(cmd);
 }
 
-void ForceControl::applySelection(Vector6d& vec) {
+void ForceControl::applySelection(Vector6d& vec) const {
 	const auto& sel = *selection_;
 	for (size_t i = 0; i < 6; ++i) {
 		if(std::abs(sel(i)) < 1e-12) {
