@@ -9,4 +9,5 @@ before_install:
     - docker pull benjaminn13/pid-workspace-ci
 
 script:
-    - docker run benjaminn13/pid-workspace-ci bash -c "make deploy package=open-phri && cd ../packages/open-phri/build/ && cmake -DBUILD_AND_RUN_TESTS=ON .. && cmake .. && make build force=true"
+    - if [ $TRAVIS_BRANCH = 'master' ]; docker run benjaminn13/pid-workspace-ci bash -c "make deploy package=open-phri && cd ../packages/open-phri/build/ && cmake -DBUILD_AND_RUN_TESTS=ON .. && cmake .. && make build force=true"; fi
+    - if [ $TRAVIS_BRANCH = 'integration' ]; docker run benjaminn13/pid-workspace-ci bash -c "make deploy package=open-phri && cd ../packages/open-phri/build/ && git checkout integration && cmake -DBUILD_AND_RUN_TESTS=ON .. && cmake .. && make build"; fi
