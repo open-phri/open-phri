@@ -58,6 +58,7 @@ public:
 		return (out);
 	}
 
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 private:
 	phri::Vector3d translation_;
 	Eigen::Quaterniond orientation_;
@@ -86,6 +87,7 @@ public:
 
 	Twist& operator=(const phri::Vector6d& twist);
 
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 private:
 	phri::Vector6d twist_;
 };
@@ -110,6 +112,8 @@ public:
 	const double* data() const;
 
 	Acceleration& operator=(const phri::Vector6d& acceleration);
+
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 private:
 	phri::Vector6d acceleration_;
 };
