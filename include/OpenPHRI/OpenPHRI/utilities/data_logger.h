@@ -44,6 +44,13 @@ class DataLogger {
 	struct external_data_t;
 
 public:
+	/**
+	 * Creates a new data logger
+	 * @param directory            Directory in which log files will be stored
+	 * @param time                 A shared pointer to the current time
+	 * @param create_gnuplot_files Create a file to easily open logs in gnuplot (default = false)
+	 * @param delay_disk_write     Log data in RAM and write it to the disk when writeStoredDataToDisk is called or on destruction (default = false)
+	 */
 	DataLogger(
 		const std::string& directory,
 		doubleConstPtr time,
@@ -51,16 +58,51 @@ public:
 		bool delay_disk_write = false);
 	~DataLogger();
 
+	/**
+	 * Log all the data related to a SafetyController (inputs, constraints, intermediate computation)
+	 * @param controller Pointer to a SafetyController object
+	 */
 	void logSafetyControllerData(SafetyController* controller);
+	/**
+	 * Log all the data related to a Robot (all fields present in the structure)
+	 * @param robot A shared pointer to a Robot object
+	 */
 	void logRobotData(RobotConstPtr robot);
+
+	/**
+	 * Log any array of data
+	 * @param data_name  The name given to this data (used for file name)
+	 * @param data       A pointer to an array of data to log
+	 * @param data_count The number of values in the array
+	 */
 	template<typename T>
 	void logExternalData(const std::string& data_name, const T* data, size_t data_count) {
 		external_data_[&createLog(data_name, data_count)] = std::make_unique<external_data_t<T>>(data, data_count);
 	}
+
+	/**
+	 * Reset the data logger back to its initial state (no controller, robot or external data to log)
+	 */
 	void reset();
+
+	/**
+	 * Log all the given data
+	 */
 	void process();
+
+	/**
+	 * Shortcut for process
+	 */
 	void operator()();
+
+	/**
+	 * Write all previously saved data to the disk. Called during destruction if delay_disk_write was set to true during construction.
+	 */
 	void writeStoredDataToDisk();
+
+	/**
+	 * Close all the currently open files. Called during destruction.
+	 */
 	void closeFiles();
 
 private:
@@ -76,6 +118,7 @@ private:
 	bool delay_disk_write_;
 
 	RobotConstPtr robot_;
+
 	struct external_data {
 		const void* data;
 		size_t size;
