@@ -1,6 +1,0 @@
--std=c++14
--Iinclude/
--Iinclude/vrep_remote_api
--I/usr/include/eigen3
--I/home/idhuser/.julia/v0.5/CxxWrap/deps/usr/include/
--Wno-pragma-once-outside-header
