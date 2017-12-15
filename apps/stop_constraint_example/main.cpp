@@ -59,7 +59,7 @@ int main(int argc, char const *argv[]) {
 	auto activation_force_threshold = make_shared<double>(25.);
 	auto deactivation_force_threshold = make_shared<double>(5.);
 
-	auto stop_constraint = make_shared<StopConstraint>(activation_force_threshold, deactivation_force_threshold);
+	auto stop_constraint = make_shared<EmergencyStopConstraint>(activation_force_threshold, deactivation_force_threshold);
 
 	auto constant_vel = make_shared<Twist>();
 	auto constant_velocity_generator = make_shared<VelocityProxy>(constant_vel);

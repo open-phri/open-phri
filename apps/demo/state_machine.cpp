@@ -275,7 +275,7 @@ bool StateMachine::compute() {
 			if(force_control_at_next_wp_) {
 				controller_.add(
 					"emergency stop",
-					phri::StopConstraint(
+					phri::EmergencyStopConstraint(
 						std::make_shared<double>(10.),
 						std::make_shared<double>(1.)));
 			}
