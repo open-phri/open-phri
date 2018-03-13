@@ -41,8 +41,8 @@ public:
 	/** @brief Construct a velocity proxy given an externally managed velocity
 	 *  @param frame The reference frame in which the velocity is expressed
 	 */
-	VelocityProxy(TwistConstPtr velocity, ReferenceFrame frame = ReferenceFrame::TCP);
-	~VelocityProxy() = default;
+	explicit VelocityProxy(TwistConstPtr velocity, ReferenceFrame frame = ReferenceFrame::TCP);
+	virtual ~VelocityProxy() = default;
 
 	virtual Twist compute() override;
 

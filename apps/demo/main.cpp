@@ -89,7 +89,7 @@ int main(int argc, char const *argv[]) {
 	logger.logSafetyControllerData(&safety_controller);
 	logger.logRobotData(robot);
 
-	double fsm_states[2];
+	int fsm_states[2];
 	logger.logExternalData("fsm state", fsm_states, 2);
 	double operator_distance;
 	logger.logExternalData("operator distance", &operator_distance, 1);
@@ -100,8 +100,8 @@ int main(int argc, char const *argv[]) {
 
 	auto update_external_data = [&state_machine, &fsm_states, &operator_distance, &sep_dist_vlim]()
 								{
-									fsm_states[0] = static_cast<double>(state_machine.getTeachState());
-									fsm_states[1] = static_cast<double>(state_machine.getReplayState());
+									fsm_states[0] = static_cast<int>(state_machine.getTeachState());
+									fsm_states[1] = static_cast<int>(state_machine.getReplayState());
 									operator_distance = state_machine.getOperatorDistance();
 									sep_dist_vlim = state_machine.getSeparationDistanceVelocityLimitation();
 								};

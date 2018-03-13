@@ -41,8 +41,8 @@ class ExternalForce : public ForceGenerator {
 public:
 	/** @brief Construct an external fworce generator based on a given robot
 	 */
-	ExternalForce(RobotConstPtr robot);
-	~ExternalForce() = default;
+	explicit ExternalForce(RobotConstPtr robot);
+	virtual ~ExternalForce() = default;
 
 	virtual Vector6d compute() override;
 

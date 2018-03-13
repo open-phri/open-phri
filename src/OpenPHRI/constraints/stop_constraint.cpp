@@ -25,7 +25,7 @@ using namespace phri;
 using namespace Eigen;
 
 /***		Constructor & destructor		***/
-StopConstraint::StopConstraint(
+EmergencyStopConstraint::EmergencyStopConstraint(
 	doubleConstPtr activation_force_threshold,
 	doubleConstPtr deactivation_force_threshold) :
 	activation_force_threshold_(activation_force_threshold),
@@ -36,7 +36,7 @@ StopConstraint::StopConstraint(
 
 }
 
-StopConstraint::StopConstraint(
+EmergencyStopConstraint::EmergencyStopConstraint(
 	CheckType check_type,
 	doubleConstPtr activation_force_threshold,
 	doubleConstPtr deactivation_force_threshold,
@@ -53,7 +53,7 @@ StopConstraint::StopConstraint(
 }
 
 /***		Algorithm		***/
-double StopConstraint::compute() {
+double EmergencyStopConstraint::compute() {
 	double constraint;
 	double force_constraint = 1.;
 	double torque_constraint = 1.;

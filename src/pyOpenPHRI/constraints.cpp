@@ -56,9 +56,9 @@ std::shared_ptr<PowerConstraintWrap> NewPowerConstraint(Vector6dConstPtr externa
 	return std::make_shared<PowerConstraintWrap>(external_force, maximum_power);
 }
 
-std::shared_ptr<StopConstraint> NewStopConstraint(Vector6dConstPtr external_force, doubleConstPtr activation_force_threshold, doubleConstPtr deactivation_force_threshold)
+std::shared_ptr<EmergencyStopConstraint> NewEmergencyStopConstraint(Vector6dConstPtr external_force, doubleConstPtr activation_force_threshold, doubleConstPtr deactivation_force_threshold)
 {
-	return std::make_shared<StopConstraint>(external_force, activation_force_threshold, deactivation_force_threshold);
+	return std::make_shared<EmergencyStopConstraint>(external_force, activation_force_threshold, deactivation_force_threshold);
 }
 
 std::shared_ptr<SeparationDistanceConstraint> NewSeparationDistanceConstraint(ConstraintPtr constraint, InterpolatorPtr interpolator)
@@ -88,7 +88,7 @@ void wrapConstraints() {
 	def("NewVelocityConstraint",           NewVelocityConstraint,         "Create a new instance of a VelocityConstraint shared_ptr");
 	def("NewKineticEnergyConstraint",      NewKineticEnergyConstraint,    "Create a new instance of a KineticEnergyConstraint shared_ptr");
 	def("NewPowerConstraint",              NewPowerConstraint,            "Create a new instance of a PowerConstraint shared_ptr");
-	def("NewStopConstraint",               NewStopConstraint,             "Create a new instance of a StopConstraint shared_ptr");
+	def("NewEmergencyStopConstraint",               NewEmergencyStopConstraint,             "Create a new instance of a EmergencyStopConstraint shared_ptr");
 	def("NewSeparationDistanceConstraint", (std::shared_ptr<SeparationDistanceConstraint>(*)(ConstraintPtr, InterpolatorPtr, Vector6dConstPtr)) 0,
 	    NewSeparationDistanceConstraint_overloads(
 			args("constraint", "interpolator", "robot_position"),
@@ -124,8 +124,8 @@ void wrapConstraints() {
 	.def("compute", &PowerConstraintWrap::compute)
 	.def("getPower", &PowerConstraintWrap::getPowerPy);
 
-	class_<StopConstraint, boost::noncopyable, bases<Constraint>>("StopConstraint", "Stop constraint, stops the tool when the external force is above a given limit", no_init)
-	.def("compute", &StopConstraint::compute);
+	class_<EmergencyStopConstraint, boost::noncopyable, bases<Constraint>>("EmergencyStopConstraint", "Stop constraint, stops the tool when the external force is above a given limit", no_init)
+	.def("compute", &EmergencyStopConstraint::compute);
 
 	void (SeparationDistanceConstraint:: *SeparationDistanceConstraint_setVerbose)(bool) = &SeparationDistanceConstraint::setVerbose;
 	class_<SeparationDistanceConstraint, boost::noncopyable, bases<Constraint, ObjectCollection<Vector6dConstPtr>>>("SeparationDistanceConstraint", "Separation distance constraint, adapts the constraint depending on the distance to the closest object", no_init)
@@ -139,14 +139,14 @@ void wrapConstraints() {
 	register_ptr_to_python<std::shared_ptr<VelocityConstraint>>();
 	register_ptr_to_python<std::shared_ptr<KineticEnergyConstraint>>();
 	register_ptr_to_python<std::shared_ptr<PowerConstraintWrap>>();
-	register_ptr_to_python<std::shared_ptr<StopConstraint>>();
+	register_ptr_to_python<std::shared_ptr<EmergencyStopConstraint>>();
 	register_ptr_to_python<std::shared_ptr<SeparationDistanceConstraint>>();
 
 	implicitly_convertible<std::shared_ptr<DefaultConstraint>,              std::shared_ptr<Constraint>>();
 	implicitly_convertible<std::shared_ptr<VelocityConstraint>,             std::shared_ptr<Constraint>>();
 	implicitly_convertible<std::shared_ptr<KineticEnergyConstraint>,        std::shared_ptr<Constraint>>();
 	implicitly_convertible<std::shared_ptr<PowerConstraintWrap>,            std::shared_ptr<Constraint>>();
-	implicitly_convertible<std::shared_ptr<StopConstraint>,                 std::shared_ptr<Constraint>>();
+	implicitly_convertible<std::shared_ptr<EmergencyStopConstraint>,                 std::shared_ptr<Constraint>>();
 	implicitly_convertible<std::shared_ptr<SeparationDistanceConstraint>,   std::shared_ptr<Constraint>>();
 
 }

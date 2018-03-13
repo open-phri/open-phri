@@ -19,7 +19,7 @@ deactivation_force_threshold = NewDoublePtr(5)
 safety_controller = NewSafetyController(damping_matrix)
 tcp_velocity = safety_controller.getTCPVelocity()
 
-stop_constraint = NewStopConstraint(ext_force, activation_force_threshold, deactivation_force_threshold)
+stop_constraint = NewEmergencyStopConstraint(ext_force, activation_force_threshold, deactivation_force_threshold)
 
 constant_vel = NewVector6dPtr()
 constant_velocity_generator = NewVelocityProxy(constant_vel)

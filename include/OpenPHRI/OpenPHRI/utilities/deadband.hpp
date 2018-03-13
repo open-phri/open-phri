@@ -35,20 +35,20 @@ namespace phri {
 template<class T>
 class Deadband {
 public:
-	Deadband(std::shared_ptr<T> data, std::shared_ptr<const T> threshold) {
-		data_in_ = data;
-		data_out_ = data;
-		threshold_ = threshold;
+	Deadband(const std::shared_ptr<T>& data, const std::shared_ptr<const T>& threshold) :
+		data_in_(data),
+		data_out_(data),
+		threshold_(threshold)
+	{
 	}
-	Deadband(std::shared_ptr<const T> data_in, std::shared_ptr<T> data_out, std::shared_ptr<const T> threshold) {
-		data_in_ = data_in;
-		data_out_ = data_out;
+	Deadband(const std::shared_ptr<const T>& data_in, const std::shared_ptr<T>& data_out, const std::shared_ptr<const T>& threshold) :
+		data_in_(data_in),
+		data_out_(data_out)
+	{
 	}
-	~Deadband() {
+	~Deadband() = default;
 
-	}
-
-	void compute() {
+	void compute() const {
 		const auto& in = *data_in_;
 		auto& out = *data_out_;
 		const auto& th = *threshold_;
@@ -65,7 +65,7 @@ public:
 		}
 	}
 
-	void operator()() {
+	void operator()() const {
 		compute();
 	}
 

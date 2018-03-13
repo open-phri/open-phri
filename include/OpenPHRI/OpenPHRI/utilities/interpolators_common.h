@@ -45,9 +45,9 @@ class TrajectoryGenerator;
 template<typename T>
 struct TrajectoryPoint {
 	TrajectoryPoint(
-		std::shared_ptr<T> y,
-		std::shared_ptr<T> dy,
-		std::shared_ptr<T> d2y) :
+		const std::shared_ptr<T>& y,
+		const std::shared_ptr<T>& dy,
+		const std::shared_ptr<T>& d2y) :
 		y(y), dy(dy), d2y(d2y)
 	{
 		createRefs();
@@ -154,9 +154,9 @@ private:
 template<>
 struct TrajectoryPoint<Pose> {
 	TrajectoryPoint(
-		std::shared_ptr<Pose> y,
-		std::shared_ptr<Twist> dy,
-		std::shared_ptr<Acceleration> d2y) :
+		const std::shared_ptr<Pose>& y,
+		const std::shared_ptr<Twist>& dy,
+		const std::shared_ptr<Acceleration>& d2y) :
 		y(y), dy(dy), d2y(d2y)
 	{
 	}

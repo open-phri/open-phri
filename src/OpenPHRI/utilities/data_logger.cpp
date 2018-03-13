@@ -17,6 +17,7 @@
 *       If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <OpenPHRI/safety_controller.h>
 #include <OpenPHRI/utilities/data_logger.h>
 #include <OpenPHRI/constraints/constraint.h>
 #include <OpenPHRI/force_generators/force_generator.h>
@@ -87,10 +88,6 @@ void DataLogger::logRobotData(RobotConstPtr robot) {
 	robot_ = robot;
 }
 
-void DataLogger::logExternalData(const std::string& data_name, const double* data, size_t data_count) {
-	external_data_[&createLog(data_name, data_count)] = {.data=data, .size=data_count};
-}
-
 void DataLogger::reset() {
 	controller_ = nullptr;
 	robot_.reset();
@@ -153,6 +150,12 @@ void DataLogger::logData(std::ofstream& file, const double* data, size_t data_co
 	stream << data[data_count-1] << '\n';
 }
 
+void DataLogger::logData(std::ofstream& file, const external_data& data) {
+	std::ostream& stream = getStream(file);
+	stream << *time_ << '\t';
+	data.write(stream);
+}
+
 void DataLogger::process() {
 	if(controller_ != nullptr) {
 		for(auto it=controller_->constraints_begin(); it!=controller_->constraints_end(); ++it) {
@@ -202,7 +205,7 @@ void DataLogger::process() {
 	}
 
 	for(auto& data: external_data_) {
-		logData(*data.first, data.second.data, data.second.size);
+		logData(*data.first, *data.second);
 	}
 }
 

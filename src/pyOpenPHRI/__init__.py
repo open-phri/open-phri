@@ -2,7 +2,7 @@ from PyOpenPHRI import ConstraintsType
 from PyOpenPHRI import DefaultConstraint
 from PyOpenPHRI import VelocityConstraint
 from PyOpenPHRI import PowerConstraint
-from PyOpenPHRI import StopConstraint
+from PyOpenPHRI import EmergencyStopConstraint
 from PyOpenPHRI import VelocityProxy
 from PyOpenPHRI import ForceProxy
 from PyOpenPHRI import SafetyController
@@ -13,7 +13,7 @@ __all__ = ["ConstraintsType",
            "DefaultConstraint",
            "VelocityConstraint",
            "PowerConstraint",
-           "StopConstraint",
+           "EmergencyStopConstraint",
            "VelocityProxy",
            "ForceProxy",
            "SafetyController",

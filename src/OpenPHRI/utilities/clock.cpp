@@ -26,8 +26,10 @@ Clock::Clock() : sample_time_(-1.) {
 	time_ = std::make_shared<double>(0.);
 }
 
-Clock::Clock(double sample_time) : sample_time_(sample_time) {
-	time_ = std::make_shared<double>(0.);
+Clock::Clock(double sample_time) :
+	sample_time_(sample_time),
+	time_(std::make_shared<double>(0.))
+{
 }
 
 void Clock::reset() {

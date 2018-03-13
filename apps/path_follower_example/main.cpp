@@ -62,7 +62,7 @@ int main(int argc, char const *argv[]) {
 	auto activation_force_threshold = make_shared<double>(25.);
 	auto deactivation_force_threshold = make_shared<double>(5.);
 
-	safety_controller.add("stop constraint", StopConstraint(activation_force_threshold, deactivation_force_threshold));
+	safety_controller.add("stop constraint", EmergencyStopConstraint(activation_force_threshold, deactivation_force_threshold));
 	safety_controller.add("external force", ExternalForce(robot));
 
 	auto point_1 = TrajectoryPoint<Vector2d>(Vector2d(-0.197,   1.1249),    Vector2d(0., 0.),       Vector2d(0., 0.));

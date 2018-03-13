@@ -53,7 +53,7 @@ public:
 	 */
 	LinearInterpolator(LinearPointConstPtr from, LinearPointConstPtr to);
 
-	~LinearInterpolator() = default;
+	virtual ~LinearInterpolator() = default;
 
 	/**
 	 * @brief Turn the saturation on or off. If on, the output will be restricted to the [from.y() to.y()] range.

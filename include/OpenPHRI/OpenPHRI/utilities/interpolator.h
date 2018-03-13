@@ -38,7 +38,7 @@ namespace phri {
 class Interpolator {
 public:
 	Interpolator() = default;
-	~Interpolator() = default;
+	virtual ~Interpolator() = default;
 
 	/**
 	 * @brief Get the pointer to the output data.

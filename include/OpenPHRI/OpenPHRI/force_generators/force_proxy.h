@@ -47,7 +47,7 @@ public:
 	virtual Vector6d compute() override;
 
 private:
-	Vector6dConstPtr force_;
+	Vector6dConstPtr force_ptr_;
 };
 
 using ForceProxyPtr = std::shared_ptr<ForceProxy>;

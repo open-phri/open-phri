@@ -28,14 +28,29 @@
 
 #pragma once
 
-#include <OpenPHRI/safety_controller.h>
+#include <OpenPHRI/type_aliases.h>
+#include <OpenPHRI/robot.h>
+#include <memory>
 #include <fstream>
 #include <sstream>
 
 namespace phri {
 
+class SafetyController;
+
 class DataLogger {
+	struct external_data;
+	template<typename T>
+	struct external_data_t;
+
 public:
+	/**
+	 * Creates a new data logger
+	 * @param directory            Directory in which log files will be stored
+	 * @param time                 A shared pointer to the current time
+	 * @param create_gnuplot_files Create a file to easily open logs in gnuplot (default = false)
+	 * @param delay_disk_write     Log data in RAM and write it to the disk when writeStoredDataToDisk is called or on destruction (default = false)
+	 */
 	DataLogger(
 		const std::string& directory,
 		doubleConstPtr time,
@@ -43,19 +58,58 @@ public:
 		bool delay_disk_write = false);
 	~DataLogger();
 
+	/**
+	 * Log all the data related to a SafetyController (inputs, constraints, intermediate computation)
+	 * @param controller Pointer to a SafetyController object
+	 */
 	void logSafetyControllerData(SafetyController* controller);
+	/**
+	 * Log all the data related to a Robot (all fields present in the structure)
+	 * @param robot A shared pointer to a Robot object
+	 */
 	void logRobotData(RobotConstPtr robot);
-	void logExternalData(const std::string& data_name, const double* data, size_t data_count);
+
+	/**
+	 * Log any array of data
+	 * @param data_name  The name given to this data (used for file name)
+	 * @param data       A pointer to an array of data to log
+	 * @param data_count The number of values in the array
+	 */
+	template<typename T>
+	void logExternalData(const std::string& data_name, const T* data, size_t data_count) {
+		external_data_[&createLog(data_name, data_count)] = std::make_unique<external_data_t<T>>(data, data_count);
+	}
+
+	/**
+	 * Reset the data logger back to its initial state (no controller, robot or external data to log)
+	 */
 	void reset();
+
+	/**
+	 * Log all the given data
+	 */
 	void process();
+
+	/**
+	 * Shortcut for process
+	 */
 	void operator()();
+
+	/**
+	 * Write all previously saved data to the disk. Called during destruction if delay_disk_write was set to true during construction.
+	 */
 	void writeStoredDataToDisk();
+
+	/**
+	 * Close all the currently open files. Called during destruction.
+	 */
 	void closeFiles();
 
 private:
 	std::ofstream& createLog(const std::string& data_name, size_t data_count);
 	std::ostream& getStream(std::ofstream& file);
 	void logData(std::ofstream& file, const double* data, size_t data_count);
+	void logData(std::ofstream& file, const external_data& data);
 
 	SafetyController* controller_;
 	std::string directory_;
@@ -64,14 +118,33 @@ private:
 	bool delay_disk_write_;
 
 	RobotConstPtr robot_;
-	struct external_data_t {
-		const double* data;
+
+	struct external_data {
+		const void* data;
 		size_t size;
+
+		virtual void write(std::ostream& stream) const = 0;
+	};
+
+	template<typename T>
+	struct external_data_t : virtual public external_data {
+		external_data_t(const T* data, size_t size) {
+			this->data = static_cast<const void*>(data);
+			this->size = size;
+		}
+
+		virtual void write(std::ostream& stream) const override {
+			auto ptr = static_cast<const T*>(data);
+			for (size_t i = 0; i < size-1; ++i) {
+				stream << ptr[i] << '\t';
+			}
+			stream << ptr[size-1] << '\n';
+		}
 	};
 
 	std::map<std::string, std::ofstream> log_files_;
 	std::map<std::ofstream*, std::stringstream> stored_data_;
-	std::map<std::ofstream*, external_data_t> external_data_;
+	std::map<std::ofstream*, std::unique_ptr<external_data>> external_data_;
 };
 
 } // namespace phri
