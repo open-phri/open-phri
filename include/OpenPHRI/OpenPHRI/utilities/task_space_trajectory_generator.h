@@ -117,7 +117,7 @@ public:
 	}
 
 	void enableErrorTracking(const Pose* reference, const Vector6d& threshold, bool recompute_when_resumed) {
-		enableErrorTracking(std::shared_ptr<const Pose>(reference, [](auto p){}), threshold, recompute_when_resumed);
+		enableErrorTracking(std::shared_ptr<const Pose>(reference, [](const Pose* p){}), threshold, recompute_when_resumed);
 	}
 
 private:
