@@ -46,7 +46,7 @@ public:
 	 * @brief Construct a power constraint with a given total velocity, external force and maximum power.
 	 * @param maximum_power A shared pointer to the maximum power allowed.
 	 */
-	PowerConstraint(
+	explicit PowerConstraint(
 		doubleConstPtr maximum_power);
 
 	virtual ~PowerConstraint() = default;

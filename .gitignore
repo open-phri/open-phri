@@ -1,3 +1,4 @@
 *~
 *.old
 .clang_complete
+.atom-dbg.cson

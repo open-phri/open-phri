@@ -43,7 +43,7 @@ public:
 	 * @brief Construct a joint velocity constraint with a given a vector of maximum velocities.
 	 * @param maximum_velocity A shared pointer to the maximum velocities allowed.
 	 */
-	JointVelocityConstraint(
+	explicit JointVelocityConstraint(
 		VectorXdConstPtr maximum_velocities);
 
 	virtual ~JointVelocityConstraint() = default;

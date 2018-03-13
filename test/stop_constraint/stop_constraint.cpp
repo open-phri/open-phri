@@ -28,8 +28,8 @@ int main(int argc, char const *argv[]) {
 	auto deactivation_torque_threshold = make_shared<double>(1.);
 
 
-	auto stop_constraint = make_shared<StopConstraint>(
-		StopConstraint::CheckBoth,  // Check both external forces and external joint torques
+	auto stop_constraint = make_shared<EmergencyStopConstraint>(
+		EmergencyStopConstraint::CheckBoth,  // Check both external forces and external joint torques
 		activation_force_threshold,
 		deactivation_force_threshold,
 		activation_torque_threshold,

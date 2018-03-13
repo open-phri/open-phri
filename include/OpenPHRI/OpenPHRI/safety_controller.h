@@ -46,7 +46,7 @@ public:
 	 * @brief Construct a safety controller with a given robot.
 	 * @param robot The robot to work with.
 	 */
-	SafetyController(RobotPtr robot);
+	explicit SafetyController(RobotPtr robot);
 
 	~SafetyController() = default;
 
@@ -113,7 +113,7 @@ public:
 	 */
 	template<typename T>
 	typename std::enable_if<std::is_base_of<Constraint, T>::value, bool>::type
-	add(const std::string& name, std::shared_ptr<T> obj, bool force = false) {
+	add(const std::string& name, const std::shared_ptr<T>& obj, bool force = false) {
 		return addConstraint(name, obj, force);
 	}
 
@@ -131,7 +131,7 @@ public:
 	 */
 	template<typename T>
 	typename std::enable_if<std::is_base_of<ForceGenerator, T>::value, bool>::type
-	add(const std::string& name, std::shared_ptr<T> obj, bool force = false) {
+	add(const std::string& name, const std::shared_ptr<T>& obj, bool force = false) {
 		return addForceGenerator(name, obj, force);
 	}
 
@@ -149,7 +149,7 @@ public:
 	 */
 	template<typename T>
 	typename std::enable_if<std::is_base_of<TorqueGenerator, T>::value, bool>::type
-	add(const std::string& name, std::shared_ptr<T> obj, bool force = false) {
+	add(const std::string& name, const std::shared_ptr<T>& obj, bool force = false) {
 		return addTorqueGenerator(name, obj, force);
 	}
 
@@ -167,7 +167,7 @@ public:
 	 */
 	template<typename T>
 	typename std::enable_if<std::is_base_of<VelocityGenerator, T>::value, bool>::type
-	add(const std::string& name, std::shared_ptr<T> obj, bool force = false) {
+	add(const std::string& name, const std::shared_ptr<T>& obj, bool force = false) {
 		return addVelocityGenerator(name, obj, force);
 	}
 
@@ -185,7 +185,7 @@ public:
 	 */
 	template<typename T>
 	typename std::enable_if<std::is_base_of<JointVelocityGenerator, T>::value, bool>::type
-	add(const std::string& name, std::shared_ptr<T> obj, bool force = false) {
+	add(const std::string& name, const std::shared_ptr<T>& obj, bool force = false) {
 		return addJointVelocityGenerator(name, obj, force);
 	}
 

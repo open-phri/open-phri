@@ -40,8 +40,8 @@ class TorqueProxy : public TorqueGenerator {
 public:
 	/** @brief Construct a torque proxy given an externally managed torque
 	 */
-	TorqueProxy(VectorXdConstPtr torque);
-	~TorqueProxy() = default;
+	explicit TorqueProxy(VectorXdConstPtr torque);
+	virtual ~TorqueProxy() = default;
 
 	virtual VectorXd compute() override;
 

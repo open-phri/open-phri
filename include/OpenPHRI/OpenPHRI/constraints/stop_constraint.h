@@ -21,7 +21,7 @@
 /**
  * @file stop_constraint.h
  * @author Benjamin Navarro
- * @brief Definition of the StopConstraint class
+ * @brief Definition of the EmergencyStopConstraint class
  * @date April 2017
  * @ingroup OpenPHRI
  */
@@ -37,7 +37,7 @@ namespace phri {
  *  @details Two thresholds are used. The robot is stopped when the external force is above the activation threshold and
  *  released when the external force gets below the deactivation threshold.
  */
-class StopConstraint : public Constraint {
+class EmergencyStopConstraint : public Constraint {
 public:
 	enum CheckType {
 		CheckForces         = 1<<0,
@@ -52,18 +52,18 @@ public:
 	 * @param activation_force_threshold A shared pointer to the activation threshold.
 	 * @param deactivation_force_threshold A shared pointer to the deactivation threshold.
 	 */
-	StopConstraint(
+	EmergencyStopConstraint(
 		doubleConstPtr activation_force_threshold,
 		doubleConstPtr deactivation_force_threshold);
 
-	StopConstraint(
+	EmergencyStopConstraint(
 		CheckType check_type,
 		doubleConstPtr activation_force_threshold,
 		doubleConstPtr deactivation_force_threshold,
 		doubleConstPtr activation_torque_threshold,
 		doubleConstPtr deactivation_torque_threshold);
 
-	virtual ~StopConstraint() = default;
+	virtual ~EmergencyStopConstraint() = default;
 
 	/***		Algorithm		***/
 	virtual double compute() override;
@@ -78,7 +78,7 @@ private:
 	double previous_constraint_value_;
 };
 
-using StopConstraintPtr = std::shared_ptr<StopConstraint>;
-using StopConstraintConstPtr = std::shared_ptr<const StopConstraint>;
+using EmergencyStopConstraintPtr = std::shared_ptr<EmergencyStopConstraint>;
+using EmergencyStopConstraintConstPtr = std::shared_ptr<const EmergencyStopConstraint>;
 
 } // namespace phri

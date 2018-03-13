@@ -39,7 +39,7 @@ namespace phri {
  */
 class ForceGenerator {
 public:
-	~ForceGenerator() = default;
+	virtual ~ForceGenerator() = default;
 
 	/**
 	 * @brief Compute the value associated with the force generator.
@@ -58,7 +58,7 @@ protected:
 	 * @brief Construct a force generator
 	 * @param frame The reference frame in which the force is expressed.
 	 */
-	ForceGenerator(ReferenceFrame frame);
+	explicit ForceGenerator(ReferenceFrame frame);
 
 	/**
 	 * @brief Transform the given force in the TCP frame, if necessary.

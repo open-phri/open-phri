@@ -36,7 +36,7 @@ namespace phri {
 class Clock {
 public:
 	Clock();
-	Clock(double sample_time);
+	explicit Clock(double sample_time);
 	~Clock() = default;
 
 	void reset();

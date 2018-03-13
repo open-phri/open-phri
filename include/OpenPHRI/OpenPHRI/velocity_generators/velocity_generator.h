@@ -41,7 +41,7 @@ namespace phri {
  */
 class VelocityGenerator {
 public:
-	~VelocityGenerator() = default;
+	virtual ~VelocityGenerator() = default;
 
 	/**
 	 * @brief Compute the value associated with the velocity generator.
@@ -66,7 +66,7 @@ protected:
 	 * @brief Transform the given force in the TCP frame, if necessary.
 	 * @param velocity The velocity to transform.
 	 */
-	virtual Vector6d transform(Vector6d velocity) final;
+	virtual Twist transform(Twist velocity) final;
 
 	friend class SafetyController;
 	RobotConstPtr robot_;

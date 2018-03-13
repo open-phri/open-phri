@@ -51,21 +51,20 @@ public:
 		ReferenceFrame frame = ReferenceFrame::TCP,
 		ForceControlTargetType type = ForceControlTargetType::Environment);
 
-	~ForceControl() = default;
+	virtual ~ForceControl() = default;
 
 	virtual Twist compute() override;
 
 	void configureFilter(double sample_time, double time_constant);
 
 private:
-	void applySelection(Vector6d& vec);
+	void applySelection(Vector6d& vec) const;
 
 	Vector6dConstPtr external_force_target_;
 	double sample_time_;
 	Vector6dConstPtr p_gain_;
 	Vector6dConstPtr d_gain_;
 	Vector6dConstPtr selection_;
-	ReferenceFrame frame_;
 	ForceControlTargetType type_;
 
 	double filter_coeff_;

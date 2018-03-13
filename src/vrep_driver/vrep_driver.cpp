@@ -245,7 +245,6 @@ bool VREPDriver::readJacobian(phri::MatrixXdPtr jacobian) const {
 
 		std::string jacobian_str = std::string((char*)(jacobian_buf));
 		std::istringstream iss(jacobian_str);
-		std::vector<std::string> lines;
 
 		size_t rows, cols;
 		iss >> rows;

@@ -105,15 +105,15 @@ public:
 		segment_params_.push_back(params);
 	}
 
-	std::shared_ptr<const T> getPositionOutput() {
+	std::shared_ptr<const T> getPositionOutput() const {
 		return position_output_;
 	}
 
-	std::shared_ptr<const T> getVelocityOutput() {
+	std::shared_ptr<const T> getVelocityOutput() const {
 		return velocity_output_;
 	}
 
-	std::shared_ptr<const T> getAccelerationOutput() {
+	std::shared_ptr<const T> getAccelerationOutput() const {
 		return acceleration_output_;
 	}
 
@@ -129,7 +129,7 @@ public:
 		return total_minimum_time;
 	}
 
-	double getComponentMinimumTime(size_t component, size_t starting_segment = 0) {
+	double getComponentMinimumTime(size_t component, size_t starting_segment = 0) const {
 		double min_time = 0.;
 		for (size_t segment = starting_segment; segment < getSegmentCount(); ++segment) {
 			min_time += segment_params_[segment].minimum_time[component];
@@ -137,7 +137,7 @@ public:
 		return min_time;
 	}
 
-	double getTrajectoryDuration() {
+	double getTrajectoryDuration() const {
 		double total = 0.;
 		for (size_t i = 0; i < getSegmentCount(); ++i) {
 			total += getSegmentDuration(i);
@@ -145,7 +145,7 @@ public:
 		return total;
 	}
 
-	double getSegmentMinimumTime(size_t segment, size_t component) {
+	double getSegmentMinimumTime(size_t segment, size_t component) const {
 		if(segment < getSegmentCount()) {
 			return segment_params_[segment].minimum_time[component];
 		}
@@ -154,11 +154,11 @@ public:
 		}
 	}
 
-	double getSegmentDuration(size_t segment, size_t component) {
+	double getSegmentDuration(size_t segment, size_t component) const {
 		return segment_params_[segment].minimum_time[component] + segment_params_[segment].padding_time[component];
 	}
 
-	double getSegmentDuration(size_t segment) {
+	double getSegmentDuration(size_t segment) const {
 		double max = 0.;
 		for (size_t component = 0; component < getComponentCount(); ++component) {
 			max = std::max(max, getSegmentDuration(segment, component));
@@ -166,11 +166,11 @@ public:
 		return max;
 	}
 
-	size_t getSegmentCount() {
+	size_t getSegmentCount() const {
 		return points_.size()-1;
 	}
 
-	size_t getComponentCount() {
+	size_t getComponentCount() const {
 		return points_[0].size();
 	}
 
@@ -390,7 +390,7 @@ public:
 		sync_ = sync;
 	}
 	template<typename U = T>
-	void enableErrorTracking(std::shared_ptr<const T> reference, const T& threshold, bool recompute_when_resumed, typename std::enable_if<std::is_same<U, double>::value>::type* = 0) {
+	void enableErrorTracking(const std::shared_ptr<const T>& reference, const T& threshold, bool recompute_when_resumed, typename std::enable_if<std::is_same<U, double>::value>::type* = 0) {
 		error_tracking_params_.reference = reference;
 		error_tracking_params_.threshold = threshold;
 		error_tracking_params_.recompute_when_resumed = recompute_when_resumed;
@@ -399,7 +399,7 @@ public:
 	}
 
 	template<typename U = T>
-	void enableErrorTracking(std::shared_ptr<const T> reference, const T& threshold, bool recompute_when_resumed, typename std::enable_if<not std::is_same<U, double>::value>::type* = 0) {
+	void enableErrorTracking(const std::shared_ptr<const T>& reference, const T& threshold, bool recompute_when_resumed, typename std::enable_if<not std::is_same<U, double>::value>::type* = 0) {
 		error_tracking_params_.reference = reference;
 		error_tracking_params_.threshold = threshold;
 		error_tracking_params_.recompute_when_resumed = recompute_when_resumed;
@@ -515,7 +515,7 @@ protected:
 		}
 	}
 
-	bool computeTimings(const TrajectoryPoint<T>& from, const TrajectoryPoint<T>& to, SegmentParams& params, size_t segment, size_t component, double v_eps, double a_eps) {
+	static bool computeTimings(const TrajectoryPoint<T>& from, const TrajectoryPoint<T>& to, SegmentParams& params, size_t segment, size_t component, double v_eps, double a_eps) {
 		bool ok = true;
 		if(params.isFixedTime) {
 			params.poly_params[component] = FifthOrderPolynomial::Constraints {0, params.minimum_time[component], from.yrefs_[component], to.yrefs_[component], from.dyrefs_[component], to.dyrefs_[component], from.d2yrefs_[component], to.d2yrefs_[component]};

@@ -48,7 +48,7 @@ public:
 	 * @param output A shared pointer to the output data
 	 * @param sample_time Time step between each call to Integrator::compute().
 	 */
-	Integrator(std::shared_ptr<const T> input, std::shared_ptr<T> output, double sample_time) :
+	Integrator(const std::shared_ptr<const T>& input, const std::shared_ptr<T>& output, double sample_time) :
 		input_(input), output_(output), sample_time_(sample_time)
 	{
 		reset();
@@ -59,7 +59,7 @@ public:
 	 * @param input A shared pointer to the input data
 	 * @param sample_time Time step between each call to Integrator::compute().
 	 */
-	Integrator(std::shared_ptr<const T> input, double sample_time) :
+	Integrator(const std::shared_ptr<const T>& input, double sample_time) :
 		Integrator(input, std::make_shared<T>(), sample_time)
 	{
 	}
@@ -72,7 +72,7 @@ public:
 	 * @brief Get the pointer to the output data
 	 * @return A shared pointer to the output data.
 	 */
-	std::shared_ptr<const T> getOutput() {
+	std::shared_ptr<const T> getOutput() const {
 		return output_;
 	}
 
@@ -87,7 +87,7 @@ public:
 	 * @brief Set the integrators's output to the given value.
 	 * @param value A shared pointer to the value to use
 	 */
-	void force(std::shared_ptr<const T> value) {
+	void force(const std::shared_ptr<const T>& value) {
 		*output_ = *value;
 	}
 

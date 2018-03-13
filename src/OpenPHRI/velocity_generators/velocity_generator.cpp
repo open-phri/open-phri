@@ -29,9 +29,9 @@ Twist VelocityGenerator::compute() {
 	return transform(velocity_);
 }
 
-Vector6d VelocityGenerator::transform(Vector6d velocity) {
+Twist VelocityGenerator::transform(Twist velocity) {
 	if(frame_ != ReferenceFrame::TCP) {
-		return robot_->spatialTransformationMatrix()->transpose() * velocity;
+		return static_cast<Twist>(robot_->spatialTransformationMatrix()->transpose() * static_cast<Vector6d>(velocity));
 	}
 	return velocity;
 }

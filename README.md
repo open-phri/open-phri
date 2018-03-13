@@ -6,7 +6,9 @@ OpenPHRI: a generic framework to easily and safely control robots in interaction
 
 The license that applies to the whole package content is **GNULGPL**. Please look at the license.txt file at the root of this repository.
 
-[![Build Status](https://travis-ci.org/BenjaminNavarro/open-phri.svg?branch=master)](https://travis-ci.org/BenjaminNavarro/open-phri)
+| Master  | Integration  |
+|:---:|:---:|
+| [![Build Status](https://travis-ci.org/BenjaminNavarro/open-phri.svg?branch=master)](https://travis-ci.org/BenjaminNavarro/open-phri) |  [![Build Status](https://travis-ci.org/BenjaminNavarro/open-phri.svg?branch=integration)](https://travis-ci.org/BenjaminNavarro/open-phri)  |
 
 Here are the basic steps to have OpenPHRI up and running:
  * Clone the PID workspace: `git clone https://github.com/lirmm/pid-workspace.git` or `git clone git@github.com:lirmm/pid-workspace.git` to use SSH instead of HTTPS

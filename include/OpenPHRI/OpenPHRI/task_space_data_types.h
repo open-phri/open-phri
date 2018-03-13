@@ -38,7 +38,7 @@ public:
 	Pose();
 	Pose(phri::Vector3d translation, Eigen::Quaterniond orientation);
 	Pose(phri::Vector3d translation, phri::Vector3d euler_angles);
-	Pose(phri::AffineTransform transformation);
+	explicit Pose(phri::AffineTransform transformation);
 
 	const phri::Vector3d&                       translation() const;
 	const Eigen::Quaterniond&                   orientation() const;
@@ -58,6 +58,7 @@ public:
 		return (out);
 	}
 
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 private:
 	phri::Vector3d translation_;
 	Eigen::Quaterniond orientation_;
@@ -70,7 +71,7 @@ class Twist {
 public:
 	Twist();
 	Twist(phri::Vector3d translation, phri::Vector3d rotation);
-	Twist(phri::Vector6d twist);
+	explicit Twist(phri::Vector6d twist);
 
 	Eigen::Ref<const phri::Vector3d>    translation() const;
 	Eigen::Ref<const phri::Vector3d>    rotation() const;
@@ -86,6 +87,7 @@ public:
 
 	Twist& operator=(const phri::Vector6d& twist);
 
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 private:
 	phri::Vector6d twist_;
 };
@@ -97,7 +99,7 @@ class Acceleration {
 public:
 	Acceleration();
 	Acceleration(phri::Vector3d translation, phri::Vector3d rotation);
-	Acceleration(phri::Vector6d acceleration);
+	explicit Acceleration(phri::Vector6d acceleration);
 
 	Eigen::Ref<const phri::Vector3d>    translation() const;
 	Eigen::Ref<const phri::Vector3d>    rotation() const;
@@ -110,6 +112,8 @@ public:
 	const double* data() const;
 
 	Acceleration& operator=(const phri::Vector6d& acceleration);
+
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 private:
 	phri::Vector6d acceleration_;
 };
