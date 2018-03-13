@@ -19,10 +19,11 @@ Here are the basic steps to have OpenPHRI up and running:
  * Find the applications under the `bin` folder of the install path `pid-workspace/instal/your-architecture/open-phri/current-version/`
  * Run apps (Start V-REP, open a scene (see OpenPHRI/share/scenes) and run the corresponding application e.g. `./apps/demo`)
 
+
 Installation and Usage
 =======================
 
-The procedures for installing the open-phri package and for using its components is based on the [PID](https://gite.lirmm.fr/pid/pid-workspace/wikis/home) build and deployment system called PID. Just follow and read the links to understand how to install, use and call its API and/or applications.
+The procedures for installing the open-phri package and for using its components is based on the [PID](http://pid.lirmm.net/pid-framework/pages/install.html) build and deployment system called PID. Just follow and read the links to understand how to install, use and call its API and/or applications.
 
 About authors
 =====================
