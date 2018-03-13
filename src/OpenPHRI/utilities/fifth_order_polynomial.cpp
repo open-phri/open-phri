@@ -23,6 +23,7 @@
 #include <iostream>
 #include <cmath>
 #include <limits>
+#include <stdexcept>
 
 using namespace phri;
 
