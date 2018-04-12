@@ -120,6 +120,8 @@ private:
 	RobotConstPtr robot_;
 
 	struct external_data {
+		external_data() = default;
+		virtual ~external_data() = default;
 		const void* data;
 		size_t size;
 
