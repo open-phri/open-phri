@@ -1,4 +1,4 @@
-/*      File: joint_velocity_generators.h
+/*      File: null_space_motion.cpp
 *       This file is part of the program open-phri
 *       Program description : OpenPHRI: a generic framework to easily and safely control robots in interactions with humans
 *       Copyright (C) 2017 -  Benjamin Navarro (LIRMM). All Right reserved.
@@ -17,16 +17,21 @@
 *       If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-/**
- * @file joint_velocity_generators.h
- * @author Benjamin Navarro
- * @brief Include all implemented joint velocity generators
- * @date April 2017
- * @ingroup OpenPHRI
- */
-
-#pragma once
-
-#include <OpenPHRI/joint_velocity_generators/joint_velocity_proxy.h>
 #include <OpenPHRI/joint_velocity_generators/null_space_motion.h>
+#include <iostream>
+
+using namespace phri;
+
+NullSpaceMotion::NullSpaceMotion(VectorXdConstPtr joint_velocity) :
+	joint_velocity_(joint_velocity)
+{
+	null_space_projector_.resize(joint_velocity->size(), joint_velocity->size());
+	identity_.resize(joint_velocity->size(), joint_velocity->size());
+	identity_.setIdentity();
+}
+
+VectorXd NullSpaceMotion::compute() {
+	null_space_projector_ = identity_ - (*robot_->jacobianInverse()) * (*robot_->jacobian());
+	// std::cout << "projector:\n" << null_space_projector_ << std::endl;
+	return null_space_projector_ * (*joint_velocity_);
+}

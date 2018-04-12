@@ -1,7 +1,7 @@
-/*      File: joint_velocity_generators.h
+/*      File: null_space_motion.h
 *       This file is part of the program open-phri
 *       Program description : OpenPHRI: a generic framework to easily and safely control robots in interactions with humans
-*       Copyright (C) 2017 -  Benjamin Navarro (LIRMM). All Right reserved.
+*       Copyright (C) 2018 -  Benjamin Navarro (LIRMM). All Right reserved.
 *
 *       This software is free software: you can redistribute it and/or modify
 *       it under the terms of the LGPL license as published by
@@ -19,14 +19,37 @@
 
 
 /**
- * @file joint_velocity_generators.h
+ * @file null_space_motion.h
  * @author Benjamin Navarro
- * @brief Include all implemented joint velocity generators
- * @date April 2017
+ * @brief Definition of the NullSpaceMotion class
+ * @date April 2018
  * @ingroup OpenPHRI
  */
 
 #pragma once
 
-#include <OpenPHRI/joint_velocity_generators/joint_velocity_proxy.h>
-#include <OpenPHRI/joint_velocity_generators/null_space_motion.h>
+#include <OpenPHRI/joint_velocity_generators/joint_velocity_generator.h>
+#include <OpenPHRI/definitions.h>
+
+namespace phri {
+
+/** @brief Adds a joint velocity in the null space of the task jacobian.
+ *  @details Can be useful to perform a secondary task such as joint limits avoidance.
+ */
+class NullSpaceMotion : public JointVelocityGenerator {
+public:
+	explicit NullSpaceMotion(VectorXdConstPtr joint_velocity);
+	virtual ~NullSpaceMotion() = default;
+
+	virtual VectorXd compute() override;
+
+private:
+	VectorXdConstPtr joint_velocity_;
+	MatrixXd null_space_projector_;
+	MatrixXd identity_;
+};
+
+using NullSpaceMotionPtr = std::shared_ptr<NullSpaceMotion>;
+using NullSpaceMotionConstPtr = std::shared_ptr<const NullSpaceMotion>;
+
+} // namespace phri
