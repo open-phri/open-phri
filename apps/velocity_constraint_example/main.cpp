@@ -46,8 +46,9 @@ int main(int argc, char const *argv[]) {
 	/***				V-REP driver				***/
 	VREPDriver driver(
 		robot,
-		ControlLevel::TCP,
-		SAMPLE_TIME);
+		ControlLevel::Joint,
+		SAMPLE_TIME,
+		"", "", -1000);
 
 	driver.startSimulation();
 
@@ -65,21 +66,32 @@ int main(int argc, char const *argv[]) {
 		"ext force proxy",
 		ExternalForce(robot));
 
-	signal(SIGINT, sigint_handler);
+	Clock clock(SAMPLE_TIME);
+	DataLogger logger(
+		"/tmp",
+		clock.getTime(),
+		true);
+
+	logger.logSafetyControllerData(&safety_controller);
+	logger.logRobotData(robot);
 
 	driver.enableSynchonous(true);
-	while(not driver.getSimulationData() and not _stop) {
-		driver.nextStep();
-	}
+	bool init_ok = driver.init();
 
-	if(not _stop)
+	if(init_ok)
 		std::cout << "Starting main loop\n";
+
+	signal(SIGINT, sigint_handler);
+
 	while(not _stop) {
 		if(driver.getSimulationData()) {
 			safety_controller();
 			if(not driver.sendSimulationData()) {
 				std::cerr << "Can'send simulation data to V-REP" << std::endl;
 			}
+			clock();
+			logger();
+			// safety_controller.print();
 		}
 		else {
 			std::cerr << "Can't get simulation data from V-REP" << std::endl;

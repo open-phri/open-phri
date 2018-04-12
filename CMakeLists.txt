@@ -26,7 +26,7 @@ set_PID_Package_Version(0 8 0)
 check_PID_Platform(CONFIGURATION posix)
 
 #now finding packages
-declare_PID_Package_Dependency (PACKAGE api-driver-vrep NATIVE VERSION 0.7)
+declare_PID_Package_Dependency (PACKAGE api-driver-vrep NATIVE VERSION 1.0)
 
 declare_PID_Package_Dependency(PACKAGE eigen-extensions NATIVE VERSION 0.6.0)
 

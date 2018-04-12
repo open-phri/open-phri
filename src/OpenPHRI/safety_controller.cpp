@@ -33,6 +33,8 @@
 
 using namespace phri;
 
+#define HEAVY_PRINTING 0
+
 SafetyController::SafetyController(
 	RobotPtr robot) :
 	skip_jacobian_inverse_computation_(false)
@@ -138,69 +140,66 @@ void SafetyController::enableDynamicDampedLeastSquares(double lambda_max, double
 
 
 void SafetyController::compute() {
-	// std::cout << "###################################################################\n";
-	const auto& force_sum = computeForceSum();
-	const auto& torque_sum = computeTorqueSum();
-	const auto& velocity_sum = computeVelocitySum();
-	const auto& joint_velocity_sum = computeJointVelocitySum();
 	const auto& jacobian_inverse = *robot_->jacobianInverse();
 	const auto& jacobian = *robot_->jacobian();
 	const auto& spatial_transformation = *robot_->spatialTransformationMatrix();
-
 	if(not skip_jacobian_inverse_computation_) {
 		*robot_->jacobianInverse() = computeJacobianInverse();
 	}
 
-	// std::cout << "force_sum: " << force_sum.transpose() << std::endl;
-	// std::cout << "torque_sum: " << torque_sum.transpose() << std::endl;
-	// std::cout << "velocity_sum: " << velocity_sum.transpose() << std::endl;
-	// std::cout << "joint_velocity_sum: " << joint_velocity_sum.transpose() << std::endl;
-	// std::cout << "spatial_transformation:\n " << spatial_transformation << std::endl;
-	// std::cout << "jacobian:\n " << jacobian << std::endl;
-	// std::cout << "jacobian_inverse:\n " << jacobian_inverse << std::endl;
-	//
-	// std::cout << "*******************************************************************\n";
+	const auto& force_sum = computeForceSum();
+	const auto& torque_sum = computeTorqueSum();
+	const auto& velocity_sum = computeVelocitySum();
+	const auto& joint_velocity_sum = computeJointVelocitySum();
+#if HEAVY_PRINTING
+	std::cout << "###################################################################\n";
+	std::cout << "force_sum: " << force_sum.transpose() << std::endl;
+	std::cout << "torque_sum: " << torque_sum.transpose() << std::endl;
+	std::cout << "velocity_sum: " << velocity_sum.transpose() << std::endl;
+	std::cout << "joint_velocity_sum: " << joint_velocity_sum.transpose() << std::endl;
+	std::cout << "spatial_transformation:\n " << spatial_transformation << std::endl;
+	std::cout << "jacobian:\n " << jacobian << std::endl;
+	std::cout << "jacobian_inverse:\n " << jacobian_inverse << std::endl;
+	std::cout << "*******************************************************************\n";
+#endif
 
 	// Joint level damping control
 	*robot_->joint_velocity_command_ = torque_sum.cwiseQuotient(*robot_->joint_damping_matrix_) + joint_velocity_sum;
-	// std::cout << "joint vel cmd: " << robot_->joint_velocity_command_->transpose() << std::endl;
 
 	// Control point level damping control
 	*robot_->control_point_velocity_command_ = force_sum.cwiseQuotient(*robot_->control_point_damping_matrix_) + static_cast<Vector6d>(velocity_sum);
-	// std::cout << "cp vel cmd: " << robot_->control_point_velocity_command_->transpose() << std::endl;
 
 	// Cumulative effect on the joint velocity of all inputs
 	*robot_->joint_total_velocity_ = jacobian_inverse * spatial_transformation * static_cast<Vector6d>(*robot_->control_point_velocity_command_) + *robot_->joint_velocity_command_;
-	// std::cout << "joint vel tot: " << robot_->joint_total_velocity_->transpose() << std::endl;
 
 	// Cumulative effect on the control point velocity of all inputs
 	*robot_->control_point_total_velocity_ = static_cast<Vector6d>(*robot_->control_point_velocity_command_) + spatial_transformation.transpose() * jacobian * *robot_->joint_velocity_command_;
-	// std::cout << "cp vel tot: " << robot_->control_point_total_velocity_->transpose() << std::endl;
 
 	// Cumulative effect on torques of both joint torque and control point force inputs
 	*robot_->joint_total_torque_ = torque_sum + jacobian.transpose() * force_sum;
-	// std::cout << "jont trq tot: " << robot_->joint_total_torque_->transpose() << std::endl;
 
 	// Cumulative effect on forces of both joint torque and control point force inputs
 	*robot_->control_point_total_force_ = force_sum + jacobian_inverse.transpose() * torque_sum;
-	// std::cout << "cp force tot: " << robot_->control_point_total_force_->transpose() << std::endl;
 
 	// Compute the velocity scaling factor
 	double constraint_value = computeConstraintValue();
 
 	// Scale the joint velocities to comply with the constraints
 	*robot_->joint_velocity_ = constraint_value * *robot_->joint_total_velocity_;
-	// TODO move this to a joint velocity generator so that it is accounted by the constraints
-	if(null_space_velocity_.use_count() > 1) {
-		phri::MatrixXd eye(robot_->jointCount(), robot_->jointCount());
-		eye.setIdentity();
-		*robot_->joint_velocity_ += (eye - *robot_->jacobianInverse() * *robot_->jacobian()) * *null_space_velocity_;;
-	}
-	// std::cout << "joint vel: " << robot_->joint_velocity_->transpose() << std::endl;
 
 	// Scale the control point velocities to comply with the constraints
 	*robot_->control_point_velocity_ = constraint_value * static_cast<Vector6d>(*robot_->control_point_total_velocity_);
-	// std::cout << "cp vel: " << robot_->control_point_velocity_->transpose() << std::endl;
+
+#if HEAVY_PRINTING
+	std::cout << "joint vel cmd: " << robot_->joint_velocity_command_->transpose() << std::endl;
+	std::cout << "cp vel cmd: " << *(robot_->control_point_velocity_command_) << std::endl;
+	std::cout << "joint vel tot: " << robot_->joint_total_velocity_->transpose() << std::endl;
+	std::cout << "cp vel tot: " << *(robot_->control_point_total_velocity_) << std::endl;
+	std::cout << "jont trq tot: " << robot_->joint_total_torque_->transpose() << std::endl;
+	std::cout << "cp force tot: " << robot_->control_point_total_force_->transpose() << std::endl;
+	std::cout << "joint vel: " << robot_->joint_velocity_->transpose() << std::endl;
+	std::cout << "cp vel: " << *(robot_->control_point_velocity_) << std::endl;
+#endif
 }
 
 void SafetyController::print() const {
@@ -357,10 +356,7 @@ const MatrixXd& SafetyController::computeJacobianInverse() const {
 			jac_inv = jac.transpose() * tmp;
 		}
 		else {
-			// Compute the pseudo inverse in the non square case based on SVD decomposition
-			Eigen::JacobiSVD<MatrixXd> svd(jac, Eigen::ComputeThinU | Eigen::ComputeThinV);
-			double tolerance = std::numeric_limits<double>::epsilon() * std::max(jac.cols(), jac.rows()) * svd.singularValues().array().abs()(0);
-			jac_inv = svd.matrixV() * (svd.singularValues().array().abs() > tolerance).select(svd.singularValues().array().inverse(), 0).matrix().asDiagonal() * svd.matrixU().adjoint();
+			jac_inv = jac.pseudoInverse();
 		}
 	}
 

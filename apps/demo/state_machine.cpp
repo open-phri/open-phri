@@ -293,7 +293,6 @@ bool StateMachine::compute() {
 				std::cout << "No more waypoints" << std::endl;
 				replay_state_ = ReplayStates::End;
 			}
-			// trajectory_generator_->compute();
 		}
 
 		break;
@@ -301,17 +300,6 @@ bool StateMachine::compute() {
 		{
 			*robot_->controlPointTargetPose() = *trajectory_generator_->getPositionOutput();
 			double error = (robot_->controlPointTargetPose()->translation() - robot_->controlPointCurrentPose()->translation()).norm();
-			// std::cout << "error: " << error << std::endl;
-			// bool stopped = *robot_->scalingFactor() < 0.001;
-			// if(not stopped and is_robot_stopped_) {
-			//  std::cout << "Recomputing the trajectory\n";
-			//  setupTrajectoryGenerator();
-			// }
-			// if(stopped and not is_robot_stopped_) {
-			//  std::cout << "/!\\ Emergency stop /!\\ \n";
-			// }
-			// is_robot_stopped_ = stopped;
-			// if(not stopped and trajectory_generator_->compute() and error < 0.001) {
 			if(trajectory_generator_->compute() and error < 0.001) {
 				std::cout << "Waypoint reached" << std::endl;
 				waypoints_.pop_front();

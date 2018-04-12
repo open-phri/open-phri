@@ -1,5 +1,4 @@
 List of things to be done (decreasing priority):
-    - Create task space Pose(translation+quaternion),Twist,Acceleration classes and use them instead of 6D vectors
     - Trajectory generator: try to constrain on the norm of the linear and angular velocities
     - Provide an easy way to use one of the 4 modes of the ISO/TS 15066
     - Update the python bindings & tests
