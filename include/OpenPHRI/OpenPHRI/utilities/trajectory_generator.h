@@ -250,7 +250,7 @@ public:
 						d2y = 0.;
 					}
 					else {
-						for_each(error_tracking_params_.state.begin(), error_tracking_params_.state.end(), [](auto& state) {state = ErrorTrackingState::Paused;});
+						for_each(error_tracking_params_.state.begin(), error_tracking_params_.state.end(), [](ErrorTrackingState state) {state = ErrorTrackingState::Paused;});
 						for(double& dy: velocity_output_refs_) {
 							dy = 0.;
 						}
@@ -410,13 +410,13 @@ public:
 	}
 
 	void enableErrorTracking(const T* reference, const T& threshold, bool recompute_when_resumed) {
-		enableErrorTracking(std::shared_ptr<const T>(reference, [](auto p){}), threshold, recompute_when_resumed);
+		enableErrorTracking(std::shared_ptr<const T>(reference, [](const T* p){}), threshold, recompute_when_resumed);
 	}
 
 	void disableErrorTracking() {
 		error_tracking_params_.reference.reset();
 		error_tracking_params_.state.resize(getComponentCount());
-		for_each(error_tracking_params_.state.begin(), error_tracking_params_.state.end(), [](auto& state){state = ErrorTrackingState::Running;});
+		for_each(error_tracking_params_.state.begin(), error_tracking_params_.state.end(), [](ErrorTrackingState state){state = ErrorTrackingState::Running;});
 	}
 
 	void reset() {
