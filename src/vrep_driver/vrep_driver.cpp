@@ -24,6 +24,8 @@
 #include <sstream>
 #include <iostream>
 #include <vector>
+#include <thread>
+#include <chrono>
 
 #include <extApi.h>
 #include <v_repConst.h>
@@ -64,6 +66,24 @@ VREPDriver::VREPDriver(
 
 VREPDriver::~VREPDriver() {
 	enableSynchonous(false);
+}
+
+bool VREPDriver::init(double timeout) {
+	double waited_for = 0.;
+	while(not getSimulationData() and waited_for < timeout) {
+		if(sync_mode_) {
+			nextStep();
+		}
+		else {
+			std::this_thread::sleep_for(std::chrono::milliseconds(int(sample_time_ * 1000.)));
+		}
+		waited_for += sample_time_;
+	}
+	bool ok = waited_for < timeout;
+	if(ok and control_level_ == ControlLevel::Joint) {
+		*robot_->jointTargetPosition() = *robot_->jointCurrentPosition();
+	}
+	return ok;
 }
 
 void VREPDriver::init(const std::string& ip, int port) {

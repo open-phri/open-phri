@@ -96,6 +96,13 @@ public:
 	~VREPDriver();
 
 	/**
+	 * Initialize the communication with V-REP
+	 * @param timeout The maximum time to wait to establish the connection.
+	 * @return true on success, false otherwise
+	 */
+	bool init(double timeout = 5.);
+
+	/**
 	 * @brief Retrieve the client ID of the current connection.
 	 * @return The client ID. A negative value means that the connection has failed to open.
 	 */
