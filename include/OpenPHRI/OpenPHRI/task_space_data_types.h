@@ -52,7 +52,7 @@ public:
 	explicit operator phri::Vector6d() const;
 	Pose& operator= (const phri::Vector6d& pos_euler);
 
-	friend std ::ostream& operator<< (std::ostream& out, const Pose& pose){
+	friend std ::ostream& operator<< (std::ostream& out, const Pose& pose) {
 		out << pose.translation().x() << "x + " << pose.translation().y() << "y + " << pose.translation().z() << "z; ";
 		out << pose.orientation().w() << " + " << pose.orientation().x() << "i + " << pose.orientation().y() << "j + " << pose.orientation().z() << "k";
 		return (out);
@@ -87,6 +87,11 @@ public:
 
 	Twist& operator=(const phri::Vector6d& twist);
 
+	friend std ::ostream& operator<< (std::ostream& out, const Twist& twist) {
+		out << static_cast<phri::Vector6d>(twist).transpose();
+		return (out);
+	}
+
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 private:
 	phri::Vector6d twist_;
@@ -112,6 +117,11 @@ public:
 	const double* data() const;
 
 	Acceleration& operator=(const phri::Vector6d& acceleration);
+
+	friend std ::ostream& operator<< (std::ostream& out, const Acceleration& acceleration) {
+		out << static_cast<phri::Vector6d>(acceleration).transpose();
+		return (out);
+	}
 
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 private:
