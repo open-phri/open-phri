@@ -4,6 +4,8 @@
 #include <OpenPHRI/drivers/driver.h>
 #include <OpenPHRI/fwd_decl.h>
 
+#include <yaml-cpp/yaml.h>
+
 namespace phri {
 
 class AppMaker {
@@ -25,13 +27,32 @@ public:
 	DriverPtr getDriver() const;
 	DataLoggerPtr getDataLogger() const;
 
+	template<typename T>
+	T getParameter(const std::string& name) const {
+		const auto& params = getParameters();
+		if(params) {
+			return getParameters()[name].as<T>();
+		}
+		else {
+			throw std::runtime_error(OPEN_PHRI_ERROR("there is no 'parameters' field in the configuration file."));
+		}
+	}
+
+	template<typename T>
+	T getParameter(const std::string& name, const T& default_value) const {
+		try {
+			return getParameters()[name].as<T>(default_value);
+		}
+		catch(...) {
+			return default_value;
+		}
+	}
+
 private:
-	RobotPtr robot_;
-	SafetyControllerPtr controller_;
-	RobotModelPtr model_;
-	DriverPtr driver_;
-	DataLoggerPtr data_logger_;
-	ClockPtr clock_;
+	const YAML::Node& getParameters() const;
+
+	struct pImpl;
+	std::unique_ptr<pImpl> impl_;
 };
 
 using AppMakerPtr = std::shared_ptr<AppMaker>;

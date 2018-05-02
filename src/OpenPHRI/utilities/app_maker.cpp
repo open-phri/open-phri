@@ -1,47 +1,60 @@
 #include <OpenPHRI/utilities/app_maker.h>
 
 #include <pid/rpath.h>
-#include <yaml-cpp/yaml.h>
 
 using namespace phri;
 
-AppMaker::AppMaker(const std::string& configuration_file) {
+struct AppMaker::pImpl {
+	RobotPtr robot;
+	SafetyControllerPtr controller;
+	RobotModelPtr model;
+	DriverPtr driver;
+	DataLoggerPtr data_logger;
+	ClockPtr clock;
+	YAML::Node app_configuration;
+};
+
+AppMaker::AppMaker(const std::string& configuration_file) :
+	impl_(std::make_unique<AppMaker::pImpl>())
+{
 	auto conf = YAML::LoadFile(PID_PATH(configuration_file));
-
 	/***				Robot				***/
-	robot_ = std::make_shared<Robot>();
+	impl_->robot = std::make_shared<Robot>();
 
-	model_ = std::make_shared<RobotModel>(
-		robot_,
+	impl_->model = std::make_shared<RobotModel>(
+		impl_->robot,
 		conf);
 
-	robot_->create(model_->name(), model_->jointCount());
+	impl_->robot->create(impl_->model->name(), impl_->model->jointCount());
 
 	/***				V-REP driver				***/
-	driver_ = DriverFactory::create(
+	impl_->driver = DriverFactory::create(
 		conf["driver"]["type"].as<std::string>(),
-		robot_,
+		impl_->robot,
 		conf);
 
-	driver_->start();
+	impl_->driver->start();
 
 	/***			Controller configuration			***/
-	controller_ = std::make_shared<SafetyController>(robot_, conf);
+	impl_->controller = std::make_shared<SafetyController>(impl_->robot, conf);
 
-	clock_ = std::make_shared<Clock>(driver_->getSampleTime());
-	data_logger_ = std::make_shared<DataLogger>(
+	impl_->clock = std::make_shared<Clock>(impl_->driver->getSampleTime());
+	impl_->data_logger = std::make_shared<DataLogger>(
 		"/tmp",
-		clock_->getTime(),
+		impl_->clock->getTime(),
 		true);
 
-	data_logger_->logSafetyControllerData(controller_.get());
-	data_logger_->logRobotData(robot_);
+	impl_->data_logger->logSafetyControllerData(impl_->controller.get());
+	impl_->data_logger->logRobotData(impl_->robot);
+
+	impl_->app_configuration = conf["parameters"];
 }
+
 AppMaker::~AppMaker() = default;
 
 bool AppMaker::init(std::function<bool(void)> init_code) {
 	bool all_ok = true;
-	all_ok &= driver_->init();
+	all_ok &= impl_->driver->init();
 	if(init_code) {
 		all_ok &= init_code();
 	}
@@ -53,21 +66,21 @@ bool AppMaker::run(
 	std::function<bool(void)> post_controller_code)
 {
 	bool ok = true;
-	if(driver_->read()) {
-		model_->forwardKinematics();
+	if(impl_->driver->read()) {
+		impl_->model->forwardKinematics();
 		if(pre_controller_code) {
 			pre_controller_code();
 		}
-		controller_->compute();
+		impl_->controller->compute();
 		if(post_controller_code) {
 			post_controller_code();
 		}
-		if(not driver_->send()) {
+		if(not impl_->driver->send()) {
 			std::cerr << "[OpenPHRI::AppMaker] Can'send data to the driver" << std::endl;
 			ok = false;
 		}
-		clock_->update();
-		data_logger_->process();
+		impl_->clock->update();
+		impl_->data_logger->process();
 	}
 	else {
 		std::cerr << "[OpenPHRI::AppMaker] Can't get data from the driver" << std::endl;
@@ -77,25 +90,29 @@ bool AppMaker::run(
 }
 
 bool AppMaker::stop() {
-	return driver_->stop();
+	return impl_->driver->stop();
 }
 
 RobotPtr AppMaker::getRobot() const {
-	return robot_;
+	return impl_->robot;
 }
 
 SafetyControllerPtr AppMaker::getController() const {
-	return controller_;
+	return impl_->controller;
 }
 
 RobotModelPtr AppMaker::getModel() const {
-	return model_;
+	return impl_->model;
 }
 
 DriverPtr AppMaker::getDriver() const {
-	return driver_;
+	return impl_->driver;
 }
 
 DataLoggerPtr AppMaker::getDataLogger() const {
-	return data_logger_;
+	return impl_->data_logger;
+}
+
+const YAML::Node& AppMaker::getParameters() const {
+	return impl_->app_configuration;
 }

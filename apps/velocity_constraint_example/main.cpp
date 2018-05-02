@@ -39,7 +39,7 @@ void sigint_handler(int sig) {
 int main(int argc, char const *argv[]) {
 	PID_EXE(argv[0]);
 
-	auto app = AppMaker("configuration_examples/kuka_lwr4.yaml");
+	AppMaker app("configuration_examples/kuka_lwr4.yaml");
 
 	/***			Controller configuration			***/
 	auto robot = app.getRobot();
