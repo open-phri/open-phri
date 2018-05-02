@@ -18,14 +18,14 @@
 */
 
 #include <OpenPHRI/OpenPHRI.h>
-#include <vrep_driver/vrep_driver.h>
+#include <OpenPHRI/drivers/vrep_driver.h>
 
 #include <boost/python.hpp>
 #include <iostream>
 
 namespace phri {
 
-using namespace vrep;
+
 
 std::shared_ptr<VREPDriver> NewVREPDriver(double sample_time, const std::string& prefix = "", const std::string& suffix = "", const std::string& ip = "127.0.0.1", int port = 19997)
 {
@@ -37,7 +37,7 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(NewVREPDriver_overloads, NewVREPDriver, 1, 5)
 
 void wrapVREP() {
 	using namespace phri;
-	using namespace vrep;
+	
 	using namespace boost::python;
 
 	/*********************************************************************************/

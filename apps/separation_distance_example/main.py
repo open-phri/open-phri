@@ -16,7 +16,7 @@ driver = NewVREPDriver(
     SAMPLE_TIME,
     "LBR4p_")      # Robot prefix
 
-driver.startSimulation()
+driver.start()
 
 ###                 Controller configuration                ###
 damping_matrix = NewMatrix6dPtr(Matrix6.Identity * 100)
@@ -68,4 +68,4 @@ while not stop:
     driver.nextStep()
 
 driver.enableSynchonous(False)
-driver.stopSimulation()
+driver.stop()

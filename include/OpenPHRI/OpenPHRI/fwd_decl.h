@@ -40,3 +40,7 @@ class LinearInterpolator;
 class PolynomialInterpolator;
 
 }
+
+namespace YAML {
+class Node;
+}

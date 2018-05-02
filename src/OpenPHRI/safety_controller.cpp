@@ -27,6 +27,7 @@
 #include <OpenPHRI/utilities/demangle.h>
 
 #include <Eigen/SVD>
+#include <yaml-cpp/yaml.h>
 
 #include <limits>
 #include <iostream>
@@ -41,11 +42,29 @@ SafetyController::SafetyController(
 {
 	addConstraint("default constraint", std::make_shared<DefaultConstraint>());
 	robot_ = robot;
-	null_space_velocity_ = std::make_shared<VectorXd>(robot_->jointCount());
-	null_space_velocity_->setZero();
 	dynamic_dls_ = false;
 	lambda2_ = -1.;
 	sigma_min_threshold_ = -1.;
+}
+
+SafetyController::SafetyController(
+	RobotPtr robot,
+	YAML::Node& configuration) :
+	SafetyController(robot)
+{
+	auto controller = configuration["controller"];
+	if(controller) {
+		dynamic_dls_ = controller["use_dynamic_dls"].as<bool>(dynamic_dls_);
+		double lambda_max = controller["lambda_max"].as<double>(lambda2_);
+		double sigma_min_threshold = controller["sigma_min_threshold"].as<double>(sigma_min_threshold_);
+
+		if(dynamic_dls_) {
+			enableDynamicDampedLeastSquares(lambda_max, sigma_min_threshold);
+		}
+		else if(lambda_max > 0.) {
+			enableDampedLeastSquares(lambda_max);
+		}
+	}
 }
 
 void SafetyController::setVerbose(bool on) {
@@ -119,10 +138,6 @@ TorqueGeneratorPtr SafetyController::getTorqueGenerator(const std::string& name)
 
 JointVelocityGeneratorPtr SafetyController::getJointVelocityGenerator(const std::string& name) {
 	return joint_velocity_generators_.get(name).object;
-}
-
-std::shared_ptr<VectorXd> SafetyController::getNullSpaceVelocityVector() const {
-	return null_space_velocity_;
 }
 
 void SafetyController::enableDampedLeastSquares(double lambda) {

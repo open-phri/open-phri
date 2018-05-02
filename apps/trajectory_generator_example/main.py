@@ -83,7 +83,7 @@ trajectory_generator.add("z_traj", z_traj)
 
 trajectory_generator.computeParameters()
 
-driver.startSimulation()
+driver.start()
 driver.enableSynchonous(True)
 signal(SIGINT, sigint_handler)
 
@@ -110,4 +110,4 @@ while not (stop or end):
 print("End of the trajectory reached" if end else "Trajectory generation interrupted")
 
 driver.enableSynchonous(False)
-driver.stopSimulation()
+driver.stop()

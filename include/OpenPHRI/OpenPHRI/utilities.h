@@ -28,15 +28,18 @@
 
  #pragma once
 
+#include <OpenPHRI/utilities/benchmark.hpp>
+#include <OpenPHRI/utilities/clock.h>
+#include <OpenPHRI/utilities/data_logger.h>
+#include <OpenPHRI/utilities/deadband.hpp>
 #include <OpenPHRI/utilities/derivator.hpp>
 #include <OpenPHRI/utilities/integrator.hpp>
-#include <OpenPHRI/utilities/object_collection.hpp>
-#include <OpenPHRI/utilities/manipulator_equivalent_mass.h>
 #include <OpenPHRI/utilities/interpolators.h>
-#include <OpenPHRI/utilities/trajectory_generator.h>
-#include <OpenPHRI/utilities/task_space_trajectory_generator.h>
 #include <OpenPHRI/utilities/laser_scanner_detector.h>
-#include <OpenPHRI/utilities/data_logger.h>
-#include <OpenPHRI/utilities/clock.h>
-#include <OpenPHRI/utilities/benchmark.hpp>
-#include <OpenPHRI/utilities/deadband.hpp>
+#include <OpenPHRI/utilities/manipulator_equivalent_mass.h>
+#include <OpenPHRI/utilities/object_collection.hpp>
+#include <OpenPHRI/utilities/robot_model.h>
+#include <OpenPHRI/utilities/task_space_trajectory_generator.h>
+#include <OpenPHRI/utilities/trajectory_generator.h>
+
+#include <OpenPHRI/utilities/app_maker.h>

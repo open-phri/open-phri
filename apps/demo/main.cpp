@@ -24,12 +24,12 @@
 #include <list>
 
 #include <OpenPHRI/OpenPHRI.h>
-#include <vrep_driver/vrep_driver.h>
+#include <OpenPHRI/drivers/vrep_driver.h>
 
 #include "state_machine.h"
 
 using namespace phri;
-using namespace vrep;
+
 
 double SAMPLE_TIME = 0.005;
 
@@ -51,11 +51,10 @@ int main(int argc, char const *argv[]) {
 	/***				V-REP driver				***/
 	VREPDriver driver(
 		robot,
-		ControlLevel::Joint,
 		SAMPLE_TIME,
 		"","",-1000);
 
-	driver.startSimulation();
+	driver.start();
 
 	std::shared_ptr<LaserScannerDetector> laser_detector;
 	std::shared_ptr<const VectorXd> laser_data;
@@ -110,7 +109,7 @@ int main(int argc, char const *argv[]) {
 
 	driver.enableSynchonous(true);
 	size_t count = 10;
-	while(not (driver.getSimulationData(ReferenceFrame::Base, ReferenceFrame::Base) and ( not laser_data or laser_data->size() == 1080) and count-- == 0 )and not _stop) {
+	while(not (driver.read() and ( not laser_data or laser_data->size() == 1080) and count-- == 0 ) and not _stop) {
 		driver.nextStep();
 	}
 
@@ -123,7 +122,7 @@ int main(int argc, char const *argv[]) {
 		std::cout << "Starting main loop\n";
 
 	while(not _stop) {
-		if(driver.getSimulationData(ReferenceFrame::Base, ReferenceFrame::Base)) {
+		if(driver.read()) {
 
 			auto t_start = std::chrono::high_resolution_clock::now();
 			_stop |= state_machine.compute();
@@ -132,7 +131,7 @@ int main(int argc, char const *argv[]) {
 
 			t_avg = (1e6 * 0.01*std::chrono::duration<double>(t_end-t_start).count() + 0.99*t_avg);
 
-			if(not driver.sendSimulationData()) {
+			if(not driver.send()) {
 				std::cerr << "Can'send robot data to V-REP" << std::endl;
 			}
 
@@ -151,7 +150,7 @@ int main(int argc, char const *argv[]) {
 	}
 
 	driver.enableSynchonous(false);
-	driver.stopSimulation();
+	driver.stop();
 
 	return 0;
 }

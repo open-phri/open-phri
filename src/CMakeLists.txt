@@ -6,6 +6,7 @@ if(USE_OPENMP)
         DIRECTORY OpenPHRI
         CXX_STANDARD 14
         EXPORTED COMPILER_OPTIONS -fopenmp
+        RUNTIME_RESOURCES robot_models
     )
 
     declare_PID_Component_Dependency(
@@ -18,6 +19,7 @@ else()
         NAME open-phri
         DIRECTORY OpenPHRI
         CXX_STANDARD 14
+        RUNTIME_RESOURCES robot_models
     )
 endif()
 
@@ -27,6 +29,29 @@ declare_PID_Component_Dependency(
     PACKAGE eigen-extensions
 )
 
+declare_PID_Component_Dependency(
+    COMPONENT open-phri
+    EXPORT NATIVE rpathlib
+    PACKAGE pid-rpath
+)
+
+declare_PID_Component_Dependency(
+    COMPONENT open-phri
+    NATIVE rbdyn
+    PACKAGE rbdyn
+)
+
+declare_PID_Component_Dependency(
+    COMPONENT open-phri
+    NATIVE rbdyn-parsers
+    PACKAGE rbdyn
+)
+
+declare_PID_Component_Dependency(
+    COMPONENT open-phri
+    EXPORT EXTERNAL libyaml
+    PACKAGE yaml-cpp
+)
 
 ###         OpenPHRI V-REP DRIVER        ###
 declare_PID_Component(

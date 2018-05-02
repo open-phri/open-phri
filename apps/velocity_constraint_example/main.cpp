@@ -22,13 +22,13 @@
 #include <signal.h>
 
 #include <OpenPHRI/OpenPHRI.h>
-#include <vrep_driver/vrep_driver.h>
+#include <OpenPHRI/drivers/vrep_driver.h>
+#include <pid/rpath.h>
+#include <yaml-cpp/yaml.h>
 
 using namespace std;
 using namespace phri;
-using namespace vrep;
 
-constexpr double SAMPLE_TIME = 0.010;
 
 bool _stop = false;
 
@@ -37,71 +37,41 @@ void sigint_handler(int sig) {
 }
 
 int main(int argc, char const *argv[]) {
+	PID_EXE(argv[0]);
 
-	/***				Robot				***/
-	auto robot = make_shared<Robot>(
-		"LBR4p",    // Robot's name, must match V-REP model's name
-		7);         // Robot's joint count
-
-	/***				V-REP driver				***/
-	VREPDriver driver(
-		robot,
-		ControlLevel::Joint,
-		SAMPLE_TIME,
-		"", "", -1000);
-
-	driver.startSimulation();
+	auto app = AppMaker("configuration_examples/kuka_lwr4.yaml");
 
 	/***			Controller configuration			***/
+	auto robot = app.getRobot();
 	*robot->controlPointDampingMatrix() *= 100.;
-	auto safety_controller = SafetyController(robot);
 
 	auto maximum_velocity = make_shared<double>(0.1);
 
-	safety_controller.add(
+	auto safety_controller = app.getController();
+	safety_controller->add(
 		"velocity constraint",
 		VelocityConstraint(maximum_velocity));
 
-	safety_controller.add(
+	auto vel_cstr = safety_controller->get<VelocityConstraint>("velocity constraint");
+
+	safety_controller->add(
 		"ext force proxy",
 		ExternalForce(robot));
 
-	Clock clock(SAMPLE_TIME);
-	DataLogger logger(
-		"/tmp",
-		clock.getTime(),
-		true);
-
-	logger.logSafetyControllerData(&safety_controller);
-	logger.logRobotData(robot);
-
-	driver.enableSynchonous(true);
-	bool init_ok = driver.init();
+	bool init_ok = app.init();
 
 	if(init_ok)
 		std::cout << "Starting main loop\n";
+	else
+		std::cout << "Initialization failed\n";
 
 	signal(SIGINT, sigint_handler);
 
-	while(not _stop) {
-		if(driver.getSimulationData()) {
-			safety_controller();
-			if(not driver.sendSimulationData()) {
-				std::cerr << "Can'send simulation data to V-REP" << std::endl;
-			}
-			clock();
-			logger();
-			// safety_controller.print();
-		}
-		else {
-			std::cerr << "Can't get simulation data from V-REP" << std::endl;
-		}
-
-		driver.nextStep();
+	while(init_ok and not _stop) {
+		_stop |= not app.run();
 	}
 
-	driver.enableSynchonous(false);
-	driver.stopSimulation();
+	app.stop();
 
 	return 0;
 }

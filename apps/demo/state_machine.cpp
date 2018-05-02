@@ -143,14 +143,6 @@ void StateMachine::init() {
 	*robot_->jointTargetPosition() = *robot_->jointCurrentPosition();
 }
 
-void StateMachine::useNullSpaceMotion(double null_space_gain, phri::VectorXd&& joint_min_positions, phri::VectorXd&& joint_max_positions) {
-	null_space_velocity_ = controller_.getNullSpaceVelocityVector();
-	joint_min_positions_ = joint_min_positions;
-	joint_max_positions_ = joint_max_positions;
-	null_space_gain_ = null_space_gain;
-}
-
-
 bool StateMachine::compute() {
 	bool end = false;
 	auto current_time = std::chrono::high_resolution_clock::now();

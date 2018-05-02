@@ -149,4 +149,7 @@ private:
 	std::map<std::ofstream*, std::unique_ptr<external_data>> external_data_;
 };
 
+using DataLoggerPtr = std::shared_ptr<DataLogger>;
+using DataLoggerConstPtr = std::shared_ptr<const DataLogger>;
+
 } // namespace phri

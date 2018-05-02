@@ -35,7 +35,7 @@ driver = NewVREPDriver(
     "LBR4p_")      # Robot prefix
 
 driver.enableSynchonous(True)
-driver.startSimulation()
+driver.start()
 
 signal(SIGINT, sigint_handler)
 
@@ -56,4 +56,4 @@ while not stop:
 
     driver.nextStep()
 
-driver.stopSimulation()
+driver.stop()

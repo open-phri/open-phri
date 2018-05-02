@@ -3,6 +3,7 @@ function(add_application app)
     EXAMPLE_APPLICATION
     NAME ${app}
     DIRECTORY ${app}
+    RUNTIME_RESOURCES configuration_examples
   )
 
   declare_PID_Component_Dependency(

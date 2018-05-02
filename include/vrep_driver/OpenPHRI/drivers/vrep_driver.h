@@ -21,7 +21,7 @@
 /**
  * @file vrep_driver.h
  * @author Benjamin Navarro
- * @brief Definition of the VREPDriver class and the phri::ReferenceFrame enum.
+ * @brief Definition of the VREPDriver class
  * @date April 2017
  * @ingroup VREP
  */
@@ -30,7 +30,7 @@
 /** @defgroup VREP
  * Provides an easy interface to the V-REP simulator
  *
- * Usage: #include <vrep_driver/vrep_driver.h>
+ * Usage: #include <OpenPHRI/drivers/vrep_driver.h>
  *
  */
 
@@ -44,16 +44,10 @@
 
 #include <OpenPHRI/definitions.h>
 #include <OpenPHRI/robot.h>
+#include <OpenPHRI/fwd_decl.h>
+#include <OpenPHRI/drivers/driver.h>
 
-namespace vrep {
-
-/** @enum vrep::ControlLevel
- *  @brief Specify the control level (joint or TCP)
- */
-enum class ControlLevel {
-	Joint,  /**< Joint position commands will be sent */
-	TCP     /**< TCP velocity commands will be sent */
-};
+namespace phri {
 
 /** @brief Wrapper for -REP low level C API.
  *  @details Can be used to control the simulation (start/pause/stop), to tack objects' position, read and send robot related data.
@@ -61,7 +55,7 @@ enum class ControlLevel {
  *  base_frame (frame attached to the base link) and world_frame (frame attached to the environment).
  *  All these objects can have a prefix and/or suffix specified in the constructor.
  */
-class VREPDriver {
+class VREPDriver : virtual public phri::Driver {
 public:
 	/**
 	 * @brief Construct a driver using an IP & port. Prefix and suffix can be used to target a specific robot.
@@ -73,7 +67,6 @@ public:
 	 */
 	VREPDriver(
 		phri::RobotPtr robot,
-		ControlLevel control_level,
 		double sample_time,
 		const std::string& suffix = "",
 		const std::string& ip = "127.0.0.1",
@@ -88,19 +81,22 @@ public:
 	 */
 	VREPDriver(
 		phri::RobotPtr robot,
-		ControlLevel control_level,
 		double sample_time,
 		int client_id,
 		const std::string& suffix = "");
 
-	~VREPDriver();
+	VREPDriver(
+		const phri::RobotPtr& robot,
+		const YAML::Node& configuration);
+
+	virtual ~VREPDriver();
 
 	/**
 	 * Initialize the communication with V-REP
 	 * @param timeout The maximum time to wait to establish the connection.
 	 * @return true on success, false otherwise
 	 */
-	bool init(double timeout = 5.);
+	virtual bool init(double timeout = 5.) override;
 
 	/**
 	 * @brief Retrieve the client ID of the current connection.
@@ -129,17 +125,17 @@ public:
 	/**
 	 * @brief Start the simulation.
 	 */
-	void startSimulation() const;
+	virtual bool start() override;
 
 	/**
 	 * @brief Stop the simulation.
 	 */
-	void stopSimulation() const;
+	virtual bool stop() override;
 
 	/**
 	 * @brief Pause the simulation.
 	 */
-	void pauseSimulation() const;
+	void pause();
 
 	/**
 	 * @brief Get the TCP pose in the given frame.
@@ -156,22 +152,6 @@ public:
 	 * @return True if correctly read, false otherwise.
 	 */
 	bool readTCPVelocity(phri::TwistPtr velocity, phri::ReferenceFrame frame) const;
-
-	/**
-	 * @brief Get the target TCP pose in the given frame.
-	 * @param pose [out] The current target TCP pose.
-	 * @param frame [in] The reference frame.
-	 * @return True if correctly read, false otherwise.
-	 */
-	bool readTCPTargetPose(phri::PosePtr pose, phri::ReferenceFrame frame) const;
-
-	/**
-	 * @brief Send the target TCP velocity in the given frame.
-	 * @param velocity [in] The target TCP velocity.
-	 * @param frame [in] The reference frame.
-	 * @return True if correctly read, false otherwise.
-	 */
-	bool sendTCPtargetVelocity(phri::TwistConstPtr velocity, phri::ReferenceFrame frame) const;
 
 	/**
 	 * @brief Get the TCP wrench in the TCP frame.
@@ -215,8 +195,8 @@ public:
 	bool sendJointTargetPosition(phri::VectorXdConstPtr position) const;
 	bool sendJointTargetVelocity(phri::VectorXdConstPtr velocity) const;
 
-	bool getSimulationData(phri::ReferenceFrame frame_velocities = phri::ReferenceFrame::TCP, phri::ReferenceFrame frame_positions = phri::ReferenceFrame::Base);
-	bool sendSimulationData(phri::ReferenceFrame frame_velocities = phri::ReferenceFrame::TCP);
+	virtual bool read() override;
+	virtual bool send() override;
 
 private:
 	void init(const std::string& ip, int port);
@@ -224,12 +204,8 @@ private:
 	bool getObjectHandles();
 	void startStreaming() const;
 	int getFrameHandle(phri::ReferenceFrame frame) const;
-	void computeSpatialTransformation(phri::Matrix4dConstPtr transformation, phri::Matrix6dPtr spatial_transformation) const;
 
-	ControlLevel control_level_;
-	double sample_time_;
 	bool sync_mode_;
-	phri::RobotPtr robot_;
 	std::string suffix_;
 	int client_id_;
 
@@ -237,6 +213,10 @@ private:
 	std::map<std::string, phri::VectorXdPtr> lasers_data_;
 	std::map<std::pair<int,int>, phri::PosePtr> tracked_objects_;
 
+	static bool registered_in_factory;
 };
+
+using VREPDriverPtr = std::shared_ptr<VREPDriver>;
+using VREPDriverConstPtr = std::shared_ptr<const VREPDriver>;
 
 }

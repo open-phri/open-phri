@@ -22,11 +22,11 @@
 #include <signal.h>
 
 #include <OpenPHRI/OpenPHRI.h>
-#include <vrep_driver/vrep_driver.h>
+#include <OpenPHRI/drivers/vrep_driver.h>
 
 using namespace std;
 using namespace phri;
-using namespace vrep;
+
 
 constexpr double SAMPLE_TIME = 0.010;
 
@@ -46,11 +46,10 @@ int main(int argc, char const *argv[]) {
 	/***				V-REP driver				***/
 	VREPDriver driver(
 		robot,
-		ControlLevel::Joint,
 		SAMPLE_TIME,
 		"", "", -1000);
 
-	driver.startSimulation();
+	driver.start();
 
 	/***			Controller configuration			***/
 	auto safety_controller = SafetyController(robot);
@@ -82,11 +81,11 @@ int main(int argc, char const *argv[]) {
 	signal(SIGINT, sigint_handler);
 
 	while(init_ok and not _stop) {
-		if(driver.getSimulationData()) {
+		if(driver.read()) {
 			safety_controller();
 			clock();
 			logger();
-			if(not driver.sendSimulationData()) {
+			if(not driver.send()) {
 				std::cerr << "Can'send simulation data to V-REP" << std::endl;
 			}
 		}
@@ -99,7 +98,7 @@ int main(int argc, char const *argv[]) {
 	}
 
 	driver.enableSynchonous(false);
-	driver.stopSimulation();
+	driver.stop();
 
 	return 0;
 }

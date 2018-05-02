@@ -17,8 +17,10 @@
 *       If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <vrep_driver/vrep_driver.h>
+#include <OpenPHRI/drivers/vrep_driver.h>
 #include <OpenPHRI/utilities/exceptions.h>
+
+#include <yaml-cpp/yaml.h>
 
 #include <stdexcept>
 #include <sstream>
@@ -30,38 +32,71 @@
 #include <extApi.h>
 #include <v_repConst.h>
 
-using namespace vrep;
+using namespace phri;
 using namespace std;
+
+bool VREPDriver::registered_in_factory = phri::DriverFactory::add<VREPDriver>("vrep");
 
 VREPDriver::VREPDriver(
 	phri::RobotPtr robot,
-	ControlLevel control_level,
 	double sample_time,
 	const std::string& suffix,
 	const std::string& ip,
 	int port) :
-	control_level_(control_level),
-	sample_time_(sample_time),
-	sync_mode_(false),
-	robot_(robot),
+	phri::Driver(robot),
+	sync_mode_(true),
 	suffix_(suffix)
 {
+	sample_time_ = sample_time;
 	init(ip, port);
 }
 
 VREPDriver::VREPDriver(
 	phri::RobotPtr robot,
-	ControlLevel control_level,
 	double sample_time,
 	int client_id,
 	const std::string& suffix) :
-	control_level_(control_level),
-	sample_time_(sample_time),
-	sync_mode_(false),
-	robot_(robot),
+	phri::Driver(robot),
+	sync_mode_(true),
 	suffix_(suffix)
 {
+	sample_time_ = sample_time;
 	init(client_id);
+}
+
+VREPDriver::VREPDriver(
+	const phri::RobotPtr& robot,
+	const YAML::Node& configuration) :
+	phri::Driver(robot)
+{
+	const auto& vrep = configuration["driver"];
+
+	if(vrep) {
+		try {
+			sample_time_ = vrep["sample_time"].as<double>();
+		}
+		catch(...) {
+			throw std::runtime_error(OPEN_PHRI_ERROR("You must provide a 'sample_time' field in the V-REP configuration."));
+		}
+		suffix_ = vrep["suffix"].as<std::string>("");
+		sync_mode_ = vrep["synchronous"].as<bool>(true);
+		auto mode = vrep["mode"].as<std::string>("TCP");
+		if(mode == "TCP") {
+			std::string ip = vrep["ip"].as<std::string>("127.0.0.1");
+			int port = vrep["port"].as<int>(19997);
+			init(ip, port);
+		}
+		else if(mode == "shared_memory") {
+			int port = vrep["port"].as<int>(-1000);
+			init("", port);
+		}
+		else {
+			throw std::runtime_error(OPEN_PHRI_ERROR("Invalid 'mode' field in the V-REP configuration. Value can be 'TCP' or 'shared_memory'."));
+		}
+	}
+	else {
+		throw std::runtime_error(OPEN_PHRI_ERROR("The configuration file doesn't include a 'driver' field."));
+	}
 }
 
 VREPDriver::~VREPDriver() {
@@ -70,17 +105,12 @@ VREPDriver::~VREPDriver() {
 
 bool VREPDriver::init(double timeout) {
 	double waited_for = 0.;
-	while(not getSimulationData() and waited_for < timeout) {
-		if(sync_mode_) {
-			nextStep();
-		}
-		else {
-			std::this_thread::sleep_for(std::chrono::milliseconds(int(sample_time_ * 1000.)));
-		}
+	enableSynchonous(sync_mode_);
+	while(not read() and waited_for < timeout) {
 		waited_for += sample_time_;
 	}
 	bool ok = waited_for < timeout;
-	if(ok and control_level_ == ControlLevel::Joint) {
+	if(ok) {
 		*robot_->jointTargetPosition() = *robot_->jointCurrentPosition();
 	}
 	return ok;
@@ -127,19 +157,23 @@ bool VREPDriver::nextStep() const {
 	return false;
 }
 
-void VREPDriver::startSimulation() const {
-	simxStartSimulation(client_id_, simx_opmode_oneshot_wait);
+bool VREPDriver::start() {
+	bool ok = simxStartSimulation(client_id_, simx_opmode_oneshot_wait) == simx_return_ok;
 	if(sync_mode_) {
-		nextStep();
-		nextStep();
+		ok &= nextStep();
+		ok &= nextStep();
 	}
+	return ok;
 }
 
-void VREPDriver::stopSimulation() const {
-	simxStopSimulation(client_id_, simx_opmode_oneshot_wait);
+bool VREPDriver::stop() {
+	if(sync_mode_) {
+		enableSynchonous(false);
+	}
+	return simxStopSimulation(client_id_, simx_opmode_oneshot_wait) == simx_return_ok;
 }
 
-void VREPDriver::pauseSimulation() const {
+void VREPDriver::pause() {
 	simxPauseSimulation(client_id_, simx_opmode_oneshot_wait);
 }
 
@@ -180,7 +214,7 @@ bool VREPDriver::readTCPVelocity(phri::TwistPtr velocity, phri::ReferenceFrame f
 			velocity_vec[i] = data[i];
 		}
 
-		// With V-REP, the velocity is (sadly) always expressed in the absolute frame so we need to map it from the absolute frame to the given frame
+		// With V-REP, the velocity is (sadly) always expressed in the absolute frame so we need to map it from the absolute frame to the base frame
 		Matrix3d rot_mat;
 		rot_mat =   AngleAxisd(angles[0], Vector3d::UnitX())
 		          * AngleAxisd(angles[1], Vector3d::UnitY())
@@ -189,46 +223,6 @@ bool VREPDriver::readTCPVelocity(phri::TwistPtr velocity, phri::ReferenceFrame f
 		velocity_vec.block<3,1>(0,0) = rot_mat.transpose() * velocity_vec.block<3,1>(0,0);
 		velocity_vec.block<3,1>(3,0) = rot_mat.transpose() * velocity_vec.block<3,1>(3,0);
 	}
-
-	return all_ok;
-}
-
-bool VREPDriver::readTCPTargetPose(phri::PosePtr pose, phri::ReferenceFrame frame) const {
-	bool all_ok = true;
-	float data[6];
-
-	int object_handle = object_handles_.at(robot_->name() + "_tcp_target" + suffix_);
-	int frame_id = getFrameHandle(frame);
-	all_ok &= (simxGetObjectPosition    (client_id_, object_handle, frame_id, data,    simx_opmode_buffer) == simx_return_ok);
-	all_ok &= (simxGetObjectOrientation (client_id_, object_handle, frame_id, data+3,  simx_opmode_buffer) == simx_return_ok);
-
-	if(all_ok) {
-		phri::Vector6d pose_vec;
-		for (size_t i = 0; all_ok and i < 6; ++i) {
-			pose_vec[i] = data[i];
-		}
-		*pose = pose_vec;
-	}
-
-	return all_ok;
-}
-
-bool VREPDriver::sendTCPtargetVelocity(phri::TwistConstPtr velocity, phri::ReferenceFrame frame) const {
-	bool all_ok = true;
-
-	auto pose = make_shared<phri::Pose>();
-	all_ok &= readTCPTargetPose(pose, frame);
-	pose->integrate(*velocity, sample_time_);
-
-	float data[6];
-	phri::Vector6d pose_vec = pose->getErrorWith(phri::Pose());
-	for (size_t i = 0; all_ok and i < 6; ++i) {
-		data[i] = pose_vec[i];
-	}
-	int object_handle = object_handles_.at(robot_->name() + "_tcp_target" + suffix_);
-	int frame_id = getFrameHandle(frame);
-	all_ok &= (simxSetObjectPosition    (client_id_, object_handle, frame_id, data,    simx_opmode_oneshot) != -1);
-	all_ok &= (simxSetObjectOrientation (client_id_, object_handle, frame_id, data+3,  simx_opmode_oneshot) != -1);
 
 	return all_ok;
 }
@@ -409,7 +403,7 @@ bool VREPDriver::sendJointTargetPosition(phri::VectorXdConstPtr position) const 
 	const auto& position_data = *position;
 	for (size_t i = 0; i < robot_->jointCount(); ++i) {
 		int joint_handle = object_handles_.at(robot_->name() + "_joint" + std::to_string(i+1) + suffix_);
-		all_ok &= (simxSetJointPosition(client_id_, joint_handle, position_data(i), simx_opmode_oneshot) != -1);
+		all_ok &= (simxSetJointTargetPosition(client_id_, joint_handle, position_data(i), simx_opmode_oneshot) != -1);
 	}
 
 	return all_ok;
@@ -419,7 +413,6 @@ bool VREPDriver::sendJointTargetVelocity(phri::VectorXdConstPtr velocity) const 
 	bool all_ok = true;
 
 	const auto& velocity_vec = *velocity;
-	// const auto& position_vec = *robot_->jointCurrentPosition();
 
 	*robot_->jointTargetPosition() += velocity_vec*sample_time_;
 
@@ -443,7 +436,6 @@ bool VREPDriver::getObjectHandles() {
 		};
 
 	all_ok &= getHandle("tcp");
-	all_ok &= getHandle("tcp_target");
 	all_ok &= getHandle("base_frame");
 	all_ok &= getHandle("world_frame");
 	all_ok &= getHandle("force_sensor");
@@ -459,7 +451,7 @@ void VREPDriver::startStreaming() const {
 	float data[6];
 
 	phri::ReferenceFrame frames[] = {phri::ReferenceFrame::TCP, phri::ReferenceFrame::Base, phri::ReferenceFrame::World};
-	string objects[] = {"_tcp", "_tcp_target"};
+	string objects[] = {"_tcp"};
 
 	for(auto& object : objects) {
 		int obj_handle = object_handles_.at(robot_->name() + object + suffix_);
@@ -505,55 +497,33 @@ int VREPDriver::getFrameHandle(phri::ReferenceFrame frame) const {
 	}
 }
 
-void VREPDriver::computeSpatialTransformation(phri::Matrix4dConstPtr transformation, phri::Matrix6dPtr spatial_transformation) const {
-	auto& mat = *spatial_transformation;
-	const auto& rot_mat = transformation->block<3,3>(0,0);
-	mat.block<3,3>(3,0).setZero();
-	mat.block<3,3>(0,0) = rot_mat;
-	mat.block<3,3>(0,3).setZero();
-	mat.block<3,3>(3,3) = rot_mat;
-}
-
-bool VREPDriver::getSimulationData(phri::ReferenceFrame frame_velocities, phri::ReferenceFrame frame_positions) {
+bool VREPDriver::read() {
 	bool all_ok = true;
+	if(sync_mode_) {
+		all_ok &= nextStep();
+	}
+	else {
+		std::this_thread::sleep_for(std::chrono::milliseconds(int(sample_time_ * 1000.)));
+	}
 
-	all_ok &= readTCPPose(robot_->controlPointCurrentPose(), frame_positions);
-	// all_ok &= readTCPTargetPose(robot_->controlPointTargetPose(), frame_positions);
-	all_ok &= readTCPVelocity(robot_->controlPointCurrentVelocity(), frame_velocities);
+	all_ok &= readTCPVelocity(robot_->controlPointCurrentVelocity(), phri::ReferenceFrame::Base);
 	all_ok &= readTCPWrench(robot_->controlPointExternalForce());
-	all_ok &= readJacobian(robot_->jacobian());
-	all_ok &= readTransformationMatrix(robot_->transformationMatrix());
 	all_ok &= readJointPosition(robot_->jointCurrentPosition());
 	all_ok &= updateTrackedObjectsPosition();
 	all_ok &= updateLaserScanners();
 
-	computeSpatialTransformation(robot_->transformationMatrix(), robot_->spatialTransformationMatrix());
-
 	return all_ok;
 }
 
-bool VREPDriver::sendSimulationData(phri::ReferenceFrame frame_velocities) {
+bool VREPDriver::send() {
 	bool all_ok = true;
 
 	// Make sure all commands are sent at the same time
-	// simxPauseCommunication(client_id_, true);
+	simxPauseCommunication(client_id_, true);
 
-	if(control_level_ == ControlLevel::TCP) {
-		all_ok &= sendTCPtargetVelocity(robot_->controlPointVelocity(), frame_velocities);
-	}
-	else {
-		// Make the TCP target tracks the TCP so that V-REP IK doesn't screw everything
-		float data[3] = {0.f,0.f,0.f};
-		int tcp_target_handle = object_handles_.at(robot_->name()+"_tcp_target"+suffix_);
-		int tcp_handle = object_handles_.at(robot_->name()+"_tcp"+suffix_);
-		all_ok &= (simxSetObjectPosition     (client_id_, tcp_target_handle, tcp_handle, data, simx_opmode_oneshot) != -1);
-		all_ok &= (simxSetObjectOrientation  (client_id_, tcp_target_handle, tcp_handle, data, simx_opmode_oneshot) != -1);
+	all_ok &= sendJointTargetVelocity(robot_->jointVelocity());
 
-		all_ok &= sendJointTargetVelocity(robot_->jointVelocity());
-
-	}
-
-	// simxPauseCommunication(client_id_, false);
+	simxPauseCommunication(client_id_, false);
 
 	return all_ok;
 }

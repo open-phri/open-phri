@@ -47,6 +47,12 @@ public:
 	 * @param robot The robot to work with.
 	 */
 	explicit SafetyController(RobotPtr robot);
+	/**
+	* @brief Construct a safety controller with a given robot and a specific configuration.
+	* @param robot The robot to work with.
+	* @param configuration The YAML node containing the controller's configuration.
+	*/
+	explicit SafetyController(RobotPtr robot, YAML::Node& configuration);
 
 	~SafetyController() = default;
 
@@ -268,7 +274,47 @@ public:
 	 */
 	std::shared_ptr<JointVelocityGenerator> getJointVelocityGenerator(const std::string& name);
 
-	std::shared_ptr<VectorXd> getNullSpaceVelocityVector() const;
+
+	/**
+	 * @brief Shortcut for the SafetyController::getConstraint method, with pointer type conversion.
+	 */
+	template<typename T>
+	std::shared_ptr<T> get(const std::string& name, typename std::enable_if<std::is_base_of<Constraint, T>::value>::type* = nullptr) {
+		return std::dynamic_pointer_cast<T>(getConstraint(name));
+	}
+
+	/**
+	 * @brief Shortcut for the SafetyController::getForceGenerator method, with pointer type conversion.
+	 */
+	template<typename T>
+	std::shared_ptr<T> get(const std::string& name, typename std::enable_if<std::is_base_of<ForceGenerator, T>::value>::type* = nullptr) {
+		return std::dynamic_pointer_cast<T>(getForceGenerator(name));
+	}
+
+	/**
+	 * @brief Shortcut for the SafetyController::getTorqueGenerator method, with pointer type conversion.
+	 */
+	template<typename T>
+	std::shared_ptr<T> get(const std::string& name, typename std::enable_if<std::is_base_of<TorqueGenerator, T>::value>::type* = nullptr) {
+		return getTorqueGenerator(name);
+	}
+
+	/**
+	 * @brief Shortcut for the SafetyController::getVelocityGenerator method, with pointer type conversion.
+	 */
+	template<typename T>
+	std::shared_ptr<T> get(const std::string& name, typename std::enable_if<std::is_base_of<VelocityGenerator, T>::value>::type* = nullptr) {
+		return getVelocityGenerator(name);
+	}
+
+	/**
+	 * @brief Shortcut for the SafetyController::getJointVelocityGenerator method, with pointer type conversion.
+	 */
+	template<typename T>
+	std::shared_ptr<T> get(const std::string& name, typename std::enable_if<std::is_base_of<JointVelocityGenerator, T>::value>::type* = nullptr) {
+		return getJointVelocityGenerator(name);
+	}
+
 
 	void enableDampedLeastSquares(double lambda);
 
@@ -332,11 +378,13 @@ protected:
 
 	RobotPtr robot_;
 	bool skip_jacobian_inverse_computation_;
-	std::shared_ptr<VectorXd> null_space_velocity_;
 
 	bool dynamic_dls_;
 	double lambda2_;
 	double sigma_min_threshold_;
 };
+
+using SafetyControllerPtr = std::shared_ptr<SafetyController>;
+using SafetyControllerConstPtr = std::shared_ptr<const SafetyController>;
 
 } // namespace phri

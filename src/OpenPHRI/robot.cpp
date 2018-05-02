@@ -18,14 +18,58 @@
 */
 
 #include <OpenPHRI/robot.h>
+#include <OpenPHRI/utilities/exceptions.h>
+
+#include <yaml-cpp/yaml.h>
+
+#include <iostream>
 
 using namespace phri;
 
-Robot::Robot(const std::string& name,
-             size_t joint_count) :
-	name_(name),
-	joint_count_(joint_count)
+Robot::Robot(
+	const std::string& name,
+	size_t joint_count)
 {
+	create(name, joint_count);
+}
+
+Robot::Robot(const YAML::Node& configuration) {
+	create(configuration);
+}
+
+void Robot::create(
+	const std::string& name,
+	size_t joint_count)
+{
+	name_ = name;
+	joint_count_ = joint_count;
+	create();
+}
+
+void Robot::create(const YAML::Node& configuration) {
+	const auto& robot = configuration["robot"];
+	if(robot) {
+		try {
+			name_ = robot["name"].as<std::string>();
+		}
+		catch(...) {
+			throw std::runtime_error(OPEN_PHRI_ERROR("You must provide a 'name' field in the robot configuration."));
+		}
+		try {
+			joint_count_ = robot["joint_count"].as<size_t>();
+		}
+		catch(...) {
+			throw std::runtime_error(OPEN_PHRI_ERROR("You must provide a 'joint_count' field in the robot configuration."));
+		}
+
+		create();
+	}
+	else {
+		throw std::runtime_error(OPEN_PHRI_ERROR("The configuration file doesn't include a 'robot' field."));
+	}
+}
+
+void Robot::create() {
 	joint_damping_matrix_               = std::make_shared<VectorXd>();
 	control_point_damping_matrix_       = std::make_shared<Vector6d>(Vector6d::Ones());
 
@@ -85,7 +129,7 @@ Robot::Robot(const std::string& name,
 	jacobian_inverse_->resize(joint_count_, 6);
 	jacobian_inverse_->setZero();
 
-	joint_damping_matrix_->resize(joint_count, 1);
+	joint_damping_matrix_->resize(joint_count_, 1);
 	joint_damping_matrix_->setOnes();
 }
 

@@ -29,14 +29,21 @@
 #pragma once
 
 #include <OpenPHRI/definitions.h>
+#include <OpenPHRI/fwd_decl.h>
 
 namespace phri {
 
 class Robot {
 public:
+	Robot() = default;
 	Robot(const std::string& name,
 	      size_t joint_count);
+	Robot(const YAML::Node& configuration);
 	~Robot() = default;
+
+	void create(const std::string& name,
+	            size_t joint_count);
+	void create(const YAML::Node& configuration);
 
 	/**
 	 * @brief The name given to the robot.
@@ -216,6 +223,8 @@ public:
 
 private:
 	friend class SafetyController;
+
+	void create();
 
 	std::string name_;
 	size_t joint_count_;

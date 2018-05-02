@@ -59,8 +59,6 @@ public:
 	// Read init position, set parameters
 	void init();
 
-	void useNullSpaceMotion(double null_space_gain, phri::VectorXd&& joint_min_positions, phri::VectorXd&& joint_max_positions);
-
 	// return true when finished
 	bool compute();
 

@@ -22,11 +22,11 @@
 #include <signal.h>
 
 #include <OpenPHRI/OpenPHRI.h>
-#include <vrep_driver/vrep_driver.h>
+#include <OpenPHRI/drivers/vrep_driver.h>
 
 using namespace std;
 using namespace phri;
-using namespace vrep;
+
 
 constexpr double SAMPLE_TIME = 0.010;
 
@@ -49,10 +49,9 @@ int main(int argc, char const *argv[]) {
 	/***				V-REP driver				***/
 	VREPDriver driver(
 		robot,
-		ControlLevel::TCP,
 		SAMPLE_TIME);
 
-	driver.startSimulation();
+	driver.start();
 
 	/***			Controller configuration			***/
 	*robot->controlPointDampingMatrix() *= 100.;
@@ -120,7 +119,7 @@ int main(int argc, char const *argv[]) {
 
 	bool end = false;
 	while(not (_stop or end)) {
-		if(driver.getSimulationData()) {
+		if(driver.read()) {
 			(*reference)[0] = robot_position->translation().x();
 			(*reference)[1] = robot_position->translation().z();
 
@@ -132,7 +131,7 @@ int main(int argc, char const *argv[]) {
 			velocity_target->translation().z() = (*trajectory_generator.getVelocityOutput())[1];
 
 			safety_controller();
-			driver.sendSimulationData();
+			driver.send();
 
 			clock();
 			logger();
@@ -144,7 +143,7 @@ int main(int argc, char const *argv[]) {
 	cout << (end ? "End of the trajectory reached" : "Trajectory generation interrupted") << endl;
 
 	driver.enableSynchonous(false);
-	driver.stopSimulation();
+	driver.stop();
 
 	return 0;
 }
