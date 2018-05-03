@@ -33,7 +33,7 @@
 #include <OpenPHRI/constraints/acceleration_constraint.h>
 #include <OpenPHRI/constraints/power_constraint.h>
 #include <OpenPHRI/constraints/force_constraint.h>
-#include <OpenPHRI/constraints/stop_constraint.h>
+#include <OpenPHRI/constraints/emergency_stop_constraint.h>
 #include <OpenPHRI/constraints/separation_distance_constraint.h>
 #include <OpenPHRI/constraints/joint_velocity_constraint.h>
 #include <OpenPHRI/constraints/kinetic_energy_constraint.h>

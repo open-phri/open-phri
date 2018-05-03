@@ -17,7 +17,7 @@
 *       If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <OpenPHRI/constraints/stop_constraint.h>
+#include <OpenPHRI/constraints/emergency_stop_constraint.h>
 #include <iostream>
 
 using namespace phri;
