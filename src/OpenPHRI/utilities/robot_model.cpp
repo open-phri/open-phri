@@ -86,8 +86,11 @@ struct RobotModel::pImpl {
 		rbd::forwardKinematics(mb, mbc);
 		rbd::forwardVelocity(mb, mbc);
 
-		auto tcp_pose = mbc.bodyPosW[control_point_body_index];
-		*robot->controlPointCurrentPose() = Pose(tcp_pose.translation(), static_cast<Eigen::Quaterniond>(tcp_pose.rotation()));
+		const auto& tcp_pose = mbc.bodyPosW[control_point_body_index];
+		*robot->controlPointCurrentPose() = Pose(tcp_pose.translation(), static_cast<Eigen::Quaterniond>(tcp_pose.rotation().transpose()));
+		robot->transformationMatrix()->setIdentity();
+		robot->transformationMatrix()->block<3,1>(0,3) = tcp_pose.translation();
+		robot->transformationMatrix()->block<3,3>(0,0) = tcp_pose.rotation().transpose();
 		updateSpatialTransformation();
 
 		auto joint_count = robot->jointCount();
