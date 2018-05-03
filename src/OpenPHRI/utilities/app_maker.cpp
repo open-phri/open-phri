@@ -40,7 +40,7 @@ AppMaker::AppMaker(const std::string& configuration_file) :
 
 	impl_->clock = std::make_shared<Clock>(impl_->driver->getSampleTime());
 	impl_->data_logger = std::make_shared<DataLogger>(
-		conf["data_logger"]["folder"].as<std::string>("/tmp"),
+		PID_PATH(conf["data_logger"]["folder"].as<std::string>("/tmp")),
 		impl_->clock->getTime(),
 		true);
 
