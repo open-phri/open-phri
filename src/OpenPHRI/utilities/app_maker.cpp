@@ -40,12 +40,16 @@ AppMaker::AppMaker(const std::string& configuration_file) :
 
 	impl_->clock = std::make_shared<Clock>(impl_->driver->getSampleTime());
 	impl_->data_logger = std::make_shared<DataLogger>(
-		"/tmp",
+		conf["data_logger"]["folder"].as<std::string>("/tmp"),
 		impl_->clock->getTime(),
 		true);
 
-	impl_->data_logger->logSafetyControllerData(impl_->controller.get());
-	impl_->data_logger->logRobotData(impl_->robot);
+	if(conf["data_logger"]["log_control_data"].as<bool>(false)) {
+		impl_->data_logger->logSafetyControllerData(impl_->controller.get());
+	}
+	if(conf["data_logger"]["log_robot_data"].as<bool>(false)) {
+		impl_->data_logger->logRobotData(impl_->robot);
+	}
 
 	impl_->app_configuration = conf["parameters"];
 }
