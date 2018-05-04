@@ -13,11 +13,12 @@ public:
 	virtual ~Driver();
 
 	/**
-	 * Initialize the communication with the robot.
+	 * @brief Initialize the communication with the robot.
+	 * @details Must be called by derived classes on successfull initialization when the robot state has correctly been updated.
 	 * @param timeout The maximum time to wait to establish the connection.
 	 * @return true on success, false otherwise
 	 */
-	virtual bool init(double timeout = 5.) = 0;
+	virtual bool init(double timeout = 5.);
 
 	/**
 	* Start the communication with the robot.

@@ -111,7 +111,7 @@ bool VREPDriver::init(double timeout) {
 	}
 	bool ok = waited_for < timeout;
 	if(ok) {
-		*robot_->jointTargetPosition() = *robot_->jointCurrentPosition();
+		ok &= Driver::init(timeout);
 	}
 	return ok;
 }

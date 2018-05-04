@@ -11,6 +11,11 @@ Driver::Driver(RobotPtr robot) :
 
 Driver::~Driver() = default;
 
+bool Driver::init(double timeout) {
+	*robot_->jointTargetPosition() = *robot_->jointCurrentPosition();
+	return true;
+}
+
 double Driver::getSampleTime() const {
 	return sample_time_;
 }
