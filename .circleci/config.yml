@@ -1,0 +1,24 @@
+version: 2
+jobs:
+  build_ubuntu1404:
+    docker:
+      - image: benjaminn13/pid-workspace-ci:ubuntu-14.04
+    steps:
+      - run: make upgrade && make deploy package=open-phri && cd ../packages/open-phri/build/ && cmake -DBUILD_AND_RUN_TESTS=ON .. && cmake .. && make build force=true
+  build_ubuntu1604:
+    docker:
+      - image: benjaminn13/pid-workspace-ci:ubuntu-16.04
+    steps:
+      - run: make upgrade && make deploy package=open-phri && cd ../packages/open-phri/build/ && cmake -DBUILD_AND_RUN_TESTS=ON .. && cmake .. && make build force=true
+  build_ubuntu1804:
+    docker:
+      - image: benjaminn13/pid-workspace-ci:ubuntu-18.04
+    steps:
+      - run: make upgrade && make deploy package=open-phri && cd ../packages/open-phri/build/ && cmake -DBUILD_AND_RUN_TESTS=ON .. && cmake .. && make build force=true
+workflows:
+  version: 2
+  build_accept_deploy:
+    jobs:
+      - build_ubuntu1404
+      - build_ubuntu1604
+      - build_ubuntu1804
