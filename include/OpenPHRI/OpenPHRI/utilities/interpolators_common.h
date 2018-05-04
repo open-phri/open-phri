@@ -81,6 +81,25 @@ struct TrajectoryPoint {
 		}
 	}
 
+	template<typename U = T>
+	void resize(size_t size, typename std::enable_if<std::is_same<U, std::vector<double>>::value or std::is_same<U, phri::VectorXd>::value>::type* = 0)
+	{
+		y->resize(size);
+		dy->resize(size);
+		d2y->resize(size);
+
+		createRefs();
+
+		for (size_t i = 0; i < this->size(); ++i) {
+			double& y = yrefs_[i];
+			double& dy = dyrefs_[i];
+			double& d2y = d2yrefs_[i];
+			y = 0.;
+			dy = 0.;
+			d2y = 0.;
+		}
+	}
+
 	void print() const {
 		std::cout << "[";
 		std::cout << "(";

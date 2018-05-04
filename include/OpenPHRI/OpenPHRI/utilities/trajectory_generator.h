@@ -508,6 +508,9 @@ protected:
 		auto& position_vec = *position_output_;
 		auto& velocity_vec = *velocity_output_;
 		auto& acceleration_vec = *acceleration_output_;
+		position_vec.resize(current_segement_.size());
+		velocity_vec.resize(current_segement_.size());
+		acceleration_vec.resize(current_segement_.size());
 		for (size_t i = 0; i < static_cast<size_t>(position_vec.size()); ++i) {
 			position_output_refs_.push_back(std::ref(position_vec[i]));
 			velocity_output_refs_.push_back(std::ref(velocity_vec[i]));
