@@ -99,11 +99,11 @@ bool AppMaker::run(
 	if(impl_->driver->read()) {
 		impl_->model->forwardKinematics();
 		if(pre_controller_code) {
-			pre_controller_code();
+			ok &= pre_controller_code();
 		}
 		impl_->controller->compute();
 		if(post_controller_code) {
-			post_controller_code();
+			ok &= post_controller_code();
 		}
 		if(not impl_->driver->send()) {
 			std::cerr << "[phri::AppMaker] Can'send data to the driver" << std::endl;
