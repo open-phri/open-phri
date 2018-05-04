@@ -83,9 +83,9 @@ public:
 	 * @return true if the item has successfully been added to the collection, false otherwise.
 	 */
 	virtual bool add(const std::string& name, T item, bool force = false) {
-		if((items_.find(name) != items_.end())and not force) {
+		if((items_.find(name) != items_.end()) and not force) {
 			if(verbose_) {
-				std::cerr << "In " << class_name_ << "::add" << collection_name_ << ": an item called \"" << name << "\" already exists. Not replaced (force = false)" << std::endl;
+				std::cerr << "In phri::" << class_name_ << "::add" << collection_name_ << ": an item called \"" << name << "\" already exists. Not replaced (force = false)" << std::endl;
 			}
 			return false;
 		}

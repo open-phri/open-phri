@@ -167,15 +167,16 @@ void SafetyController::compute() {
 	const auto& velocity_sum = computeVelocitySum();
 	const auto& joint_velocity_sum = computeJointVelocitySum();
 #if HEAVY_PRINTING
-	std::cout << "###################################################################\n";
-	std::cout << "force_sum: " << force_sum.transpose() << std::endl;
-	std::cout << "torque_sum: " << torque_sum.transpose() << std::endl;
-	std::cout << "velocity_sum: " << velocity_sum.transpose() << std::endl;
-	std::cout << "joint_velocity_sum: " << joint_velocity_sum.transpose() << std::endl;
-	std::cout << "spatial_transformation:\n " << spatial_transformation << std::endl;
-	std::cout << "jacobian:\n " << jacobian << std::endl;
-	std::cout << "jacobian_inverse:\n " << jacobian_inverse << std::endl;
-	std::cout << "*******************************************************************\n";
+	std::cout << "[phri::phSafetyController::compute]\n";
+	std::cout << "\t###################################################################\n";
+	std::cout << "\tforce_sum: " << force_sum.transpose() << std::endl;
+	std::cout << "\ttorque_sum: " << torque_sum.transpose() << std::endl;
+	std::cout << "\tvelocity_sum: " << velocity_sum.transpose() << std::endl;
+	std::cout << "\tjoint_velocity_sum: " << joint_velocity_sum.transpose() << std::endl;
+	std::cout << "\tspatial_transformation:\n " << spatial_transformation << std::endl;
+	std::cout << "\tjacobian:\n " << jacobian << std::endl;
+	std::cout << "\tjacobian_inverse:\n " << jacobian_inverse << std::endl;
+	std::cout << "\t*******************************************************************\n";
 #endif
 
 	// Joint level damping control
@@ -206,37 +207,38 @@ void SafetyController::compute() {
 	*robot_->control_point_velocity_ = constraint_value * static_cast<Vector6d>(*robot_->control_point_total_velocity_);
 
 #if HEAVY_PRINTING
-	std::cout << "joint vel cmd: " << robot_->joint_velocity_command_->transpose() << std::endl;
-	std::cout << "cp vel cmd: " << *(robot_->control_point_velocity_command_) << std::endl;
-	std::cout << "joint vel tot: " << robot_->joint_total_velocity_->transpose() << std::endl;
-	std::cout << "cp vel tot: " << *(robot_->control_point_total_velocity_) << std::endl;
-	std::cout << "jont trq tot: " << robot_->joint_total_torque_->transpose() << std::endl;
-	std::cout << "cp force tot: " << robot_->control_point_total_force_->transpose() << std::endl;
-	std::cout << "joint vel: " << robot_->joint_velocity_->transpose() << std::endl;
-	std::cout << "cp vel: " << *(robot_->control_point_velocity_) << std::endl;
+	std::cout << "\tjoint vel cmd: " << robot_->joint_velocity_command_->transpose() << std::endl;
+	std::cout << "\tcp vel cmd: " << *(robot_->control_point_velocity_command_) << std::endl;
+	std::cout << "\tjoint vel tot: " << robot_->joint_total_velocity_->transpose() << std::endl;
+	std::cout << "\tcp vel tot: " << *(robot_->control_point_total_velocity_) << std::endl;
+	std::cout << "\tjont trq tot: " << robot_->joint_total_torque_->transpose() << std::endl;
+	std::cout << "\tcp force tot: " << robot_->control_point_total_force_->transpose() << std::endl;
+	std::cout << "\tjoint vel: " << robot_->joint_velocity_->transpose() << std::endl;
+	std::cout << "\tcp vel: " << *(robot_->control_point_velocity_) << std::endl;
 #endif
 }
 
 void SafetyController::print() const {
-	std::cout << "Force generators:\n";
+	std::cout << "[phri::SafetyController::print]\n";
+	std::cout << "\tForce generators:\n";
 	for (const auto& gen: force_generators_) {
-		std::cout << "\t- " << gen.first << " (" << getTypeName(*gen.second.object) << "): " << gen.second.last_value.transpose() << "\n";
+		std::cout << "\t\t- " << gen.first << " (" << getTypeName(*gen.second.object) << "): " << gen.second.last_value.transpose() << "\n";
 	}
-	std::cout << "Velocity generators:\n";
+	std::cout << "\tVelocity generators:\n";
 	for (const auto& gen: velocity_generators_) {
-		std::cout << "\t- " << gen.first << " (" << getTypeName(*gen.second.object) << "): " << static_cast<const Vector6d&>(gen.second.last_value).transpose() << "\n";
+		std::cout << "\t\t- " << gen.first << " (" << getTypeName(*gen.second.object) << "): " << static_cast<const Vector6d&>(gen.second.last_value).transpose() << "\n";
 	}
-	std::cout << "Torque generators:\n";
+	std::cout << "\tTorque generators:\n";
 	for (const auto& gen: torque_generators_) {
-		std::cout << "\t- " << gen.first << " (" << getTypeName(*gen.second.object) << "): " << gen.second.last_value.transpose() << "\n";
+		std::cout << "\t\t- " << gen.first << " (" << getTypeName(*gen.second.object) << "): " << gen.second.last_value.transpose() << "\n";
 	}
-	std::cout << "Joint velocity generators:\n";
+	std::cout << "\tJoint velocity generators:\n";
 	for (const auto& gen: joint_velocity_generators_) {
-		std::cout << "\t- " << gen.first << " (" << getTypeName(*gen.second.object) << "): " << gen.second.last_value.transpose() << "\n";
+		std::cout << "\t\t- " << gen.first << " (" << getTypeName(*gen.second.object) << "): " << gen.second.last_value.transpose() << "\n";
 	}
-	std::cout << "Constraints:\n";
+	std::cout << "\tConstraints:\n";
 	for (const auto& cstr: constraints_) {
-		std::cout << "\t- " << cstr.first << " (" << getTypeName(*cstr.second.object) << "): " << cstr.second.last_value << "\n";
+		std::cout << "\t\t- " << cstr.first << " (" << getTypeName(*cstr.second.object) << "): " << cstr.second.last_value << "\n";
 	}
 }
 

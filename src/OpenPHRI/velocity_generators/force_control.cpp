@@ -47,7 +47,7 @@ void ForceControl::configureFilter(double sample_time, double time_constant) {
 	assert(time_constant > 0);
 
 	if(not (time_constant > 5.*sample_time)) {
-		std::cout << "ForceControl::configureFilter: the time constant (" << time_constant << ") for the low pass filter should be at least five times greater than the sample time (" << sample_time << ") to have a correct behavior" << std::endl;
+		std::cout << "phri::ForceControl::configureFilter: the time constant (" << time_constant << ") for the low pass filter should be at least five times greater than the sample time (" << sample_time << ") to have a correct behavior" << std::endl;
 	}
 
 	filter_coeff_ = (sample_time/(time_constant+sample_time));
