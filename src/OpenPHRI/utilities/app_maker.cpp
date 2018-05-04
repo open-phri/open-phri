@@ -12,6 +12,7 @@ struct AppMaker::pImpl {
 	DataLoggerPtr data_logger;
 	ClockPtr clock;
 	YAML::Node app_configuration;
+	double init_timeout;
 };
 
 AppMaker::AppMaker(const std::string& configuration_file) :
@@ -27,7 +28,8 @@ AppMaker::AppMaker(const std::string& configuration_file) :
 
 	impl_->robot->create(impl_->model->name(), impl_->model->jointCount());
 
-	/***				V-REP driver				***/
+	/***				Robot driver				***/
+	impl_->init_timeout = conf["driver"]["init_timeout"].as<double>(30.);
 	impl_->driver = DriverFactory::create(
 		conf["driver"]["type"].as<std::string>(),
 		impl_->robot,
@@ -58,7 +60,7 @@ AppMaker::~AppMaker() = default;
 
 bool AppMaker::init(std::function<bool(void)> init_code) {
 	bool all_ok = true;
-	all_ok &= impl_->driver->init();
+	all_ok &= impl_->driver->init(impl_->init_timeout);
 	if(init_code) {
 		all_ok &= init_code();
 	}
