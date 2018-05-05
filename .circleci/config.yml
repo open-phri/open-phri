@@ -6,19 +6,19 @@ jobs:
       - image: benjaminn13/pid-workspace-ci:ubuntu-14.04
     working_directory: /home/piduser/pid-workspace/pid
     steps:
-      - run: make upgrade && make deploy package=open-phri && cd ../packages/open-phri/build/ && git checkout $CIRCLE_BRANCH && cmake -DBUILD_AND_RUN_TESTS=ON .. && cmake .. && make build force=true
+      - run: make upgrade && cd ../packages && git clone https://github.com/BenjaminNavarro/open-phri.git --branch $CIRCLE_BRANCH && cd open-phri/build && cmake -DBUILD_AND_RUN_TESTS=ON .. && cmake .. && make build force=true
   "build_ubuntu1604":
     docker:
       - image: benjaminn13/pid-workspace-ci:ubuntu-16.04
     working_directory: /home/piduser/pid-workspace/pid
     steps:
-      - run: make upgrade && make deploy package=open-phri && cd ../packages/open-phri/build/ && git checkout $CIRCLE_BRANCH && cmake -DBUILD_AND_RUN_TESTS=ON .. && cmake .. && make build force=true
+      - run: make upgrade && cd ../packages && git clone https://github.com/BenjaminNavarro/open-phri.git --branch $CIRCLE_BRANCH && cd open-phri/build && cmake -DBUILD_AND_RUN_TESTS=ON .. && cmake .. && make build force=true
   "build_ubuntu1804":
     docker:
       - image: benjaminn13/pid-workspace-ci:ubuntu-18.04
     working_directory: /home/piduser/pid-workspace/pid
     steps:
-      - run: make upgrade && make deploy package=open-phri && cd ../packages/open-phri/build/ && git checkout $CIRCLE_BRANCH && cmake -DBUILD_AND_RUN_TESTS=ON .. && cmake .. && make build force=true
+      - run: make upgrade && cd ../packages && git clone https://github.com/BenjaminNavarro/open-phri.git --branch $CIRCLE_BRANCH && cd open-phri/build && cmake -DBUILD_AND_RUN_TESTS=ON .. && cmake .. && make build force=true
 
 
 workflows:
