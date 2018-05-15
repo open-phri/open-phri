@@ -15,3 +15,7 @@ controller:
     use_dynamic_dls: true
     lambda_max: 0.1
     sigma_min_threshold: 0.1
+
+data_logger:
+    log_control_data: true
+    log_robot_data: true
