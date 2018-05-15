@@ -30,8 +30,7 @@ NullSpaceMotion::NullSpaceMotion(VectorXdConstPtr joint_velocity) :
 	identity_.setIdentity();
 }
 
-VectorXd NullSpaceMotion::compute() {
+void NullSpaceMotion::update(VectorXd& velocity) {
 	null_space_projector_ = identity_ - (*robot_->jacobianInverse()) * (*robot_->jacobian());
-	// std::cout << "projector:\n" << null_space_projector_ << std::endl;
-	return null_space_projector_ * (*joint_velocity_);
+	velocity = null_space_projector_ * (*joint_velocity_);
 }

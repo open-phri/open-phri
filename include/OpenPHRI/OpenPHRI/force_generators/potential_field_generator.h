@@ -88,9 +88,9 @@ public:
 	PotentialFieldGenerator(Vector3dConstPtr offset, ReferenceFrame objects_frame = ReferenceFrame::TCP);
 	virtual ~PotentialFieldGenerator() = default;
 
-	virtual Vector6d compute() override;
-
 private:
+	virtual void update(Vector6d& force) override;
+
 	ReferenceFrame objects_frame_;
 	Vector3dConstPtr offset_;
 };

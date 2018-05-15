@@ -54,7 +54,7 @@ void ForceControl::configureFilter(double sample_time, double time_constant) {
 
 }
 
-Twist ForceControl::compute() {
+void ForceControl::update(Twist& velocity) {
 	Vector6d error;
 	Vector6d target;
 	if(type_ == ForceControlTargetType::Environment) {
@@ -72,14 +72,12 @@ Twist ForceControl::compute() {
 	}
 	applySelection(error);
 
-	Vector6d cmd = p_gain_->cwiseProduct(error);
-
 	error = filter_coeff_*error + (1.-filter_coeff_) *prev_error_;
-	cmd += d_gain_->cwiseProduct((error - prev_error_)/sample_time_);
-	prev_error_ = error;
 
-	// TODO use velocity_ and VelocityGenerator::compute()
-	return static_cast<Twist>(cmd);
+	velocity = p_gain_->cwiseProduct(error) +
+	           d_gain_->cwiseProduct((error - prev_error_)/sample_time_);
+
+	prev_error_ = error;
 }
 
 void ForceControl::applySelection(Vector6d& vec) const {

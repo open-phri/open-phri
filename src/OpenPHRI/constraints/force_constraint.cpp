@@ -34,15 +34,15 @@ public:
 
 	}
 
-	virtual Twist compute() override {
-		velocity_ = Vector6d::Zero();
+	virtual void update(Twist& velocity) override {
 		double f_norm = external_force_->norm();
 
 		if(f_norm > *maximum_force_) {
-			velocity_ = *external_force_ * 1e12; // Just something huge
+			velocity = *external_force_ * 1e12; // Just something huge
 		}
-
-		return VelocityGenerator::compute();
+		else {
+			velocity = phri::Twist();
+		}
 	}
 
 private:

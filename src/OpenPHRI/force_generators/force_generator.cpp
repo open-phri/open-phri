@@ -26,10 +26,12 @@ ForceGenerator::ForceGenerator(ReferenceFrame frame) {
 }
 
 Vector6d ForceGenerator::compute() {
-	return transform(force_);
+	Vector6d force;
+	update(force);
+	return transform(force);
 }
 
-Vector6d ForceGenerator::transform(Vector6d force) {
+Vector6d ForceGenerator::transform(const Vector6d& force) {
 	if(frame_ != ReferenceFrame::TCP) {
 		return robot_->spatialTransformationMatrix()->transpose() * force;
 	}

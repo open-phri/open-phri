@@ -35,8 +35,7 @@ StiffnessGenerator::StiffnessGenerator(
 {
 }
 
-
-Vector6d StiffnessGenerator::compute() {
+void StiffnessGenerator::update(Vector6d& force) {
 	Vector6d error;
 
 	if(stiffness_frame_ == ReferenceFrame::TCP) {
@@ -57,7 +56,5 @@ Vector6d StiffnessGenerator::compute() {
 		}
 	}
 
-	force_ = *stiffness_ * error;
-
-	return ForceGenerator::compute();
+	force = *stiffness_ * error;
 }

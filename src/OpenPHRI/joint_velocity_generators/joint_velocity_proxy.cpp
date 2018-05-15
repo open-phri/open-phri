@@ -26,6 +26,17 @@ JointVelocityProxy::JointVelocityProxy(VectorXdConstPtr joint_velocity) :
 {
 }
 
-VectorXd JointVelocityProxy::compute() {
-	return *joint_velocity_;
+JointVelocityProxy::JointVelocityProxy(
+	VectorXdConstPtr joint_velocity,
+	const std::function<void(void)>& update_func) :
+	JointVelocityProxy(joint_velocity)
+{
+	update_func_ = update_func;
+}
+
+void JointVelocityProxy::update(VectorXd& velocity) {
+	if(update_func_) {
+		update_func_();
+	}
+	velocity = *joint_velocity_;
 }

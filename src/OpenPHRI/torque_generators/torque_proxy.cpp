@@ -26,6 +26,6 @@ TorqueProxy::TorqueProxy(VectorXdConstPtr torque) :
 {
 }
 
-VectorXd TorqueProxy::compute() {
-	return *torque_;
+void TorqueProxy::update(VectorXd& torque) {
+	torque = *torque_;
 }

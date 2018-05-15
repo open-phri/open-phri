@@ -48,7 +48,7 @@ public:
 	 * @brief Compute the value associated with the joint_velocity generator.
 	 * @return The joint_velocity generator's evaluated value.
 	 */
-	virtual VectorXd compute() = 0;
+	virtual VectorXd compute() final;
 
 	/**
 	 * @brief Call operator, shortcut for compute().
@@ -57,6 +57,8 @@ public:
 	virtual VectorXd operator()() final;
 
 protected:
+	virtual void update(VectorXd& velocity) = 0;
+
 	friend class SafetyController;
 	RobotConstPtr robot_;
 };

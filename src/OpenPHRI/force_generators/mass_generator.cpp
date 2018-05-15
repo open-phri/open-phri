@@ -35,7 +35,7 @@ MassGenerator::MassGenerator(
 }
 
 
-Vector6d MassGenerator::compute() {
+void MassGenerator::update(Vector6d& force) {
 	Vector6d error;
 
 	if(mass_frame_ == ReferenceFrame::TCP) {
@@ -45,7 +45,6 @@ Vector6d MassGenerator::compute() {
 		else {
 			error = robot_->spatialTransformationMatrix()->transpose() * (static_cast<const Vector6d&>(*target_acceleration_) - static_cast<const Vector6d&>(*robot_->controlPointCurrentAcceleration()));
 		}
-		force_ = *mass_ * error;
 	}
 	else {
 		if(target_acceleration_frame_ == ReferenceFrame::TCP) {
@@ -54,8 +53,7 @@ Vector6d MassGenerator::compute() {
 		else {
 			error = static_cast<const Vector6d&>(*target_acceleration_) - static_cast<const Vector6d&>(*robot_->controlPointCurrentAcceleration());
 		}
-		force_ = *mass_ * error;
 	}
 
-	return ForceGenerator::compute();
+	force = *mass_ * error;
 }

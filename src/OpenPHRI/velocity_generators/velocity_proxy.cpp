@@ -18,16 +18,30 @@
 */
 
 #include <OpenPHRI/velocity_generators/velocity_proxy.h>
+#include <iostream>
 
 using namespace phri;
 
-VelocityProxy::VelocityProxy(TwistConstPtr velocity, ReferenceFrame frame) :
+VelocityProxy::VelocityProxy(
+	TwistConstPtr velocity,
+	ReferenceFrame frame) :
 	VelocityGenerator(frame),
 	external_velocity_(velocity)
 {
 }
 
-Twist VelocityProxy::compute() {
-	velocity_ = *external_velocity_;
-	return VelocityGenerator::compute();;
+VelocityProxy::VelocityProxy(
+	TwistConstPtr velocity,
+	ReferenceFrame frame,
+	const std::function<void(void)>& update_func) :
+	VelocityProxy(velocity, frame)
+{
+	update_func_ = update_func;
+}
+
+void VelocityProxy::update(Twist& velocity) {
+	if(update_func_) {
+		update_func_();
+	}
+	velocity = *external_velocity_;
 }

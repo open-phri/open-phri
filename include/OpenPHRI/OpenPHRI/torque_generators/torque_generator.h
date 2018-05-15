@@ -46,7 +46,7 @@ public:
 	 * @brief Compute the value associated with the torque generator.
 	 * @return The torque generator's evaluated value.
 	 */
-	virtual VectorXd compute() = 0;
+	virtual VectorXd compute() final;
 
 	/**
 	 * @brief Call operator, shortcut for compute().
@@ -55,6 +55,7 @@ public:
 	virtual VectorXd operator()() final;
 
 protected:
+	virtual void update(VectorXd& torque) = 0;
 	friend class SafetyController;
 	RobotConstPtr robot_;
 };
