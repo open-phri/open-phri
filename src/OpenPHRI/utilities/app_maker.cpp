@@ -82,6 +82,7 @@ bool AppMaker::init(std::function<bool(void)> init_code) {
 	bool all_ok = true;
 	std::cout << "[phri::AppMaker] Initializing the robot..." << std::flush;
 	all_ok &= impl_->driver->init(impl_->init_timeout);
+	impl_->model->forwardKinematics();
 	std::cout << " done." << std::endl;
 	if(init_code) {
 		std::cout << "[phri::AppMaker] Calling user initialization function..." << std::flush;

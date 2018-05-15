@@ -47,7 +47,7 @@ public:
 	 * @brief Compute the value associated with the velocity generator.
 	 * @return The velocity generator's evaluated value.
 	 */
-	virtual Twist compute() = 0;
+	virtual Twist compute() final;
 
 	/**
 	 * @brief Call operator, shortcut for compute().
@@ -66,12 +66,13 @@ protected:
 	 * @brief Transform the given force in the TCP frame, if necessary.
 	 * @param velocity The velocity to transform.
 	 */
-	virtual Twist transform(Twist velocity) final;
+	virtual Twist transform(const Twist& velocity) final;
+
+	virtual void update(Twist& velocity) = 0;
 
 	friend class SafetyController;
 	RobotConstPtr robot_;
 	ReferenceFrame frame_;
-	Twist velocity_;
 };
 
 using VelocityGeneratorPtr = std::shared_ptr<VelocityGenerator>;

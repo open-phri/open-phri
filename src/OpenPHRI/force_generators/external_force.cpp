@@ -22,12 +22,6 @@
 using namespace phri;
 
 ExternalForce::ExternalForce(RobotConstPtr robot) :
-	ForceGenerator(ReferenceFrame::TCP),
-	external_force_(robot->controlPointExternalForce())
+	ForceProxy(robot->controlPointExternalForce(), ReferenceFrame::TCP)
 {
-}
-
-Vector6d ExternalForce::compute() {
-	force_ = *external_force_;
-	return ForceGenerator::compute();
 }

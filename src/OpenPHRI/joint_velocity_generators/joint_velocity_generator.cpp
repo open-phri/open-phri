@@ -21,6 +21,12 @@
 
 using namespace phri;
 
+VectorXd JointVelocityGenerator::compute() {
+	VectorXd velocity;
+	update(velocity);
+	return velocity;
+}
+
 VectorXd JointVelocityGenerator::operator()() {
 	return compute();
 }

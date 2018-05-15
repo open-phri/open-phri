@@ -41,9 +41,9 @@ public:
 	explicit NullSpaceMotion(VectorXdConstPtr joint_velocity);
 	virtual ~NullSpaceMotion() = default;
 
-	virtual VectorXd compute() override;
-
 private:
+	virtual void update(VectorXd& velocity) override;
+
 	VectorXdConstPtr joint_velocity_;
 	MatrixXd null_space_projector_;
 	MatrixXd identity_;

@@ -30,6 +30,7 @@
 
 #include <OpenPHRI/velocity_generators/velocity_generator.h>
 #include <OpenPHRI/definitions.h>
+#include <functional>
 
 namespace phri {
 
@@ -41,13 +42,22 @@ public:
 	/** @brief Construct a velocity proxy given an externally managed velocity
 	 *  @param frame The reference frame in which the velocity is expressed
 	 */
-	explicit VelocityProxy(TwistConstPtr velocity, ReferenceFrame frame = ReferenceFrame::TCP);
+	explicit VelocityProxy(
+		TwistConstPtr velocity,
+		ReferenceFrame frame = ReferenceFrame::TCP);
+
+	explicit VelocityProxy(
+		TwistConstPtr velocity,
+		ReferenceFrame frame,
+		const std::function<void(void)>& update_func);
+
 	virtual ~VelocityProxy() = default;
 
-	virtual Twist compute() override;
-
 private:
+	virtual void update(Twist& velocity) override;
+
 	TwistConstPtr external_velocity_;
+	std::function<void(void)> update_func_;
 };
 
 using VelocityProxyPtr = std::shared_ptr<VelocityProxy>;

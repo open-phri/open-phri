@@ -52,9 +52,9 @@ public:
 
 	~StiffnessGenerator() = default;
 
-	virtual Vector6d compute() override;
-
 private:
+	virtual void update(Vector6d& force) override;
+
 	Matrix6dConstPtr stiffness_;
 	PoseConstPtr target_position_;
 	ReferenceFrame stiffness_frame_;

@@ -374,7 +374,7 @@ public:
 		return all_ok;
 	}
 
-	double operator()() {
+	auto operator()() {
 		return compute();
 	}
 

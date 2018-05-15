@@ -39,7 +39,7 @@ PotentialFieldGenerator::PotentialFieldGenerator(
 	offset_ = offset;
 }
 
-Vector6d PotentialFieldGenerator::compute() {
+void PotentialFieldGenerator::update(Vector6d& force) {
 	Vector3d total_force = Vector3d::Zero();
 	Vector3d rob_pos;
 
@@ -72,9 +72,6 @@ Vector6d PotentialFieldGenerator::compute() {
 		}
 	}
 
-
-	force_ = Vector6d::Zero();
-	force_.block<3,1>(0,0) = total_force;
-
-	return ForceGenerator::compute();
+	force.segment<3>(0) = total_force;
+	force.segment<3>(3) = Vector3d::Zero();
 }

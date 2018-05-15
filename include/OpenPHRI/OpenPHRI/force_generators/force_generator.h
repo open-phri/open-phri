@@ -45,7 +45,7 @@ public:
 	 * @brief Compute the value associated with the force generator.
 	 * @return The force generator's evaluated value.
 	 */
-	virtual Vector6d compute();
+	virtual Vector6d compute() final;
 
 	/**
 	 * @brief Call operator, shortcut for compute().
@@ -64,12 +64,13 @@ protected:
 	 * @brief Transform the given force in the TCP frame, if necessary.
 	 * @param force The force to transform.
 	 */
-	virtual Vector6d transform(Vector6d force) final;
+	virtual Vector6d transform(const Vector6d& force) final;
+
+	virtual void update(Vector6d& force) = 0;
 
 	friend class SafetyController;
 	RobotConstPtr robot_;
 	ReferenceFrame frame_;
-	Vector6d force_;
 };
 
 using ForceGeneratorPtr = std::shared_ptr<ForceGenerator>;

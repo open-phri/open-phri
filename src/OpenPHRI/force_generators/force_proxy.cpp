@@ -21,12 +21,26 @@
 
 using namespace phri;
 
-ForceProxy::ForceProxy(Vector6dConstPtr force, ReferenceFrame frame) :
+ForceProxy::ForceProxy(
+	Vector6dConstPtr force,
+	ReferenceFrame frame) :
 	ForceGenerator(frame),
 	force_ptr_(force)
 {
 }
 
-Vector6d ForceProxy::compute() {
-	return transform(*force_ptr_);
+ForceProxy::ForceProxy(
+	Vector6dConstPtr force,
+	ReferenceFrame frame,
+	std::function<void(void)> update_func) :
+	ForceProxy(force, frame)
+{
+	update_func_ = update_func;
+}
+
+void ForceProxy::update(Vector6d& force) {
+	if(update_func_) {
+		update_func_();
+	}
+	force = *force_ptr_;
 }

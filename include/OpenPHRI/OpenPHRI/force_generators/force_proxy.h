@@ -41,13 +41,22 @@ public:
 	/** @brief Construct a force proxy given an externally managed force
 	 *  @param frame The reference frame in which the force is expressed
 	 */
-	ForceProxy(Vector6dConstPtr force, ReferenceFrame frame = ReferenceFrame::TCP);
+	explicit ForceProxy(
+		Vector6dConstPtr force,
+		ReferenceFrame frame = ReferenceFrame::TCP);
+
+	explicit ForceProxy(
+		Vector6dConstPtr force,
+		ReferenceFrame frame,
+		std::function<void(void)> update_func);
+
 	~ForceProxy() = default;
 
-	virtual Vector6d compute() override;
-
 private:
+	virtual void update(Vector6d& force) override;
+
 	Vector6dConstPtr force_ptr_;
+	std::function<void(void)> update_func_;
 };
 
 using ForceProxyPtr = std::shared_ptr<ForceProxy>;

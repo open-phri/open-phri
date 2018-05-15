@@ -53,11 +53,10 @@ public:
 
 	virtual ~ForceControl() = default;
 
-	virtual Twist compute() override;
-
 	void configureFilter(double sample_time, double time_constant);
 
 private:
+	virtual void update(Twist& velocity) override;
 	void applySelection(Vector6d& vec) const;
 
 	Vector6dConstPtr external_force_target_;

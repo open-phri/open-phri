@@ -52,9 +52,9 @@ public:
 
 	~MassGenerator() = default;
 
-	virtual Vector6d compute() override;
-
 private:
+	virtual void update(Vector6d& force) override;
+
 	Matrix6dConstPtr mass_;
 	AccelerationConstPtr target_acceleration_;
 	ReferenceFrame mass_frame_;

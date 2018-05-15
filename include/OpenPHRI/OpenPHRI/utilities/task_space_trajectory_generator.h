@@ -80,7 +80,7 @@ public:
 	virtual bool compute() override {
 		if(error_tracking_params_) {
 			reference_pose_vec_->block<3,1>(0,0) = reference_pose_->translation();
-			reference_pose_vec_->block<3,1>(3,0) = reference_pose_->orientation().getAngularError(start_pose_.y->orientation());
+			reference_pose_vec_->block<3,1>(3,0) = start_pose_.y->orientation().getAngularError(reference_pose_->orientation());
 		}
 
 		bool ret = super::compute();
@@ -152,11 +152,11 @@ private:
 			Point prev(start_pose_, Twist(), Acceleration());
 			while(wp != waypoints_.end()) {
 				TrajectoryPoint<Vector6d> to;
-				to.y->block<3,1>(0,0) = (*wp).pose.y->translation();
-				to.y->block<3,1>(3,0) = (*wp).pose.y->orientation().getAngularError(prev.pose.y->orientation());
-				*to.dy = *(*wp).pose.dy;
-				*to.d2y = *(*wp).pose.d2y;
-				super::addPathTo(to, static_cast<Vector6d>((*wp).max_velocity), static_cast<Vector6d>((*wp).max_acceleration));
+				to.y->block<3,1>(0,0) = wp->pose.y->translation();
+				to.y->block<3,1>(3,0) = prev.pose.y->orientation().getAngularError(wp->pose.y->orientation());
+				*to.dy = *wp->pose.dy;
+				*to.d2y = *wp->pose.d2y;
+				super::addPathTo(to, static_cast<Vector6d>(wp->max_velocity), static_cast<Vector6d>(wp->max_acceleration));
 				prev = *wp;
 				++wp;
 			}

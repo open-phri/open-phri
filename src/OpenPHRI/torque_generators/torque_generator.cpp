@@ -21,6 +21,11 @@
 
 using namespace phri;
 
+VectorXd TorqueGenerator::compute() {
+	VectorXd torque;
+	update(torque);
+	return torque;
+}
 VectorXd TorqueGenerator::operator()() {
 	return compute();
 }

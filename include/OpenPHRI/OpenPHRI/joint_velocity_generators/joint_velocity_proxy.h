@@ -39,12 +39,17 @@ namespace phri {
 class JointVelocityProxy : public JointVelocityGenerator {
 public:
 	explicit JointVelocityProxy(VectorXdConstPtr joint_velocity);
+	explicit JointVelocityProxy(
+		VectorXdConstPtr joint_velocity,
+		const std::function<void(void)>& update_func);
+
 	virtual ~JointVelocityProxy() = default;
 
-	virtual VectorXd compute() override;
-
 private:
+	virtual void update(VectorXd& velocity) override;
+
 	VectorXdConstPtr joint_velocity_;
+	std::function<void(void)> update_func_;
 };
 
 using JointVelocityProxyPtr = std::shared_ptr<JointVelocityProxy>;
