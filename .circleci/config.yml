@@ -26,5 +26,9 @@ workflows:
   build:
     jobs:
       - "build_ubuntu1404"
-      - "build_ubuntu1604"
-      - "build_ubuntu1804"
+      - "build_ubuntu1604":
+          requires:
+            - "build_ubuntu1404"
+      - "build_ubuntu1804":
+          requires:
+              - "build_ubuntu1604"
