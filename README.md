@@ -10,7 +10,9 @@ Once the documentation is finished and the Python bindings are updated, the V1.0
 Overview
 =========
 
-OpenPHRI: a generic framework to easily and safely control robots in interactions with humans
+OpenPHRI: a generic framework to easily and safely control robots in interactions with humans.
+
+For an overview of the library, you can check the related [Robotics and Automation Magazine article](https://ieeexplore.ieee.org/ielx7/100/4600619/08360398.pdf), but keep in mind that the library went through some changes since its writing and so some parts might not be up-to-date.
 
 The license that applies to the whole package content is **GNULGPL**. Please look at the license.txt file at the root of this repository.
 
