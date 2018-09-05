@@ -315,6 +315,12 @@ public:
 		return getJointVelocityGenerator(name);
 	}
 
+	void removeAll();
+	void removeAllVelocityInputs();
+	void removeAllJointVelocityInputs();
+	void removeAllForceInputs();
+	void removeAllTorqueInputs();
+	void removeAllConstraints();
 
 	void enableDampedLeastSquares(double lambda);
 

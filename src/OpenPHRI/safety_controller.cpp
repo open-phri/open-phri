@@ -140,6 +140,35 @@ JointVelocityGeneratorPtr SafetyController::getJointVelocityGenerator(const std:
 	return joint_velocity_generators_.get(name).object;
 }
 
+void SafetyController::removeAll() {
+	removeAllVelocityInputs();
+	removeAllJointVelocityInputs();
+	removeAllForceInputs();
+	removeAllTorqueInputs();
+	removeAllConstraints();
+}
+
+void SafetyController::removeAllVelocityInputs() {
+	velocity_generators_.removeAll();
+}
+
+void SafetyController::removeAllJointVelocityInputs() {
+	joint_velocity_generators_.removeAll();
+}
+
+void SafetyController::removeAllForceInputs() {
+	force_generators_.removeAll();
+}
+
+void SafetyController::removeAllTorqueInputs() {
+	torque_generators_.removeAll();
+}
+
+void SafetyController::removeAllConstraints() {
+	constraints_.removeAll();
+}
+
+
 void SafetyController::enableDampedLeastSquares(double lambda) {
 	assert(lambda > 0.);
 	lambda2_ = lambda*lambda;
