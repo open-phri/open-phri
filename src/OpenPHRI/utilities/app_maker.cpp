@@ -13,6 +13,7 @@ struct AppMaker::pImpl {
 	ClockPtr clock;
 	YAML::Node app_configuration;
 	double init_timeout;
+	double start_timeout;
 };
 
 AppMaker::AppMaker(const std::string& configuration_file) :
@@ -44,10 +45,11 @@ AppMaker::AppMaker(const std::string& configuration_file) :
 		impl_->robot,
 		conf);
 	impl_->init_timeout = conf["driver"]["init_timeout"].as<double>(30.);
+	impl_->start_timeout = conf["driver"]["start_timeout"].as<double>(30.);
 	std::cout << " done." << std::endl;
 
 	std::cout << "[phri::AppMaker] Starting the robot driver..." << std::flush;
-	impl_->driver->start();
+	impl_->driver->start(impl_->start_timeout);
 	std::cout << " done." << std::endl;
 
 	/***			Controller configuration			***/

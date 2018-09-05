@@ -9,7 +9,10 @@ namespace phri {
 
 class Driver {
 public:
-	Driver(RobotPtr robot);
+	Driver(
+		RobotPtr robot,
+		double sample_time);
+
 	virtual ~Driver();
 
 	/**
@@ -18,13 +21,13 @@ public:
 	 * @param timeout The maximum time to wait to establish the connection.
 	 * @return true on success, false otherwise
 	 */
-	virtual bool init(double timeout = 5.);
+	virtual bool init(double timeout = 30.);
 
 	/**
 	* Start the communication with the robot.
 	* @return true on success, false otherwise
 	*/
-	virtual bool start() = 0;
+	virtual bool start(double timeout = 30.) = 0;
 
 	/**
 	* Stop the communication with the robot.

@@ -43,7 +43,8 @@ VREPDriver::VREPDriver(
 	const std::string& suffix,
 	const std::string& ip,
 	int port) :
-	phri::Driver(robot),
+	phri::Driver(robot,
+	             sample_time),
 	sync_mode_(true),
 	suffix_(suffix)
 {
@@ -56,18 +57,17 @@ VREPDriver::VREPDriver(
 	double sample_time,
 	int client_id,
 	const std::string& suffix) :
-	phri::Driver(robot),
+	phri::Driver(robot, sample_time),
 	sync_mode_(true),
 	suffix_(suffix)
 {
-	sample_time_ = sample_time;
 	init(client_id);
 }
 
 VREPDriver::VREPDriver(
 	const phri::RobotPtr& robot,
 	const YAML::Node& configuration) :
-	phri::Driver(robot)
+	phri::Driver(robot, 0.)
 {
 	const auto& vrep = configuration["driver"];
 
@@ -104,16 +104,8 @@ VREPDriver::~VREPDriver() {
 }
 
 bool VREPDriver::init(double timeout) {
-	double waited_for = 0.;
 	enableSynchonous(sync_mode_);
-	while(not read() and waited_for < timeout) {
-		waited_for += sample_time_;
-	}
-	bool ok = waited_for < timeout;
-	if(ok) {
-		ok &= Driver::init(timeout);
-	}
-	return ok;
+	return Driver::init(timeout);
 }
 
 void VREPDriver::init(const std::string& ip, int port) {
@@ -157,7 +149,7 @@ bool VREPDriver::nextStep() const {
 	return false;
 }
 
-bool VREPDriver::start() {
+bool VREPDriver::start(double timeout) {
 	bool ok = simxStartSimulation(client_id_, simx_opmode_oneshot_wait) == simx_return_ok;
 	if(sync_mode_) {
 		ok &= nextStep();
@@ -495,6 +487,7 @@ int VREPDriver::getFrameHandle(phri::ReferenceFrame frame) const {
 		return object_handles_.at(robot_->name() + "_world_frame" + suffix_);
 		break;
 	}
+	return -1;
 }
 
 bool VREPDriver::read() {
