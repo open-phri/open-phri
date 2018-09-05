@@ -25,13 +25,11 @@ using namespace phri;
 StiffnessGenerator::StiffnessGenerator(
 	Matrix6dConstPtr stiffness,
 	PoseConstPtr target_position,
-	ReferenceFrame stiffness_frame,
-	ReferenceFrame target_position_frame) :
+	ReferenceFrame stiffness_frame) :
 	ForceGenerator(stiffness_frame),
 	stiffness_(stiffness),
 	target_position_(target_position),
-	stiffness_frame_(stiffness_frame),
-	target_position_frame_(target_position_frame)
+	stiffness_frame_(stiffness_frame)
 {
 }
 
@@ -39,22 +37,12 @@ void StiffnessGenerator::update(Vector6d& force) {
 	Vector6d error;
 
 	if(stiffness_frame_ == ReferenceFrame::TCP) {
-		if(target_position_frame_ == ReferenceFrame::TCP) {
-			// TODO check why static_cast fails with Eigen 3.3.4
-			error = target_position_->getErrorWith(Pose());
-		}
-		else {
-			error = robot_->spatialTransformationMatrix()->transpose() * (target_position_->getErrorWith(*robot_->controlPointCurrentPose()));
-		}
+		error = robot_->spatialTransformationMatrix()->transpose() * (robot_->controlPointCurrentPose()->getErrorWith(*target_position_));
 	}
 	else {
-		if(target_position_frame_ == ReferenceFrame::TCP) {
-			error = *robot_->spatialTransformationMatrix() * target_position_->getErrorWith(Pose());
-		}
-		else {
-			error = target_position_->getErrorWith(*robot_->controlPointCurrentPose());
-		}
+		error = robot_->controlPointCurrentPose()->getErrorWith(*target_position_);
 	}
 
+	error.segment<3>(0) *= -1.;
 	force = *stiffness_ * error;
 }
