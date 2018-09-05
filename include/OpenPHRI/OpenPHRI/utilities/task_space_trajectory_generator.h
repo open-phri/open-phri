@@ -175,6 +175,9 @@ private:
 };
 
 using TaskSpaceTrajectoryGenerator = TrajectoryGenerator<Pose>;
+using TaskSpaceTrajectoryGeneratorPtr = std::shared_ptr<TaskSpaceTrajectoryGenerator>;
+using TaskSpaceTrajectoryGeneratorConstPtr = std::shared_ptr<const TaskSpaceTrajectoryGenerator>;
+
 
 extern template class TrajectoryGenerator<Pose>;
 
