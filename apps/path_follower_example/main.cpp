@@ -79,8 +79,7 @@ int main(int argc, char const *argv[]) {
 		StiffnessGenerator(
 			make_shared<Matrix6d>(Matrix6d::Identity() * 5000.),
 			position_target,
-			ReferenceFrame::TCP,
-			ReferenceFrame::Base));
+			ReferenceFrame::TCP));
 
 	safety_controller.add(
 		"traj vel",

@@ -196,7 +196,7 @@ double FifthOrderPolynomial::getFirstDerivativeMaximum(const Parameters& params)
 
 	double max = 0.;
 	for (size_t i = 0; i < 3; ++i) {
-		max = std::max(max, ( poly(roots_real[i]) ));
+		max = std::max(max, poly(roots_real[i]));
 	}
 
 	return max;

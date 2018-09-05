@@ -104,11 +104,12 @@ public:
 		super::removeAllPoints();
 	}
 
-	void enableErrorTracking(std::shared_ptr<const Pose> reference, const Vector6d& threshold, bool recompute_when_resumed) {
+	void enableErrorTracking(std::shared_ptr<const Pose> reference, const Vector6d& threshold, bool recompute_when_resumed, double hysteresis_threshold = 0.1) {
 		reference_pose_ = reference;
 		reference_pose_vec_ = std::make_shared<Vector6d>();
 		error_tracking_params_.reference = reference_pose_vec_;
 		error_tracking_params_.threshold = threshold;
+		error_tracking_params_.hysteresis_threshold = hysteresis_threshold;
 		error_tracking_params_.recompute_when_resumed = recompute_when_resumed;
 		for (size_t i = 0; i < 6; ++i) {
 			error_tracking_params_.reference_refs.push_back(std::cref((*error_tracking_params_.reference)[i]));
@@ -116,7 +117,7 @@ public:
 		}
 	}
 
-	void enableErrorTracking(const Pose* reference, const Vector6d& threshold, bool recompute_when_resumed) {
+	void enableErrorTracking(const Pose* reference, const Vector6d& threshold, bool recompute_when_resumed, double hysteresis_threshold = 0.1) {
 		enableErrorTracking(std::shared_ptr<const Pose>(reference, [](const Pose* p){}), threshold, recompute_when_resumed);
 	}
 

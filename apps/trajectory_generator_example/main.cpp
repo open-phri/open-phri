@@ -28,35 +28,67 @@ using namespace std;
 using namespace phri;
 
 
-constexpr double SAMPLE_TIME = 0.010;
-
 bool _stop = false;
 
-void sigint_handler(int sig) {
-	_stop = true;
-}
+TaskSpaceTrajectoryGenerator createTrajectoryGenerator(double sample_time);
 
 int main(int argc, char const *argv[]) {
 
-	/***				Robot				***/
-	auto robot = make_shared<Robot>(
-		"LBR4p",    // Robot's name, must match V-REP model's name
-		7);         // Robot's joint count
+	AppMaker app("configuration_examples/kuka_lwr4.yaml");
 
-	/***				V-REP driver				***/
-	VREPDriver driver(
-		robot,
-		SAMPLE_TIME,
-		"", "", -1000);
 
-	driver.start();
-	driver.enableSynchonous(true);
-	while(not driver.read()) {
-		driver.nextStep();
+	/***			Create and configure the trajectory generator			***/
+	auto trajectory_generator = createTrajectoryGenerator(app.getDriver()->getSampleTime());
+	try {
+		trajectory_generator.computeTimings();
+	}
+	catch(std::exception& err) {
+		auto& driver = dynamic_cast<VREPDriver&>(*app.getDriver());
+		driver.enableSynchonous(false);
+		driver.stop();
+		throw err;
 	}
 
 	/***			Controller configuration			***/
-	auto safety_controller = SafetyController(robot);
+	app.getController()->add(
+		"traj vel",
+		VelocityProxy(
+			trajectory_generator.getTwistOutput(),
+			ReferenceFrame::Base));
+
+
+	/**			Additional logs			***/
+	auto logger = app.getDataLogger();
+	logger->logExternalData("traj6d-pos", trajectory_generator.getPoseOutput()->translation().data(), 3);
+	logger->logExternalData("traj6d-quat", trajectory_generator.getPoseOutput()->orientation().coeffs().data(), 4);
+	logger->logExternalData("traj6d-vel", trajectory_generator.getTwistOutput()->data(), 6);
+
+	/***		Application initialization		***/
+	bool init_ok = app.init();
+
+	if(init_ok)
+		std::cout << "Starting main loop\n";
+	else
+		std::cout << "Initialization failed\n";
+
+	signal(SIGINT, [](int){_stop = true;});
+
+	/***		Main loop		***/
+	while(init_ok and not _stop) {
+		_stop |= not app.run(
+			[&trajectory_generator](){return not trajectory_generator();} // call the trajectory generator before the controller
+			);
+	}
+
+	signal(SIGINT, nullptr);
+
+	/***		Application deinitialization		***/
+	app.stop();
+
+	return 0;
+}
+
+TaskSpaceTrajectoryGenerator createTrajectoryGenerator(double sample_time) {
 
 	// Pose, twist and acceleration at the waypoints
 	auto quat_1 = Eigen::Quaterniond::Identity();
@@ -79,14 +111,8 @@ int main(int argc, char const *argv[]) {
 
 	auto trajectory_generator = TaskSpaceTrajectoryGenerator(
 		pose_1,
-		SAMPLE_TIME,
+		sample_time,
 		TrajectorySynchronization::SynchronizeWaypoints);
-
-	safety_controller.add(
-		"traj vel",
-		VelocityProxy(
-			trajectory_generator.getTwistOutput(),
-			ReferenceFrame::Base));
 
 	// Generate paths between waypoints with maximum twist and acceleration
 	trajectory_generator.addPathTo(
@@ -104,48 +130,5 @@ int main(int argc, char const *argv[]) {
 		Twist(Vector3d(0.05, 1., 0.05), 0.5*Vector3d::Ones()),
 		Acceleration(Vector3d(0.1, 1., 0.1), 0.5*Vector3d::Ones()));
 
-	try {
-		trajectory_generator.computeTimings();
-	}
-	catch(std::exception& err) {
-		driver.enableSynchonous(false);
-		driver.stop();
-		throw;
-	}
-
-	Clock clock(SAMPLE_TIME);
-	DataLogger logger(
-		"/tmp",
-		clock.getTime(),
-		true);
-
-	logger.logExternalData("traj6d-pos", trajectory_generator.getPoseOutput()->translation().data(), 3);
-	logger.logExternalData("traj6d-quat", trajectory_generator.getPoseOutput()->orientation().coeffs().data(), 4);
-	logger.logExternalData("traj6d-vel", trajectory_generator.getTwistOutput()->data(), 6);
-	logger.logSafetyControllerData(&safety_controller);
-	logger.logRobotData(robot);
-
-	driver.readJointPosition(robot->jointTargetPosition());
-
-	signal(SIGINT, sigint_handler);
-	bool end = false;
-	while(not (_stop or end)) {
-		if(driver.read()) {
-			end = trajectory_generator();
-			safety_controller();
-			driver.send();
-
-			clock();
-			logger();
-		}
-
-		driver.nextStep();
-	}
-
-	cout << (end ? "End of the trajectory reached" : "Trajectory generation interrupted") << endl;
-
-	driver.enableSynchonous(false);
-	driver.stop();
-
-	return 0;
+	return trajectory_generator;
 }

@@ -59,31 +59,13 @@ public:
 		create(start);
 	}
 
-	template<typename U = T>
-	void addPathTo(const TrajectoryPoint<T>& to, const T& max_velocity, const T& max_acceleration, typename std::enable_if<std::is_same<U, double>::value>::type* = 0) {
+	void addPathTo(const TrajectoryPoint<T>& to, const T& max_velocity, const T& max_acceleration) {
 		assert(getComponentCount() == to.size());
 		points_.push_back(to);
 		SegmentParams params;
 		for (size_t i = 0; i < to.size(); ++i) {
-			params.max_velocity.push_back(max_velocity);
-			params.max_acceleration.push_back(max_acceleration);
-		}
-		params.minimum_time.resize(1, 0.);
-		params.padding_time.resize(1, 0.);
-		params.current_time.resize(1, 0.);
-		params.isFixedTime = false;
-		params.poly_params.resize(to.size());
-		segment_params_.push_back(params);
-	}
-
-	template<typename U = T>
-	void addPathTo(const TrajectoryPoint<T>& to, const T& max_velocity, const T& max_acceleration, typename std::enable_if<not std::is_same<U, double>::value>::type* = 0) {
-		assert(getComponentCount() == to.size());
-		points_.push_back(to);
-		SegmentParams params;
-		for (size_t i = 0; i < to.size(); ++i) {
-			params.max_velocity.push_back(max_velocity[i]);
-			params.max_acceleration.push_back(max_acceleration[i]);
+			params.max_velocity.push_back(getElement(max_velocity, i));
+			params.max_acceleration.push_back(getElement(max_acceleration, i));
 		}
 		params.minimum_time.resize(to.size(), 0.);
 		params.padding_time.resize(to.size(), 0.);
@@ -214,28 +196,80 @@ public:
 			return false;
 		}
 
-		bool ret = true;
-
 		#pragma omp parallel for
 		for (size_t segment = 0; segment < getSegmentCount(); ++segment) {
 			auto& from = points_[segment];
 			auto& to = points_[segment+1];
 			auto& params = segment_params_[segment];
 			for (size_t component = 0; component < getComponentCount(); ++component) {
-				ret &= computeTimings(from, to, params, segment, component, v_eps, a_eps);
+				computeTimings(from, to, params, segment, component, v_eps, a_eps);
 			}
 		}
 
 		computePaddingTime();
 		computeParameters();
 
-		return ret;
+		return true;
+	}
+
+
+
+	bool updateLimits(const T& max_velocity, const T& max_acceleration, double v_eps = 1e-6, double a_eps = 1e-6) {
+		if(getSegmentCount() < 1) {
+			return false;
+		}
+
+		#pragma omp parallel for
+		for (size_t component = 0; component < getComponentCount(); ++component) {
+			size_t segment = current_segement_[component];
+
+			auto from = TrajectoryPoint<T>();
+			auto& to = points_[segment+1];
+			auto params = segment_params_[segment];
+			params.max_velocity[component] = getElement(max_velocity, component);
+			params.max_acceleration[component] = getElement(max_acceleration, component);
+
+			double current_time = params.current_time[component];
+			getElement(*from.y, component) = FifthOrderPolynomial::compute(current_time, params.poly_params[component]);
+			getElement(*from.dy, component) = FifthOrderPolynomial::computeFirstDerivative(current_time, params.poly_params[component]);
+			getElement(*from.d2y, component) = FifthOrderPolynomial::computeSecondDerivative(current_time, params.poly_params[component]);
+
+			std::cout << "current_time: " << current_time << std::endl;
+			std::cout << "New max vel: " << params.max_velocity[component] << std::endl;
+			std::cout << "New max acc: " << params.max_acceleration[component] << std::endl;
+			std::cout << "from.y: " << *from.y << std::endl;
+			std::cout << "from.dy: " << *from.dy << std::endl;
+			std::cout << "from.d2y: " << *from.d2y << std::endl;
+			std::cout << "to.y: " << *to.y << std::endl;
+			std::cout << "to.dy: " << *to.dy << std::endl;
+			std::cout << "to.d2y: " << *to.d2y << std::endl;
+
+			computeTimings(from, to, params, segment, component, v_eps, a_eps);
+		}
+
+		computePaddingTime();
+		computeParameters();
+
+		return true;
 	}
 
 	virtual bool compute() {
 		auto check_error =
 			[this](size_t component) -> bool {
-				return std::abs(position_output_refs_[component] - error_tracking_params_.reference_refs[component]) > error_tracking_params_.threshold_refs[component];
+				double error = std::abs(position_output_refs_[component] - error_tracking_params_.reference_refs[component]);
+				double threshold = error_tracking_params_.threshold_refs[component];
+				double hysteresis = threshold * error_tracking_params_.hysteresis_threshold;
+				if(error > (threshold + hysteresis)) {
+					error_tracking_params_.previous_state[component] = ErrorTrackingState::Paused;
+					return true;
+				}
+				else if(error < (threshold - hysteresis)) {
+					error_tracking_params_.previous_state[component] = ErrorTrackingState::Running;
+					return false;
+				}
+				else {
+					return error_tracking_params_.previous_state[component] == ErrorTrackingState::Paused;
+				}
 			};
 
 		if(error_tracking_params_) {
@@ -389,34 +423,28 @@ public:
 	void setSynchronizationMethod(TrajectorySynchronization sync) {
 		sync_ = sync;
 	}
-	template<typename U = T>
-	void enableErrorTracking(const std::shared_ptr<const T>& reference, const T& threshold, bool recompute_when_resumed, typename std::enable_if<std::is_same<U, double>::value>::type* = 0) {
-		error_tracking_params_.reference = reference;
-		error_tracking_params_.threshold = threshold;
-		error_tracking_params_.recompute_when_resumed = recompute_when_resumed;
-		error_tracking_params_.reference_refs.push_back(std::cref(*reference));
-		error_tracking_params_.threshold_refs.push_back(std::cref(error_tracking_params_.threshold));
-	}
 
-	template<typename U = T>
-	void enableErrorTracking(const std::shared_ptr<const T>& reference, const T& threshold, bool recompute_when_resumed, typename std::enable_if<not std::is_same<U, double>::value>::type* = 0) {
+	void enableErrorTracking(const std::shared_ptr<const T>& reference, const T& threshold, bool recompute_when_resumed, double hysteresis_threshold = 0.1) {
 		error_tracking_params_.reference = reference;
+		error_tracking_params_.hysteresis_threshold = hysteresis_threshold; // percentage of threshold
 		error_tracking_params_.threshold = threshold;
 		error_tracking_params_.recompute_when_resumed = recompute_when_resumed;
-		for (size_t i = 0; i < reference->size(); ++i) {
-			error_tracking_params_.reference_refs.push_back(std::cref((*error_tracking_params_.reference)[i]));
-			error_tracking_params_.threshold_refs.push_back(std::cref(error_tracking_params_.threshold[i]));
+		for (size_t i = 0; i < getSize(*reference); ++i) {
+			error_tracking_params_.reference_refs.push_back(std::cref(getElement(*error_tracking_params_.reference, i)));
+			error_tracking_params_.threshold_refs.push_back(std::cref(getElement(error_tracking_params_.threshold, i)));
 		}
 	}
 
-	void enableErrorTracking(const T* reference, const T& threshold, bool recompute_when_resumed) {
+	void enableErrorTracking(const T* reference, const T& threshold, bool recompute_when_resumed, double hysteresis_threshold = 0.1) {
 		enableErrorTracking(std::shared_ptr<const T>(reference, [](const T* p){}), threshold, recompute_when_resumed);
 	}
 
 	void disableErrorTracking() {
 		error_tracking_params_.reference.reset();
 		error_tracking_params_.state.resize(getComponentCount());
-		for_each(error_tracking_params_.state.begin(), error_tracking_params_.state.end(), [](ErrorTrackingState state){state = ErrorTrackingState::Running;});
+		error_tracking_params_.previous_state.resize(getComponentCount());
+		for_each(error_tracking_params_.state.begin(), error_tracking_params_.state.end(), [](ErrorTrackingState& state){state = ErrorTrackingState::Running;});
+		for_each(error_tracking_params_.previous_state.begin(), error_tracking_params_.previous_state.end(), [](ErrorTrackingState& state){state = ErrorTrackingState::Running;});
 	}
 
 	void reset() {
@@ -467,7 +495,9 @@ protected:
 
 		std::shared_ptr<const T> reference;
 		T threshold;
+		double hysteresis_threshold;
 		std::vector<ErrorTrackingState> state;
+		std::vector<ErrorTrackingState> previous_state;
 		bool recompute_when_resumed;
 		std::vector<std::reference_wrapper<const double>> reference_refs;
 		std::vector<std::reference_wrapper<const double>> threshold_refs;
@@ -490,42 +520,33 @@ protected:
 		disableErrorTracking();
 	}
 
-	template<typename U = T>
-	void createRefs(typename std::enable_if<std::is_same<U, double>::value>::type* = 0) {
+	void createRefs() {
 		position_output_refs_.clear();
 		velocity_output_refs_.clear();
 		acceleration_output_refs_.clear();
-		position_output_refs_.push_back(std::ref(*position_output_));
-		velocity_output_refs_.push_back(std::ref(*velocity_output_));
-		acceleration_output_refs_.push_back(std::ref(*acceleration_output_));
-	}
 
-	template<typename U = T>
-	void createRefs(typename std::enable_if<not std::is_same<U, double>::value>::type* = 0) {
-		position_output_refs_.clear();
-		velocity_output_refs_.clear();
-		acceleration_output_refs_.clear();
 		auto& position_vec = *position_output_;
 		auto& velocity_vec = *velocity_output_;
 		auto& acceleration_vec = *acceleration_output_;
-		position_vec.resize(current_segement_.size());
-		velocity_vec.resize(current_segement_.size());
-		acceleration_vec.resize(current_segement_.size());
-		for (size_t i = 0; i < static_cast<size_t>(position_vec.size()); ++i) {
-			position_output_refs_.push_back(std::ref(position_vec[i]));
-			velocity_output_refs_.push_back(std::ref(velocity_vec[i]));
-			acceleration_output_refs_.push_back(std::ref(acceleration_vec[i]));
+
+		resize(position_vec, current_segement_.size());
+		resize(velocity_vec, current_segement_.size());
+		resize(acceleration_vec, current_segement_.size());
+
+		for (size_t i = 0; i < getSize(position_vec); ++i) {
+			position_output_refs_.push_back(std::ref(getElement(position_vec, i)));
+			velocity_output_refs_.push_back(std::ref(getElement(velocity_vec, i)));
+			acceleration_output_refs_.push_back(std::ref(getElement(acceleration_vec, i)));
 		}
 	}
 
-	static bool computeTimings(const TrajectoryPoint<T>& from, const TrajectoryPoint<T>& to, SegmentParams& params, size_t segment, size_t component, double v_eps, double a_eps) {
-		bool ok = true;
+	static void computeTimings(const TrajectoryPoint<T>& from, const TrajectoryPoint<T>& to, SegmentParams& params, size_t segment, size_t component, double v_eps, double a_eps) {
 		if(params.isFixedTime) {
 			params.poly_params[component] = FifthOrderPolynomial::Constraints {0, params.minimum_time[component], from.yrefs_[component], to.yrefs_[component], from.dyrefs_[component], to.dyrefs_[component], from.d2yrefs_[component], to.d2yrefs_[component]};
 		}
 		else {
 			auto error_msg =
-				[&ok, segment, component] (const std::string& where, const std::string& what) {
+				[segment, component] (const std::string& where, const std::string& what) {
 					throw std::runtime_error(OPEN_PHRI_ERROR(where + " " + what + " for segment " + std::to_string(segment+1) + ", component " + std::to_string(component+1) + " is higher than the maximum"));
 				};
 
@@ -537,31 +558,23 @@ protected:
 			switch(error) {
 			case FifthOrderPolynomial::ConstraintError::InitialVelocity:
 				error_msg("initial", "velocity");
-				ok = false;
 				break;
 			case FifthOrderPolynomial::ConstraintError::FinalVelocity:
 				error_msg("final", "velocity");
-				ok = false;
 				break;
 			case FifthOrderPolynomial::ConstraintError::InitialAcceleration:
 				error_msg("initial", "acceleration");
-				ok = false;
 				break;
 			case FifthOrderPolynomial::ConstraintError::FinalAcceleration:
 				error_msg("final", "acceleration");
-				ok = false;
 				break;
 			default:
 				break;
 			}
 
-			if(ok) {
-				params.poly_params[component] = poly_params;
-				params.minimum_time[component] = params.poly_params[component].xf;
-			}
+			params.poly_params[component] = poly_params;
+			params.minimum_time[component] = params.poly_params[component].xf;
 		}
-
-		return ok;
 	}
 
 	void computePaddingTime(size_t component) {
@@ -594,6 +607,35 @@ protected:
 		}
 	}
 
+	template<typename U = T>
+	auto& getElement(U& value, size_t idx, typename std::enable_if_t<std::is_arithmetic<U>::value>* = 0) const {
+		return value;
+	}
+
+	template<typename U = T>
+	auto& getElement(U& value, size_t idx, typename std::enable_if_t<not std::is_arithmetic<U>::value>* = 0) const {
+		return value[idx];
+	}
+
+	template<typename U = T>
+	size_t getSize(const U& value, typename std::enable_if_t<std::is_arithmetic<U>::value>* = 0) const {
+		return 1;
+	}
+
+	template<typename U = T>
+	size_t getSize(const U& value, typename std::enable_if_t<not std::is_arithmetic<U>::value>* = 0) const {
+		return value.size();
+	}
+
+	template<typename U = T>
+	void resize(U& value, size_t size, typename std::enable_if_t<std::is_arithmetic<U>::value>* = 0) const {
+		return;
+	}
+
+	template<typename U = T>
+	void resize(U& value, size_t size, typename std::enable_if_t<not std::is_arithmetic<U>::value>* = 0) const {
+		value.resize(size);
+	}
 
 	std::vector<TrajectoryPoint<T>> points_;
 	std::vector<SegmentParams> segment_params_;
