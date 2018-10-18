@@ -2,8 +2,6 @@
 
 using namespace phri;
 
-std::map<std::string, DriverFactory::create_method_t> DriverFactory::create_methods_;
-
 Driver::Driver(
 	RobotPtr robot,
 	double sample_time) :

@@ -65,9 +65,9 @@ public:
 	~DriverFactory() = default;
 
 	static bool add(const std::string name, create_method_t create_method) {
-		auto it = create_methods_.find(name);
-		if (it == create_methods_.end()) {
-			create_methods_[name] = create_method;
+		auto it = createMethods().find(name);
+		if (it == createMethods().end()) {
+			createMethods()[name] = create_method;
 			return true;
 		}
 		return false;
@@ -75,9 +75,9 @@ public:
 
 	template <typename T>
 	static bool add(const std::string name) {
-		auto it = create_methods_.find(name);
-		if (it == create_methods_.end()) {
-			create_methods_[name] = [](RobotPtr robot, const YAML::Node& conf) -> std::shared_ptr<Driver> {
+		auto it = createMethods().find(name);
+		if (it == createMethods().end()) {
+			createMethods()[name] = [](RobotPtr robot, const YAML::Node& conf) -> std::shared_ptr<Driver> {
 										return std::make_shared<T>(robot, conf);
 									};
 			return true;
@@ -86,8 +86,8 @@ public:
 	}
 
 	static std::shared_ptr<Driver> create(std::string name, const RobotPtr& robot, const YAML::Node& configuration) {
-		auto it = create_methods_.find(name);
-		if (it != create_methods_.end()) {
+		auto it = createMethods().find(name);
+		if (it != createMethods().end()) {
 			return it->second(robot, configuration);
 		}
 
@@ -95,7 +95,10 @@ public:
 	}
 
 private:
-	static std::map<std::string, create_method_t> create_methods_;
+	static std::map<std::string, create_method_t>& createMethods() {
+		static std::map<std::string, create_method_t> create_methods;
+		return create_methods;
+	}
 };
 
 using DriverPtr = std::shared_ptr<Driver>;
