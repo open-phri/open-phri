@@ -63,6 +63,7 @@ public:
 	virtual bool start(double timeout = 0.) override;
 	virtual bool stop() override;
 
+	virtual bool sync() override;
 	virtual bool read() override;
 	virtual bool send() override;
 

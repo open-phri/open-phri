@@ -29,6 +29,10 @@ bool Driver::init(double timeout) {
 	return false;
 }
 
+bool Driver::sync() {
+	return true;
+}
+
 double Driver::getSampleTime() const {
 	return sample_time_;
 }

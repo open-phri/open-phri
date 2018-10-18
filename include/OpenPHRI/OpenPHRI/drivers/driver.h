@@ -47,6 +47,8 @@ public:
 	*/
 	virtual bool send() = 0;
 
+	virtual bool sync();
+
 	virtual double getSampleTime() const final;
 
 protected:

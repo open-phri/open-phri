@@ -2,6 +2,9 @@
 #include <OpenPHRI/utilities/exceptions.h>
 
 #include <yaml-cpp/yaml.h>
+#include <thread>
+#include <chrono>
+
 using namespace phri;
 using namespace std;
 
@@ -57,6 +60,10 @@ bool DummyDriver::stop() {
 	return true;
 }
 
+bool DummyDriver::sync() {
+	std::this_thread::sleep_for(std::chrono::microseconds(static_cast<int>(sample_time_ * 1e6)));
+	return true;
+}
 
 bool DummyDriver::read() {
 	return true;
