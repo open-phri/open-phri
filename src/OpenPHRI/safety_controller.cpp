@@ -380,7 +380,7 @@ const MatrixXd& SafetyController::computeJacobianInverse() const {
 		if(lambda2_ > 0.) {
 			double lambda2;
 
-			if(dynamic_dls_ > 0.) {
+			if(dynamic_dls_) {
 				Eigen::JacobiSVD<Eigen::MatrixXd> svd(jac);
 				double sigma_min = svd.singularValues()(5);
 				if(sigma_min > sigma_min_threshold_) {
