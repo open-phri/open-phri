@@ -44,7 +44,17 @@ struct RobotModel::pImpl {
 		mbg = parser_result.mbg;
 		name = parser_result.name;
 		auto indexes = mb.jointIndexByName();
-		size_t joint_count = mbc.q.size() - 1;
+		size_t rbd_joint_count = mbc.q.size() - 1;
+		size_t joint_count = 0;
+		for(const auto& joint: mbc.q) {
+			joint_count += joint.size();
+		}
+		// std::cout << "joint_count: " << joint_count << std::endl;
+
+		std::vector<double> rbd_lower_limit(rbd_joint_count);
+		std::vector<double> rbd_upper_limit(rbd_joint_count);
+		std::vector<double> rbd_velocity_limit(rbd_joint_count);
+		std::vector<double> rbd_force_limit(rbd_joint_count);
 
 		lower_limit = std::make_shared<VectorXd>(joint_count);
 		upper_limit = std::make_shared<VectorXd>(joint_count);
@@ -56,19 +66,42 @@ struct RobotModel::pImpl {
 				// skip root joint
 				continue;
 			}
-			(*lower_limit)(index.second - 1) = parser_result.limits.lower[index.first][0];
-			(*upper_limit)(index.second - 1) = parser_result.limits.upper[index.first][0];
-			(*velocity_limit)(index.second - 1) = parser_result.limits.velocity[index.first][0];
-			(*force_limit)(index.second - 1) = parser_result.limits.torque[index.first][0];
+			// Filter out fixed joints
+			auto dof_count = parser_result.limits.lower[index.first].size();
+			if(dof_count > 0) {
+				rbd_lower_limit[index.second - 1] = parser_result.limits.lower[index.first][0];
+				rbd_lower_limit[index.second - 1] = parser_result.limits.upper[index.first][0];
+				rbd_lower_limit[index.second - 1] = parser_result.limits.velocity[index.first][0];
+				rbd_lower_limit[index.second - 1] = parser_result.limits.torque[index.first][0];
+			}
+			else {
+				rbd_lower_limit[index.second - 1] = std::nan("");
+				rbd_lower_limit[index.second - 1] = std::nan("");
+				rbd_lower_limit[index.second - 1] = std::nan("");
+				rbd_lower_limit[index.second - 1] = std::nan("");
+			}
 		}
+		for (size_t rbd_idx = 0, idx = 0; rbd_idx < rbd_joint_count; ++rbd_idx) {
+			if(not std::isnan(rbd_lower_limit[rbd_idx])) {
+				(*lower_limit)(idx) = rbd_lower_limit[rbd_idx];
+				(*upper_limit)(idx) = rbd_upper_limit[rbd_idx];
+				(*velocity_limit)(idx) = rbd_velocity_limit[rbd_idx];
+				(*force_limit)(idx) = rbd_force_limit[rbd_idx];
+				++idx;
+			}
+		}
+
 		jacobian = rbd::Jacobian(mb, control_point);
 		control_point_body_index = mb.bodyIndexByName(control_point);
 	}
 
 	void updateJointPositions() {
 		const auto& joint_pos = *robot->jointCurrentPosition();
-		for (size_t i = 0; i < robot->jointCount(); ++i) {
-			mbc.q[i+1][0] = joint_pos(i);
+		for (size_t idx = 0, rbd_idx = 1; idx < robot->jointCount(); ++rbd_idx) {
+			if(mbc.q[rbd_idx].size() > 0) {
+				mbc.q[rbd_idx][0] = joint_pos(idx);
+				++idx;
+			}
 		}
 	}
 
