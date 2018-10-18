@@ -123,6 +123,11 @@ public:
 	bool nextStep() const;
 
 	/**
+	 * @brief see nextStep.
+	 */
+	bool sync() override;
+
+	/**
 	 * @brief Start the simulation.
 	 */
 	virtual bool start(double timeout = 0.) override;
@@ -214,6 +219,7 @@ private:
 	std::map<std::pair<int,int>, phri::PosePtr> tracked_objects_;
 
 	static bool registered_in_factory;
+	static std::map<std::string,int> connection_to_client_id;
 };
 
 using VREPDriverPtr = std::shared_ptr<VREPDriver>;

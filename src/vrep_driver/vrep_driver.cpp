@@ -36,6 +36,7 @@ using namespace phri;
 using namespace std;
 
 bool VREPDriver::registered_in_factory = phri::DriverFactory::add<VREPDriver>("vrep");
+std::map<std::string,int> VREPDriver::connection_to_client_id;
 
 VREPDriver::VREPDriver(
 	phri::RobotPtr robot,
@@ -109,7 +110,14 @@ bool VREPDriver::init(double timeout) {
 }
 
 void VREPDriver::init(const std::string& ip, int port) {
-	client_id_ = simxStart((simxChar*)ip.c_str(), port, 0, 1, 10000, int(sample_time_*1000));
+	auto connection_name = ip + ":" + std::to_string(port);
+	try {
+		client_id_ = VREPDriver::connection_to_client_id.at(connection_name);
+	}
+	catch(...) {
+		client_id_ = simxStart((simxChar*)ip.c_str(), port, 0, 1, 10000, int(sample_time_*1000));
+		VREPDriver::connection_to_client_id[connection_name] = client_id_;
+	}
 
 	if(client_id_ != -1) {
 		return init(client_id_);
@@ -147,6 +155,10 @@ bool VREPDriver::nextStep() const {
 		return (simxSynchronousTrigger(client_id_) == simx_return_ok);
 	}
 	return false;
+}
+
+bool VREPDriver::sync() {
+	return nextStep();
 }
 
 bool VREPDriver::start(double timeout) {
