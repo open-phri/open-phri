@@ -1,7 +1,8 @@
 robot:
-    name: LBR4p
-    anglesInDegrees: false
+    name: UR10
+    anglesInDegrees: true
     links:
+        - name: base
         - name: link1
         - name: link2
         - name: link3
@@ -11,47 +12,54 @@ robot:
         - name: link7
         - name: end-effector
     joints:
+        -   name: joint_base
+            parent: base
+            child: link1
+            type: fixed
+            frame:
+                xyz: [-0.575, -0.0085, 0]
+                rpy: [0, 0, 180]
         -   name: joint1
             parent: link1
             child: link2
             type: revolute
             axis: [0, 0, 1]
             frame:
-                xyz: [0, 0, 0.1105]
+                xyz: [0, 0, 0.1273]
                 rpy: [0, 0, 0]
             limits:
-                upper: 2.9670
-                lower: -2.9670
-                velocity: 2.3
-                effort: 176
+                upper: 6.2831
+                lower: -6.2831
+                velocity: 2.16
+                effort: 330
                 anglesInDegrees: false
         -   name: joint2
             parent: link2
             child: link3
             type: revolute
-            axis: [0, -1, 0]
+            axis: [0, 1, 0]
             frame:
-                xyz: [0, 0, 0.2]
-                rpy: [0, 0, 0]
+                xyz: [0, 0.220941, 0]
+                rpy: [0, 90, 0]
             limits:
-                upper: 2.0943
-                lower: -2.0943
-                velocity: 2.3
-                effort: 176
+                upper: 6.2831
+                lower: -6.2831
+                velocity: 2.16
+                effort: 330
                 anglesInDegrees: false
         -   name: joint3
             parent: link3
             child: link4
             type: revolute
-            axis: [0, 0, 1]
+            axis: [0, 1, 0]
             frame:
-                xyz: [0, 0, 0.2]
+                xyz: [0, -0.1719, 0.612]
                 rpy: [0, 0, 0]
             limits:
-                upper: 2.9670
-                lower: -2.9670
-                velocity: 3.07
-                effort: 100
+                upper: 3.1415
+                lower: -3.1415
+                velocity: 3.15
+                effort: 150
                 anglesInDegrees: false
         -   name: joint4
             parent: link4
@@ -59,13 +67,13 @@ robot:
             type: revolute
             axis: [0, 1, 0]
             frame:
-                xyz: [0, 0, 0.2]
-                rpy: [0, 0, 0]
+                xyz: [0, 0, 0.5723]
+                rpy: [0, 90, 0]
             limits:
-                upper: 2.0943
-                lower: -2.0943
-                velocity: 3.07
-                effort: 100
+                upper: 6.2831
+                lower: -6.2831
+                velocity: 3.2
+                effort: 54
                 anglesInDegrees: false
         -   name: joint5
             parent: link5
@@ -73,39 +81,32 @@ robot:
             type: revolute
             axis: [0, 0, 1]
             frame:
-                xyz: [0, 0, 0.195]
+                xyz: [0, 0.1149, 0]
                 rpy: [0, 0, 0]
             limits:
-                upper: 2.9670
-                lower: -2.9670
-                velocity: 4.75
-                effort: 100
+                upper: 6.2831
+                lower: -6.2831
+                velocity: 3.2
+                effort: 54
                 anglesInDegrees: false
         -   name: joint6
             parent: link6
             child: link7
             type: revolute
-            axis: [0, -1, 0]
+            axis: [0, 1, 0]
             frame:
-                xyz: [0, 0, 0.195]
+                xyz: [0, 0, 0.1157]
                 rpy: [0, 0, 0]
             limits:
-                upper: 2.0943
-                lower: -2.0943
-                velocity: 4.22
-                effort: 30
+                upper: 6.2831
+                lower: -6.2831
+                velocity: 3.2
+                effort: 54
                 anglesInDegrees: false
-        -   name: joint7
+        -   name: ee_fixed_joint
             parent: link7
             child: end-effector
-            type: revolute
-            axis: [0, 0, 1]
+            type: fixed
             frame:
-                xyz: [0, 0, 0.078]
-                rpy: [0, 0, 0]
-            limits:
-                upper: 2.9670
-                lower: -2.9670
-                velocity: 4.22
-                effort: 30
-                anglesInDegrees: false
+                xyz: [0, 0.0922, 0]
+                rpy: [-90, 0, 0]
