@@ -220,8 +220,7 @@ bool StateMachine::compute() {
 			auto stiffness = std::make_shared<phri::StiffnessGenerator>(
 				stiffness_mat_,
 				robot_->controlPointTargetPose(),
-				phri::ReferenceFrame::TCP,
-				phri::ReferenceFrame::Base);
+				phri::ReferenceFrame::TCP);
 
 			controller_.add("stiffness", stiffness);
 			*robot_->controlPointTargetPose() = *robot_->controlPointCurrentPose();
