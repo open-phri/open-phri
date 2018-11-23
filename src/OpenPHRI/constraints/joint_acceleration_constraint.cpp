@@ -1,4 +1,4 @@
-/*      File: constraints.h
+/*      File: joint_acceleration_constraint.cpp
 *       This file is part of the program open-phri
 *       Program description : OpenPHRI: a generic framework to easily and safely control robots in interactions with humans
 *       Copyright (C) 2017 -  Benjamin Navarro (LIRMM). All Right reserved.
@@ -17,24 +17,34 @@
 *       If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-/**
- * @file constraints.h
- * @author Benjamin Navarro
- * @brief Include all implemented constraints
- * @date April 2017
- * @ingroup OpenPHRI
- */
-
-#pragma once
-
-#include <OpenPHRI/constraints/default_constraint.h>
-#include <OpenPHRI/constraints/velocity_constraint.h>
-#include <OpenPHRI/constraints/acceleration_constraint.h>
-#include <OpenPHRI/constraints/power_constraint.h>
-#include <OpenPHRI/constraints/force_constraint.h>
-#include <OpenPHRI/constraints/emergency_stop_constraint.h>
-#include <OpenPHRI/constraints/separation_distance_constraint.h>
-#include <OpenPHRI/constraints/joint_velocity_constraint.h>
 #include <OpenPHRI/constraints/joint_acceleration_constraint.h>
-#include <OpenPHRI/constraints/kinetic_energy_constraint.h>
+
+using namespace phri;
+
+using namespace Eigen;
+
+/***		Constructor & destructor		***/
+JointAccelerationConstraint::JointAccelerationConstraint(
+	VectorXdConstPtr maximum_acceleration,
+	double sample_time) :
+	maximum_acceleration_(maximum_acceleration),
+	sample_time_(sample_time)
+{
+}
+
+/***		Algorithm		***/
+double JointAccelerationConstraint::compute() {
+	double constraint = 1.;
+	const auto& joint_vel = *robot_->jointTotalVelocity();
+	const auto& max_joint_acc = *maximum_acceleration_;
+	const auto& prev_joint_vel = *robot_->jointVelocity();
+
+	for (size_t i = 0; i < joint_vel.size(); ++i) {
+		if(joint_vel(i) < 1e-6) {
+			continue;
+		}
+		constraint = std::min(constraint, (std::abs(prev_joint_vel(i)) + max_joint_acc(i)*sample_time_) / std::abs(joint_vel(i)));
+	}
+
+	return constraint;
+}
