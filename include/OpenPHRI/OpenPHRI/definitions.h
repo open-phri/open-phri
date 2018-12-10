@@ -31,6 +31,9 @@
 #include <OpenPHRI/type_aliases.h>
 #include <OpenPHRI/task_space_data_types.h>
 
+#include <memory>
+#include <type_traits>
+
 namespace phri {
 
 #define assert_msg(msg,cond) assert(((void) msg, cond ))
@@ -44,5 +47,10 @@ enum class ReferenceFrame {
 	World   /**< Frame fixed relative to the environment */
 };
 
+template<class T>
+struct is_shared_ptr : std::false_type {};
+
+template<class T>
+struct is_shared_ptr<std::shared_ptr<T>> : std::true_type {};
 
 }

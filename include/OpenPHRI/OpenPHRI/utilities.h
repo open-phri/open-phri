@@ -31,6 +31,7 @@
 #include <OpenPHRI/utilities/benchmark.hpp>
 #include <OpenPHRI/utilities/clock.h>
 #include <OpenPHRI/utilities/data_logger.h>
+#include <OpenPHRI/utilities/data_replayer.hpp>
 #include <OpenPHRI/utilities/deadband.hpp>
 #include <OpenPHRI/utilities/derivator.hpp>
 #include <OpenPHRI/utilities/integrator.hpp>

@@ -1,10 +1,17 @@
 #pragma once
 
-#include <OpenPHRI/OpenPHRI.h>
+#include <OpenPHRI/robot.h>
+#include <OpenPHRI/safety_controller.h>
+#include <OpenPHRI/utilities/robot_model.h>
+#include <OpenPHRI/utilities/data_logger.h>
+#include <OpenPHRI/utilities/exceptions.h>
 #include <OpenPHRI/drivers/driver.h>
-#include <OpenPHRI/fwd_decl.h>
 
 #include <yaml-cpp/yaml.h>
+
+#include <string>
+#include <functional>
+#include <memory>
 
 namespace phri {
 

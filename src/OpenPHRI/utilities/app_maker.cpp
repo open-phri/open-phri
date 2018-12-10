@@ -1,4 +1,4 @@
-#include <OpenPHRI/utilities/app_maker.h>
+#include <OpenPHRI/OpenPHRI.h>
 
 #include <pid/rpath.h>
 
