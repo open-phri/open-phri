@@ -9,7 +9,7 @@ option(USE_OPENMP 			"Make use of OpenMP to parallize certain parts of the libra
 
 PROJECT(open-phri)
 
-declare_PID_Package(
+PID_Package(
 			AUTHOR 		    Benjamin Navarro
 			INSTITUTION	    LIRMM
 			MAIL		    navarro@lirmm.fr
@@ -19,18 +19,17 @@ declare_PID_Package(
 			LICENSE 	    GNULGPL
 			DESCRIPTION     "OpenPHRI: a generic framework to easily and safely control robots in interactions with humans"
 			README			instructions.md
+			VERSION			1.0.0
 )
-
-set_PID_Package_Version(0 9 0)
 
 check_PID_Platform(CONFIGURATION posix)
 
 #now finding packages
-declare_PID_Package_Dependency(PACKAGE api-driver-vrep NATIVE VERSION 1.0)
-declare_PID_Package_Dependency(PACKAGE eigen-extensions NATIVE VERSION 0.6)
-declare_PID_Package_Dependency(PACKAGE pid-rpath NATIVE VERSION 2.0)
-declare_PID_Package_Dependency(PACKAGE rbdyn NATIVE VERSION 1.1)
-declare_PID_Package_Dependency(PACKAGE yaml-cpp EXTERNAL VERSION 0.6.2)
+PID_Dependency(api-driver-vrep VERSION 1.0)
+PID_Dependency(eigen-extensions VERSION 0.6)
+PID_Dependency(pid-rpath VERSION 2.0)
+PID_Dependency(rbdyn VERSION 1.3)
+PID_Dependency(yaml-cpp VERSION)
 
 if(GEN_PYTHON_BINDINGS)
 	declare_PID_Package_Dependency(PACKAGE boost EXTERNAL VERSION 1.63.0 VERSION 1.64.0)
