@@ -28,7 +28,7 @@ if(GEN_PYTHON_BINDINGS)
         MODULE_LIB
         NAME openphri
         DIRECTORY pyOpenPHRI
-        DEPEND open-phri open-phri-vrep-driver pybind11
+        DEPEND open-phri open-phri-vrep-driver boost-python
     )
 
     PID_Component_Dependency(
