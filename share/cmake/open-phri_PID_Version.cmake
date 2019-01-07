@@ -1,1 +1,1 @@
-set(open-phri_PID_VERSION 2 CACHE INTERNAL "")
+set(open-phri_PID_VERSION 3 CACHE INTERNAL "")

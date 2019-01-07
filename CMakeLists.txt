@@ -29,10 +29,10 @@ PID_Dependency(api-driver-vrep VERSION 1.0)
 PID_Dependency(eigen-extensions VERSION 0.6)
 PID_Dependency(pid-rpath VERSION 2.0)
 PID_Dependency(rbdyn VERSION 1.3)
-PID_Dependency(yaml-cpp VERSION)
+PID_Dependency(yaml-cpp)
 
 if(GEN_PYTHON_BINDINGS)
-	declare_PID_Package_Dependency(PACKAGE boost EXTERNAL VERSION 1.63.0 VERSION 1.64.0)
+	PID_Dependency(boost)
 
 	find_package(PythonLibs REQUIRED)
 endif()
