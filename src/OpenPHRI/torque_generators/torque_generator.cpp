@@ -22,7 +22,7 @@
 using namespace phri;
 
 VectorXd TorqueGenerator::compute() {
-	VectorXd torque;
+	VectorXd torque(robot_->jointCount());
 	update(torque);
 	return torque;
 }

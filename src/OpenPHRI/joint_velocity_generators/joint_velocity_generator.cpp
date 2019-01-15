@@ -22,7 +22,7 @@
 using namespace phri;
 
 VectorXd JointVelocityGenerator::compute() {
-	VectorXd velocity;
+	VectorXd velocity(robot_->jointCount());
 	update(velocity);
 	return velocity;
 }
