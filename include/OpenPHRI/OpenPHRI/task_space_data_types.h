@@ -83,6 +83,7 @@ public:
 	operator const phri::Vector6d& () const;
 	operator phri::Vector6d& ();
 
+	double* data();
 	const double* data() const;
 
 	Twist& operator=(const phri::Vector6d& twist);
@@ -114,6 +115,7 @@ public:
 	operator const phri::Vector6d& () const;
 	operator phri::Vector6d& ();
 
+	double* data();
 	const double* data() const;
 
 	Acceleration& operator=(const phri::Vector6d& acceleration);

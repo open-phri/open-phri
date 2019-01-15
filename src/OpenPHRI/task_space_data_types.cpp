@@ -148,6 +148,10 @@ const double* Twist::data() const {
 	return twist_.data();
 }
 
+double* Twist::data() {
+	return twist_.data();
+}
+
 Twist& Twist::operator=(const phri::Vector6d& twist) {
 	translation() = twist.block<3,1>(0,0);
 	rotation() = twist.block<3,1>(3,0);
@@ -193,6 +197,10 @@ Acceleration::operator phri::Vector6d& () {
 }
 
 const double* Acceleration::data() const {
+	return acceleration_.data();
+}
+
+double* Acceleration::data() {
 	return acceleration_.data();
 }
 
