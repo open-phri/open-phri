@@ -40,10 +40,14 @@ AppMaker::AppMaker(const std::string& configuration_file) :
 
 	/***				Robot driver				***/
 	std::cout << "[phri::AppMaker] Creating the robot driver..." << std::flush;
+	auto driver_namme = conf["driver"]["type"].as<std::string>();
 	impl_->driver = DriverFactory::create(
-		conf["driver"]["type"].as<std::string>(),
+		driver_namme,
 		impl_->robot,
 		conf);
+	if(not impl_->driver) {
+		throw std::runtime_error(OPEN_PHRI_ERROR("The driver '" + driver_namme + "' cannot be created. Make sure its header is included and its library is linked to your application."));
+	}
 	impl_->init_timeout = conf["driver"]["init_timeout"].as<double>(30.);
 	impl_->start_timeout = conf["driver"]["start_timeout"].as<double>(30.);
 	std::cout << " done." << std::endl;
