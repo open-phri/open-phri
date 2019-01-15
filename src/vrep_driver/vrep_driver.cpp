@@ -35,7 +35,7 @@
 using namespace phri;
 using namespace std;
 
-bool VREPDriver::registered_in_factory = phri::DriverFactory::add<VREPDriver>("vrep");
+const bool VREPDriver::registered_in_factory = phri::DriverFactory::add<VREPDriver>("vrep");
 std::map<std::string,int> VREPDriver::connection_to_client_id;
 
 VREPDriver::VREPDriver(
@@ -531,4 +531,8 @@ bool VREPDriver::send() {
 	simxPauseCommunication(client_id_, false);
 
 	return all_ok;
+}
+
+bool VREPDriver::isRegisteredInFactory() {
+	return registered_in_factory;
 }

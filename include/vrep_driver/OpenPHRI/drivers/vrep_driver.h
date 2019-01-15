@@ -203,6 +203,8 @@ public:
 	virtual bool read() override;
 	virtual bool send() override;
 
+	static bool isRegisteredInFactory();
+
 private:
 	void init(const std::string& ip, int port);
 	void init(int client_id);
@@ -218,7 +220,7 @@ private:
 	std::map<std::string, phri::VectorXdPtr> lasers_data_;
 	std::map<std::pair<int,int>, phri::PosePtr> tracked_objects_;
 
-	static bool registered_in_factory;
+	static const bool registered_in_factory;
 	static std::map<std::string,int> connection_to_client_id;
 };
 
