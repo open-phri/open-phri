@@ -43,7 +43,7 @@ public:
 	explicit TorqueProxy(VectorXdConstPtr torque);
 	virtual ~TorqueProxy() = default;
 
-private:
+protected:
 	virtual void update(VectorXd& torque) override;
 
 	VectorXdConstPtr torque_;

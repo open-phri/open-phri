@@ -63,7 +63,7 @@ protected:
 	VelocityGenerator(ReferenceFrame frame);
 
 	/**
-	 * @brief Transform the given force in the TCP frame, if necessary.
+	 * @brief Transform the given velocity in the TCP frame, if necessary.
 	 * @param velocity The velocity to transform.
 	 */
 	virtual Twist transform(const Twist& velocity) final;

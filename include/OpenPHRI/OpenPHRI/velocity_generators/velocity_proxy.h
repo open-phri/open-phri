@@ -53,7 +53,7 @@ public:
 
 	virtual ~VelocityProxy() = default;
 
-private:
+protected:
 	virtual void update(Twist& velocity) override;
 
 	TwistConstPtr external_velocity_;

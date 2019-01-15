@@ -52,7 +52,7 @@ public:
 
 	~MassGenerator() = default;
 
-private:
+protected:
 	virtual void update(Vector6d& force) override;
 
 	Matrix6dConstPtr mass_;

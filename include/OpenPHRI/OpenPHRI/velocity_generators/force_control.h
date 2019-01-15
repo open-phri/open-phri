@@ -55,7 +55,7 @@ public:
 
 	void configureFilter(double sample_time, double time_constant);
 
-private:
+protected:
 	virtual void update(Twist& velocity) override;
 	void applySelection(Vector6d& vec) const;
 

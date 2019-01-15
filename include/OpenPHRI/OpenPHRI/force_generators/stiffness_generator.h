@@ -51,7 +51,7 @@ public:
 
 	~StiffnessGenerator() = default;
 
-private:
+protected:
 	virtual void update(Vector6d& force) override;
 
 	Matrix6dConstPtr stiffness_;

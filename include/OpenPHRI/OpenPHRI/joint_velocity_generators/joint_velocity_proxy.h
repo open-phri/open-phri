@@ -45,7 +45,7 @@ public:
 
 	virtual ~JointVelocityProxy() = default;
 
-private:
+protected:
 	virtual void update(VectorXd& velocity) override;
 
 	VectorXdConstPtr joint_velocity_;

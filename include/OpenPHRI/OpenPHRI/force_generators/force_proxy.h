@@ -52,7 +52,7 @@ public:
 
 	~ForceProxy() = default;
 
-private:
+protected:
 	virtual void update(Vector6d& force) override;
 
 	Vector6dConstPtr force_ptr_;

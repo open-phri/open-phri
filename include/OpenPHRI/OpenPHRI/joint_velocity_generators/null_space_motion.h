@@ -41,7 +41,7 @@ public:
 	explicit NullSpaceMotion(VectorXdConstPtr joint_velocity);
 	virtual ~NullSpaceMotion() = default;
 
-private:
+protected:
 	virtual void update(VectorXd& velocity) override;
 
 	VectorXdConstPtr joint_velocity_;
