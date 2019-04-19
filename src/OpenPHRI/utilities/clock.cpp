@@ -47,7 +47,7 @@ std::shared_ptr<double> Clock::getTime() const {
 
 double Clock::update() {
 	auto& current_time = *time_;
-	if(sample_time_ < 0) {
+	if(sample_time_ <= 0) {
 		current_time = std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - init_time_).count();
 	}
 	else {
