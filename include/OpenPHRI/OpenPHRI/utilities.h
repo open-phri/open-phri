@@ -42,5 +42,6 @@
 #include <OpenPHRI/utilities/robot_model.h>
 #include <OpenPHRI/utilities/task_space_trajectory_generator.h>
 #include <OpenPHRI/utilities/trajectory_generator.h>
+#include <OpenPHRI/utilities/low_pass_filter.hpp>
 
 #include <OpenPHRI/utilities/app_maker.h>
