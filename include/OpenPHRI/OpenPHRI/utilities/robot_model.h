@@ -7,10 +7,15 @@ namespace phri {
 
 class RobotModel {
 public:
-    RobotModel(RobotPtr robot, const std::string& model_path,
+    RobotModel(Robot& robot, const std::string& model_path,
                const std::string& control_point);
-    RobotModel(RobotPtr robot, const YAML::Node& configuration);
+    RobotModel(Robot& robot, const YAML::Node& configuration);
+    RobotModel(const RobotModel& other);
+    RobotModel(RobotModel&& other) noexcept;
     ~RobotModel();
+
+    RobotModel& operator=(const RobotModel& other);
+    RobotModel& operator=(RobotModel&& other) noexcept;
 
     void forwardKinematics() const;
 

@@ -45,7 +45,7 @@ public:
      * @param robot The robot to read/write data from/to.
      * @param sample_time The sample time to use.
      */
-    DummyDriver(phri::RobotPtr robot, double sample_time);
+    DummyDriver(phri::Robot& robot, double sample_time);
 
     /**
      * @brief Construct a driver using a specific robot and a YAML configuration
@@ -53,7 +53,7 @@ public:
      * @param robot The robot to read/write data from/to.
      * @param configuration The YAML configuration node.
      */
-    DummyDriver(const phri::RobotPtr& robot, const YAML::Node& configuration);
+    DummyDriver(phri::Robot& robot, const YAML::Node& configuration);
 
     virtual ~DummyDriver();
 

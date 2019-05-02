@@ -71,13 +71,14 @@ public:
 
     virtual double compute() override;
 
-    virtual void setRobot(RobotConstPtr robot) override;
-
     /**
      * @brief Retrieve the separation shared pointer.
      * @return The shared pointer to the separation power.
      */
     doubleConstPtr getSeparationDistance() const;
+
+protected:
+    virtual void setRobot(Robot const* robot) override;
 
 private:
     double closestObjectDistance();

@@ -30,3 +30,7 @@ VectorXd TorqueGenerator::compute() {
 VectorXd TorqueGenerator::operator()() {
     return compute();
 }
+
+void TorqueGenerator::setRobot(Robot const* robot) {
+    robot_ = robot;
+}

@@ -33,9 +33,9 @@ JointAccelerationConstraint::JointAccelerationConstraint(
 /***		Algorithm		***/
 double JointAccelerationConstraint::compute() {
     double constraint = 1.;
-    const auto& joint_vel = *robot_->jointTotalVelocity();
+    const auto& joint_vel = robot_->control.joints.total_velocity;
     const auto& max_joint_acc = *maximum_acceleration_;
-    const auto& prev_joint_vel = *robot_->jointVelocity();
+    const auto& prev_joint_vel = robot_->joints.command.velocity;
 
     for (size_t i = 0; i < joint_vel.size(); ++i) {
         if (joint_vel(i) < 1e-6) {

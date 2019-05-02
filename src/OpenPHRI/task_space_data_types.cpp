@@ -124,6 +124,14 @@ Twist& Twist::integrate(const Acceleration& acceleration, double sample_time) {
     return *this;
 }
 
+Eigen::Ref<const phri::Vector6d> Twist::vector() const {
+    return twist_;
+}
+
+Eigen::Ref<phri::Vector6d> Twist::vector() {
+    return twist_;
+}
+
 Twist::operator const phri::Vector6d&() const {
     return twist_;
 }
@@ -172,6 +180,14 @@ Eigen::Ref<phri::Vector3d> Acceleration::rotation() {
     return acceleration_.block<3, 1>(3, 0);
 }
 
+Eigen::Ref<const phri::Vector6d> Acceleration::vector() const {
+    return acceleration_;
+}
+
+Eigen::Ref<phri::Vector6d> Acceleration::vector() {
+    return acceleration_;
+}
+
 Acceleration::operator const phri::Vector6d&() const {
     return acceleration_;
 }
@@ -191,6 +207,59 @@ double* Acceleration::data() {
 Acceleration& Acceleration::operator=(const phri::Vector6d& acceleration) {
     translation() = acceleration.block<3, 1>(0, 0);
     rotation() = acceleration.block<3, 1>(3, 0);
+    return *this;
+}
+
+/***			Wrench			***/
+Wrench::Wrench() : Wrench(phri::Vector3d::Zero(), phri::Vector3d::Zero()) {
+}
+Wrench::Wrench(phri::Vector3d force, phri::Vector3d torque) {
+    wrench_.block<3, 1>(0, 0) = force;
+    wrench_.block<3, 1>(3, 0) = torque;
+}
+Wrench::Wrench(phri::Vector6d wrench) : wrench_(wrench) {
+}
+
+Eigen::Ref<const phri::Vector3d> Wrench::force() const {
+    return wrench_.block<3, 1>(0, 0);
+}
+Eigen::Ref<const phri::Vector3d> Wrench::torque() const {
+    return wrench_.block<3, 1>(3, 0);
+}
+Eigen::Ref<phri::Vector3d> Wrench::force() {
+    return wrench_.block<3, 1>(0, 0);
+}
+Eigen::Ref<phri::Vector3d> Wrench::torque() {
+    return wrench_.block<3, 1>(3, 0);
+}
+
+Eigen::Ref<const phri::Vector6d> Wrench::vector() const {
+    return wrench_;
+}
+
+Eigen::Ref<phri::Vector6d> Wrench::vector() {
+    return wrench_;
+}
+
+Wrench::operator const phri::Vector6d&() const {
+    return wrench_;
+}
+
+Wrench::operator phri::Vector6d&() {
+    return wrench_;
+}
+
+const double* Wrench::data() const {
+    return wrench_.data();
+}
+
+double* Wrench::data() {
+    return wrench_.data();
+}
+
+Wrench& Wrench::operator=(const phri::Vector6d& wrench) {
+    force() = wrench.block<3, 1>(0, 0);
+    torque() = wrench.block<3, 1>(3, 0);
     return *this;
 }
 

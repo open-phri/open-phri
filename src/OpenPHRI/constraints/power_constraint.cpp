@@ -33,10 +33,8 @@ PowerConstraint::PowerConstraint(doubleConstPtr maximum_power)
 /***		Algorithm		***/
 double PowerConstraint::compute() {
     double constraint = 1.;
-    const Vector3d& velocity =
-        robot_->controlPointTotalVelocity()->translation();
-    const Vector3d& force =
-        robot_->controlPointExternalForce()->block<3, 1>(0, 0);
+    const Vector3d& velocity = robot_->control.task.total_twist.translation();
+    const Vector3d& force = robot_->task.state.wrench.force();
     double power = force.dot(velocity);
     *power_ = power;
 

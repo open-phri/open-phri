@@ -49,7 +49,7 @@ public:
      * @brief Construct a safety controller with a given robot.
      * @param robot The robot to work with.
      */
-    explicit SafetyController(RobotPtr robot);
+    explicit SafetyController(Robot& robot);
     /**
      * @brief Construct a safety controller with a given robot and a specific
      * configuration.
@@ -57,7 +57,7 @@ public:
      * @param configuration The YAML node containing the controller's
      * configuration.
      */
-    explicit SafetyController(RobotPtr robot, YAML::Node& configuration);
+    explicit SafetyController(Robot& robot, YAML::Node& configuration);
 
     ~SafetyController() = default;
 
@@ -469,7 +469,7 @@ protected:
     ObjectCollection<StorageWrapper<JointVelocityGenerator>>
         joint_velocity_generators_;
 
-    RobotPtr robot_;
+    Robot& robot_;
     bool skip_jacobian_inverse_computation_;
 
     bool dynamic_dls_;

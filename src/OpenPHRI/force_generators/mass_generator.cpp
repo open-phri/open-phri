@@ -40,19 +40,19 @@ void MassGenerator::update(Vector6d& force) {
         if (target_acceleration_frame_ == ReferenceFrame::TCP) {
             error = *target_acceleration_;
         } else {
-            error = robot_->spatialTransformationMatrix()->transpose() *
-                    (static_cast<const Vector6d&>(*target_acceleration_) -
-                     static_cast<const Vector6d&>(
-                         *robot_->controlPointCurrentAcceleration()));
+            error =
+                robot_->control.spatial_transformation_matrix.transpose() *
+                (static_cast<const Vector6d&>(*target_acceleration_) -
+                 static_cast<const Vector6d&>(robot_->task.state.acceleration));
         }
     } else {
         if (target_acceleration_frame_ == ReferenceFrame::TCP) {
-            error = *robot_->spatialTransformationMatrix() *
+            error = robot_->control.spatial_transformation_matrix *
                     static_cast<const Vector6d&>(*target_acceleration_);
         } else {
-            error = static_cast<const Vector6d&>(*target_acceleration_) -
-                    static_cast<const Vector6d&>(
-                        *robot_->controlPointCurrentAcceleration());
+            error =
+                static_cast<const Vector6d&>(*target_acceleration_) -
+                static_cast<const Vector6d&>(robot_->task.state.acceleration);
         }
     }
 

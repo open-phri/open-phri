@@ -22,7 +22,7 @@
 
 using namespace phri;
 
-void Constraint::setRobot(RobotConstPtr robot) {
+void Constraint::setRobot(Robot const* robot) {
     robot_ = robot;
 }
 

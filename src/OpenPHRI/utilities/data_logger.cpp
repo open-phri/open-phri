@@ -53,58 +53,58 @@ void DataLogger::logSafetyControllerData(SafetyController* controller) {
 void DataLogger::logRobotData(RobotConstPtr robot) {
     size_t joint_vec_size = robot->jointCount();
 
-    logExternalData("jointDampingMatrix", robot->jointDampingMatrix()->data(),
+    logExternalData("jointDampingMatrix", robot->control.joints.damping.data(),
                     joint_vec_size);
     logExternalData("controlPointDampingMatrix",
-                    robot->controlPointDampingMatrix()->data(), 6);
+                    robot->control.task.damping.data(), 6);
 
-    logExternalData("jointVelocity", robot->jointVelocity()->data(),
+    logExternalData("jointVelocity", robot->joints.command.velocity.data(),
                     joint_vec_size);
-    logExternalData("jointVelocitySum", robot->jointVelocitySum()->data(),
-                    joint_vec_size);
-    logExternalData("jointTorqueSum", robot->jointTorqueSum()->data(),
+    logExternalData("jointVelocitySum",
+                    robot->control.joints.velocity_sum.data(), joint_vec_size);
+    logExternalData("jointTorqueSum", robot->control.joints.force_sum.data(),
                     joint_vec_size);
     logExternalData("jointVelocityCommand",
-                    robot->jointVelocityCommand()->data(), joint_vec_size);
-    logExternalData("jointTotalVelocity", robot->jointTotalVelocity()->data(),
+                    robot->control.joints.velocity_command.data(),
                     joint_vec_size);
-    logExternalData("jointTotalTorque", robot->jointTotalTorque()->data(),
+    logExternalData("jointTotalVelocity",
+                    robot->control.joints.total_velocity.data(),
                     joint_vec_size);
-    logExternalData("jointCurrentPosition",
-                    robot->jointCurrentPosition()->data(), joint_vec_size);
-    logExternalData("jointTargetPosition", robot->jointTargetPosition()->data(),
+    logExternalData("jointTotalTorque",
+                    robot->control.joints.total_force.data(), joint_vec_size);
+    logExternalData("jointCurrentPosition", robot->joints.state.position.data(),
                     joint_vec_size);
-    logExternalData("jointExternalTorque", robot->jointExternalTorque()->data(),
+    logExternalData("jointTargetPosition", robot->joints.target.position.data(),
+                    joint_vec_size);
+    logExternalData("jointExternalTorque", robot->joints.state.force.data(),
                     joint_vec_size);
 
-    logExternalData("controlPointVelocity",
-                    robot->controlPointVelocity()->data(), 6);
+    logExternalData("controlPointVelocity", robot->task.command.twist.data(),
+                    6);
     logExternalData("controlPointVelocitySum",
-                    robot->controlPointVelocitySum()->data(), 6);
+                    robot->control.task.twist_sum.data(), 6);
     logExternalData("controlPointForceSum",
-                    robot->controlPointForceSum()->data(), 6);
+                    robot->control.task.wrench_sum.data(), 6);
     logExternalData("controlPointVelocityCommand",
-                    robot->controlPointVelocityCommand()->data(), 6);
+                    robot->control.task.twist_command.data(), 6);
     logExternalData("controlPointTotalVelocity",
-                    robot->controlPointTotalVelocity()->data(), 6);
+                    robot->control.task.total_twist.data(), 6);
     logExternalData("controlPointTotalForce",
-                    robot->controlPointTotalForce()->data(), 6);
+                    robot->control.task.total_wrench.data(), 6);
     logExternalData("controlPointCurrentPosition",
-                    robot->controlPointCurrentPose()->translation().data(), 3);
-    logExternalData(
-        "controlPointCurrentOrientation",
-        robot->controlPointCurrentPose()->orientation().coeffs().data(), 4);
+                    robot->task.state.pose.translation().data(), 3);
+    logExternalData("controlPointCurrentOrientation",
+                    robot->task.state.pose.orientation().coeffs().data(), 4);
     logExternalData("controlPointTargetPosition",
-                    robot->controlPointTargetPose()->translation().data(), 3);
-    logExternalData(
-        "controlPointTargetOrientation",
-        robot->controlPointTargetPose()->orientation().coeffs().data(), 4);
+                    robot->task.target.pose.translation().data(), 3);
+    logExternalData("controlPointTargetOrientation",
+                    robot->task.target.pose.orientation().coeffs().data(), 4);
     logExternalData("controlPointCurrentVelocity",
-                    robot->controlPointCurrentVelocity()->data(), 6);
+                    robot->task.state.twist.data(), 6);
     logExternalData("controlPointExternalForce",
-                    robot->controlPointExternalForce()->data(), 6);
+                    robot->task.state.wrench.data(), 6);
 
-    logExternalData("scalingFactor", robot->scalingFactor().get(), 1);
+    logExternalData("scalingFactor", &robot->control.scaling_factor, 1);
 
     robot_ = robot;
 }

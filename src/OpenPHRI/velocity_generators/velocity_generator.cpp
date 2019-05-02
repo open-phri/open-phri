@@ -35,7 +35,7 @@ Twist VelocityGenerator::compute() {
 Twist VelocityGenerator::transform(const Twist& velocity) {
     if (frame_ != ReferenceFrame::TCP) {
         return static_cast<Twist>(
-            robot_->spatialTransformationMatrix()->transpose() *
+            robot_->control.spatial_transformation_matrix.transpose() *
             static_cast<Vector6d>(velocity));
     }
     return velocity;
@@ -43,4 +43,8 @@ Twist VelocityGenerator::transform(const Twist& velocity) {
 
 Twist VelocityGenerator::operator()() {
     return compute();
+}
+
+void VelocityGenerator::setRobot(Robot const* robot) {
+    robot_ = robot;
 }

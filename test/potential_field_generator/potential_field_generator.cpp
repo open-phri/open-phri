@@ -1,6 +1,7 @@
 #undef NDEBUG
 
 #include <OpenPHRI/OpenPHRI.h>
+#include <pid/rpath.h>
 #include <iostream>
 
 using namespace phri;
@@ -8,10 +9,16 @@ using namespace std;
 
 int main(int argc, char const* argv[]) {
 
-    auto robot = make_shared<Robot>("rob", // Robot's name
-                                    7);    // Robot's joint count
+    auto robot = phri::Robot{"rob", // Robot's name
+                             7};    // Robot's joint count
 
-    auto safety_controller = SafetyController(robot);
+    auto model = phri::RobotModel(
+        robot, PID_PATH("robot_models/kuka_lwr4.yaml"), "end-effector");
+
+    robot.joints.state.position.setOnes();
+    model.forwardKinematics();
+
+    auto safety_controller = phri::SafetyController(robot);
     safety_controller.setVerbose(true);
 
     auto potential_field_generator = make_shared<PotentialFieldGenerator>();
@@ -67,13 +74,12 @@ int main(int argc, char const* argv[]) {
     // Step #7 : 1 obstacle > threshold distance
     obs_pos->translation().x() = 0.3;
     safety_controller.compute();
-    assert_msg("Step #7",
-               static_cast<Vector6d>(*robot->controlPointVelocity()).isZero());
+    assert_msg("Step #7", robot.task.command.twist.vector().isZero());
 
     // Step #8 : 1 obstacle < threshold distance
     obs_pos->translation().x() = 0.1;
     safety_controller.compute();
-    assert_msg("Step #8", robot->controlPointVelocity()->translation().dot(
+    assert_msg("Step #8", robot.task.command.twist.translation().dot(
                               obs_pos->translation()) < 0.);
 
     // Step #9 : 1 target
@@ -82,7 +88,7 @@ int main(int argc, char const* argv[]) {
     tgt_pos->translation().x() = 0.1;
     tgt_pos->translation().y() = 0.2;
     safety_controller.compute();
-    assert_msg("Step #9", robot->controlPointVelocity()->translation().dot(
+    assert_msg("Step #9", robot.task.command.twist.translation().dot(
                               tgt_pos->translation()) > 0.);
 
     return 0;

@@ -58,14 +58,17 @@ public:
      */
     virtual double operator()() final;
 
+protected:
+    friend class SafetyController;
+    friend class SeparationDistanceConstraint;
+
     /**
-     * @brief Set the robot to work with. Should not be set by the user.
+     * @brief Set the robot to work with.
      * @param robot The robot.
      */
-    virtual void setRobot(RobotConstPtr robot);
+    virtual void setRobot(Robot const* robot);
 
-protected:
-    RobotConstPtr robot_;
+    Robot const* robot_;
 };
 
 using ConstraintPtr = std::shared_ptr<Constraint>;

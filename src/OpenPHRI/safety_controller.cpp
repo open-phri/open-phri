@@ -35,18 +35,17 @@
 
 using namespace phri;
 
-#define HEAVY_PRINTING 0
+#define HEAVY_PRINTING 1
 
-SafetyController::SafetyController(RobotPtr robot)
-    : skip_jacobian_inverse_computation_(false) {
+SafetyController::SafetyController(Robot& robot)
+    : robot_(robot), skip_jacobian_inverse_computation_(false) {
     addConstraint("default constraint", std::make_shared<DefaultConstraint>());
-    robot_ = robot;
     dynamic_dls_ = false;
     lambda2_ = -1.;
     sigma_min_threshold_ = -1.;
 }
 
-SafetyController::SafetyController(RobotPtr robot, YAML::Node& configuration)
+SafetyController::SafetyController(Robot& robot, YAML::Node& configuration)
     : SafetyController(robot) {
     auto controller = configuration["controller"];
     if (controller) {
@@ -81,34 +80,34 @@ void SafetyController::skipJacobianInverseComputation(bool on) {
 
 bool SafetyController::addConstraint(const std::string& name,
                                      ConstraintPtr constraint, bool force) {
-    constraint->setRobot(robot_);
+    constraint->setRobot(&robot_);
     return constraints_.add(name, {constraint}, force);
 }
 
 bool SafetyController::addForceGenerator(const std::string& name,
                                          ForceGeneratorPtr generator,
                                          bool force) {
-    generator->robot_ = robot_;
+    generator->setRobot(&robot_);
     return force_generators_.add(name, {generator}, force);
 }
 
 bool SafetyController::addTorqueGenerator(const std::string& name,
                                           TorqueGeneratorPtr generator,
                                           bool force) {
-    generator->robot_ = robot_;
+    generator->setRobot(&robot_);
     return torque_generators_.add(name, {generator}, force);
 }
 
 bool SafetyController::addVelocityGenerator(const std::string& name,
                                             VelocityGeneratorPtr generator,
                                             bool force) {
-    generator->robot_ = robot_;
+    generator->setRobot(&robot_);
     return velocity_generators_.add(name, {generator}, force);
 }
 
 bool SafetyController::addJointVelocityGenerator(
     const std::string& name, JointVelocityGeneratorPtr generator, bool force) {
-    generator->robot_ = robot_;
+    generator->setRobot(&robot_);
     return joint_velocity_generators_.add(name, {generator}, force);
 }
 
@@ -193,11 +192,12 @@ void SafetyController::enableDynamicDampedLeastSquares(
 }
 
 void SafetyController::compute() {
-    const auto& jacobian_inverse = *robot_->jacobianInverse();
-    const auto& jacobian = *robot_->jacobian();
-    const auto& spatial_transformation = *robot_->spatialTransformationMatrix();
+    const auto& jacobian_inverse = robot_.control.jacobian_inverse;
+    const auto& jacobian = robot_.control.jacobian;
+    const auto& spatial_transformation =
+        robot_.control.spatial_transformation_matrix;
     if (not skip_jacobian_inverse_computation_) {
-        *robot_->jacobianInverse() = computeJacobianInverse();
+        robot_.control.jacobian_inverse = computeJacobianInverse();
     }
 
     const auto& force_sum = computeForceSum();
@@ -222,66 +222,65 @@ void SafetyController::compute() {
 #endif
 
     // Joint level damping control
-    *robot_->joint_velocity_command_ =
-        torque_sum.cwiseQuotient(*robot_->joint_damping_matrix_) +
+    robot_.control.joints.velocity_command =
+        torque_sum.cwiseQuotient(robot_.control.joints.damping) +
         joint_velocity_sum;
 
     // Control point level damping control
-    *robot_->control_point_velocity_command_ =
-        force_sum.cwiseQuotient(*robot_->control_point_damping_matrix_) +
+    robot_.control.task.twist_command =
+        force_sum.cwiseQuotient(robot_.control.task.damping) +
         static_cast<Vector6d>(velocity_sum);
 
     // Cumulative effect on the joint velocity of all inputs
-    *robot_->joint_total_velocity_ =
+    robot_.control.joints.total_velocity =
         jacobian_inverse * spatial_transformation *
-            static_cast<Vector6d>(*robot_->control_point_velocity_command_) +
-        *robot_->joint_velocity_command_;
+            static_cast<Vector6d>(robot_.control.task.twist_command) +
+        robot_.control.joints.velocity_command;
 
     // Cumulative effect on the control point velocity of all inputs
-    *robot_->control_point_total_velocity_ =
-        static_cast<Vector6d>(*robot_->control_point_velocity_command_) +
+    robot_.control.task.total_twist =
+        static_cast<Vector6d>(robot_.control.task.twist_command) +
         spatial_transformation.transpose() * jacobian *
-            *robot_->joint_velocity_command_;
+            robot_.control.joints.velocity_command;
 
     // Cumulative effect on torques of both joint torque and control point force
     // inputs
-    *robot_->joint_total_torque_ =
+    robot_.control.joints.total_force =
         torque_sum + jacobian.transpose() * force_sum;
 
     // Cumulative effect on forces of both joint torque and control point force
     // inputs
-    *robot_->control_point_total_force_ =
+    robot_.control.task.total_wrench =
         force_sum + jacobian_inverse.transpose() * torque_sum;
 
     // Compute the velocity scaling factor
     double constraint_value = computeConstraintValue();
 
     // Scale the joint velocities to comply with the constraints
-    *robot_->joint_velocity_ =
-        constraint_value * *robot_->joint_total_velocity_;
+    robot_.joints.command.velocity =
+        constraint_value * robot_.control.joints.total_velocity;
 
     // Scale the control point velocities to comply with the constraints
-    *robot_->control_point_velocity_ =
+    robot_.task.command.twist =
         constraint_value *
-        static_cast<Vector6d>(*robot_->control_point_total_velocity_);
+        static_cast<Vector6d>(robot_.control.task.total_twist);
 
 #if HEAVY_PRINTING
     std::cout << "\tjoint vel cmd: "
-              << robot_->joint_velocity_command_->transpose() << std::endl;
-    std::cout << "\tcp vel cmd: " << *(robot_->control_point_velocity_command_)
+              << robot_.control.joints.velocity_command.transpose()
               << std::endl;
+    std::cout << "\tcp vel cmd: " << robot_.task.command.twist << std::endl;
     std::cout << "\tjoint vel tot: "
-              << robot_->joint_total_velocity_->transpose() << std::endl;
-    std::cout << "\tcp vel tot: " << *(robot_->control_point_total_velocity_)
+              << robot_.control.joints.total_velocity.transpose() << std::endl;
+    std::cout << "\tcp vel tot: " << robot_.control.task.total_twist
               << std::endl;
-    std::cout << "\tjont trq tot: " << robot_->joint_total_torque_->transpose()
+    std::cout << "\tjont trq tot: "
+              << robot_.control.joints.total_force.transpose() << std::endl;
+    std::cout << "\tcp force tot: " << robot_.control.task.total_wrench
               << std::endl;
-    std::cout << "\tcp force tot: "
-              << robot_->control_point_total_force_->transpose() << std::endl;
-    std::cout << "\tjoint vel: " << robot_->joint_velocity_->transpose()
+    std::cout << "\tjoint vel: " << robot_.joints.command.velocity.transpose()
               << std::endl;
-    std::cout << "\tcp vel: " << *(robot_->control_point_velocity_)
-              << std::endl;
+    std::cout << "\tcp vel: " << robot_.task.command.twist << std::endl;
 #endif
 }
 
@@ -378,11 +377,11 @@ double SafetyController::computeConstraintValue() {
         min_value = std::min(min_value, constraint.second.last_value);
     }
 
-    return *robot_->scaling_factor_ = std::min(1., min_value);
+    return robot_.control.scaling_factor = std::min(1., min_value);
 }
 
 const Vector6d& SafetyController::computeForceSum() {
-    auto& sum = *robot_->control_point_force_sum_;
+    auto& sum = static_cast<Vector6d&>(robot_.control.task.wrench_sum);
     sum.setZero();
 
     for (auto& force_generator : force_generators_) {
@@ -395,7 +394,7 @@ const Vector6d& SafetyController::computeForceSum() {
 }
 
 const VectorXd& SafetyController::computeTorqueSum() {
-    auto& sum = *robot_->joint_torque_sum_;
+    auto& sum = robot_.control.joints.force_sum;
     sum.setZero();
 
     for (auto& torque_generator : torque_generators_) {
@@ -408,7 +407,7 @@ const VectorXd& SafetyController::computeTorqueSum() {
 }
 
 const Vector6d& SafetyController::computeVelocitySum() {
-    Vector6d& sum = *robot_->control_point_velocity_sum_;
+    auto& sum = static_cast<Vector6d&>(robot_.control.task.twist_sum);
     sum.setZero();
 
     for (auto& velocity_generator : velocity_generators_) {
@@ -422,7 +421,7 @@ const Vector6d& SafetyController::computeVelocitySum() {
 }
 
 const VectorXd& SafetyController::computeJointVelocitySum() {
-    auto& sum = *robot_->joint_velocity_sum_;
+    auto& sum = robot_.control.joints.velocity_sum;
     sum.setZero();
 
     for (auto& joint_velocity_generator : joint_velocity_generators_) {
@@ -435,8 +434,8 @@ const VectorXd& SafetyController::computeJointVelocitySum() {
 }
 
 const MatrixXd& SafetyController::computeJacobianInverse() const {
-    auto& jac = *robot_->jacobian_;
-    auto& jac_inv = *robot_->jacobian_inverse_;
+    auto& jac = robot_.control.jacobian;
+    auto& jac_inv = robot_.control.jacobian_inverse;
 
     if (jac.rows() == jac.cols()) {
         jac_inv = jac.inverse();

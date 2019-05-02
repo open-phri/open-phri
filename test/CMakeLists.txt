@@ -1,13 +1,10 @@
 function(create_test test)
-    declare_PID_Component(
+    PID_Component(
         TEST_APPLICATION
         NAME  ${test}
         DIRECTORY ${test}
-    )
-
-    declare_PID_Component_Dependency(
-        COMPONENT ${test}
-        NATIVE open-phri
+        RUNTIME_RESOURCES robot_models
+        DEPEND open-phri/open-phri pid-rpath/rpathlib
     )
 
     run_PID_Test(
@@ -21,12 +18,12 @@ function(create_test test)
 endfunction()
 
 
-create_test(default_controller)
-create_test(proxy_generators)
 create_test(add_remove_constraints)
-create_test(velocity_constraint)
-create_test(joint_velocity_constraint)
-create_test(power_constraint)
-create_test(stop_constraint)
-create_test(potential_field_generator)
+create_test(default_controller)
 create_test(interpolators)
+create_test(joint_velocity_constraint)
+create_test(potential_field_generator)
+create_test(power_constraint)
+# create_test(proxy_generators)
+# create_test(stop_constraint)
+create_test(velocity_constraint)

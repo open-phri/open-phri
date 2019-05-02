@@ -57,10 +57,17 @@ public:
     virtual VectorXd operator()() final;
 
 protected:
+    friend class SafetyController;
+
     virtual void update(VectorXd& velocity) = 0;
 
-    friend class SafetyController;
-    RobotConstPtr robot_;
+    /**
+     * @brief Set the robot to work with.
+     * @param robot The robot.
+     */
+    virtual void setRobot(Robot const* robot);
+
+    Robot const* robot_;
 };
 
 using JointVelocityGeneratorPtr = std::shared_ptr<JointVelocityGenerator>;

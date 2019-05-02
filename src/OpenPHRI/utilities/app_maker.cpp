@@ -29,7 +29,7 @@ AppMaker::AppMaker(const std::string& configuration_file)
     std::cout << " done." << std::endl;
 
     std::cout << "[phri::AppMaker] Loading the robot model..." << std::flush;
-    impl_->model = std::make_shared<RobotModel>(impl_->robot, conf);
+    impl_->model = std::make_shared<RobotModel>(*impl_->robot, conf);
     std::cout << " done." << std::endl;
 
     std::cout
@@ -41,7 +41,7 @@ AppMaker::AppMaker(const std::string& configuration_file)
     /***				Robot driver				***/
     std::cout << "[phri::AppMaker] Creating the robot driver..." << std::flush;
     auto driver_namme = conf["driver"]["type"].as<std::string>();
-    impl_->driver = DriverFactory::create(driver_namme, impl_->robot, conf);
+    impl_->driver = DriverFactory::create(driver_namme, *impl_->robot, conf);
     if (not impl_->driver) {
         throw std::runtime_error(OPEN_PHRI_ERROR(
             "The driver '" + driver_namme +
@@ -59,7 +59,7 @@ AppMaker::AppMaker(const std::string& configuration_file)
     /***			Controller configuration			***/
     std::cout << "[phri::AppMaker] Creating the robot controller..."
               << std::flush;
-    impl_->controller = std::make_shared<SafetyController>(impl_->robot, conf);
+    impl_->controller = std::make_shared<SafetyController>(*impl_->robot, conf);
     std::cout << " done." << std::endl;
 
     /***			Data logger configuration			***/

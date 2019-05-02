@@ -1,6 +1,7 @@
 #undef NDEBUG
 
 #include <OpenPHRI/OpenPHRI.h>
+#include <pid/rpath.h>
 
 using namespace phri;
 using namespace std;
@@ -11,22 +12,28 @@ bool isClose(double v1, double v2, double eps = 1e-3) {
 
 int main(int argc, char const* argv[]) {
 
-    auto robot = make_shared<Robot>("rob", // Robot's name
-                                    7);    // Robot's joint count
+    auto robot = phri::Robot{"rob", // Robot's name
+                             7};    // Robot's joint count
 
-    *robot->controlPointDampingMatrix() *= 10.;
+    auto model = phri::RobotModel(
+        robot, PID_PATH("robot_models/kuka_lwr4.yaml"), "end-effector");
 
-    auto safety_controller = SafetyController(robot);
+    robot.joints.state.position.setOnes();
+    model.forwardKinematics();
+
+    auto safety_controller = phri::SafetyController(robot);
     safety_controller.setVerbose(true);
+
+    robot.control.task.damping.setConstant(10.);
 
     auto constant_vel = make_shared<Twist>();
     Vector6d& constant_vel_ref = *constant_vel;
-    auto constant_force = make_shared<Vector6d>(Vector6d::Zero());
+    auto constant_force = Vector6d::Zero();
 
     auto constant_velocity_generator = make_shared<VelocityProxy>(constant_vel);
     auto constant_force_generator = make_shared<ForceProxy>(constant_force);
 
-    const Vector6d& cp_velocity = *robot->controlPointVelocity();
+    const Vector6d& cp_velocity = robot.task.command.twist;
 
     safety_controller.add("vel proxy", constant_velocity_generator);
     safety_controller.add("force proxy", constant_force_generator);

@@ -31,3 +31,7 @@ VectorXd JointVelocityGenerator::compute() {
 VectorXd JointVelocityGenerator::operator()() {
     return compute();
 }
+
+void JointVelocityGenerator::setRobot(Robot const* robot) {
+    robot_ = robot;
+}

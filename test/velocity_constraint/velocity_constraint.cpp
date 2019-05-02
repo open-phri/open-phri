@@ -1,8 +1,7 @@
 #undef NDEBUG
 
 #include <OpenPHRI/OpenPHRI.h>
-
-using namespace phri;
+#include <pid/rpath.h>
 
 bool isClose(double v1, double v2, double eps = 1e-3) {
     return std::abs(v1 - v2) < eps;
@@ -10,24 +9,33 @@ bool isClose(double v1, double v2, double eps = 1e-3) {
 
 int main(int argc, char const* argv[]) {
 
-    auto robot = make_shared<Robot>("rob", // Robot's name
-                                    7);    // Robot's joint count
+    auto robot = phri::Robot{"rob", // Robot's name
+                             7};    // Robot's joint count
 
-    auto safety_controller = SafetyController(robot);
+    auto model = phri::RobotModel(
+        robot, PID_PATH("robot_models/kuka_lwr4.yaml"), "end-effector");
+
+    robot.joints.state.position.setOnes();
+    model.forwardKinematics();
+
+    auto safety_controller = phri::SafetyController(robot);
     safety_controller.setVerbose(true);
 
-    auto maximum_velocity = make_shared<double>(0.5);
+    auto maximum_velocity = std::make_shared<double>(0.5);
     auto velocity_constraint =
-        make_shared<VelocityConstraint>(maximum_velocity);
+        std::make_shared<phri::VelocityConstraint>(maximum_velocity);
 
-    auto constant_vel = make_shared<Twist>();
-    auto constant_velocity_generator = make_shared<VelocityProxy>(constant_vel);
+    auto constant_vel = std::make_shared<phri::Twist>();
+    auto constant_velocity_generator =
+        std::make_shared<phri::VelocityProxy>(constant_vel);
 
     safety_controller.add("velocity constraint", velocity_constraint);
     safety_controller.add("vel proxy", constant_velocity_generator);
 
-    const Vector6d& cp_velocity = *robot->controlPointVelocity();
-    const Vector6d& cp_total_velocity = *robot->controlPointTotalVelocity();
+    auto cp_velocity =
+        static_cast<const phri::Vector6d&>(robot.task.command.twist);
+    auto cp_total_velocity =
+        static_cast<const phri::Vector6d&>(robot.control.task.total_twist);
 
     // Step #1 : no velocity
     safety_controller.compute();
@@ -44,9 +52,8 @@ int main(int argc, char const* argv[]) {
     constant_vel->translation().x() = 0.6;
     safety_controller.compute();
 
-    assert_msg("Step #3",
-               isClose(robot->controlPointVelocity()->translation().norm(),
-                       *maximum_velocity));
+    assert_msg("Step #3", isClose(robot.task.command.twist.translation().norm(),
+                                  *maximum_velocity));
 
     // Step #4 : velocity 3 axes < max
     constant_vel->translation().x() = 0.2;
@@ -62,12 +69,11 @@ int main(int argc, char const* argv[]) {
     constant_vel->translation().z() = 0.6;
     safety_controller.compute();
 
-    assert_msg("Step #5",
-               isClose(robot->controlPointVelocity()->translation().norm(),
-                       *maximum_velocity));
+    assert_msg("Step #5", isClose(robot.task.command.twist.translation().norm(),
+                                  *maximum_velocity));
 
     // Step #6 : rotational velocity only
-    static_cast<Vector6d&>(*constant_vel).setZero();
+    static_cast<phri::Vector6d&>(*constant_vel).setZero();
     constant_vel->rotation().x() = 0.5;
     constant_vel->rotation().y() = 0.4;
     constant_vel->rotation().z() = 0.6;

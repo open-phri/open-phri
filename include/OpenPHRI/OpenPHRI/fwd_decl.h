@@ -33,6 +33,7 @@ namespace phri {
 
 class SafetyController;
 class Constraint;
+class SeparationDistanceConstraint;
 class VelocityGenerator;
 class JointVelocityGenerator;
 class ForceGenerator;

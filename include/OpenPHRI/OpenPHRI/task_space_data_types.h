@@ -84,6 +84,9 @@ public:
 
     Twist& integrate(const Acceleration& acceleration, double sample_time);
 
+    Eigen::Ref<const phri::Vector6d> vector() const;
+    Eigen::Ref<phri::Vector6d> vector();
+
     operator const phri::Vector6d&() const;
     operator phri::Vector6d&();
 
@@ -116,6 +119,9 @@ public:
     Eigen::Ref<phri::Vector3d> translation();
     Eigen::Ref<phri::Vector3d> rotation();
 
+    Eigen::Ref<const phri::Vector6d> vector() const;
+    Eigen::Ref<phri::Vector6d> vector();
+
     operator const phri::Vector6d&() const;
     operator phri::Vector6d&();
 
@@ -137,5 +143,40 @@ private:
 
 using AccelerationPtr = std::shared_ptr<Acceleration>;
 using AccelerationConstPtr = std::shared_ptr<const Acceleration>;
+
+class Wrench {
+public:
+    Wrench();
+    Wrench(phri::Vector3d force, phri::Vector3d torque);
+    explicit Wrench(phri::Vector6d wrench);
+
+    Eigen::Ref<const phri::Vector3d> force() const;
+    Eigen::Ref<const phri::Vector3d> torque() const;
+    Eigen::Ref<phri::Vector3d> force();
+    Eigen::Ref<phri::Vector3d> torque();
+
+    Eigen::Ref<const phri::Vector6d> vector() const;
+    Eigen::Ref<phri::Vector6d> vector();
+
+    operator const phri::Vector6d&() const;
+    operator phri::Vector6d&();
+
+    double* data();
+    const double* data() const;
+
+    Wrench& operator=(const phri::Vector6d& wrench);
+
+    friend std ::ostream& operator<<(std::ostream& out, const Wrench& wrench) {
+        out << static_cast<phri::Vector6d>(wrench).transpose();
+        return (out);
+    }
+
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+private:
+    phri::Vector6d wrench_;
+};
+
+using WrenchPtr = std::shared_ptr<Wrench>;
+using WrenchConstPtr = std::shared_ptr<const Wrench>;
 
 } // namespace phri

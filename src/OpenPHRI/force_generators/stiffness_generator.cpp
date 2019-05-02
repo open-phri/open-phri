@@ -36,12 +36,10 @@ void StiffnessGenerator::update(Vector6d& force) {
     Vector6d error;
 
     if (stiffness_frame_ == ReferenceFrame::TCP) {
-        error = robot_->spatialTransformationMatrix()->transpose() *
-                (robot_->controlPointCurrentPose()->getErrorWith(
-                    *target_position_));
+        error = robot_->control.spatial_transformation_matrix.transpose() *
+                (robot_->task.state.pose.getErrorWith(*target_position_));
     } else {
-        error =
-            robot_->controlPointCurrentPose()->getErrorWith(*target_position_);
+        error = robot_->task.state.pose.getErrorWith(*target_position_);
     }
 
     error.segment<3>(0) *= -1.;

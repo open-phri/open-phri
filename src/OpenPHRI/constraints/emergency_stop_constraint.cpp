@@ -57,8 +57,7 @@ double EmergencyStopConstraint::compute() {
     if (check_type_ & CheckType::CheckForces) {
         double act = *activation_force_threshold_;
         double deact = *deactivation_force_threshold_;
-        double norm =
-            robot_->controlPointExternalForce()->block<3, 1>(0, 0).norm();
+        double norm = robot_->task.state.wrench.force().norm();
 
         if (norm >= act) {
             force_constraint = 0.;
@@ -72,7 +71,7 @@ double EmergencyStopConstraint::compute() {
     if (check_type_ & CheckType::CheckJointTorques) {
         double act = *activation_torque_threshold_;
         double deact = *deactivation_torque_threshold_;
-        double norm = robot_->jointExternalTorque()->norm();
+        double norm = robot_->joints.state.force.norm();
 
         if (norm >= act) {
             torque_constraint = 0.;

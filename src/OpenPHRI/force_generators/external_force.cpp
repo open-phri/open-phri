@@ -22,6 +22,9 @@
 
 using namespace phri;
 
-ExternalForce::ExternalForce(RobotConstPtr robot)
-    : ForceProxy(robot->controlPointExternalForce(), ReferenceFrame::TCP) {
+ExternalForce::ExternalForce() : ForceGenerator(ReferenceFrame::TCP) {
+}
+
+void ExternalForce::update(Vector6d& force) {
+    force = robot_->task.state.wrench;
 }

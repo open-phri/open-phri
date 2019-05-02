@@ -55,9 +55,17 @@ public:
     virtual VectorXd operator()() final;
 
 protected:
-    virtual void update(VectorXd& torque) = 0;
     friend class SafetyController;
-    RobotConstPtr robot_;
+
+    virtual void update(VectorXd& torque) = 0;
+
+    /**
+     * @brief Set the robot to work with.
+     * @param robot The robot.
+     */
+    virtual void setRobot(Robot const* robot);
+
+    Robot const* robot_;
 };
 
 using TorqueGeneratorPtr = std::shared_ptr<TorqueGenerator>;

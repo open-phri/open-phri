@@ -54,6 +54,8 @@ public:
     virtual Vector6d operator()() final;
 
 protected:
+    friend class SafetyController;
+
     /**
      * @brief Construct a force generator
      * @param frame The reference frame in which the force is expressed.
@@ -68,8 +70,13 @@ protected:
 
     virtual void update(Vector6d& force) = 0;
 
-    friend class SafetyController;
-    RobotConstPtr robot_;
+    /**
+     * @brief Set the robot to work with.
+     * @param robot The robot.
+     */
+    virtual void setRobot(Robot const* robot);
+
+    Robot const* robot_;
     ReferenceFrame frame_;
 };
 

@@ -27,7 +27,7 @@ using namespace Eigen;
 
 class ForceLimitationVelocityGenerator : public VelocityGenerator {
 public:
-    ForceLimitationVelocityGenerator(Vector6dConstPtr external_force,
+    ForceLimitationVelocityGenerator(const Vector6d& external_force,
                                      doubleConstPtr maximum_force)
         : VelocityGenerator(ReferenceFrame::TCP),
           external_force_(external_force),
@@ -35,17 +35,17 @@ public:
     }
 
     virtual void update(Twist& velocity) override {
-        double f_norm = external_force_->norm();
+        double f_norm = external_force_.norm();
 
         if (f_norm > *maximum_force_) {
-            velocity = *external_force_ * 1e12; // Just something huge
+            velocity = external_force_ * 1e12; // Just something huge
         } else {
             velocity = phri::Twist();
         }
     }
 
 private:
-    Vector6dConstPtr external_force_;
+    const Vector6d& external_force_;
     doubleConstPtr maximum_force_;
 };
 
@@ -54,7 +54,7 @@ ForceConstraint::ForceConstraint(VelocityConstraintPtr constraint,
                                  doubleConstPtr maximum_force)
     : constraint_(constraint), maximum_force_(maximum_force) {
     velocity_generator_ = std::make_shared<ForceLimitationVelocityGenerator>(
-        robot_->controlPointExternalForce(), maximum_force_);
+        robot_->task.state.wrench, maximum_force_);
 }
 
 /***		Algorithm		***/

@@ -33,7 +33,7 @@ JointVelocityConstraint::JointVelocityConstraint(
 /***		Algorithm		***/
 double JointVelocityConstraint::compute() {
     double constraint = 1.;
-    const auto& joint_vel = *robot_->jointTotalVelocity();
+    const auto& joint_vel = robot_->control.joints.total_velocity;
     const auto& max_joint_vel = *maximum_velocities_;
 
     for (size_t i = 0; i < joint_vel.size(); ++i) {

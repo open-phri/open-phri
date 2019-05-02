@@ -51,7 +51,7 @@ doubleConstPtr SeparationDistanceConstraint::getSeparationDistance() const {
     return separation_distance_;
 }
 
-void SeparationDistanceConstraint::setRobot(RobotConstPtr robot) {
+void SeparationDistanceConstraint::setRobot(Robot const* robot) {
     constraint_->setRobot(robot);
     Constraint::setRobot(robot);
 }

@@ -41,8 +41,9 @@ void PotentialFieldGenerator::update(Vector6d& force) {
     if (objects_frame_ == ReferenceFrame::TCP) {
         rob_pos = *offset_;
     } else {
-        rob_pos = robot_->controlPointCurrentPose()->translation() +
-                  robot_->transformationMatrix()->block<3, 3>(0, 0) * *offset_;
+        rob_pos =
+            robot_->task.state.pose.translation() +
+            robot_->control.transformation_matrix.block<3, 3>(0, 0) * *offset_;
     }
 
     for (const auto& item : items_) {

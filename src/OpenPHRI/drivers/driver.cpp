@@ -2,8 +2,8 @@
 
 using namespace phri;
 
-Driver::Driver(RobotPtr robot, double sample_time)
-    : robot_(robot), sample_time_(sample_time) {
+Driver::Driver(Robot& robot, double sample_time) : robot_(robot) {
+    robot_.control.time_step = sample_time;
 }
 
 Driver::~Driver() = default;
@@ -16,7 +16,7 @@ bool Driver::init(double timeout) {
     }
 
     if (waited_for < timeout) {
-        *robot_->jointTargetPosition() = *robot_->jointCurrentPosition();
+        robot_.joints.command.position = robot_.joints.state.position;
         return true;
     }
 
@@ -28,5 +28,5 @@ bool Driver::sync() {
 }
 
 double Driver::getSampleTime() const {
-    return sample_time_;
+    return robot_.control.time_step;
 }

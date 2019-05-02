@@ -62,10 +62,10 @@ void ForceControl::update(Twist& velocity) {
         target = -*external_force_target_;
     }
     if (frame_ == ReferenceFrame::TCP) {
-        error = target + *robot_->controlPointExternalForce();
+        error = target + static_cast<Vector6d>(robot_->task.state.wrench);
     } else {
-        error = target + *robot_->spatialTransformationMatrix() *
-                             *robot_->controlPointExternalForce();
+        error = target + robot_->control.spatial_transformation_matrix *
+                             static_cast<Vector6d>(robot_->task.state.wrench);
     }
     applySelection(error);
 

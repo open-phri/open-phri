@@ -9,7 +9,7 @@ namespace phri {
 
 class Driver {
 public:
-    Driver(RobotPtr robot, double sample_time);
+    Driver(Robot& robot, double sample_time);
 
     virtual ~Driver();
 
@@ -51,14 +51,13 @@ public:
     virtual double getSampleTime() const final;
 
 protected:
-    RobotPtr robot_;
-    double sample_time_;
+    Robot& robot_;
 };
 
 class DriverFactory {
 public:
     using create_method_t =
-        std::function<std::shared_ptr<Driver>(RobotPtr, const YAML::Node&)>;
+        std::function<std::shared_ptr<Driver>(Robot&, const YAML::Node&)>;
 
     DriverFactory() = default;
     ~DriverFactory() = default;
@@ -76,7 +75,7 @@ public:
         auto it = createMethods().find(name);
         if (it == createMethods().end()) {
             createMethods()[name] =
-                [](RobotPtr robot,
+                [](Robot& robot,
                    const YAML::Node& conf) -> std::shared_ptr<Driver> {
                 return std::make_shared<T>(robot, conf);
             };
@@ -85,8 +84,7 @@ public:
         return false;
     }
 
-    static std::shared_ptr<Driver> create(std::string name,
-                                          const RobotPtr& robot,
+    static std::shared_ptr<Driver> create(std::string name, Robot& robot,
                                           const YAML::Node& configuration) {
         auto it = createMethods().find(name);
         if (it != createMethods().end()) {

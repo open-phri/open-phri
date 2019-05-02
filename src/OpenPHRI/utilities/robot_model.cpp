@@ -21,7 +21,7 @@
 using namespace phri;
 
 struct RobotModel::pImpl {
-    pImpl(RobotPtr robot, const std::string& model_path,
+    pImpl(Robot& robot, const std::string& model_path,
           const std::string& control_point)
         : robot(robot) {
         auto file = PID_PATH(model_path);
@@ -102,9 +102,8 @@ struct RobotModel::pImpl {
     }
 
     void updateJointPositions() {
-        const auto& joint_pos = *robot->jointCurrentPosition();
-        for (size_t idx = 0, rbd_idx = 1; idx < robot->jointCount();
-             ++rbd_idx) {
+        const auto& joint_pos = robot.joints.state.position;
+        for (size_t idx = 0, rbd_idx = 1; idx < robot.jointCount(); ++rbd_idx) {
             if (mbc.q[rbd_idx].size() > 0) {
                 mbc.q[rbd_idx][0] = joint_pos(idx);
                 ++idx;
@@ -113,8 +112,9 @@ struct RobotModel::pImpl {
     }
 
     void updateSpatialTransformation() {
-        auto& mat = *robot->spatialTransformationMatrix();
-        const auto& rot_mat = robot->transformationMatrix()->block<3, 3>(0, 0);
+        auto& mat = robot.control.spatial_transformation_matrix;
+        const auto& rot_mat =
+            robot.control.transformation_matrix.block<3, 3>(0, 0);
         mat.block<3, 3>(3, 0).setZero();
         mat.block<3, 3>(0, 0) = rot_mat;
         mat.block<3, 3>(0, 3).setZero();
@@ -127,21 +127,21 @@ struct RobotModel::pImpl {
         rbd::forwardVelocity(mb, mbc);
 
         const auto& tcp_pose = mbc.bodyPosW[control_point_body_index];
-        *robot->controlPointCurrentPose() = Pose(
+        robot.task.state.pose = Pose(
             tcp_pose.translation(),
             static_cast<Eigen::Quaterniond>(tcp_pose.rotation().transpose()));
-        robot->transformationMatrix()->setIdentity();
-        robot->transformationMatrix()->block<3, 1>(0, 3) =
+        robot.control.transformation_matrix.setIdentity();
+        robot.control.transformation_matrix.block<3, 1>(0, 3) =
             tcp_pose.translation();
-        robot->transformationMatrix()->block<3, 3>(0, 0) =
+        robot.control.transformation_matrix.block<3, 3>(0, 0) =
             tcp_pose.rotation().transpose();
         updateSpatialTransformation();
 
-        auto joint_count = robot->jointCount();
+        auto joint_count = robot.jointCount();
         Eigen::MatrixXd jac_mat = jacobian.jacobian(mb, mbc);
-        robot->jacobian()->block(0, 0, 3, joint_count) =
+        robot.control.jacobian.block(0, 0, 3, joint_count) =
             jac_mat.block(3, 0, 3, joint_count);
-        robot->jacobian()->block(3, 0, 3, joint_count) =
+        robot.control.jacobian.block(3, 0, 3, joint_count) =
             jac_mat.block(0, 0, 3, joint_count);
     }
 
@@ -151,7 +151,7 @@ struct RobotModel::pImpl {
     rbd::Jacobian jacobian;
     std::string name;
 
-    RobotPtr robot;
+    Robot& robot;
     int control_point_body_index;
     VectorXdPtr lower_limit;
     VectorXdPtr upper_limit;
@@ -159,13 +159,13 @@ struct RobotModel::pImpl {
     VectorXdPtr force_limit;
 };
 
-RobotModel::RobotModel(RobotPtr robot, const std::string& model_path,
+RobotModel::RobotModel(Robot& robot, const std::string& model_path,
                        const std::string& control_point)
     : impl_(std::make_unique<RobotModel::pImpl>(robot, model_path,
                                                 control_point)) {
 }
 
-RobotModel::RobotModel(RobotPtr robot, const YAML::Node& configuration) {
+RobotModel::RobotModel(Robot& robot, const YAML::Node& configuration) {
     const auto& model = configuration["model"];
     std::string path;
     std::string control_point;
@@ -191,7 +191,25 @@ RobotModel::RobotModel(RobotPtr robot, const YAML::Node& configuration) {
     }
 }
 
+RobotModel::RobotModel(const RobotModel& other)
+    : impl_(std::make_unique<pImpl>(*other.impl_)) {
+}
+
+RobotModel::RobotModel(RobotModel&& other) noexcept
+    : impl_(std::move(other.impl_)) {
+}
+
 RobotModel::~RobotModel() = default;
+
+RobotModel& RobotModel::operator=(const RobotModel& other) {
+    impl_ = std::make_unique<pImpl>(*other.impl_);
+    return *this;
+}
+
+RobotModel& RobotModel::operator=(RobotModel&& other) noexcept {
+    impl_ = std::move(other.impl_);
+    return *this;
+}
 
 void RobotModel::forwardKinematics() const {
     impl_->forwardKinematics();

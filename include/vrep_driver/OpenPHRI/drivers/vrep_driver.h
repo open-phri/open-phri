@@ -48,7 +48,7 @@
 
 namespace phri {
 
-/** @brief Wrapper for -REP low level C API.
+/** @brief Wrapper for V-REP low level C API.
  *  @details Can be used to control the simulation (start/pause/stop), to tack
  * objects' position, read and send robot related data. Some objects need to be
  * present in the scene: tcp (actual TCP pose), tcp_target (TCP reference pose),
@@ -71,7 +71,7 @@ public:
      * @param port [optional] Can be used to specify a port different thant the
      * default one.
      */
-    VREPDriver(phri::RobotPtr robot, double sample_time,
+    VREPDriver(phri::Robot& robot, double sample_time,
                const std::string& suffix = "",
                const std::string& ip = "127.0.0.1", int port = 19997);
 
@@ -85,10 +85,10 @@ public:
      * @param suffix [optional] Can be used to specify a suffix for all the
      * basic objects.
      */
-    VREPDriver(phri::RobotPtr robot, double sample_time, int client_id,
+    VREPDriver(phri::Robot& robot, double sample_time, int client_id,
                const std::string& suffix = "");
 
-    VREPDriver(const phri::RobotPtr& robot, const YAML::Node& configuration);
+    VREPDriver(phri::Robot& robot, const YAML::Node& configuration);
 
     virtual ~VREPDriver();
 
@@ -152,7 +152,7 @@ public:
      * @param frame [in] The reference frame.
      * @return True if correctly read, false otherwise.
      */
-    bool readTCPPose(phri::PosePtr pose, phri::ReferenceFrame frame) const;
+    bool readTCPPose(phri::Pose& pose, phri::ReferenceFrame frame) const;
 
     /**
      * @brief Get the TCP velocity in the given frame.
@@ -160,7 +160,7 @@ public:
      * @param frame [in] The reference frame.
      * @return True if correctly read, false otherwise.
      */
-    bool readTCPVelocity(phri::TwistPtr velocity,
+    bool readTCPVelocity(phri::Twist& velocity,
                          phri::ReferenceFrame frame) const;
 
     /**
@@ -168,21 +168,21 @@ public:
      * @param wrench [out] The current TCP wrench.
      * @return True if correctly read, false otherwise.
      */
-    bool readTCPWrench(phri::Vector6dPtr wrench) const;
+    bool readTCPWrench(phri::Wrench& wrench) const;
 
     /**
      * @brief Get the Jacobian matrix associated with the TCP.
      * @param jacobian [out] The current Jacobian matrix.
      * @return True if correctly read, false otherwise.
      */
-    bool readJacobian(phri::MatrixXdPtr jacobian) const;
+    bool readJacobian(phri::MatrixXd& jacobian) const;
 
     /**
      * @brief Get the transformation matrix associated with the TCP.
      * @param matrix [out] The current transformation matrix.
      * @return True if correctly read, false otherwise.
      */
-    bool readTransformationMatrix(phri::Matrix4dPtr matrix) const;
+    bool readTransformationMatrix(phri::Matrix4d& matrix) const;
 
     /**
      * @brief Start tracking a given object in the specified frame.
@@ -203,9 +203,9 @@ public:
     phri::VectorXdConstPtr initLaserScanner(const std::string& name);
     bool updateLaserScanners();
 
-    bool readJointPosition(phri::VectorXdPtr position) const;
-    bool sendJointTargetPosition(phri::VectorXdConstPtr position) const;
-    bool sendJointTargetVelocity(phri::VectorXdConstPtr velocity) const;
+    bool readJointPosition(phri::VectorXd& position) const;
+    bool sendJointTargetPosition(const phri::VectorXd& position) const;
+    bool sendJointTargetVelocity(const phri::VectorXd& velocity) const;
 
     virtual bool read() override;
     virtual bool send() override;
