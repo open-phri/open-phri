@@ -9,99 +9,101 @@ namespace phri {
 
 class Driver {
 public:
-	Driver(
-		RobotPtr robot,
-		double sample_time);
+    Driver(RobotPtr robot, double sample_time);
 
-	virtual ~Driver();
+    virtual ~Driver();
 
-	/**
-	 * @brief Initialize the communication with the robot.
-	 * @details Must be called by derived classes on successfull initialization when the robot state has correctly been updated.
-	 * @param timeout The maximum time to wait to establish the connection.
-	 * @return true on success, false otherwise
-	 */
-	virtual bool init(double timeout = 30.);
+    /**
+     * @brief Initialize the communication with the robot.
+     * @details Must be called by derived classes on successfull initialization
+     * when the robot state has correctly been updated.
+     * @param timeout The maximum time to wait to establish the connection.
+     * @return true on success, false otherwise
+     */
+    virtual bool init(double timeout = 30.);
 
-	/**
-	* Start the communication with the robot.
-	* @return true on success, false otherwise
-	*/
-	virtual bool start(double timeout = 30.) = 0;
+    /**
+     * Start the communication with the robot.
+     * @return true on success, false otherwise
+     */
+    virtual bool start(double timeout = 30.) = 0;
 
-	/**
-	* Stop the communication with the robot.
-	* @return true on success, false otherwise
-	*/
-	virtual bool stop() = 0;
+    /**
+     * Stop the communication with the robot.
+     * @return true on success, false otherwise
+     */
+    virtual bool stop() = 0;
 
-	/**
-	 * Get data from the robot (current state)
-	 * @return true on success, false otherwise
-	 */
-	virtual bool read() = 0;
+    /**
+     * Get data from the robot (current state)
+     * @return true on success, false otherwise
+     */
+    virtual bool read() = 0;
 
-	/**
-	* Send data to the robot (commands)
-	* @return true on success, false otherwise
-	*/
-	virtual bool send() = 0;
+    /**
+     * Send data to the robot (commands)
+     * @return true on success, false otherwise
+     */
+    virtual bool send() = 0;
 
-	virtual bool sync();
+    virtual bool sync();
 
-	virtual double getSampleTime() const final;
+    virtual double getSampleTime() const final;
 
 protected:
-	RobotPtr robot_;
-	double sample_time_;
-
+    RobotPtr robot_;
+    double sample_time_;
 };
 
 class DriverFactory {
 public:
-	using create_method_t = std::function<std::shared_ptr<Driver>(RobotPtr, const YAML::Node&)>;
+    using create_method_t =
+        std::function<std::shared_ptr<Driver>(RobotPtr, const YAML::Node&)>;
 
-	DriverFactory() = default;
-	~DriverFactory() = default;
+    DriverFactory() = default;
+    ~DriverFactory() = default;
 
-	static bool add(const std::string name, create_method_t create_method) {
-		auto it = createMethods().find(name);
-		if (it == createMethods().end()) {
-			createMethods()[name] = create_method;
-			return true;
-		}
-		return false;
-	}
+    static bool add(const std::string name, create_method_t create_method) {
+        auto it = createMethods().find(name);
+        if (it == createMethods().end()) {
+            createMethods()[name] = create_method;
+            return true;
+        }
+        return false;
+    }
 
-	template <typename T>
-	static bool add(const std::string name) {
-		auto it = createMethods().find(name);
-		if (it == createMethods().end()) {
-			createMethods()[name] = [](RobotPtr robot, const YAML::Node& conf) -> std::shared_ptr<Driver> {
-										return std::make_shared<T>(robot, conf);
-									};
-			return true;
-		}
-		return false;
-	}
+    template <typename T> static bool add(const std::string name) {
+        auto it = createMethods().find(name);
+        if (it == createMethods().end()) {
+            createMethods()[name] =
+                [](RobotPtr robot,
+                   const YAML::Node& conf) -> std::shared_ptr<Driver> {
+                return std::make_shared<T>(robot, conf);
+            };
+            return true;
+        }
+        return false;
+    }
 
-	static std::shared_ptr<Driver> create(std::string name, const RobotPtr& robot, const YAML::Node& configuration) {
-		auto it = createMethods().find(name);
-		if (it != createMethods().end()) {
-			return it->second(robot, configuration);
-		}
+    static std::shared_ptr<Driver> create(std::string name,
+                                          const RobotPtr& robot,
+                                          const YAML::Node& configuration) {
+        auto it = createMethods().find(name);
+        if (it != createMethods().end()) {
+            return it->second(robot, configuration);
+        }
 
-		return nullptr;
-	}
+        return nullptr;
+    }
 
 private:
-	static std::map<std::string, create_method_t>& createMethods() {
-		static std::map<std::string, create_method_t> create_methods;
-		return create_methods;
-	}
+    static std::map<std::string, create_method_t>& createMethods() {
+        static std::map<std::string, create_method_t> create_methods;
+        return create_methods;
+    }
 };
 
 using DriverPtr = std::shared_ptr<Driver>;
 using DriverConstPtr = std::shared_ptr<const Driver>;
 
-}
+} // namespace phri

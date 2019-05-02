@@ -1,22 +1,22 @@
 /*      File: interpolator.h
-*       This file is part of the program open-phri
-*       Program description : OpenPHRI: a generic framework to easily and safely control robots in interactions with humans
-*       Copyright (C) 2017 -  Benjamin Navarro (LIRMM). All Right reserved.
-*
-*       This software is free software: you can redistribute it and/or modify
-*       it under the terms of the LGPL license as published by
-*       the Free Software Foundation, either version 3
-*       of the License, or (at your option) any later version.
-*       This software is distributed in the hope that it will be useful,
-*       but WITHOUT ANY WARRANTY without even the implied warranty of
-*       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-*       LGPL License for more details.
-*
-*       You should have received a copy of the GNU Lesser General Public License version 3 and the
-*       General Public License version 3 along with this program.
-*       If not, see <http://www.gnu.org/licenses/>.
-*/
-
+ *       This file is part of the program open-phri
+ *       Program description : OpenPHRI: a generic framework to easily and
+ * safely control robots in interactions with humans Copyright (C) 2017 -
+ * Benjamin Navarro (LIRMM). All Right reserved.
+ *
+ *       This software is free software: you can redistribute it and/or modify
+ *       it under the terms of the LGPL license as published by
+ *       the Free Software Foundation, either version 3
+ *       of the License, or (at your option) any later version.
+ *       This software is distributed in the hope that it will be useful,
+ *       but WITHOUT ANY WARRANTY without even the implied warranty of
+ *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *       LGPL License for more details.
+ *
+ *       You should have received a copy of the GNU Lesser General Public
+ * License version 3 and the General Public License version 3 along with this
+ * program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 /**
  * @file interpolator.h
@@ -33,47 +33,48 @@
 namespace phri {
 
 /** @brief Base class for all interpolators.
- *  @details Provides two pure virtual method to update the internal parameters and to compute a new value.
+ *  @details Provides two pure virtual method to update the internal parameters
+ * and to compute a new value.
  */
 class Interpolator {
 public:
-	Interpolator() = default;
-	virtual ~Interpolator() = default;
+    Interpolator() = default;
+    virtual ~Interpolator() = default;
 
-	/**
-	 * @brief Get the pointer to the output data.
-	 * @return A shared pointer to the output data.
-	 */
-	virtual doubleConstPtr getOutput() const final;
+    /**
+     * @brief Get the pointer to the output data.
+     * @return A shared pointer to the output data.
+     */
+    virtual doubleConstPtr getOutput() const final;
 
-	/**
-	 * @brief Set the pointer to the input data.
-	 * @return A shared pointer to the input data.
-	 */
-	virtual void setInput(doubleConstPtr input) final;
+    /**
+     * @brief Set the pointer to the input data.
+     * @return A shared pointer to the input data.
+     */
+    virtual void setInput(doubleConstPtr input) final;
 
-	/**
-	 * @brief Compute the interpolator's parameters .
-	 */
-	virtual void computeParameters() = 0;
+    /**
+     * @brief Compute the interpolator's parameters .
+     */
+    virtual void computeParameters() = 0;
 
-	/**
-	 * @brief Compute the new interpolator output.
-	 * @return The new output data.
-	 */
-	virtual double compute() = 0;
+    /**
+     * @brief Compute the new interpolator output.
+     * @return The new output data.
+     */
+    virtual double compute() = 0;
 
-	/**
-	 * @brief Call operator, shortcut for compute()
-	 * @return The new output data.
-	 */
-	virtual double operator()() final {
-		return compute();
-	}
+    /**
+     * @brief Call operator, shortcut for compute()
+     * @return The new output data.
+     */
+    virtual double operator()() final {
+        return compute();
+    }
 
 protected:
-	doubleConstPtr input_;
-	doublePtr output_;
+    doubleConstPtr input_;
+    doublePtr output_;
 };
 
 using InterpolatorPtr = std::shared_ptr<Interpolator>;

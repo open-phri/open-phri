@@ -74,7 +74,8 @@ public:
      * @brief Update the filter output.
      */
     virtual void compute() {
-        *output_ = *input_*getCoefficient() + previous_input_*(1.-getCoefficient());
+        *output_ = *input_ * getCoefficient() +
+                   previous_input_ * (1. - getCoefficient());
         previous_input_ = *input_;
     }
 

@@ -8,4 +8,4 @@ template class LowPassFilter<Vector3d>;
 template class LowPassFilter<Vector6d>;
 template class LowPassFilter<VectorXd>;
 
-}
+} // namespace phri
