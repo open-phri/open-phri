@@ -1,13 +1,13 @@
-#undef NDEBUG
-
 #include <OpenPHRI/OpenPHRI.h>
+#include <catch2/catch.hpp>
 #include <pid/rpath.h>
 
-bool isClose(double v1, double v2, double eps = 1e-3) {
-    return std::abs(v1 - v2) < eps;
-}
+#include "utils.h"
 
-int main(int argc, char const* argv[]) {
+using namespace phri;
+using namespace std;
+
+TEST_CASE("Velocity constraint") {
 
     auto robot = phri::Robot{"rob", // Robot's name
                              7};    // Robot's joint count
@@ -40,20 +40,20 @@ int main(int argc, char const* argv[]) {
     // Step #1 : no velocity
     safety_controller.compute();
 
-    assert_msg("Step #1", cp_velocity.isZero());
+    REQUIRE(cp_velocity.isZero());
 
     // Step #2 : velocity 1 axis < max
     constant_vel->translation().x() = 0.2;
     safety_controller.compute();
 
-    assert_msg("Step #2", cp_velocity.isApprox(cp_total_velocity));
+    REQUIRE(cp_velocity.isApprox(cp_total_velocity));
 
     // Step #3 : velocity 1 axis > max
     constant_vel->translation().x() = 0.6;
     safety_controller.compute();
 
-    assert_msg("Step #3", isClose(robot.task.command.twist.translation().norm(),
-                                  *maximum_velocity));
+    REQUIRE(isClose(robot.task.command.twist.translation().norm(),
+                    *maximum_velocity));
 
     // Step #4 : velocity 3 axes < max
     constant_vel->translation().x() = 0.2;
@@ -61,7 +61,7 @@ int main(int argc, char const* argv[]) {
     constant_vel->translation().z() = 0.3;
     safety_controller.compute();
 
-    assert_msg("Step #4", cp_velocity.isApprox(cp_total_velocity));
+    REQUIRE(cp_velocity.isApprox(cp_total_velocity));
 
     // Step #5 : velocity 3 axes > max
     constant_vel->translation().x() = 0.5;
@@ -69,8 +69,8 @@ int main(int argc, char const* argv[]) {
     constant_vel->translation().z() = 0.6;
     safety_controller.compute();
 
-    assert_msg("Step #5", isClose(robot.task.command.twist.translation().norm(),
-                                  *maximum_velocity));
+    REQUIRE(isClose(robot.task.command.twist.translation().norm(),
+                    *maximum_velocity));
 
     // Step #6 : rotational velocity only
     static_cast<phri::Vector6d&>(*constant_vel).setZero();
@@ -79,7 +79,5 @@ int main(int argc, char const* argv[]) {
     constant_vel->rotation().z() = 0.6;
     safety_controller.compute();
 
-    assert_msg("Step #6", cp_velocity.isApprox(cp_total_velocity));
-
-    return 0;
+    REQUIRE(cp_velocity.isApprox(cp_total_velocity));
 }

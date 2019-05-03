@@ -1,20 +1,13 @@
-#undef NDEBUG
-
 #include <OpenPHRI/OpenPHRI.h>
+#include <catch2/catch.hpp>
 #include <pid/rpath.h>
+
+#include "utils.h"
 
 using namespace phri;
 using namespace std;
 
-bool isLessOrEqual(VectorXd v1, VectorXd v2) {
-    bool ok = true;
-    for (size_t i = 0; i < v1.size(); ++i) {
-        ok &= std::abs(v1(i)) <= std::abs(v2(i));
-    }
-    return ok;
-}
-
-int main(int argc, char const* argv[]) {
+TEST_CASE("Joint velocity constraint") {
 
     auto robot = phri::Robot{"rob", // Robot's name
                              7};    // Robot's joint count
@@ -44,21 +37,20 @@ int main(int argc, char const* argv[]) {
     // Step #1 : no velocity
     safety_controller.compute();
 
-    assert_msg("Step #1", robot.joints.command.velocity.isZero());
+    REQUIRE(robot.joints.command.velocity.isZero());
 
     // Step #2 : velocity 1 axis < max
     (*constant_vel)(0) = 0.5;
     safety_controller.compute();
 
-    assert_msg("Step #2", robot.joints.command.velocity.isApprox(
-                              robot.control.joints.total_velocity));
+    REQUIRE(robot.joints.command.velocity.isApprox(
+        robot.control.joints.total_velocity));
 
     // Step #3 : velocity 1 axis > max
     (*constant_vel)(0) = 1.5;
     safety_controller.compute();
 
-    assert_msg("Step #3", isLessOrEqual(robot.joints.command.velocity,
-                                        *maximum_velocities));
+    REQUIRE(isLessOrEqual(robot.joints.command.velocity, *maximum_velocities));
 
     // Step #4 : velocity 3 axes < max
     (*constant_vel)(0) = 0.5;
@@ -66,8 +58,8 @@ int main(int argc, char const* argv[]) {
     (*constant_vel)(2) = 1.5;
     safety_controller.compute();
 
-    assert_msg("Step #4", robot.task.command.twist.vector().isApprox(
-                              robot.control.task.total_twist.vector()));
+    REQUIRE(robot.task.command.twist.vector().isApprox(
+        robot.control.task.total_twist.vector()));
 
     // Step #5 : velocity 3 axes > max
     (*constant_vel)(0) = 1.5;
@@ -75,8 +67,5 @@ int main(int argc, char const* argv[]) {
     (*constant_vel)(2) = 3.5;
     safety_controller.compute();
 
-    assert_msg("Step #5", isLessOrEqual(robot.joints.command.velocity,
-                                        *maximum_velocities));
-
-    return 0;
+    REQUIRE(isLessOrEqual(robot.joints.command.velocity, *maximum_velocities));
 }
