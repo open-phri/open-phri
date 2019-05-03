@@ -74,8 +74,8 @@ using PoseConstPtr = std::shared_ptr<const Pose>;
 class Twist {
 public:
     Twist();
-    Twist(phri::Vector3d translation, phri::Vector3d rotation);
-    explicit Twist(phri::Vector6d twist);
+    Twist(const phri::Vector3d& translation, const phri::Vector3d& rotation);
+    explicit Twist(const phri::Vector6d& twist);
 
     Eigen::Ref<const phri::Vector3d> translation() const;
     Eigen::Ref<const phri::Vector3d> rotation() const;
@@ -94,6 +94,10 @@ public:
     const double* data() const;
 
     Twist& operator=(const phri::Vector6d& twist);
+    Twist operator-(const phri::Twist& other) const;
+    Twist operator+(const phri::Twist& other) const;
+    Twist operator*(double scalar) const;
+    Twist operator/(double scalar) const;
 
     friend std ::ostream& operator<<(std::ostream& out, const Twist& twist) {
         out << static_cast<phri::Vector6d>(twist).transpose();

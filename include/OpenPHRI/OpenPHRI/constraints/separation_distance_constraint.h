@@ -23,7 +23,7 @@
  * @author Benjamin Navarro
  * @brief Definition of the SeparationDistanceConstraint class
  * @date April 2017
- * @ingroup OpenPHRI
+ * @ingroup phri
  */
 
 #pragma once
@@ -51,7 +51,7 @@ public:
      * @param constraint The constraint to wrap.
      * @param interpolator The interpolator used to tune the constraint.
      */
-    SeparationDistanceConstraint(ConstraintPtr constraint,
+    SeparationDistanceConstraint(std::shared_ptr<Constraint> constraint,
                                  InterpolatorPtr interpolator);
 
     /**
@@ -63,7 +63,7 @@ public:
      * @param robot_position The positon of the robot in the same frame as the
      * objects.
      */
-    SeparationDistanceConstraint(ConstraintPtr constraint,
+    SeparationDistanceConstraint(std::shared_ptr<Constraint> constraint,
                                  InterpolatorPtr interpolator,
                                  Vector6dConstPtr robot_position);
 
@@ -83,15 +83,10 @@ protected:
 private:
     double closestObjectDistance();
 
-    ConstraintPtr constraint_;
+    std::shared_ptr<Constraint> constraint_;
     InterpolatorPtr interpolator_;
     Vector6dConstPtr robot_position_;
     doublePtr separation_distance_;
 };
-
-using SeparationDistanceConstraintPtr =
-    std::shared_ptr<SeparationDistanceConstraint>;
-using SeparationDistanceConstraintConstPtr =
-    std::shared_ptr<const SeparationDistanceConstraint>;
 
 } // namespace phri

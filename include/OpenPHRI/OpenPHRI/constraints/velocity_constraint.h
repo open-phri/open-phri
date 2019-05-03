@@ -18,13 +18,11 @@
  * program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * @file velocity_constraint.h
- * @author Benjamin Navarro
- * @brief Definition of the VelocityConstraint class
- * @date April 2017
- * @ingroup OpenPHRI
- */
+//! \file velocity_constraint.h
+//! \author Benjamin Navarro
+//! \brief A constraint to limit the TCP velocity.
+//! \date 05-2019
+//! \ingroup phri
 
 #pragma once
 
@@ -33,30 +31,79 @@
 
 namespace phri {
 
-/** @brief A constraint to limit the TCP velocity.
- */
+//! \brief A constraint to limit the TCP velocity.
 class VelocityConstraint : public Constraint {
 public:
-    /***		Constructor & destructor		***/
+    //! \brief Construct a new VelocityConstraint object with an initial
+    //! limit set to zero.
+    //! \details Use VelocityConstraint::maximumVelocity() to
+    //! set it to the desired value
+    VelocityConstraint();
 
-    /**
-     * @brief Construct a velocity constraint with a given total and a maximum
-     * velocity.
-     * @param maximum_velocity A shared pointer to the maximum velocity allowed.
-     */
-    explicit VelocityConstraint(doubleConstPtr maximum_velocity);
+    //! \brief Construct a new VelocityConstraint object using the given
+    //! pointed value
+    //! \param maximum_velocity A shared pointer to the desired
+    //! maximum velocity (m/s). Throws if the pointer is empty.
+    explicit VelocityConstraint(std::shared_ptr<double> maximum_velocity);
 
+    //! \brief Construct a new VelocityConstraint object using the given
+    //! referenced value
+    //! \param maximum_velocity A reference to the desired
+    //! maximum velocity (m/s). Make sure that \p maximum_velocity
+    //! outlives the constraint
+    explicit VelocityConstraint(double& maximum_velocity);
+
+    //! \brief Construct a new VelocityConstraint object using the given
+    //! value
+    //! \param maximum_velocity The value of the desired maximum
+    //! velocity (m/s). Use VelocityConstraint::maximumVelocity()
+    //! to update the limit
+    explicit VelocityConstraint(const double& maximum_velocity);
+
+    //! \brief Construct a new VelocityConstraint object using the given
+    //! value
+    //! \param maximum_velocity The value of the desired maximum
+    //! velocity (m/s). Use VelocityConstraint::maximumVelocity()
+    //! to update the limit
+    explicit VelocityConstraint(double&& maximum_velocity);
+
+    //! \brief Default copy constructor
+    VelocityConstraint(const VelocityConstraint&) = default;
+
+    //! \brief Default move constructor
+    VelocityConstraint(VelocityConstraint&&) = default;
+
+    //! \brief Default virtual destructor
+    //! \details If \ref VelocityConstraint::maximum_velocity_ was
+    //! created using an rvalue reference, the pointed memory won't be released
     virtual ~VelocityConstraint() = default;
 
-    /***		Algorithm		***/
+    //! \brief Default copy operator
+    VelocityConstraint& operator=(const VelocityConstraint&) = default;
+
+    //! \brief Default move operator
+    VelocityConstraint& operator=(VelocityConstraint&&) = default;
+
+    //! \brief Compute the velocity constraint based on the robot state
+    //! \return double The constraint value [0,1]
     virtual double compute() override;
 
-protected:
-    VelocityConstraint() = default;
-    doubleConstPtr maximum_velocity_;
-};
+    //! \brief Read/write access the velocity limit used by the constraint
+    //! \return double& A reference to the velocity limit
+    double& maximumVelocity();
 
-using VelocityConstraintPtr = std::shared_ptr<VelocityConstraint>;
-using VelocityConstraintConstPtr = std::shared_ptr<const VelocityConstraint>;
+    //! \brief Read access the velocity limit used by the constraint
+    //! \return double The velocity limit value
+    double maximumVelocity() const;
+
+    //! \brief Access to the shared pointer holding the velocity limit used
+    //! by the constraint
+    //! \return std::shared_ptr<double> A shared pointer to the velocity
+    //! limit
+    std::shared_ptr<double> maximumVelocityPtr();
+
+protected:
+    std::shared_ptr<double> maximum_velocity_;
+};
 
 } // namespace phri

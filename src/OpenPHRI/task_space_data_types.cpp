@@ -98,11 +98,12 @@ Pose& Pose::operator=(const phri::Vector6d& pos_euler) {
 /***			Twist			***/
 Twist::Twist() : Twist(phri::Vector3d::Zero(), phri::Vector3d::Zero()) {
 }
-Twist::Twist(phri::Vector3d translation, phri::Vector3d rotation) {
+Twist::Twist(const phri::Vector3d& translation,
+             const phri::Vector3d& rotation) {
     twist_.block<3, 1>(0, 0) = translation;
     twist_.block<3, 1>(3, 0) = rotation;
 }
-Twist::Twist(phri::Vector6d twist) : twist_(twist) {
+Twist::Twist(const phri::Vector6d& twist) : twist_(twist) {
 }
 
 Eigen::Ref<const phri::Vector3d> Twist::translation() const {
@@ -152,6 +153,22 @@ Twist& Twist::operator=(const phri::Vector6d& twist) {
     translation() = twist.block<3, 1>(0, 0);
     rotation() = twist.block<3, 1>(3, 0);
     return *this;
+}
+
+Twist Twist::operator-(const phri::Twist& other) const {
+    return Twist(vector() - other.vector());
+}
+
+Twist Twist::operator+(const phri::Twist& other) const {
+    return Twist(vector() + other.vector());
+}
+
+Twist Twist::operator*(double scalar) const {
+    return Twist(vector() * scalar);
+}
+
+Twist Twist::operator/(double scalar) const {
+    return Twist(vector() / scalar);
 }
 
 /***			Acceleration			***/

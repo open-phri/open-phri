@@ -19,19 +19,46 @@
  */
 
 #include <OpenPHRI/constraints/joint_velocity_constraint.h>
+#include <OpenPHRI/utilities/exceptions.h>
 
-using namespace phri;
+namespace phri {
 
-using namespace Eigen;
-
-/***		Constructor & destructor		***/
-JointVelocityConstraint::JointVelocityConstraint(
-    VectorXdConstPtr maximum_velocities)
-    : maximum_velocities_(maximum_velocities) {
+JointVelocityConstraint::JointVelocityConstraint()
+    : maximum_velocities_(std::make_shared<VectorXd>()) {
 }
 
-/***		Algorithm		***/
+JointVelocityConstraint::JointVelocityConstraint(
+    std::shared_ptr<VectorXd> maximum_velocities)
+    : maximum_velocities_(maximum_velocities) {
+    if (not maximum_velocities) {
+        throw std::runtime_error(
+            OPEN_PHRI_ERROR("You provided an empty shared pointer"));
+    }
+}
+
+JointVelocityConstraint::JointVelocityConstraint(VectorXd& maximum_velocities)
+    : JointVelocityConstraint(
+          std::shared_ptr<VectorXd>(&maximum_velocities, [](auto p) {})) {
+}
+
+JointVelocityConstraint::JointVelocityConstraint(
+    const VectorXd& maximum_velocities)
+    : JointVelocityConstraint(std::make_shared<VectorXd>(maximum_velocities)) {
+}
+
+JointVelocityConstraint::JointVelocityConstraint(VectorXd&& maximum_velocities)
+    : JointVelocityConstraint(
+          std::make_shared<VectorXd>(std::move(maximum_velocities))) {
+}
+
 double JointVelocityConstraint::compute() {
+    if (maximumVelocities().size() != robot_->jointCount()) {
+        throw std::length_error(OPEN_PHRI_ERROR(
+            "The maximum velocity has " +
+            std::to_string(maximumVelocities().size()) +
+            " dofs but the robot has " + std::to_string(robot_->jointCount())));
+    }
+
     double constraint = 1.;
     const auto& joint_vel = robot_->control.joints.total_velocity;
     const auto& max_joint_vel = *maximum_velocities_;
@@ -43,3 +70,17 @@ double JointVelocityConstraint::compute() {
 
     return constraint;
 }
+
+VectorXd& JointVelocityConstraint::maximumVelocities() {
+    return *maximum_velocities_;
+}
+
+const VectorXd& JointVelocityConstraint::maximumVelocities() const {
+    return *maximum_velocities_;
+}
+
+std::shared_ptr<VectorXd> JointVelocityConstraint::maximumVelocitiesPtr() {
+    return maximum_velocities_;
+}
+
+} // namespace phri

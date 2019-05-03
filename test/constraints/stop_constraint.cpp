@@ -27,20 +27,23 @@ TEST_CASE("Stop constraint") {
     auto deactivation_force_threshold = make_shared<double>(5.);
 
     auto& ext_torque = robot.joints.state.force;
-    auto activation_torque_threshold = make_shared<double>(5.);
-    auto deactivation_torque_threshold = make_shared<double>(1.);
+    auto activation_torque_threshold = make_shared<VectorXd>(7);
+    activation_torque_threshold->setConstant(5);
+    auto deactivation_torque_threshold = make_shared<VectorXd>(7);
+    deactivation_torque_threshold->setConstant(1);
 
-    auto stop_constraint = make_shared<EmergencyStopConstraint>(
-        EmergencyStopConstraint::CheckBoth, // Check both external forces and
-                                            // external joint torques
-        activation_force_threshold, deactivation_force_threshold,
+    auto task_stop_constraint = make_shared<TaskEmergencyStopConstraint>(
+        activation_force_threshold, deactivation_force_threshold);
+
+    auto joint_stop_constraint = make_shared<JointEmergencyStopConstraint>(
         activation_torque_threshold, deactivation_torque_threshold);
 
     auto constant_vel = make_shared<Twist>();
     auto constant_velocity_generator = make_shared<VelocityProxy>(constant_vel);
     auto constant_force_generator = make_shared<ExternalForce>();
 
-    safety_controller.add("stop constraint", stop_constraint);
+    safety_controller.add("task stop constraint", task_stop_constraint);
+    safety_controller.add("joint stop constraint", joint_stop_constraint);
     safety_controller.add("vel proxy", constant_velocity_generator);
     safety_controller.add("force proxy", constant_force_generator);
 

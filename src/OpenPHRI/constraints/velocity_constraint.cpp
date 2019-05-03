@@ -19,17 +19,36 @@
  */
 
 #include <OpenPHRI/constraints/velocity_constraint.h>
+#include <OpenPHRI/utilities/exceptions.h>
 
-using namespace phri;
+namespace phri {
 
-using namespace Eigen;
-
-/***		Constructor & destructor		***/
-VelocityConstraint::VelocityConstraint(doubleConstPtr maximum_velocity)
-    : maximum_velocity_(maximum_velocity) {
+VelocityConstraint::VelocityConstraint()
+    : maximum_velocity_(std::make_shared<double>(0.)) {
 }
 
-/***		Algorithm		***/
+VelocityConstraint::VelocityConstraint(std::shared_ptr<double> maximum_velocity)
+    : maximum_velocity_(maximum_velocity) {
+    if (not maximum_velocity) {
+        throw std::runtime_error(
+            OPEN_PHRI_ERROR("You provided an empty shared pointer"));
+    }
+}
+
+VelocityConstraint::VelocityConstraint(double& maximum_velocity)
+    : VelocityConstraint(
+          std::shared_ptr<double>(&maximum_velocity, [](auto p) {})) {
+}
+
+VelocityConstraint::VelocityConstraint(const double& maximum_velocity)
+    : VelocityConstraint(std::make_shared<double>(maximum_velocity)) {
+}
+
+VelocityConstraint::VelocityConstraint(double&& maximum_velocity)
+    : VelocityConstraint(
+          std::make_shared<double>(std::move(maximum_velocity))) {
+}
+
 double VelocityConstraint::compute() {
     double constraint = 1.;
     double v_norm = robot_->control.task.total_twist.translation().norm();
@@ -40,3 +59,17 @@ double VelocityConstraint::compute() {
 
     return constraint;
 }
+
+double& VelocityConstraint::maximumVelocity() {
+    return *maximum_velocity_;
+}
+
+double VelocityConstraint::maximumVelocity() const {
+    return *maximum_velocity_;
+}
+
+std::shared_ptr<double> VelocityConstraint::maximumVelocityPtr() {
+    return maximum_velocity_;
+}
+
+} // namespace phri

@@ -35,7 +35,7 @@
 
 using namespace phri;
 
-#define HEAVY_PRINTING 1
+#define HEAVY_PRINTING 0
 
 SafetyController::SafetyController(Robot& robot)
     : robot_(robot), skip_jacobian_inverse_computation_(false) {
@@ -79,7 +79,8 @@ void SafetyController::skipJacobianInverseComputation(bool on) {
 }
 
 bool SafetyController::addConstraint(const std::string& name,
-                                     ConstraintPtr constraint, bool force) {
+                                     std::shared_ptr<Constraint> constraint,
+                                     bool force) {
     constraint->setRobot(&robot_);
     return constraints_.add(name, {constraint}, force);
 }
@@ -131,7 +132,8 @@ bool SafetyController::removeJointVelocityGenerator(const std::string& name) {
     return joint_velocity_generators_.remove(name);
 }
 
-ConstraintPtr SafetyController::getConstraint(const std::string& name) {
+std::shared_ptr<Constraint>
+SafetyController::getConstraint(const std::string& name) {
     return constraints_.get(name).object;
 }
 

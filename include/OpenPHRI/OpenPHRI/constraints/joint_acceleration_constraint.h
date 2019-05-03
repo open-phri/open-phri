@@ -23,7 +23,7 @@
  * @author Benjamin Navarro
  * @brief Definition of the JointAccelerationConstraint class
  * @date October 2018
- * @ingroup OpenPHRI
+ * @ingroup phri
  */
 
 #pragma once
@@ -57,10 +57,5 @@ private:
     VectorXdConstPtr maximum_acceleration_;
     double sample_time_;
 };
-
-using JointAccelerationConstraintPtr =
-    std::shared_ptr<JointAccelerationConstraint>;
-using JointAccelerationConstraintConstPtr =
-    std::shared_ptr<const JointAccelerationConstraint>;
 
 } // namespace phri

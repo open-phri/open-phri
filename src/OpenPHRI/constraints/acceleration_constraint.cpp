@@ -19,28 +19,62 @@
  */
 
 #include <OpenPHRI/constraints/acceleration_constraint.h>
+#include <OpenPHRI/utilities/exceptions.h>
 
-using namespace phri;
+namespace phri {
 
-using namespace Eigen;
-
-/***		Constructor & destructor		***/
-AccelerationConstraint::AccelerationConstraint(
-    doubleConstPtr maximum_acceleration, double sample_time)
-    : maximum_acceleration_(maximum_acceleration), sample_time_(sample_time) {
+AccelerationConstraint::AccelerationConstraint()
+    : maximum_acceleration_(std::make_shared<double>(0.)) {
 }
 
-/***		Algorithm		***/
+AccelerationConstraint::AccelerationConstraint(
+    std::shared_ptr<double> maximum_acceleration)
+    : maximum_acceleration_(maximum_acceleration) {
+    if (not maximum_acceleration) {
+        throw std::runtime_error(
+            OPEN_PHRI_ERROR("You provided an empty shared pointer"));
+    }
+}
+
+AccelerationConstraint::AccelerationConstraint(double& maximum_acceleration)
+    : maximum_acceleration_(
+          std::shared_ptr<double>(&maximum_acceleration, [](auto p) {})) {
+}
+
+AccelerationConstraint::AccelerationConstraint(
+    const double& maximum_acceleration)
+    : maximum_acceleration_(std::make_shared<double>(maximum_acceleration)) {
+}
+
+AccelerationConstraint::AccelerationConstraint(double&& maximum_acceleration)
+    : maximum_acceleration_(
+          std::make_shared<double>(std::move(maximum_acceleration))) {
+}
+
 double AccelerationConstraint::compute() {
     double constraint = 1.;
     double v_norm = robot_->control.task.total_twist.translation().norm();
 
     if (v_norm > 0.) {
         double prev_v_norm = robot_->task.command.twist.translation().norm();
-        double vmax =
-            prev_v_norm + std::abs(*maximum_acceleration_) * sample_time_;
+        double vmax = prev_v_norm + std::abs(*maximum_acceleration_) *
+                                        robot_->control.time_step;
         constraint = vmax / v_norm;
     }
 
     return constraint;
 }
+
+double& AccelerationConstraint::maximumAcceleration() {
+    return *maximum_acceleration_;
+}
+
+double AccelerationConstraint::maximumAcceleration() const {
+    return *maximum_acceleration_;
+}
+
+std::shared_ptr<double> AccelerationConstraint::maximumAccelerationPtr() {
+    return maximum_acceleration_;
+}
+
+} // namespace phri

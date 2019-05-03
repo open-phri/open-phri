@@ -18,13 +18,11 @@
  * program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * @file joint_velocity_constraint.h
- * @author Benjamin Navarro
- * @brief Definition of the JointVelocityConstraint class
- * @date June 2017
- * @ingroup OpenPHRI
- */
+//! \file joint_velocity_constraint.h
+//! \author Benjamin Navarro
+//! \brief A constraint to limit the joint velocities
+//! \date 05-2019
+//! \ingroup phri
 
 #pragma once
 
@@ -33,31 +31,79 @@
 
 namespace phri {
 
-/** @brief A constraint to limit the joint velocities.
- */
+//! \brief A constraint to limit the joint velocities.
 class JointVelocityConstraint : public Constraint {
 public:
-    /***		Constructor & destructor		***/
+    //! \brief Construct a new JointVelocityConstraint object with an initial
+    //! limit set to zero.
+    //! \details Use JointVelocityConstraint::maximumvelocity() to
+    //! set it to the desired value
+    JointVelocityConstraint();
 
-    /**
-     * @brief Construct a joint velocity constraint with a given a vector of
-     * maximum velocities.
-     * @param maximum_velocity A shared pointer to the maximum velocities
-     * allowed.
-     */
-    explicit JointVelocityConstraint(VectorXdConstPtr maximum_velocities);
+    //! \brief Construct a new JointVelocityConstraint object using the given
+    //! pointed value
+    //! \param maximum_velocities A shared pointer to the desired
+    //! maximum velocity (rad/s, m/s). Throws if the pointer is empty.
+    explicit JointVelocityConstraint(
+        std::shared_ptr<VectorXd> maximum_velocities);
 
+    //! \brief Construct a new JointVelocityConstraint object using the given
+    //! referenced value
+    //! \param maximum_velocities A reference to the desired
+    //! maximum velocity (rad/s, m/s). Make sure that \p maximum_velocities
+    //! outlives the constraint
+    explicit JointVelocityConstraint(VectorXd& maximum_velocities);
+
+    //! \brief Construct a new JointVelocityConstraint object using the given
+    //! value
+    //! \param maximum_velocities The value of the desired maximum
+    //! velocity (rad/s, m/s). Use JointVelocityConstraint::maximumvelocity() to
+    //! update the limit
+    explicit JointVelocityConstraint(const VectorXd& maximum_velocities);
+
+    //! \brief Construct a new JointVelocityConstraint object using the given
+    //! value
+    //! \param maximum_velocities The value of the desired maximum
+    //! velocity (rad/s, m/s). Use JointVelocityConstraint::maximumvelocity() to
+    //! update the limit
+    explicit JointVelocityConstraint(VectorXd&& maximum_velocities);
+
+    //! \brief Default copy constructor
+    JointVelocityConstraint(const JointVelocityConstraint&) = default;
+
+    //! \brief Default move constructor
+    JointVelocityConstraint(JointVelocityConstraint&&) = default;
+
+    //! \brief Default virtual destructor
+    //! \details If \ref JointVelocityConstraint::maximum_velocities_ was
+    //! created using an rvalue reference, the pointed memory won't be released
     virtual ~JointVelocityConstraint() = default;
 
-    /***		Algorithm		***/
+    //! \brief Default copy operator
+    JointVelocityConstraint&
+    operator=(const JointVelocityConstraint&) = default;
+
+    //! \brief Default move operator
+    JointVelocityConstraint& operator=(JointVelocityConstraint&&) = default;
+
     virtual double compute() override;
 
-private:
-    VectorXdConstPtr maximum_velocities_;
-};
+    //! \brief Read/write access the velocity limit used by the constraint
+    //! \return double& A reference to the velocity limit
+    VectorXd& maximumVelocities();
 
-using JointVelocityConstraintPtr = std::shared_ptr<JointVelocityConstraint>;
-using JointVelocityConstraintConstPtr =
-    std::shared_ptr<const JointVelocityConstraint>;
+    //! \brief Read access the velocity limit used by the constraint
+    //! \return double The velocity limit value
+    const VectorXd& maximumVelocities() const;
+
+    //! \brief Access to the shared pointer holding the velocity limit used
+    //! by the constraint
+    //! \return std::shared_ptr<double> A shared pointer to the velocity
+    //! limit
+    std::shared_ptr<VectorXd> maximumVelocitiesPtr();
+
+private:
+    std::shared_ptr<VectorXd> maximum_velocities_;
+};
 
 } // namespace phri

@@ -18,13 +18,11 @@
  * program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * @file default_constraint.h
- * @author Benjamin Navarro
- * @brief Definition of the DefaultConstraint class
- * @date April 2017
- * @ingroup OpenPHRI
- */
+//! \file default_constraint.h
+//! \author Benjamin Navarro
+//! \brief Default constraint. Always evaluate to one.
+//! \date 05-2019
+//! \ingroup phri
 
 #pragma once
 
@@ -32,24 +30,30 @@
 
 namespace phri {
 
-/** @brief Default constraint. Always evaluate to one.
- */
+//! \brief Default constraint. Always evaluate to one.
 class DefaultConstraint : public Constraint {
 public:
-    /***		Constructor & destructor		***/
-
-    /**
-     * @brief Construct a default constraint of a given type
-     */
+    //! \brief Default constructor
     DefaultConstraint() = default;
 
+    //! \brief Default copy constructor
+    DefaultConstraint(const DefaultConstraint&) = default;
+
+    //! \brief Default move constructor
+    DefaultConstraint(DefaultConstraint&&) = default;
+
+    //! \brief Default virtual destructor
     virtual ~DefaultConstraint() = default;
 
-    /***		Algorithm		***/
+    //! \brief Default copy operator
+    DefaultConstraint& operator=(const DefaultConstraint&) = default;
+
+    //! \brief Default move operator
+    DefaultConstraint& operator=(DefaultConstraint&&) = default;
+
+    //! \brief Evaluate the constraint to one
+    //! \return double one
     virtual double compute() override;
 };
-
-using DefaultConstraintPtr = std::shared_ptr<DefaultConstraint>;
-using DefaultConstraintConstPtr = std::shared_ptr<const DefaultConstraint>;
 
 } // namespace phri

@@ -19,22 +19,85 @@
  */
 
 #include <OpenPHRI/constraints/kinetic_energy_constraint.h>
+#include <OpenPHRI/utilities/exceptions.h>
 
-using namespace phri;
-using namespace std;
+namespace phri {
 
-/***		Constructor & destructor		***/
-KineticEnergyConstraint::KineticEnergyConstraint(
-    doubleConstPtr mass, doubleConstPtr maximum_kinetic_energy)
-    : mass_(mass), maximum_kinetic_energy_(maximum_kinetic_energy) {
-    kinetic_energy_maximum_velocity_ = make_shared<double>(0.);
-    maximum_velocity_ = kinetic_energy_maximum_velocity_;
+KineticEnergyConstraint::KineticEnergyConstraint()
+    : mass_(std::make_shared<double>(0.)),
+      maximum_kinetic_energy_(std::make_shared<double>(0.)) {
+    create();
 }
 
-/***		Algorithm		***/
+KineticEnergyConstraint::KineticEnergyConstraint(
+    std::shared_ptr<double> mass,
+    std::shared_ptr<double> maximum_kinetic_energy)
+    : mass_(mass), maximum_kinetic_energy_(maximum_kinetic_energy) {
+    if (not mass or not maximum_kinetic_energy) {
+        throw std::runtime_error(
+            OPEN_PHRI_ERROR("You provided an empty shared pointer"));
+    }
+    create();
+}
+
+KineticEnergyConstraint::KineticEnergyConstraint(double& mass,
+                                                 double& maximum_kinetic_energy)
+    : KineticEnergyConstraint(
+          std::shared_ptr<double>(&mass, [](auto p) {}),
+          std::shared_ptr<double>(&maximum_kinetic_energy, [](auto p) {})) {
+    create();
+}
+
+KineticEnergyConstraint::KineticEnergyConstraint(
+    const double& mass, const double& maximum_kinetic_energy)
+    : KineticEnergyConstraint(
+          std::make_shared<double>(mass),
+          std::make_shared<double>(maximum_kinetic_energy)) {
+    create();
+}
+
+KineticEnergyConstraint::KineticEnergyConstraint(
+    double&& mass, double&& maximum_kinetic_energy)
+    : KineticEnergyConstraint(
+          std::make_shared<double>(std::move(mass)),
+          std::make_shared<double>(std::move(maximum_kinetic_energy))) {
+    create();
+}
+
 double KineticEnergyConstraint::compute() {
     *kinetic_energy_maximum_velocity_ =
         std::sqrt(2. * *maximum_kinetic_energy_ / *mass_);
 
     return VelocityConstraint::compute();
 }
+
+void KineticEnergyConstraint::create() {
+    kinetic_energy_maximum_velocity_ = std::make_shared<double>(0.);
+    maximum_velocity_ = kinetic_energy_maximum_velocity_;
+}
+
+double& KineticEnergyConstraint::mass() {
+    return *mass_;
+}
+
+double KineticEnergyConstraint::mass() const {
+    return *mass_;
+}
+
+std::shared_ptr<double> KineticEnergyConstraint::massPtr() {
+    return mass_;
+}
+
+double& KineticEnergyConstraint::maximumKineticEnergy() {
+    return *maximum_kinetic_energy_;
+}
+
+double KineticEnergyConstraint::maximumKineticEnergy() const {
+    return *maximum_kinetic_energy_;
+}
+
+std::shared_ptr<double> KineticEnergyConstraint::maximumKineticEnergyPtr() {
+    return maximum_kinetic_energy_;
+}
+
+} // namespace phri

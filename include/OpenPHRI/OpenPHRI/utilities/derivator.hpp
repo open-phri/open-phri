@@ -34,9 +34,10 @@ namespace phri {
 
 /** @brief A generic derivator class.
  *  @details Works on primitive types and Eigen vectors
- *  @tparam T The type to work on
+ *  @tparam Input The input type to work on
+ *  @tparam Output The output type to produce
  */
-template <typename T> class Derivator {
+template <typename Input, typename Output = Input> class Derivator {
 public:
     /***		Constructor & destructor		***/
 
@@ -46,8 +47,8 @@ public:
      * @param output A shared pointer to the output data
      * @param sample_time Time step between each call to Derivator::compute().
      */
-    Derivator(const std::shared_ptr<const T>& input,
-              const std::shared_ptr<T>& output, double sample_time)
+    Derivator(const std::shared_ptr<const Input>& input,
+              const std::shared_ptr<Output>& output, double sample_time)
         : input_(input), output_(output), frequency_(1. / sample_time) {
         reset();
     }
@@ -57,8 +58,8 @@ public:
      * @param input A shared pointer to the input data
      * @param sample_time Time step between each call to Derivator::compute().
      */
-    Derivator(const std::shared_ptr<const T>& input, double sample_time)
-        : Derivator(input, std::make_shared<T>(), sample_time) {
+    Derivator(const std::shared_ptr<const Input>& input, double sample_time)
+        : Derivator(input, std::make_shared<Output>(), sample_time) {
     }
 
     virtual ~Derivator() = default;
@@ -69,14 +70,14 @@ public:
      * @brief Get the pointer to the output data
      * @return A shared pointer to the output data.
      */
-    std::shared_ptr<const T> getOutput() const {
+    std::shared_ptr<const Output> getOutput() const {
         return output_;
     }
 
     /**
      * @brief Reset the derivator's internal state to its original state
      */
-    template <typename TT = T>
+    template <typename TT = Output>
     typename std::enable_if<
         std::is_same<TT,
                      Eigen::Matrix<typename TT::Scalar, TT::RowsAtCompileTime,
@@ -92,7 +93,19 @@ public:
     /**
      * @brief Reset the derivator's internal state to its original state
      */
-    template <typename TT = T>
+    template <typename TT = Output>
+    typename std::enable_if<std::is_same<TT, phri::Twist>::value or
+                                std::is_same<TT, phri::Acceleration>::value,
+                            void>::type
+    reset() {
+        output_->vector().setZero();
+        previous_input_ = *input_;
+    }
+
+    /**
+     * @brief Reset the derivator's internal state to its original state
+     */
+    template <typename TT = Output>
     typename std::enable_if<std::is_arithmetic<TT>::value, void>::type reset() {
         *output_ = TT(0);
         previous_input_ = *input_;
@@ -104,7 +117,7 @@ public:
      * @brief Update the derivative estimation.
      * @return The new estimation.
      */
-    virtual T compute() {
+    virtual Output compute() {
         *output_ = (*input_ - previous_input_) * frequency_;
         previous_input_ = *input_;
         return *output_;
@@ -114,14 +127,14 @@ public:
      * @brief Call operator, shortcut for compute()
      * @return The new estimation.
      */
-    virtual T operator()() final {
+    virtual Output operator()() final {
         return compute();
     }
 
 private:
-    std::shared_ptr<const T> input_;
-    std::shared_ptr<T> output_;
-    T previous_input_;
+    std::shared_ptr<const Input> input_;
+    std::shared_ptr<Output> output_;
+    Input previous_input_;
     double frequency_;
 };
 
