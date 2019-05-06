@@ -27,9 +27,6 @@
 #include <pid/rpath.h>
 #include <yaml-cpp/yaml.h>
 
-using namespace std;
-using namespace phri;
-
 bool _stop = false;
 
 void sigint_handler(int sig) {
@@ -37,24 +34,14 @@ void sigint_handler(int sig) {
 }
 
 int main(int argc, char const* argv[]) {
-    PID_EXE(argv[0]);
+    phri::AppMaker app("configuration_examples/kuka_lwr4.yaml");
 
-    AppMaker app("configuration_examples/kuka_lwr4.yaml");
-
-    /***			Controller configuration			***/
-    auto robot = app.getRobot();
-    *robot->controlPointDampingMatrix() *= 100.;
-
-    auto maximum_velocity = make_shared<double>(0.1);
+    auto& robot = *app.getRobot();
+    robot.control.joints.damping.setConstant(100.);
 
     auto safety_controller = app.getController();
-    safety_controller->add("velocity constraint",
-                           VelocityConstraint(maximum_velocity));
-
-    auto vel_cstr =
-        safety_controller->get<VelocityConstraint>("velocity constraint");
-
-    safety_controller->add("ext force proxy", ExternalForce(robot));
+    safety_controller->add("vmax", phri::VelocityConstraint(0.1));
+    safety_controller->add("ext force", phri::ExternalForce());
 
     bool init_ok = app.init();
 
