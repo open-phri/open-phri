@@ -21,20 +21,23 @@
 #include <OpenPHRI/OpenPHRI.h>
 #include <OpenPHRI/drivers/vrep_driver.h>
 
-#include <pid/rpath.h>
 #include <pid/signal_manager.h>
 #include <yaml-cpp/yaml.h>
 
 #include <iostream>
 
-int main(int argc, char const* argv[]) {
+int main() {
+    // Create an application using a configuration file
     phri::AppMaker app("configuration_examples/kuka_lwr4.yaml");
 
+    // Set the task space damping matrix
     app.robot().control.task.damping.setConstant(100.);
 
-    app.controller().add("vmax", phri::VelocityConstraint(0.1));
+    // Configure the controller
     app.controller().add("ext force", phri::ExternalForce());
+    app.controller().add("vmax", phri::VelocityConstraint(0.1));
 
+    // Initialize the application. Exit on failure.
     if (app.init()) {
         std::cout << "Starting main loop" << std::endl;
     } else {
@@ -42,14 +45,22 @@ int main(int argc, char const* argv[]) {
         std::exit(-1);
     }
 
+    // Catch CTRL-C signal
     bool stop = false;
     pid::SignalManager::registerCallback(pid::SignalManager::Interrupt, "stop",
                                          [&stop](int) { stop = true; });
+    // Run the main loop
     while (not stop) {
-        stop |= not app.run();
+        if (not app()) {
+            // Communication error
+            break;
+        }
     }
 
+    // Stop catching CTRL-C
     pid::SignalManager::unregisterCallback(pid::SignalManager::Interrupt,
                                            "stop");
+
+    // Stop the communication with the robot
     app.stop();
 }
