@@ -17,16 +17,18 @@ namespace phri {
 
 class AppMaker {
 public:
+    using callback = std::function<bool(void)>;
     AppMaker(const std::string& configuration_file);
     ~AppMaker();
 
     bool
     init(std::function<bool(void)> init_code = std::function<bool(void)>());
 
-    bool run(std::function<bool(void)> pre_controller_code =
-                 std::function<bool(void)>(),
-             std::function<bool(void)> post_controller_code =
-                 std::function<bool(void)>());
+    bool run(const callback& pre_controller_code = callback{},
+             const callback& post_controller_code = callback{});
+
+    bool operator()(const callback& pre_controller_code = callback{},
+                    const callback& post_controller_code = callback{});
 
     bool stop();
 

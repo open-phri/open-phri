@@ -100,8 +100,8 @@ bool AppMaker::init(std::function<bool(void)> init_code) {
     return all_ok;
 }
 
-bool AppMaker::run(std::function<bool(void)> pre_controller_code,
-                   std::function<bool(void)> post_controller_code) {
+bool AppMaker::run(const callback& pre_controller_code,
+                   const callback& post_controller_code) {
     bool ok = true;
     if (impl_->driver->read()) {
         impl_->model->forwardKinematics();
@@ -125,6 +125,11 @@ bool AppMaker::run(std::function<bool(void)> pre_controller_code,
         ok = false;
     }
     return ok;
+}
+
+bool AppMaker::operator()(const callback& pre_controller_code,
+                          const callback& post_controller_code) {
+    return run(pre_controller_code, post_controller_code);
 }
 
 bool AppMaker::stop() {
