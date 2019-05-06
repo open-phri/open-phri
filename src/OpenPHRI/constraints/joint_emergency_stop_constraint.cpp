@@ -112,7 +112,7 @@ const VectorXd& JointEmergencyStopConstraint::activationThreshold() const {
 }
 
 std::shared_ptr<VectorXd>
-JointEmergencyStopConstraint::activationThresholdPtr() {
+JointEmergencyStopConstraint::activationThresholdPtr() const {
     return activation_threshold_;
 }
 
@@ -125,7 +125,7 @@ const VectorXd& JointEmergencyStopConstraint::deactivationThreshold() const {
 }
 
 std::shared_ptr<VectorXd>
-JointEmergencyStopConstraint::deactivationThresholdPtr() {
+JointEmergencyStopConstraint::deactivationThresholdPtr() const {
     return deactivation_threshold_;
 }
 

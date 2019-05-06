@@ -101,7 +101,7 @@ public:
     //! by the constraint
     //! \return std::shared_ptr<double> A shared pointer to the acceleration
     //! limit
-    std::shared_ptr<double> maximumAccelerationPtr();
+    std::shared_ptr<double> maximumAccelerationPtr() const;
 
 private:
     //! \brief Shared pointer holding the acceleration limit.

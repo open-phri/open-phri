@@ -104,11 +104,11 @@ public:
 
     double& activationThreshold();
     double activationThreshold() const;
-    std::shared_ptr<double> activationThresholdPtr();
+    std::shared_ptr<double> activationThresholdPtr() const;
 
     double& deactivationThreshold();
     double deactivationThreshold() const;
-    std::shared_ptr<double> deactivationThresholdPtr();
+    std::shared_ptr<double> deactivationThresholdPtr() const;
 
 private:
     std::shared_ptr<double> activation_threshold_;

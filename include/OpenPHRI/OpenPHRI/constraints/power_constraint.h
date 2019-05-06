@@ -104,7 +104,7 @@ public:
     //! by the constraint
     //! \return std::shared_ptr<double> A shared pointer to the power
     //! limit
-    std::shared_ptr<double> maximumPowerPtr();
+    std::shared_ptr<double> maximumPowerPtr() const;
 
     //! \brief Read access the current exchanged power
     //! \return double The exchanged power
@@ -112,7 +112,7 @@ public:
 
     //! \brief Access to the shared pointer holding the current exchanged power
     //! \return std::shared_ptr<double> A shared pointer to the exchanged power
-    std::shared_ptr<const double> powerPtr();
+    std::shared_ptr<const double> powerPtr() const;
 
 private:
     //! \brief Shared pointer holding the power limit.

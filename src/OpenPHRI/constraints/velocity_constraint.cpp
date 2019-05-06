@@ -68,7 +68,7 @@ double VelocityConstraint::maximumVelocity() const {
     return *maximum_velocity_;
 }
 
-std::shared_ptr<double> VelocityConstraint::maximumVelocityPtr() {
+std::shared_ptr<double> VelocityConstraint::maximumVelocityPtr() const {
     return maximum_velocity_;
 }
 

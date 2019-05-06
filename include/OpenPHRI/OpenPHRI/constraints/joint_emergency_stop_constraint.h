@@ -105,11 +105,11 @@ public:
 
     VectorXd& activationThreshold();
     const VectorXd& activationThreshold() const;
-    std::shared_ptr<VectorXd> activationThresholdPtr();
+    std::shared_ptr<VectorXd> activationThresholdPtr() const;
 
     VectorXd& deactivationThreshold();
     const VectorXd& deactivationThreshold() const;
-    std::shared_ptr<VectorXd> deactivationThresholdPtr();
+    std::shared_ptr<VectorXd> deactivationThresholdPtr() const;
 
 private:
     std::shared_ptr<VectorXd> activation_threshold_;

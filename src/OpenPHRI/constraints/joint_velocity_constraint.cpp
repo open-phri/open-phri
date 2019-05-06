@@ -79,7 +79,8 @@ const VectorXd& JointVelocityConstraint::maximumVelocities() const {
     return *maximum_velocities_;
 }
 
-std::shared_ptr<VectorXd> JointVelocityConstraint::maximumVelocitiesPtr() {
+std::shared_ptr<VectorXd>
+JointVelocityConstraint::maximumVelocitiesPtr() const {
     return maximum_velocities_;
 }
 

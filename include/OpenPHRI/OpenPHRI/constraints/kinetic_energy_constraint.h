@@ -104,7 +104,7 @@ public:
     //! \brief Access to the shared pointer holding the mass
     //! used by the constraint
     //! \return std::shared_ptr<double> A shared pointer to the mass
-    std::shared_ptr<double> massPtr();
+    std::shared_ptr<double> massPtr() const;
 
     //! \brief Read/write access the kinetic energy limit used by the constraint
     //! \return double& A reference to the kinetic energy limit
@@ -118,7 +118,7 @@ public:
     //! used by the constraint
     //! \return std::shared_ptr<double> A shared pointer to the kinetic energy
     //! limit
-    std::shared_ptr<double> maximumKineticEnergyPtr();
+    std::shared_ptr<double> maximumKineticEnergyPtr() const;
 
 private:
     void create();

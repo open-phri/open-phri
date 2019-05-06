@@ -84,7 +84,7 @@ double KineticEnergyConstraint::mass() const {
     return *mass_;
 }
 
-std::shared_ptr<double> KineticEnergyConstraint::massPtr() {
+std::shared_ptr<double> KineticEnergyConstraint::massPtr() const {
     return mass_;
 }
 
@@ -96,7 +96,8 @@ double KineticEnergyConstraint::maximumKineticEnergy() const {
     return *maximum_kinetic_energy_;
 }
 
-std::shared_ptr<double> KineticEnergyConstraint::maximumKineticEnergyPtr() {
+std::shared_ptr<double>
+KineticEnergyConstraint::maximumKineticEnergyPtr() const {
     return maximum_kinetic_energy_;
 }
 

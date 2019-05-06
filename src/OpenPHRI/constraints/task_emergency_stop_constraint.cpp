@@ -88,7 +88,8 @@ double TaskEmergencyStopConstraint::activationThreshold() const {
     return *activation_threshold_;
 }
 
-std::shared_ptr<double> TaskEmergencyStopConstraint::activationThresholdPtr() {
+std::shared_ptr<double>
+TaskEmergencyStopConstraint::activationThresholdPtr() const {
     return activation_threshold_;
 }
 
@@ -101,7 +102,7 @@ double TaskEmergencyStopConstraint::deactivationThreshold() const {
 }
 
 std::shared_ptr<double>
-TaskEmergencyStopConstraint::deactivationThresholdPtr() {
+TaskEmergencyStopConstraint::deactivationThresholdPtr() const {
     return deactivation_threshold_;
 }
 

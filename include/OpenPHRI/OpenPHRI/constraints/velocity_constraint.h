@@ -100,7 +100,7 @@ public:
     //! by the constraint
     //! \return std::shared_ptr<double> A shared pointer to the velocity
     //! limit
-    std::shared_ptr<double> maximumVelocityPtr();
+    std::shared_ptr<double> maximumVelocityPtr() const;
 
 protected:
     std::shared_ptr<double> maximum_velocity_;

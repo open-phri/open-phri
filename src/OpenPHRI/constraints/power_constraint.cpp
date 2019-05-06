@@ -70,7 +70,7 @@ double PowerConstraint::maximumPower() const {
     return *maximum_power_;
 }
 
-std::shared_ptr<double> PowerConstraint::maximumPowerPtr() {
+std::shared_ptr<double> PowerConstraint::maximumPowerPtr() const {
     return maximum_power_;
 }
 
@@ -78,7 +78,7 @@ double PowerConstraint::power() const {
     return *power_;
 }
 
-std::shared_ptr<const double> PowerConstraint::powerPtr() {
+std::shared_ptr<const double> PowerConstraint::powerPtr() const {
     return power_;
 }
 

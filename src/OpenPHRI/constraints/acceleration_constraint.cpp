@@ -73,7 +73,7 @@ double AccelerationConstraint::maximumAcceleration() const {
     return *maximum_acceleration_;
 }
 
-std::shared_ptr<double> AccelerationConstraint::maximumAccelerationPtr() {
+std::shared_ptr<double> AccelerationConstraint::maximumAccelerationPtr() const {
     return maximum_acceleration_;
 }
 
