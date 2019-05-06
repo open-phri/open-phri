@@ -39,7 +39,8 @@ TEST_CASE("Stop constraint") {
         activation_torque_threshold, deactivation_torque_threshold);
 
     auto constant_vel = make_shared<Twist>();
-    auto constant_velocity_generator = make_shared<VelocityProxy>(constant_vel);
+    auto constant_velocity_generator =
+        make_shared<VelocityProxy>(constant_vel, ReferenceFrame::TCP);
     auto constant_force_generator = make_shared<ExternalForce>();
 
     safety_controller.add("task stop constraint", task_stop_constraint);

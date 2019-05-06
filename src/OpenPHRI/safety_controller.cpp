@@ -85,29 +85,30 @@ bool SafetyController::addConstraint(const std::string& name,
     return constraints_.add(name, {constraint}, force);
 }
 
-bool SafetyController::addForceGenerator(const std::string& name,
-                                         ForceGeneratorPtr generator,
-                                         bool force) {
+bool SafetyController::addForceGenerator(
+    const std::string& name, std::shared_ptr<ForceGenerator> generator,
+    bool force) {
     generator->setRobot(&robot_);
     return force_generators_.add(name, {generator}, force);
 }
 
-bool SafetyController::addTorqueGenerator(const std::string& name,
-                                          TorqueGeneratorPtr generator,
-                                          bool force) {
+bool SafetyController::addTorqueGenerator(
+    const std::string& name, std::shared_ptr<TorqueGenerator> generator,
+    bool force) {
     generator->setRobot(&robot_);
     return torque_generators_.add(name, {generator}, force);
 }
 
-bool SafetyController::addVelocityGenerator(const std::string& name,
-                                            VelocityGeneratorPtr generator,
-                                            bool force) {
+bool SafetyController::addVelocityGenerator(
+    const std::string& name, std::shared_ptr<VelocityGenerator> generator,
+    bool force) {
     generator->setRobot(&robot_);
     return velocity_generators_.add(name, {generator}, force);
 }
 
 bool SafetyController::addJointVelocityGenerator(
-    const std::string& name, JointVelocityGeneratorPtr generator, bool force) {
+    const std::string& name, std::shared_ptr<JointVelocityGenerator> generator,
+    bool force) {
     generator->setRobot(&robot_);
     return joint_velocity_generators_.add(name, {generator}, force);
 }
@@ -137,16 +138,17 @@ SafetyController::getConstraint(const std::string& name) {
     return constraints_.get(name).object;
 }
 
-ForceGeneratorPtr SafetyController::getForceGenerator(const std::string& name) {
+std::shared_ptr<ForceGenerator>
+SafetyController::getForceGenerator(const std::string& name) {
     return force_generators_.get(name).object;
 }
 
-TorqueGeneratorPtr
+std::shared_ptr<TorqueGenerator>
 SafetyController::getTorqueGenerator(const std::string& name) {
     return torque_generators_.get(name).object;
 }
 
-JointVelocityGeneratorPtr
+std::shared_ptr<JointVelocityGenerator>
 SafetyController::getJointVelocityGenerator(const std::string& name) {
     return joint_velocity_generators_.get(name).object;
 }

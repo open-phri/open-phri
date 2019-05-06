@@ -21,67 +21,136 @@
 #include <OpenPHRI/velocity_generators/force_control.h>
 #include <iostream>
 
-using namespace phri;
+namespace phri {
 
-ForceControl::ForceControl(Vector6dConstPtr external_force_target,
-                           double sample_time, Vector6dConstPtr p_gain,
-                           Vector6dConstPtr d_gain, Vector6dConstPtr selection,
-                           ReferenceFrame frame, ForceControlTargetType type)
+ForceControl::Parameters::Parameters() {
+    proportional_gain.setZero();
+    derivative_gain.setZero();
+    selection_vector.fill(false);
+}
+
+ForceControl::Parameters::Parameters(
+    const Vector6d& proportional_gain, const Vector6d& derivative_gain,
+    const std::array<bool, 6>& selection_vector)
+    : proportional_gain(proportional_gain),
+      derivative_gain(derivative_gain),
+      selection_vector(selection_vector) {
+}
+
+ForceControl::ForceControl(ReferenceFrame frame, TargetType type)
     : VelocityGenerator(frame),
-      external_force_target_(external_force_target),
-      sample_time_(sample_time),
-      p_gain_(p_gain),
-      d_gain_(d_gain),
-      selection_(selection),
+      target_(std::make_shared<Wrench>()),
+      parameters_(std::make_shared<Parameters>()),
       type_(type),
       filter_coeff_(1.) {
     prev_error_.setZero();
 }
 
-void ForceControl::configureFilter(double sample_time, double time_constant) {
-    assert(sample_time > 0);
-    assert(time_constant > 0);
+ForceControl::ForceControl(std::shared_ptr<Wrench> target,
+                           std::shared_ptr<Parameters> parameters,
+                           ReferenceFrame frame, TargetType type)
+    : ForceControl(frame, type) {
+    target_ = target;
+    parameters_ = parameters;
+}
 
-    if (not(time_constant > 5. * sample_time)) {
+ForceControl::ForceControl(Wrench& target, Parameters& parameters,
+                           ReferenceFrame frame, TargetType type)
+    : ForceControl(std::shared_ptr<Wrench>(&target, [](auto p) {}),
+                   std::shared_ptr<Parameters>(&parameters, [](auto p) {}),
+                   frame, type) {
+}
+
+ForceControl::ForceControl(const Wrench& target, const Parameters& parameters,
+                           ReferenceFrame frame, TargetType type)
+    : ForceControl(std::make_shared<Wrench>(target),
+                   std::make_shared<Parameters>(parameters), frame, type) {
+}
+
+ForceControl::ForceControl(Wrench&& target, Parameters&& parameters,
+                           ReferenceFrame frame, TargetType type)
+    : ForceControl(std::make_shared<Wrench>(std::move(target)),
+                   std::make_shared<Parameters>(std::move(parameters)), frame,
+                   type) {
+}
+
+void ForceControl::configureFilter(units::time::second_t time_constant) {
+    auto time_constant_sec = time_constant.to<double>();
+    auto sample_time = robot_->control.time_step;
+    assert(sample_time > 0);
+    assert(time_constant_sec > 0);
+
+    if (not(time_constant_sec > 5. * sample_time)) {
         std::cout << "phri::ForceControl::configureFilter: the time constant ("
-                  << time_constant
+                  << time_constant_sec
                   << ") for the low pass filter should be at least five times "
                      "greater than the sample time ("
                   << sample_time << ") to have a correct behavior" << std::endl;
     }
 
-    filter_coeff_ = (sample_time / (time_constant + sample_time));
+    filter_coeff_ = (sample_time / (time_constant_sec + sample_time));
+}
+
+void ForceControl::configureFilter(units::frequency::hertz_t cutoff_frequency) {
+    configureFilter(units::time::second_t(
+        1. / (2. * M_PI * cutoff_frequency.to<double>())));
 }
 
 void ForceControl::update(Twist& velocity) {
     Vector6d error;
-    Vector6d target;
-    if (type_ == ForceControlTargetType::Environment) {
-        target = *external_force_target_;
-    } else {
-        target = -*external_force_target_;
+    Vector6d force_target = target();
+    if (type_ == TargetType::Robot) {
+        force_target *= -1.;
     }
     if (frame_ == ReferenceFrame::TCP) {
-        error = target + static_cast<Vector6d>(robot_->task.state.wrench);
+        error = force_target + static_cast<Vector6d>(robot_->task.state.wrench);
     } else {
-        error = target + robot_->control.spatial_transformation_matrix *
-                             static_cast<Vector6d>(robot_->task.state.wrench);
+        error =
+            force_target + robot_->control.spatial_transformation_matrix *
+                               static_cast<Vector6d>(robot_->task.state.wrench);
     }
     applySelection(error);
 
     error = filter_coeff_ * error + (1. - filter_coeff_) * prev_error_;
 
-    velocity = p_gain_->cwiseProduct(error) +
-               d_gain_->cwiseProduct((error - prev_error_) / sample_time_);
+    velocity = parameters().proportional_gain.cwiseProduct(error) +
+               parameters().derivative_gain.cwiseProduct(
+                   (error - prev_error_) / robot_->control.time_step);
 
     prev_error_ = error;
 }
 
 void ForceControl::applySelection(Vector6d& vec) const {
-    const auto& sel = *selection_;
+    const auto& sel = parameters().selection_vector;
     for (size_t i = 0; i < 6; ++i) {
-        if (std::abs(sel(i)) < 1e-12) {
+        if (not sel[i]) {
             vec(i) = 0.;
         }
     }
 }
+
+Wrench& ForceControl::target() {
+    return *target_;
+}
+
+Wrench ForceControl::target() const {
+    return *target_;
+}
+
+std::shared_ptr<Wrench> ForceControl::targetPtr() const {
+    return target_;
+}
+
+ForceControl::Parameters& ForceControl::parameters() {
+    return *parameters_;
+}
+
+ForceControl::Parameters ForceControl::parameters() const {
+    return *parameters_;
+}
+
+std::shared_ptr<ForceControl::Parameters> ForceControl::parametersPtr() const {
+    return parameters_;
+}
+
+} // namespace phri

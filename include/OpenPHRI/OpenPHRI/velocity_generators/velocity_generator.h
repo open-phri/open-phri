@@ -18,13 +18,11 @@
  * program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * @file velocity_generator.h
- * @author Benjamin Navarro
- * @brief Base class definition for velocity generators
- * @date April 2017
- * @ingroup OpenPHRI
- */
+//! \file velocity_generator.h
+//! \author Benjamin Navarro
+//! \brief Base class for all velocity generators.
+//! \date 05-2019
+//! \ingroup phri
 
 #pragma once
 
@@ -36,53 +34,39 @@
 
 namespace phri {
 
-/** @brief Base class for all velocity generators.
- *  @details Provides a pure virtual compute method.
- */
+//! \brief Base class for all velocity generators.
+//! \details Provides a pure virtual compute method.
 class VelocityGenerator {
 public:
     virtual ~VelocityGenerator() = default;
 
-    /**
-     * @brief Compute the value associated with the velocity generator.
-     * @return The velocity generator's evaluated value.
-     */
+    //! \brief Compute the value associated with the velocity generator.
+    //! \return The velocity generator's evaluated value.
     virtual Twist compute() final;
 
-    /**
-     * @brief Call operator, shortcut for compute().
-     * @return The velocity generator's evaluated value.
-     */
+    //! \brief Call operator, shortcut for compute().
+    //! \return The velocity generator's evaluated value.
     virtual Twist operator()() final;
 
 protected:
     friend class SafetyController;
 
-    /**
-     * @brief Construct a velocity generator
-     * @param frame The reference frame in which the velocity is expressed.
-     */
+    //! \brief Construct a velocity generator
+    //! \param frame The reference frame in which the velocity is expressed.
     VelocityGenerator(ReferenceFrame frame);
 
-    /**
-     * @brief Transform the given velocity in the TCP frame, if necessary.
-     * @param velocity The velocity to transform.
-     */
+    //! \brief Transform the given velocity in the TCP frame, if necessary.
+    //! \param velocity The velocity to transform.
     virtual Twist transform(const Twist& velocity) final;
 
     virtual void update(Twist& velocity) = 0;
 
-    /**
-     * @brief Set the robot to work with.
-     * @param robot The robot.
-     */
+    //! \brief Set the robot to work with.
+    //! \param robot The robot.
     virtual void setRobot(Robot const* robot);
 
     Robot const* robot_;
     ReferenceFrame frame_;
 };
-
-using VelocityGeneratorPtr = std::shared_ptr<VelocityGenerator>;
-using VelocityGeneratorConstPtr = std::shared_ptr<const VelocityGenerator>;
 
 } // namespace phri

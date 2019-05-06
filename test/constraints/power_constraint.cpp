@@ -29,7 +29,8 @@ TEST_CASE("Power constraint") {
     auto power_constraint = make_shared<PowerConstraint>(maximum_power);
 
     auto constant_vel = make_shared<Twist>();
-    auto constant_velocity_generator = make_shared<VelocityProxy>(constant_vel);
+    auto constant_velocity_generator =
+        make_shared<VelocityProxy>(constant_vel, ReferenceFrame::TCP);
 
     safety_controller.add("power constraint", power_constraint);
     safety_controller.add("vel proxy", constant_velocity_generator);

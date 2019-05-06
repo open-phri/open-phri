@@ -30,7 +30,8 @@ TEST_CASE("Acceleration constraint") {
     safety_controller.add("acceleration constraint",
                           phri::AccelerationConstraint(maximum_acceleration));
 
-    safety_controller.add("vel proxy", phri::VelocityProxy(constant_vel));
+    safety_controller.add(
+        "vel proxy", phri::VelocityProxy(constant_vel, ReferenceFrame::TCP));
 
     const phri::Vector6d& cp_velocity = robot.task.command.twist;
     const phri::Vector6d& cp_total_velocity = robot.control.task.total_twist;

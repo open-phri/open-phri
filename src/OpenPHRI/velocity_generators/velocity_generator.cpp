@@ -20,10 +20,9 @@
 
 #include <OpenPHRI/velocity_generators/velocity_generator.h>
 
-using namespace phri;
+namespace phri {
 
-VelocityGenerator::VelocityGenerator(ReferenceFrame frame) {
-    frame_ = frame;
+VelocityGenerator::VelocityGenerator(ReferenceFrame frame) : frame_(frame) {
 }
 
 Twist VelocityGenerator::compute() {
@@ -48,3 +47,5 @@ Twist VelocityGenerator::operator()() {
 void VelocityGenerator::setRobot(Robot const* robot) {
     robot_ = robot;
 }
+
+} // namespace phri

@@ -26,8 +26,8 @@ TEST_CASE("Velocity constraint") {
         std::make_shared<phri::VelocityConstraint>(maximum_velocity);
 
     auto constant_vel = std::make_shared<phri::Twist>();
-    auto constant_velocity_generator =
-        std::make_shared<phri::VelocityProxy>(constant_vel);
+    auto constant_velocity_generator = std::make_shared<phri::VelocityProxy>(
+        constant_vel, ReferenceFrame::TCP);
 
     safety_controller.add("velocity constraint", velocity_constraint);
     safety_controller.add("vel proxy", constant_velocity_generator);
