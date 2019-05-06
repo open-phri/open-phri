@@ -1,19 +1,13 @@
 function(add_application app)
-  declare_PID_Component(
+  PID_Component(
     EXAMPLE_APPLICATION
     NAME ${app}
     DIRECTORY ${app}
     RUNTIME_RESOURCES configuration_examples
-  )
-
-  declare_PID_Component_Dependency(
-    COMPONENT ${app}
-    NATIVE open-phri
-  )
-
-  declare_PID_Component_Dependency(
-    COMPONENT ${app}
-    NATIVE open-phri-vrep-driver
+    DEPEND 
+      open-phri/open-phri 
+      open-phri/open-phri-vrep-driver
+      pid-os-utilities/pid-signal-manager
   )
 endfunction()
 

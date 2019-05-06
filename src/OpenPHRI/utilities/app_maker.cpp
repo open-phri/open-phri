@@ -134,23 +134,43 @@ bool AppMaker::stop() {
     return ok;
 }
 
-RobotPtr AppMaker::getRobot() const {
+Robot& AppMaker::robot() {
+    return *impl_->robot;
+}
+
+RobotPtr AppMaker::robotPtr() const {
     return impl_->robot;
 }
 
-SafetyControllerPtr AppMaker::getController() const {
+SafetyController& AppMaker::controller() {
+    return *impl_->controller;
+}
+
+SafetyControllerPtr AppMaker::controllerPtr() const {
     return impl_->controller;
 }
 
-RobotModelPtr AppMaker::getModel() const {
+RobotModel& AppMaker::model() {
+    return *impl_->model;
+}
+
+RobotModelPtr AppMaker::modelPtr() const {
     return impl_->model;
 }
 
-DriverPtr AppMaker::getDriver() const {
+Driver& AppMaker::driver() {
+    return *impl_->driver;
+}
+
+DriverPtr AppMaker::driverPtr() const {
     return impl_->driver;
 }
 
-DataLoggerPtr AppMaker::getDataLogger() const {
+DataLogger& AppMaker::dataLogger() {
+    return *impl_->data_logger;
+}
+
+DataLoggerPtr AppMaker::dataLoggerPtr() const {
     return impl_->data_logger;
 }
 

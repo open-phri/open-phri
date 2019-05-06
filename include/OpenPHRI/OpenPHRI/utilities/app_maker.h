@@ -30,13 +30,18 @@ public:
 
     bool stop();
 
-    RobotPtr getRobot() const;
-    SafetyControllerPtr getController() const;
-    RobotModelPtr getModel() const;
-    DriverPtr getDriver() const;
-    DataLoggerPtr getDataLogger() const;
+    Robot& robot();
+    RobotPtr robotPtr() const;
+    SafetyController& controller();
+    SafetyControllerPtr controllerPtr() const;
+    RobotModel& model();
+    RobotModelPtr modelPtr() const;
+    Driver& driver();
+    DriverPtr driverPtr() const;
+    DataLogger& dataLogger();
+    DataLoggerPtr dataLoggerPtr() const;
 
-    template <typename T> T getParameter(const std::string& name) const {
+    template <typename T> T parameter(const std::string& name) const {
         const auto& params = getParameters();
         if (params) {
             return getParameters()[name].as<T>();
@@ -47,7 +52,7 @@ public:
     }
 
     template <typename T>
-    T getParameter(const std::string& name, const T& default_value) const {
+    T parameter(const std::string& name, const T& default_value) const {
         try {
             return getParameters()[name].as<T>(default_value);
         } catch (...) {

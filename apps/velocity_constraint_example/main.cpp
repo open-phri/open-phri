@@ -18,45 +18,38 @@
  * program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <unistd.h>
-#include <signal.h>
-
 #include <OpenPHRI/OpenPHRI.h>
 #include <OpenPHRI/drivers/vrep_driver.h>
+
 #include <pid/rpath.h>
+#include <pid/signal_manager.h>
 #include <yaml-cpp/yaml.h>
 
-bool _stop = false;
-
-void sigint_handler(int sig) {
-    _stop = true;
-}
+#include <iostream>
 
 int main(int argc, char const* argv[]) {
     phri::AppMaker app("configuration_examples/kuka_lwr4.yaml");
 
-    auto& robot = *app.getRobot();
-    robot.control.joints.damping.setConstant(100.);
+    app.robot().control.task.damping.setConstant(100.);
 
-    auto safety_controller = app.getController();
-    safety_controller->add("vmax", phri::VelocityConstraint(0.1));
-    safety_controller->add("ext force", phri::ExternalForce());
+    app.controller().add("vmax", phri::VelocityConstraint(0.1));
+    app.controller().add("ext force", phri::ExternalForce());
 
-    bool init_ok = app.init();
-
-    if (init_ok)
-        std::cout << "Starting main loop\n";
-    else
-        std::cout << "Initialization failed\n";
-
-    signal(SIGINT, sigint_handler);
-
-    while (init_ok and not _stop) {
-        _stop |= not app.run();
+    if (app.init()) {
+        std::cout << "Starting main loop" << std::endl;
+    } else {
+        std::cerr << "Initialization failed" << std::endl;
+        std::exit(-1);
     }
 
-    app.stop();
+    bool stop = false;
+    pid::SignalManager::registerCallback(pid::SignalManager::Interrupt, "stop",
+                                         [&stop](int) { stop = true; });
+    while (not stop) {
+        stop |= not app.run();
+    }
 
-    return 0;
+    pid::SignalManager::unregisterCallback(pid::SignalManager::Interrupt,
+                                           "stop");
+    app.stop();
 }
