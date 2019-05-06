@@ -38,7 +38,20 @@ namespace phri {
 //! \details Provides a pure virtual compute method.
 class VelocityGenerator {
 public:
+    //! \brief Default copy constructor
+    VelocityGenerator(const VelocityGenerator&) = default;
+
+    //! \brief Default move constructor
+    VelocityGenerator(VelocityGenerator&&) = default;
+
+    //! \brief Default virtual destructor
     virtual ~VelocityGenerator() = default;
+
+    //! \brief Default copy operator
+    VelocityGenerator& operator=(const VelocityGenerator&) = default;
+
+    //! \brief Default move operator
+    VelocityGenerator& operator=(VelocityGenerator&&) = default;
 
     //! \brief Compute the value associated with the velocity generator.
     //! \return The velocity generator's evaluated value.
@@ -59,6 +72,9 @@ protected:
     //! \param velocity The velocity to transform.
     virtual Twist transform(const Twist& velocity) final;
 
+    //! \brief Derived classed must implement this to provide their velocity
+    //! output
+    //! \param velocity A reference to the velocity to set
     virtual void update(Twist& velocity) = 0;
 
     //! \brief Set the robot to work with.
