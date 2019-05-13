@@ -20,7 +20,8 @@ endfunction()
 
 create_test(default_controller)
 create_test(interpolators)
-create_test(potential_field_generator)
+# create_test(potential_field_generator)
+create_test(task_space)
 # create_test(proxy_generators)
 
 create_test(constraints)

@@ -24,7 +24,7 @@ safety_controller = NewSafetyController(damping_matrix)
 
 tcp_velocity = safety_controller.getTCPVelocity()
 
-maximum_velocity = NewDoublePtr(0.1)
+maximum_velocity = Newstd::shared_ptr<double>(0.1)
 velocity_constraint = NewVelocityConstraint(maximum_velocity)
 
 # Objects are tracked in the TCP frame so there is no need to provide the robot position
@@ -33,20 +33,20 @@ potential_field_generator.setVerbose(True)
 
 obstacle1 = NewPotentialFieldObject(
     PotentialFieldType.Repulsive,
-    NewDoublePtr(10.),   # gain
-    NewDoublePtr(0.2),   # threshold distance
+    Newstd::shared_ptr<double>(10.),   # gain
+    Newstd::shared_ptr<double>(0.2),   # threshold distance
     driver.trackObjectPosition("obstacle1", ReferenceFrame.TCP))
 
 obstacle2 = NewPotentialFieldObject(
     PotentialFieldType.Repulsive,
-    NewDoublePtr(10.),   # gain
-    NewDoublePtr(0.2),   # threshold distance
+    Newstd::shared_ptr<double>(10.),   # gain
+    Newstd::shared_ptr<double>(0.2),   # threshold distance
     driver.trackObjectPosition("obstacle2", ReferenceFrame.TCP))
 
 target = NewPotentialFieldObject(
     PotentialFieldType.Attractive,
-    NewDoublePtr(10.),      # gain
-    NewDoublePtr(math.inf), # threshold distance
+    Newstd::shared_ptr<double>(10.),      # gain
+    Newstd::shared_ptr<double>(math.inf), # threshold distance
     driver.trackObjectPosition("target", ReferenceFrame.TCP))
 
 potential_field_generator.add("obstacle1", obstacle1)

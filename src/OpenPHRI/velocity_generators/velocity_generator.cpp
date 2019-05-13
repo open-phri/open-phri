@@ -22,26 +22,22 @@
 
 namespace phri {
 
-VelocityGenerator::VelocityGenerator(ReferenceFrame frame) : frame_(frame) {
+const Twist& VelocityGenerator::compute() {
+    velocity_.vector().setZero();
+    update(velocity_);
+    return velocity_;
 }
 
-Twist VelocityGenerator::compute() {
-    Twist velocity;
-    update(velocity);
-    return transform(velocity);
-}
-
-Twist VelocityGenerator::transform(const Twist& velocity) {
-    if (frame_ != ReferenceFrame::TCP) {
-        return static_cast<Twist>(
-            robot_->control.spatial_transformation_matrix.transpose() *
-            static_cast<Vector6d>(velocity));
-    }
-    return velocity;
-}
-
-Twist VelocityGenerator::operator()() {
+const Twist& VelocityGenerator::operator()() {
     return compute();
+}
+
+const Robot& VelocityGenerator::robot() const {
+    return *robot_;
+}
+
+const Twist& VelocityGenerator::internalVelocity() const {
+    return velocity_;
 }
 
 void VelocityGenerator::setRobot(Robot const* robot) {

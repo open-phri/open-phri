@@ -48,7 +48,7 @@ void wrapVREP() {
     enum_<ReferenceFrame>("ReferenceFrame", "Frame of reference")
         .value("TCP", ReferenceFrame::TCP)
         .value("Base", ReferenceFrame::Base)
-        .value("World", ReferenceFrame::World);
+        .value("World", FrameAdapter::world());
 
     def("NewVREPDriver", NewVREPDriver,
         NewVREPDriver_overloads(

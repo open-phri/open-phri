@@ -23,21 +23,24 @@
 using namespace phri;
 
 ManipulatorEquivalentMass::ManipulatorEquivalentMass(
-    MatrixXdConstPtr inertia_matrix, MatrixXdConstPtr jacobian_matrix)
+    std::shared_ptr<const MatrixXd> inertia_matrix,
+    std::shared_ptr<const MatrixXd> jacobian_matrix)
     : ManipulatorEquivalentMass(inertia_matrix, jacobian_matrix,
                                 std::make_shared<Vector6d>(Vector6d::Zero())) {
 }
 
 ManipulatorEquivalentMass::ManipulatorEquivalentMass(
-    MatrixXdConstPtr inertia_matrix, MatrixXdConstPtr jacobian_matrix,
-    Vector6dConstPtr robot_position)
+    std::shared_ptr<const MatrixXd> inertia_matrix,
+    std::shared_ptr<const MatrixXd> jacobian_matrix,
+    std::shared_ptr<const Vector6d> robot_position)
     : inertia_matrix_(inertia_matrix),
       jacobian_matrix_(jacobian_matrix),
       robot_position_(robot_position) {
     mass_ = std::make_shared<double>(0.);
 }
 
-doubleConstPtr ManipulatorEquivalentMass::getEquivalentMass() const {
+std::shared_ptr<const double>
+ManipulatorEquivalentMass::getEquivalentMass() const {
     return mass_;
 }
 

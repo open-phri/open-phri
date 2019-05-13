@@ -25,24 +25,27 @@
 
 namespace phri {
 
-std::shared_ptr<VelocityProxy> NewVelocityProxy(Vector6dConstPtr velocity) {
+std::shared_ptr<VelocityProxy>
+NewVelocityProxy(std::shared_ptr<const Vector6d> velocity) {
     return std::make_shared<VelocityProxy>(velocity);
 }
 
-std::shared_ptr<ForceProxy> NewForceProxy(Vector6dConstPtr force) {
+std::shared_ptr<ForceProxy>
+NewForceProxy(std::shared_ptr<const Vector6d> force) {
     return std::make_shared<ForceProxy>(force);
 }
 
 std::shared_ptr<PotentialFieldObject>
-NewPotentialFieldObject(PotentialFieldType type, doubleConstPtr gain,
-                        doubleConstPtr threshold_distance,
-                        Vector6dConstPtr object_position) {
+NewPotentialFieldObject(PotentialFieldType type,
+                        std::shared_ptr<const double> gain,
+                        std::shared_ptr<const double> threshold_distance,
+                        std::shared_ptr<const Vector6d> object_position) {
     return std::make_shared<PotentialFieldObject>(
         type, gain, threshold_distance, object_position);
 }
 
 std::shared_ptr<PotentialFieldGenerator>
-NewPotentialFieldGenerator(Vector6dConstPtr robot_position) {
+NewPotentialFieldGenerator(std::shared_ptr<const Vector6d> robot_position) {
     return std::make_shared<PotentialFieldGenerator>(robot_position);
 }
 
@@ -55,15 +58,15 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(PotentialFieldGenerator_add_overloads,
                                        add, 2, 3)
 
 std::shared_ptr<StiffnessGenerator>
-NewStiffnessGenerator(Matrix6dConstPtr stiffness,
-                      Vector6dConstPtr target_position) {
+NewStiffnessGenerator(std::shared_ptr<Matrix6d> stiffness,
+                      std::shared_ptr<const Vector6d> target_position) {
     return std::make_shared<StiffnessGenerator>(stiffness, target_position);
 }
 
 std::shared_ptr<StiffnessGenerator>
-NewStiffnessGenerator(Matrix6dConstPtr stiffness,
-                      Vector6dConstPtr target_position,
-                      Vector6dConstPtr robot_position) {
+NewStiffnessGenerator(std::shared_ptr<Matrix6d> stiffness,
+                      std::shared_ptr<const Vector6d> target_position,
+                      std::shared_ptr<const Vector6d> robot_position) {
     return std::make_shared<StiffnessGenerator>(stiffness, target_position,
                                                 robot_position);
 }
@@ -71,13 +74,15 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(NewStiffnessGenerator_overloads,
                                 NewStiffnessGenerator, 2, 3)
 
 std::shared_ptr<MassGenerator>
-NewMassGenerator(Matrix6dConstPtr mass, Vector6dConstPtr target_acceleration) {
+NewMassGenerator(std::shared_ptr<Matrix6d> mass,
+                 std::shared_ptr<const Vector6d> target_acceleration) {
     return std::make_shared<MassGenerator>(mass, target_acceleration);
 }
 
 std::shared_ptr<MassGenerator>
-NewMassGenerator(Matrix6dConstPtr mass, Vector6dConstPtr target_acceleration,
-                 Vector6dConstPtr robot_acceleration) {
+NewMassGenerator(std::shared_ptr<Matrix6d> mass,
+                 std::shared_ptr<const Vector6d> target_acceleration,
+                 std::shared_ptr<const Vector6d> robot_acceleration) {
     return std::make_shared<MassGenerator>(mass, target_acceleration,
                                            robot_acceleration);
 }
@@ -101,21 +106,24 @@ void wrapGenerators() {
         "Create a new instance of a PotentialFieldObject shared_ptr");
 
     def("NewPotentialFieldGenerator",
-        (std::shared_ptr<PotentialFieldGenerator>(*)(Vector6dPtr))0,
+        (std::shared_ptr<PotentialFieldGenerator>(*)(
+            std::shared_ptr<Vector6d>))0,
         NewPotentialFieldGenerator_overloads(
             args("rob_pos"),
             "Create a new instance of a PotentialFieldGenerator shared_ptr"));
 
     def("NewStiffnessGenerator",
         (std::shared_ptr<StiffnessGenerator>(*)(
-            Matrix6dConstPtr, Vector6dConstPtr, Vector6dConstPtr))0,
+            std::shared_ptr<Matrix6d>, std::shared_ptr<const Vector6d>,
+            std::shared_ptr<const Vector6d>))0,
         NewStiffnessGenerator_overloads(
             args("stiffness", "target_position", "robot_position"),
             "Create a new instance of a StiffnessGenerator shared_ptr"));
 
     def("NewMassGenerator",
-        (std::shared_ptr<MassGenerator>(*)(Matrix6dConstPtr, Vector6dConstPtr,
-                                           Vector6dConstPtr))0,
+        (std::shared_ptr<MassGenerator>(*)(std::shared_ptr<Matrix6d>,
+                                           std::shared_ptr<const Vector6d>,
+                                           std::shared_ptr<const Vector6d>))0,
         NewMassGenerator_overloads(
             args("mass", "target_acceleration", "robot_acceleration"),
             "Create a new instance of a MassGenerator shared_ptr"));
@@ -156,9 +164,10 @@ void wrapGenerators() {
         .value("Attractive", PotentialFieldType::Attractive)
         .value("Repulsive", PotentialFieldType::Repulsive);
 
-    class_<PotentialFieldObject>("PotentialFieldObject",
-                                 init<PotentialFieldType, doubleConstPtr,
-                                      doubleConstPtr, Vector6dConstPtr>());
+    class_<PotentialFieldObject>(
+        "PotentialFieldObject",
+        init<PotentialFieldType, std::shared_ptr<const double>,
+             std::shared_ptr<const double>, std::shared_ptr<const Vector6d>>());
 
     class_<ObjectCollection<PotentialFieldObjectPtr>>(
         "PotentialFieldObjectCollection", no_init);

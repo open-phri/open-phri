@@ -29,7 +29,8 @@
 
 using namespace phri;
 
-DataLogger::DataLogger(const std::string& directory, doubleConstPtr time,
+DataLogger::DataLogger(const std::string& directory,
+                       std::shared_ptr<const double> time,
                        bool create_gnuplot_files, bool delay_disk_write)
     : controller_(nullptr),
       directory_(directory),

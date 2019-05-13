@@ -20,30 +20,28 @@
 
 #include <OpenPHRI/force_generators/force_generator.h>
 
-using namespace phri;
+namespace phri {
 
-ForceGenerator::ForceGenerator(ReferenceFrame frame) {
-    frame_ = frame;
+const Wrench& ForceGenerator::compute() {
+    wrench_.vector().setZero();
+    update(wrench_);
+    return wrench_;
 }
 
-Vector6d ForceGenerator::compute() {
-    Vector6d force;
-    update(force);
-    return transform(force);
-}
-
-Vector6d ForceGenerator::transform(const Vector6d& force) {
-    if (frame_ != ReferenceFrame::TCP) {
-        return robot_->control.spatial_transformation_matrix.transpose() *
-               force;
-    }
-    return force;
-}
-
-Vector6d ForceGenerator::operator()() {
+const Wrench& ForceGenerator::operator()() {
     return compute();
 }
 
 void ForceGenerator::setRobot(Robot const* robot) {
     robot_ = robot;
 }
+
+const Robot& ForceGenerator::robot() const {
+    return *robot_;
+}
+
+const Wrench& ForceGenerator::internalWrench() const {
+    return wrench_;
+}
+
+} // namespace phri

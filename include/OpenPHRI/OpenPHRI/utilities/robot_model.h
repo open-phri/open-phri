@@ -19,10 +19,10 @@ public:
 
     void forwardKinematics() const;
 
-    VectorXdConstPtr getLowerLimits() const;
-    VectorXdConstPtr getUpperLimits() const;
-    VectorXdConstPtr getVelocityLimits() const;
-    VectorXdConstPtr getForceLimits() const;
+    std::shared_ptr<const VectorXd> getLowerLimits() const;
+    std::shared_ptr<const VectorXd> getUpperLimits() const;
+    std::shared_ptr<const VectorXd> getVelocityLimits() const;
+    std::shared_ptr<const VectorXd> getForceLimits() const;
 
     size_t jointCount() const;
     const std::string& name() const;

@@ -20,11 +20,13 @@
 
 #include <OpenPHRI/force_generators/external_force.h>
 
-using namespace phri;
+namespace phri {
 
-ExternalForce::ExternalForce() : ForceGenerator(ReferenceFrame::TCP) {
+ExternalForce::ExternalForce() {
 }
 
-void ExternalForce::update(Vector6d& force) {
-    force = robot_->task.state.wrench;
+void ExternalForce::update(Wrench& force) {
+    force = robot().task.state.wrench;
 }
+
+} // namespace phri

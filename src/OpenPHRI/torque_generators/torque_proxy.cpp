@@ -22,7 +22,8 @@
 
 using namespace phri;
 
-TorqueProxy::TorqueProxy(VectorXdConstPtr torque) : torque_(torque) {
+TorqueProxy::TorqueProxy(std::shared_ptr<const VectorXd> torque)
+    : torque_(torque) {
 }
 
 void TorqueProxy::update(VectorXd& torque) {

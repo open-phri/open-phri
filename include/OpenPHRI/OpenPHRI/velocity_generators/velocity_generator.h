@@ -35,9 +35,13 @@
 namespace phri {
 
 //! \brief Base class for all velocity generators.
-//! \details Provides a pure virtual compute method.
+//! \details Provides a pure virtual compute method to be implemented by derived
+//! classes.
 class VelocityGenerator {
 public:
+    //! \brief Default constructor
+    VelocityGenerator() = default;
+
     //! \brief Default copy constructor
     VelocityGenerator(const VelocityGenerator&) = default;
 
@@ -55,22 +59,14 @@ public:
 
     //! \brief Compute the value associated with the velocity generator.
     //! \return The velocity generator's evaluated value.
-    virtual Twist compute() final;
+    virtual const Twist& compute() final;
 
     //! \brief Call operator, shortcut for compute().
     //! \return The velocity generator's evaluated value.
-    virtual Twist operator()() final;
+    virtual const Twist& operator()() final;
 
 protected:
     friend class SafetyController;
-
-    //! \brief Construct a velocity generator
-    //! \param frame The reference frame in which the velocity is expressed.
-    VelocityGenerator(ReferenceFrame frame);
-
-    //! \brief Transform the given velocity in the TCP frame, if necessary.
-    //! \param velocity The velocity to transform.
-    virtual Twist transform(const Twist& velocity) final;
 
     //! \brief Derived classed must implement this to provide their velocity
     //! output
@@ -81,8 +77,17 @@ protected:
     //! \param robot The robot.
     virtual void setRobot(Robot const* robot);
 
+    //! \brief Read/write access the controlled robot
+    //! \return double& A reference to the controlled robot
+    virtual const Robot& robot() const final;
+
+    //! \brief Read access to the internal velocity
+    //! \return Twist The internal velocity
+    virtual const Twist& internalVelocity() const;
+
+private:
     Robot const* robot_;
-    ReferenceFrame frame_;
+    Twist velocity_;
 };
 
 } // namespace phri

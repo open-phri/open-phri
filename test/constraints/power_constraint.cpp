@@ -15,6 +15,10 @@ TEST_CASE("Power constraint") {
     auto model = phri::RobotModel(
         robot, PID_PATH("robot_models/kuka_lwr4.yaml"), "end-effector");
 
+    FrameAdapter::setTransform(FrameAdapter::world(),
+                               AffineTransform::Identity(),
+                               FrameAdapter::frame("end-effector"));
+
     robot.joints.state.position.setOnes();
     model.forwardKinematics();
 
@@ -28,9 +32,8 @@ TEST_CASE("Power constraint") {
     auto& command_twist = robot.task.command.twist;
     auto power_constraint = make_shared<PowerConstraint>(maximum_power);
 
-    auto constant_vel = make_shared<Twist>();
-    auto constant_velocity_generator =
-        make_shared<VelocityProxy>(constant_vel, ReferenceFrame::TCP);
+    auto constant_vel = make_shared<Twist>(FrameAdapter::frame("end-effector"));
+    auto constant_velocity_generator = make_shared<VelocityProxy>(constant_vel);
 
     safety_controller.add("power constraint", power_constraint);
     safety_controller.add("vel proxy", constant_velocity_generator);

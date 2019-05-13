@@ -18,13 +18,11 @@
  * program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * @file joint_acceleration_constraint.h
- * @author Benjamin Navarro
- * @brief Definition of the JointAccelerationConstraint class
- * @date October 2018
- * @ingroup phri
- */
+//! \file joint_acceleration_constraint.h
+//! \author Benjamin Navarro
+//! \brief A phri::Constraint to limit the task space acceleration.
+//! \date 05-2019
+//! \ingroup phri
 
 #pragma once
 
@@ -33,29 +31,86 @@
 
 namespace phri {
 
-/** @brief A constraint to limit the joint acceleration.
- */
+//! \brief A phri::Constraint to limit the task space acceleration.
 class JointAccelerationConstraint : public Constraint {
 public:
-    /***		Constructor & destructor		***/
+    //! \brief Construct a new JointAccelerationConstraint object with an
+    //! initial limit set to zero.
+    //! \details Use JointAccelerationConstraint::maximumAcceleration() to set
+    //! it to the desired value
+    JointAccelerationConstraint();
 
-    /**
-     * @brief Construct an acceleration constraint with a given maximum
-     * acceleration.
-     * @param maximum_acceleration A shared pointer to the maximum acceleration
-     * allowed.
-     */
-    JointAccelerationConstraint(VectorXdConstPtr maximum_acceleration,
-                                double sample_time);
+    //! \brief Construct a new JointAccelerationConstraint object using the
+    //! given pointed value
+    //! \param maximum_acceleration A shared pointer to the desired maximum
+    //! acceleration(rad/s², m/s²).Throws if the pointer is empty.
+    explicit JointAccelerationConstraint(
+        std::shared_ptr<VectorXd> maximum_acceleration);
 
+    //! \brief Construct a new JointAccelerationConstraint object using the
+    //! given referenced value
+    //! \param maximum_acceleration A reference to the desired maximum
+    //! acceleration (rad/s², m/s²). Make sure that \p maximum_acceleration
+    //! outlives the constraint
+    explicit JointAccelerationConstraint(VectorXd& maximum_acceleration);
+
+    //! \brief Construct a new JointAccelerationConstraint object using the
+    //! given value
+    //! \param maximum_acceleration The value of the desired maximum
+    //! acceleration (rad/s², m/s²). Use
+    //! JointAccelerationConstraint::maximumAcceleration() to update the limit
+    explicit JointAccelerationConstraint(const VectorXd& maximum_acceleration);
+
+    //! \brief Construct a new JointAccelerationConstraint object using the
+    //! given value
+    //! \param maximum_acceleration The value of the desired maximum
+    //! acceleration (rad/s², m/s²). Use
+    //! JointAccelerationConstraint::maximumAcceleration() to update the limit
+    explicit JointAccelerationConstraint(VectorXd&& maximum_acceleration);
+
+    //! \brief Default copy constructor
+    JointAccelerationConstraint(const JointAccelerationConstraint&) = default;
+
+    //! \brief Default move constructor
+    JointAccelerationConstraint(JointAccelerationConstraint&&) = default;
+
+    //! \brief Default virtual destructor
+    //! \details If \ref JointAccelerationConstraint::maximum_acceleration_ was
+    //! created using an rvalue reference, the pointed memory won't be released
     virtual ~JointAccelerationConstraint() = default;
 
-    /***		Algorithm		***/
+    //! \brief Default copy operator
+    JointAccelerationConstraint&
+    operator=(const JointAccelerationConstraint&) = default;
+
+    //! \brief Default move operator
+    JointAccelerationConstraint&
+    operator=(JointAccelerationConstraint&&) = default;
+
+    //! \brief Compute the acceleration constraint based on the robot state
+    //! \return double The constraint value [0,1]
     virtual double compute() override;
 
+    //! \brief Read/write access the acceleration limit used by the constraint
+    //! \return VectorXd& A reference to the acceleration limit
+    VectorXd& maximumAcceleration();
+
+    //! \brief Read access the acceleration limit used by the constraint
+    //! \return VectorXd The acceleration limit value
+    VectorXd maximumAcceleration() const;
+
+    //! \brief Access to the shared pointer holding the acceleration limit used
+    //! by the constraint
+    //! \return std::shared_ptr<VectorXd> A shared pointer to the acceleration
+    //! limit
+    std::shared_ptr<VectorXd> maximumAccelerationPtr() const;
+
+protected:
+    virtual void setRobot(Robot const* robot) override;
+
 private:
-    VectorXdConstPtr maximum_acceleration_;
-    double sample_time_;
+    //! \brief Shared pointer holding the acceleration limit.
+    std::shared_ptr<VectorXd> maximum_acceleration_;
 };
 
 } // namespace phri

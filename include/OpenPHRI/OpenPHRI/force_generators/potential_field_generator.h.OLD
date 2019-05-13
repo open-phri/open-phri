@@ -44,9 +44,10 @@ enum class PotentialFieldType { Attractive, Repulsive };
 /** @brief Hold the required property for any object of the potential field.
  */
 struct PotentialFieldObject {
-    PotentialFieldObject(PotentialFieldType type, doubleConstPtr gain,
-                         doubleConstPtr threshold_distance,
-                         PoseConstPtr object_position)
+    PotentialFieldObject(PotentialFieldType type,
+                         std::shared_ptr<const double> gain,
+                         std::shared_ptr<const double> threshold_distance,
+                         std::shared_ptr<const Pose> object_position)
         : type(type),
           gain(gain),
           threshold_distance(threshold_distance),
@@ -54,11 +55,13 @@ struct PotentialFieldObject {
     }
 
     PotentialFieldType type; /**< Type of object. See PotentialFieldType. */
-    doubleConstPtr gain;     /**< Gain applied to get the resulting force. */
-    doubleConstPtr
+    std::shared_ptr<const double>
+        gain; /**< Gain applied to get the resulting force. */
+    std::shared_ptr<const double>
         threshold_distance; /**< Distance at which the object's attractive or
                                repulsive effect will start. */
-    PoseConstPtr object_position; /**< Object position in the chosen frame. */
+    std::shared_ptr<const Pose>
+        object_position; /**< Object position in the chosen frame. */
 };
 
 using PotentialFieldObjectPtr = std::shared_ptr<PotentialFieldObject>;
@@ -80,8 +83,7 @@ public:
      * @param objects_frame The frame in which the positons of the objects are
      * expressed .
      */
-    explicit PotentialFieldGenerator(
-        ReferenceFrame objects_frame = ReferenceFrame::TCP);
+    PotentialFieldGenerator();
 
     /**
      * @brief Construct a potential field generator where objects position are
@@ -91,15 +93,14 @@ public:
      * @param objects_frame The frame in which the positons of the objects are
      * expressed.
      */
-    PotentialFieldGenerator(Vector3dConstPtr offset,
-                            ReferenceFrame objects_frame = ReferenceFrame::TCP);
+    PotentialFieldGenerator(std::shared_ptr<const Vector3d> offset);
     virtual ~PotentialFieldGenerator() = default;
 
 protected:
-    virtual void update(Vector6d& force) override;
+    virtual void update(Wrench& force) override;
 
     ReferenceFrame objects_frame_;
-    Vector3dConstPtr offset_;
+    std::shared_ptr<const Vector3d> offset_;
 };
 
 using PotentialFieldGeneratorPtr = std::shared_ptr<PotentialFieldGenerator>;

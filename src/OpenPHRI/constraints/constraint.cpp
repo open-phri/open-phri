@@ -20,12 +20,18 @@
 
 #include <OpenPHRI/constraints/constraint.h>
 
-using namespace phri;
+namespace phri {
 
 void Constraint::setRobot(Robot const* robot) {
     robot_ = robot;
 }
 
+const Robot& Constraint::robot() const {
+    return *robot_;
+}
+
 double Constraint::operator()() {
     return compute();
 }
+
+} // namespace phri

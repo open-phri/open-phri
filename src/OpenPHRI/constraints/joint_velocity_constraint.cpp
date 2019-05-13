@@ -84,4 +84,9 @@ JointVelocityConstraint::maximumVelocitiesPtr() const {
     return maximum_velocities_;
 }
 
+void JointVelocityConstraint::setRobot(Robot const* new_robot) {
+    Constraint::setRobot(new_robot);
+    maximumVelocities().resize(robot().jointCount());
+}
+
 } // namespace phri

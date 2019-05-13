@@ -22,9 +22,9 @@
 
 using namespace phri;
 
-PolynomialInterpolator::PolynomialInterpolator(PolynomialPointConstPtr from,
-                                               PolynomialPointConstPtr to,
-                                               doubleConstPtr input)
+PolynomialInterpolator::PolynomialInterpolator(
+    PolynomialPointConstPtr from, PolynomialPointConstPtr to,
+    std::shared_ptr<const double> input)
     : PolynomialInterpolator(from, to) {
     setInput(input);
 }

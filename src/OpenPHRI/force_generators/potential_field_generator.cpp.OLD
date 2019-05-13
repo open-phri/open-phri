@@ -28,13 +28,13 @@ PotentialFieldGenerator::PotentialFieldGenerator(ReferenceFrame objects_frame)
     offset_ = std::make_shared<Vector3d>(Vector3d::Zero());
 }
 
-PotentialFieldGenerator::PotentialFieldGenerator(Vector3dConstPtr offset,
-                                                 ReferenceFrame objects_frame)
+PotentialFieldGenerator::PotentialFieldGenerator(
+    std::shared_ptr<const Vector3d> offset, ReferenceFrame objects_frame)
     : PotentialFieldGenerator(objects_frame) {
     offset_ = offset;
 }
 
-void PotentialFieldGenerator::update(Vector6d& force) {
+void PotentialFieldGenerator::update(Wrench& wrench) {
     Vector3d total_force = Vector3d::Zero();
     Vector3d rob_pos;
 
@@ -42,8 +42,8 @@ void PotentialFieldGenerator::update(Vector6d& force) {
         rob_pos = *offset_;
     } else {
         rob_pos =
-            robot_->task.state.pose.translation() +
-            robot_->control.transformation_matrix.block<3, 3>(0, 0) * *offset_;
+            robot().task.state.pose.translation() +
+            robot().control.transformation_matrix.block<3, 3>(0, 0) * *offset_;
     }
 
     for (const auto& item : items_) {
@@ -68,6 +68,6 @@ void PotentialFieldGenerator::update(Vector6d& force) {
         }
     }
 
-    force.segment<3>(0) = total_force;
-    force.segment<3>(3) = Vector3d::Zero();
+    wrench.force() = total_force;
+    wrench.torque().setZero();
 }

@@ -43,7 +43,7 @@ public:
      * allowed.
      */
     ForceConstraint(VelocityConstraintPtr constraint,
-                    doubleConstPtr maximum_force);
+                    std::shared_ptr<const double> maximum_force);
 
     //! \brief Construct a new ForceConstraint object with initial
     //! limits set to zero.
@@ -102,7 +102,7 @@ public:
 private:
     VelocityConstraintPtr constraint_;
     VelocityGeneratorPtr velocity_generator_;
-    doubleConstPtr maximum_force_;
+    std::shared_ptr<const double> maximum_force_;
 };
 
 using ForceConstraintPtr = std::shared_ptr<ForceConstraint>;

@@ -45,13 +45,13 @@ public:
      * @brief Get the pointer to the output data.
      * @return A shared pointer to the output data.
      */
-    virtual doubleConstPtr getOutput() const final;
+    virtual std::shared_ptr<const double> getOutput() const final;
 
     /**
      * @brief Set the pointer to the input data.
      * @return A shared pointer to the input data.
      */
-    virtual void setInput(doubleConstPtr input) final;
+    virtual void setInput(std::shared_ptr<const double> input) final;
 
     /**
      * @brief Compute the interpolator's parameters .
@@ -73,8 +73,8 @@ public:
     }
 
 protected:
-    doubleConstPtr input_;
-    doublePtr output_;
+    std::shared_ptr<const double> input_;
+    std::shared_ptr<double> output_;
 };
 
 using InterpolatorPtr = std::shared_ptr<Interpolator>;

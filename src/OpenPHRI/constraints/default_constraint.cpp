@@ -20,8 +20,10 @@
 
 #include <OpenPHRI/constraints/default_constraint.h>
 
-using namespace phri;
+namespace phri {
 
 double DefaultConstraint::compute() {
     return 1.;
 }
+
+} // namespace phri

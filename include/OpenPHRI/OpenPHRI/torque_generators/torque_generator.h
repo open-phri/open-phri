@@ -18,13 +18,11 @@
  * program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * @file torque_generator.h
- * @author Benjamin Navarro
- * @brief Base class definition for torque generators
- * @date May 2017
- * @ingroup OpenPHRI
- */
+//! \file torque_generator.h
+//! \author Benjamin Navarro
+//! \brief Base class for all torque generators.
+//! \date 05-2019
+//! \ingroup phri
 
 #pragma once
 
@@ -34,9 +32,9 @@
 
 namespace phri {
 
-/** @brief Base class for all torque generators.
- *  @details Provides a pure virtual compute method.
- */
+//! \brief Base class for all torque generators.
+//! \details Provides a pure virtual compute method to be implemented by derived
+//! classes.
 class TorqueGenerator {
 public:
     TorqueGenerator() = default;

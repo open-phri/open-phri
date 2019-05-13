@@ -18,13 +18,11 @@
  * program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * @file stiffness_generator.h
- * @author Benjamin Navarro
- * @brief Definition of the StiffnessGenerator class
- * @date April 2017
- * @ingroup OpenPHRI
- */
+//! \file stiffness_generator.h
+//! \author Benjamin Navarro
+//! \brief Generates a force as if a virtual spring is attached to the robot.
+//! \date 05-2019
+//! \ingroup phri
 
 #pragma once
 
@@ -33,33 +31,102 @@
 
 namespace phri {
 
-/** @brief Generates a force as if a virtual spring is attached to the robot.
- */
+//! \brief Generates a force as if a virtual spring is attached to the robot.
 class StiffnessGenerator : public ForceGenerator {
 public:
-    /**
-     * @brief Construct a stiffness generator given a stiffness and a target
-     * position.
-     * @param stiffness The virtual stiffness value.
-     * @param target_position The position target.
-     * @param stiffness_frame The frame in which the stiffness is expressed.
-     * @param target_position_frame The frame in which the position target is
-     * expressed.
-     */
-    StiffnessGenerator(Matrix6dConstPtr stiffness, PoseConstPtr target_position,
-                       ReferenceFrame stiffness_frame = ReferenceFrame::TCP);
+    //! \brief Construct a new StiffnessGenerator object with initial
+    //! stiffness and pose set to zero.
+    //! \details Use StiffnessGenerator::stiffness() and
+    //! StiffnessGenerator::pose() to set it to the desired value
+    //! \param stiffness_frame The reference frame in which  the stiffness is
+    //! expressed
+    explicit StiffnessGenerator(ReferenceFrame stiffness_frame);
 
-    ~StiffnessGenerator() = default;
+    //! \brief Construct a stiffness generator given a stiffness and a target
+    //! pose.
+    //! \param stiffness The virtual stiffness value.
+    //! \param target_pose The pose target.
+    //! \param stiffness_frame The frame in which the stiffness is expressed.
+    StiffnessGenerator(std::shared_ptr<Vector6d> stiffness,
+                       std::shared_ptr<Pose> target_pose,
+                       ReferenceFrame stiffness_frame);
+
+    //! \brief Construct a stiffness generator given a stiffness and a target
+    //! pose.
+    //! \param stiffness The virtual stiffness value. Make sure that \p
+    //! stiffness outlives the generator
+    //! \param target_pose The pose target. Make sure that \p target_pose
+    //! outlives the generator
+    //! \param stiffness_frame The reference frame in which  the stiffness is
+    //! expressed
+    StiffnessGenerator(Vector6d& stiffness, Pose& target_pose,
+                       ReferenceFrame stiffness_frame);
+
+    //! \brief Construct a stiffness generator given a stiffness and a target
+    //! pose.
+    //! \param stiffness The virtual stiffness value.
+    //! \param target_pose The pose target.
+    //! \param stiffness_frame The frame in which the stiffness is expressed.
+    StiffnessGenerator(const Vector6d& stiffness, const Pose& target_pose,
+                       ReferenceFrame stiffness_frame);
+
+    //! \brief Construct a stiffness generator given a stiffness and a target
+    //! pose.
+    //! \param stiffness The virtual stiffness value.
+    //! \param target_pose The pose target.
+    //! \param stiffness_frame The frame in which the stiffness is expressed.
+    StiffnessGenerator(Vector6d&& stiffness, Pose&& target_pose,
+                       ReferenceFrame stiffness_frame);
+
+    //! \brief Default copy constructor
+    StiffnessGenerator(const StiffnessGenerator&) = default;
+
+    //! \brief Default move constructor
+    StiffnessGenerator(StiffnessGenerator&&) = default;
+
+    //! \brief Default virtual destructor
+    //! \details If \ref StiffnessGenerator::external_force_ was
+    //! created using an rvalue reference, the pointed memory won't be released
+    virtual ~StiffnessGenerator() = default;
+
+    //! \brief Default copy operator
+    StiffnessGenerator& operator=(const StiffnessGenerator&) = default;
+
+    //! \brief Default move operator
+    StiffnessGenerator& operator=(StiffnessGenerator&&) = default;
+
+    //! \brief Read/write access the stiffness used by the generator
+    //! \return double& A reference to the stiffness
+    Vector6d& stiffness();
+
+    //! \brief Read access the stiffness used by the generator
+    //! \return double The stiffness value
+    const Vector6d& stiffness() const;
+
+    //! \brief Access to the shared pointer holding the stiffness used
+    //! by the generator
+    //! \return std::shared_ptr<double> A shared pointer to the stiffness
+    std::shared_ptr<Vector6d> stiffnessPtr() const;
+
+    //! \brief Read/write access the target pose used by the generator
+    //! \return double& A reference to the target pose
+    Pose& targetPose();
+
+    //! \brief Read access the target pose used by the generator
+    //! \return double The target pose value
+    const Pose& targetPose() const;
+
+    //! \brief Access to the shared pointer holding the target pose used
+    //! by the generator
+    //! \return std::shared_ptr<double> A shared pointer to the target pose
+    std::shared_ptr<Pose> targetPosePtr() const;
 
 protected:
-    virtual void update(Vector6d& force) override;
+    virtual void update(Wrench& force) override;
 
-    Matrix6dConstPtr stiffness_;
-    PoseConstPtr target_position_;
+    std::shared_ptr<Vector6d> stiffness_;
+    std::shared_ptr<Pose> target_pose_;
     ReferenceFrame stiffness_frame_;
 };
-
-using StiffnessGeneratorPtr = std::shared_ptr<StiffnessGenerator>;
-using StiffnessGeneratorConstPtr = std::shared_ptr<const StiffnessGenerator>;
 
 } // namespace phri

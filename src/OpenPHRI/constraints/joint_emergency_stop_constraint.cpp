@@ -129,4 +129,10 @@ JointEmergencyStopConstraint::deactivationThresholdPtr() const {
     return deactivation_threshold_;
 }
 
+void JointEmergencyStopConstraint::setRobot(Robot const* new_robot) {
+    Constraint::setRobot(new_robot);
+    activationThreshold().resize(robot().jointCount());
+    deactivationThreshold().resize(robot().jointCount());
+}
+
 } // namespace phri

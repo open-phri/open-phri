@@ -22,25 +22,27 @@
 
 namespace phri {
 
-VelocityProxy::VelocityProxy(ReferenceFrame frame)
-    : VelocityGenerator(frame), external_velocity_(std::make_shared<Twist>()) {
+VelocityProxy::VelocityProxy() : VelocityProxy(Twist{}) {
 }
 
-VelocityProxy::VelocityProxy(std::shared_ptr<Twist> velocity,
-                             ReferenceFrame frame)
-    : VelocityGenerator(frame), external_velocity_(velocity) {
+VelocityProxy::VelocityProxy(std::shared_ptr<Twist> velocity)
+    : VelocityGenerator(), external_velocity_(velocity) {
 }
 
-VelocityProxy::VelocityProxy(Twist& velocity, ReferenceFrame frame)
-    : VelocityProxy(std::shared_ptr<Twist>(&velocity, [](auto p) {}), frame) {
+VelocityProxy::VelocityProxy(Twist& velocity)
+    : VelocityProxy(std::shared_ptr<Twist>(&velocity, [](auto p) {})) {
 }
 
-VelocityProxy::VelocityProxy(const Twist& velocity, ReferenceFrame frame)
-    : VelocityProxy(std::make_shared<Twist>(velocity), frame) {
+VelocityProxy::VelocityProxy(const Twist& velocity)
+    : VelocityProxy(std::make_shared<Twist>(velocity)) {
 }
 
-VelocityProxy::VelocityProxy(Twist&& velocity, ReferenceFrame frame)
-    : VelocityProxy(std::make_shared<Twist>(std::move(velocity)), frame) {
+VelocityProxy::VelocityProxy(Twist&& velocity)
+    : VelocityProxy(std::make_shared<Twist>(std::move(velocity))) {
+}
+
+VelocityProxy::VelocityProxy(const generator& generator)
+    : generator_(generator) {
 }
 
 void VelocityProxy::update(Twist& velocity) {
@@ -55,7 +57,7 @@ Twist& VelocityProxy::velocity() {
     return *external_velocity_;
 }
 
-Twist VelocityProxy::velocity() const {
+const Twist& VelocityProxy::velocity() const {
     return *external_velocity_;
 }
 

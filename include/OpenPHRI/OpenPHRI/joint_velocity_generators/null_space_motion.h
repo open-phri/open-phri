@@ -18,13 +18,11 @@
  * program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * @file null_space_motion.h
- * @author Benjamin Navarro
- * @brief Definition of the NullSpaceMotion class
- * @date April 2018
- * @ingroup OpenPHRI
- */
+//! \file null_space_motion.h
+//! \author Benjamin Navarro
+//! \brief Adds a joint velocity in the null space of the task jacobian.
+//! \date 05-2019
+//! \ingroup phri
 
 #pragma once
 
@@ -33,24 +31,77 @@
 
 namespace phri {
 
-/** @brief Adds a joint velocity in the null space of the task jacobian.
- *  @details Can be useful to perform a secondary task such as joint limits
- * avoidance.
- */
+//! \brief Adds a joint velocity in the null space of the task jacobian.
+//! \details Can be useful to perform a secondary task such as joint limits
+//! avoidance.
 class NullSpaceMotion : public JointVelocityGenerator {
 public:
-    explicit NullSpaceMotion(VectorXdConstPtr joint_velocity);
+    //! \brief Construct a new NullSpaceMotion object with an initial
+    //! velocity set to zero.
+    //! \details Use NullSpaceMotion::velocity() to set it to the desired
+    //! value
+    NullSpaceMotion();
+
+    //! \brief Construct a new NullSpaceMotion object using the given
+    //! pointed value
+    //! \param velocity The velocity to forward
+    explicit NullSpaceMotion(std::shared_ptr<VectorXd> velocity);
+
+    //! \brief Construct a new NullSpaceMotion object using the given
+    //! referenced value
+    //! \param velocity The velocity to forward. Make sure that \p velocity
+    //! outlives the generator
+    explicit NullSpaceMotion(VectorXd& velocity);
+
+    //! \brief Construct a new NullSpaceMotion object using the given
+    //! value
+    //! \param velocity The velocity to forward
+    explicit NullSpaceMotion(const VectorXd& velocity);
+
+    //! \brief Construct a new NullSpaceMotion object using the given
+    //! value
+    //! \param velocity The velocity to forward
+    explicit NullSpaceMotion(VectorXd&& velocity);
+
+    //! \brief Default copy constructor
+    NullSpaceMotion(const NullSpaceMotion&) = default;
+
+    //! \brief Default move constructor
+    NullSpaceMotion(NullSpaceMotion&&) = default;
+
+    //! \brief Default virtual destructor
+    //! \details If \ref NullSpaceMotion::external_velocity_ was
+    //! created using an rvalue reference, the pointed memory won't be released
     virtual ~NullSpaceMotion() = default;
+
+    //! \brief Default copy operator
+    NullSpaceMotion& operator=(const NullSpaceMotion&) = default;
+
+    //! \brief Default move operator
+    NullSpaceMotion& operator=(NullSpaceMotion&&) = default;
+
+    //! \brief Read/write access the velocity used by the generator
+    //! \return double& A reference to the velocity
+    VectorXd& velocity();
+
+    //! \brief Read access the velocity used by the generator
+    //! \return double The velocity value
+    VectorXd velocity() const;
+
+    //! \brief Access to the shared pointer holding the velocity used
+    //! by the generator
+    //! \return std::shared_ptr<double> A shared pointer to the forwarded
+    //! velocity
+    std::shared_ptr<VectorXd> velocityPtr() const;
 
 protected:
     virtual void update(VectorXd& velocity) override;
 
-    VectorXdConstPtr joint_velocity_;
+    virtual void setRobot(Robot const* robot) override;
+
+    std::shared_ptr<VectorXd> joint_velocity_;
     MatrixXd null_space_projector_;
     MatrixXd identity_;
 };
-
-using NullSpaceMotionPtr = std::shared_ptr<NullSpaceMotion>;
-using NullSpaceMotionConstPtr = std::shared_ptr<const NullSpaceMotion>;
 
 } // namespace phri

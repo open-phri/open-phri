@@ -21,18 +21,54 @@
 #include <OpenPHRI/joint_velocity_generators/null_space_motion.h>
 #include <iostream>
 
-using namespace phri;
+namespace phri {
 
-NullSpaceMotion::NullSpaceMotion(VectorXdConstPtr joint_velocity)
-    : joint_velocity_(joint_velocity) {
-    null_space_projector_.resize(joint_velocity->size(),
-                                 joint_velocity->size());
-    identity_.resize(joint_velocity->size(), joint_velocity->size());
+NullSpaceMotion::NullSpaceMotion() : NullSpaceMotion(VectorXd{}) {
+}
+
+NullSpaceMotion::NullSpaceMotion(std::shared_ptr<VectorXd> velocity)
+    : joint_velocity_(velocity) {
+}
+
+NullSpaceMotion::NullSpaceMotion(VectorXd& velocity)
+    : NullSpaceMotion(std::shared_ptr<VectorXd>(&velocity, [](auto p) {})) {
+}
+
+NullSpaceMotion::NullSpaceMotion(const VectorXd& velocity)
+    : NullSpaceMotion(std::make_shared<VectorXd>(velocity)) {
+}
+
+NullSpaceMotion::NullSpaceMotion(VectorXd&& velocity)
+    : NullSpaceMotion(std::make_shared<VectorXd>(std::move(velocity))) {
+}
+
+void NullSpaceMotion::update(VectorXd& joint_velocity) {
+    null_space_projector_ =
+        identity_ - robot().control.jacobian_inverse * robot().control.jacobian;
+    joint_velocity = null_space_projector_ * velocity();
+}
+
+VectorXd& NullSpaceMotion::velocity() {
+    return *joint_velocity_;
+}
+
+VectorXd NullSpaceMotion::velocity() const {
+    return *joint_velocity_;
+}
+
+std::shared_ptr<VectorXd> NullSpaceMotion::velocityPtr() const {
+    return joint_velocity_;
+}
+
+void NullSpaceMotion::setRobot(Robot const* new_robot) {
+    JointVelocityGenerator::setRobot(new_robot);
+    velocity().resize(robot().jointCount());
+
+    auto dofs = robot().jointCount();
+
+    null_space_projector_.resize(dofs, dofs);
+    identity_.resize(dofs, dofs);
     identity_.setIdentity();
 }
 
-void NullSpaceMotion::update(VectorXd& velocity) {
-    null_space_projector_ =
-        identity_ - robot_->control.jacobian_inverse * robot_->control.jacobian;
-    velocity = null_space_projector_ * (*joint_velocity_);
-}
+} // namespace phri

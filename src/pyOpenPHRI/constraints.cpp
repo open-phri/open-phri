@@ -41,27 +41,27 @@ std::shared_ptr<DefaultConstraint> NewDefaultConstraint(ConstraintType type) {
 }
 
 std::shared_ptr<VelocityConstraint>
-NewVelocityConstraint(doubleConstPtr maximum_velocity) {
+NewVelocityConstraint(std::shared_ptr<const double> maximum_velocity) {
     return std::make_shared<VelocityConstraint>(maximum_velocity);
 }
 
-std::shared_ptr<KineticEnergyConstraint>
-NewKineticEnergyConstraint(doubleConstPtr mass,
-                           doubleConstPtr maximum_kinetic_energy) {
+std::shared_ptr<KineticEnergyConstraint> NewKineticEnergyConstraint(
+    std::shared_ptr<const double> mass,
+    std::shared_ptr<const double> maximum_kinetic_energy) {
     return std::make_shared<KineticEnergyConstraint>(mass,
                                                      maximum_kinetic_energy);
 }
 
 std::shared_ptr<PowerConstraintWrap>
-NewPowerConstraint(Vector6dConstPtr external_force,
-                   doubleConstPtr maximum_power) {
+NewPowerConstraint(std::shared_ptr<const Vector6d> external_force,
+                   std::shared_ptr<const double> maximum_power) {
     return std::make_shared<PowerConstraintWrap>(external_force, maximum_power);
 }
 
-std::shared_ptr<EmergencyStopConstraint>
-NewEmergencyStopConstraint(Vector6dConstPtr external_force,
-                           doubleConstPtr activation_force_threshold,
-                           doubleConstPtr deactivation_force_threshold) {
+std::shared_ptr<EmergencyStopConstraint> NewEmergencyStopConstraint(
+    std::shared_ptr<const Vector6d> external_force,
+    std::shared_ptr<const double> activation_force_threshold,
+    std::shared_ptr<const double> deactivation_force_threshold) {
     return std::make_shared<EmergencyStopConstraint>(
         external_force, activation_force_threshold,
         deactivation_force_threshold);
@@ -74,10 +74,9 @@ NewSeparationDistanceConstraint(ConstraintPtr constraint,
                                                           interpolator);
 }
 
-std::shared_ptr<SeparationDistanceConstraint>
-NewSeparationDistanceConstraint(ConstraintPtr constraint,
-                                InterpolatorPtr interpolator,
-                                Vector6dConstPtr robot_position) {
+std::shared_ptr<SeparationDistanceConstraint> NewSeparationDistanceConstraint(
+    ConstraintPtr constraint, InterpolatorPtr interpolator,
+    std::shared_ptr<const Vector6d> robot_position) {
     return std::make_shared<SeparationDistanceConstraint>(
         constraint, interpolator, robot_position);
 }
@@ -107,7 +106,7 @@ void wrapConstraints() {
         "Create a new instance of a EmergencyStopConstraint shared_ptr");
     def("NewSeparationDistanceConstraint",
         (std::shared_ptr<SeparationDistanceConstraint>(*)(
-            ConstraintPtr, InterpolatorPtr, Vector6dConstPtr))0,
+            ConstraintPtr, InterpolatorPtr, std::shared_ptr<const Vector6d>))0,
         NewSeparationDistanceConstraint_overloads(
             args("constraint", "interpolator", "robot_position"),
             "Create a new instance of a SeparationDistanceConstraint "
@@ -163,8 +162,9 @@ void wrapConstraints() {
     void (
         SeparationDistanceConstraint::*SeparationDistanceConstraint_setVerbose)(
         bool) = &SeparationDistanceConstraint::setVerbose;
-    class_<SeparationDistanceConstraint, boost::noncopyable,
-           bases<Constraint, ObjectCollection<Vector6dConstPtr>>>(
+    class_<
+        SeparationDistanceConstraint, boost::noncopyable,
+        bases<Constraint, ObjectCollection<std::shared_ptr<const Vector6d>>>>(
         "SeparationDistanceConstraint",
         "Separation distance constraint, adapts the constraint depending on "
         "the distance to the closest object",

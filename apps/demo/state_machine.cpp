@@ -457,7 +457,7 @@ bool StateMachine::setupJointTrajectoryGenerator() {
 }
 
 void StateMachine::computeLaserDistanceInTCPFrame(
-    phri::PosePtr obstacle_position) {
+    std::shared_ptr<Pose> obstacle_position) {
     phri::Vector4d position_laser = phri::Vector4d::Ones();
     position_laser.x() = operator_position_laser_->x();
     position_laser.y() = operator_position_laser_->y();

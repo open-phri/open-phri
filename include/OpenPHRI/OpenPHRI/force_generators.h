@@ -30,6 +30,6 @@
 
 #include <OpenPHRI/force_generators/force_proxy.h>
 #include <OpenPHRI/force_generators/external_force.h>
-#include <OpenPHRI/force_generators/potential_field_generator.h>
+// #include <OpenPHRI/force_generators/potential_field_generator.h>
 #include <OpenPHRI/force_generators/stiffness_generator.h>
 #include <OpenPHRI/force_generators/mass_generator.h>

@@ -41,8 +41,9 @@ namespace phri {
  *  @details You have to provide preconfigured constraint and interpolator.
  *  The interpolator input is set to the serapration distance.
  */
-class SeparationDistanceConstraint : public Constraint,
-                                     public ObjectCollection<PoseConstPtr> {
+class SeparationDistanceConstraint
+    : public Constraint,
+      public ObjectCollection<std::shared_ptr<Pose>> {
 public:
     /**
      * @brief Construct a separaration distance constraint with a given
@@ -63,9 +64,9 @@ public:
      * @param robot_position The positon of the robot in the same frame as the
      * objects.
      */
-    SeparationDistanceConstraint(std::shared_ptr<Constraint> constraint,
-                                 InterpolatorPtr interpolator,
-                                 Vector6dConstPtr robot_position);
+    SeparationDistanceConstraint(
+        std::shared_ptr<Constraint> constraint, InterpolatorPtr interpolator,
+        std::shared_ptr<const Vector6d> robot_position);
 
     virtual ~SeparationDistanceConstraint() = default;
 
@@ -75,7 +76,7 @@ public:
      * @brief Retrieve the separation shared pointer.
      * @return The shared pointer to the separation power.
      */
-    doubleConstPtr getSeparationDistance() const;
+    std::shared_ptr<const double> getSeparationDistance() const;
 
 protected:
     virtual void setRobot(Robot const* robot) override;
@@ -85,8 +86,8 @@ private:
 
     std::shared_ptr<Constraint> constraint_;
     InterpolatorPtr interpolator_;
-    Vector6dConstPtr robot_position_;
-    doublePtr separation_distance_;
+    std::shared_ptr<const Vector6d> robot_position_;
+    std::shared_ptr<double> separation_distance_;
 };
 
 } // namespace phri

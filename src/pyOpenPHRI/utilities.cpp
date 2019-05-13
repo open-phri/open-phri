@@ -106,7 +106,7 @@ void wrapUtilities() {
     CREATE_DERIVATOR(Vector3d)
     CREATE_DERIVATOR(Vector6d)
 
-    CREATE_OBJECT_COLLECTION(Vector6dConstPtr)
+    CREATE_OBJECT_COLLECTION(std::shared_ptr<const Vector6d>)
     CREATE_OBJECT_COLLECTION(PotentialFieldObjectPtr)
     CREATE_OBJECT_COLLECTION(TrajectoryPtr)
 

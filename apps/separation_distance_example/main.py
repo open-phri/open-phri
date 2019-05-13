@@ -7,9 +7,13 @@ import math
 SAMPLE_TIME = 0.01
 stop = False
 
+
+
 def sigint_handler(signal, frame):
     global stop
+
     stop = True
+
 
 ###				         V-REP driver	       		  ###
 driver = NewVREPDriver(
@@ -33,27 +37,27 @@ max_vel_interpolator.enableSaturation(True)
 maximum_velocity = max_vel_interpolator.getOutput()
 velocity_constraint = NewVelocityConstraint(maximum_velocity)
 
-# Objects are tracked in the TCP frame so there is no need to provide the robot position
-separation_dist_vel_cstr = NewSeparationDistanceConstraint(
-	velocity_constraint,
-	max_vel_interpolator)
+    velocity_constraint,
+    max_vel_interpolator)
+    velocity_constraint,
+    max_vel_interpolator)
 
 separation_dist_vel_cstr.setVerbose(True)
 obs1 = driver.trackObjectPosition("obstacle1", ReferenceFrame.TCP)
 obs2 = driver.trackObjectPosition("obstacle2", ReferenceFrame.TCP)
 separation_dist_vel_cstr.add("obstacle1", obs1)
-separation_dist_vel_cstr.add("obstacle2", obs2)
+ext_force = Newstd: : shared_ptr < Vector6d > ()
 
-ext_force = NewVector6dPtr()
+ext_force = Newstd: : shared_ptr < Vector6d > ()
 ext_force_generator = NewForceProxy(ext_force)
 
 safety_controller.addConstraint(
     "velocity constraint",
     separation_dist_vel_cstr)
-
-safety_controller.addForceGenerator(
-	"ext force proxy",
-	ext_force_generator)
+    "ext force proxy",
+    ext_force_generator)
+    "ext force proxy",
+    ext_force_generator)
 
 driver.enableSynchonous(True)
 

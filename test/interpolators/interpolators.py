@@ -8,7 +8,7 @@ def isClose(v1, v2, eps = 1e-3):
 
 lin_from = NewLinearPoint(0. ,1.)
 lin_to = NewLinearPoint(1. ,2.)
-lin_x = NewDoublePtr(0.)
+lin_x = Newstd::shared_ptr<double>(0.)
 
 lin_interp = NewLinearInterpolator(
 	lin_from,
@@ -59,7 +59,7 @@ poly_to = NewPolynomialPoint(
 	0.  # d2y
 	)
 
-poly_x = NewDoublePtr(0.)
+poly_x = Newstd::shared_ptr<double>(0.)
 
 poly_interp = NewPolynomialInterpolator(
 	poly_from,

@@ -38,7 +38,8 @@ namespace phri {
  * items that can collide with the its TCP.
  *  @tparam joint_count Number of joints of the manipulator.
  */
-class ManipulatorEquivalentMass : public ObjectCollection<Vector6dConstPtr> {
+class ManipulatorEquivalentMass
+    : public ObjectCollection<std::shared_ptr<const Vector6d>> {
 public:
     /**
      * @brief Construct a manipulator equivalent mass utility given an inertia
@@ -47,8 +48,8 @@ public:
      * @param inertia_matrix A shared pointer to the inertia matrix.
      * @param jacobian_matrix A shared pointer to the Jacobian matrix.
      */
-    ManipulatorEquivalentMass(MatrixXdConstPtr inertia_matrix,
-                              MatrixXdConstPtr jacobian_matrix);
+    ManipulatorEquivalentMass(std::shared_ptr<const MatrixXd> inertia_matrix,
+                              std::shared_ptr<const MatrixXd> jacobian_matrix);
 
     /**
      * @brief Construct a manipulator equivalent mass utility given an inertia
@@ -59,9 +60,9 @@ public:
      * @param robot_position A shared pointer to the robot position in the
      * chosen frame.
      */
-    ManipulatorEquivalentMass(MatrixXdConstPtr inertia_matrix,
-                              MatrixXdConstPtr jacobian_matrix,
-                              Vector6dConstPtr robot_position);
+    ManipulatorEquivalentMass(std::shared_ptr<const MatrixXd> inertia_matrix,
+                              std::shared_ptr<const MatrixXd> jacobian_matrix,
+                              std::shared_ptr<const Vector6d> robot_position);
 
     ~ManipulatorEquivalentMass() = default;
 
@@ -69,7 +70,7 @@ public:
      * @brief Get the pointer to the equivalent mass.
      * @return A shared pointer to the equivalent mass.
      */
-    doubleConstPtr getEquivalentMass() const;
+    std::shared_ptr<const double> getEquivalentMass() const;
 
     /**
      * @brief Compute the equivalent mass based on the inertia, jacobian and the
@@ -87,10 +88,10 @@ public:
 private:
     Vector3d closestObjectDirection();
 
-    MatrixXdConstPtr inertia_matrix_;
-    MatrixXdConstPtr jacobian_matrix_;
-    Vector6dConstPtr robot_position_;
-    doublePtr mass_;
+    std::shared_ptr<const MatrixXd> inertia_matrix_;
+    std::shared_ptr<const MatrixXd> jacobian_matrix_;
+    std::shared_ptr<const Vector6d> robot_position_;
+    std::shared_ptr<double> mass_;
 };
 
 } // namespace phri

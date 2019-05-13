@@ -18,13 +18,11 @@
  * program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * @file joint_velocity_generator.h
- * @author Benjamin Navarro
- * @brief Base class definition for joint_velocity generators
- * @date April 2017
- * @ingroup OpenPHRI
- */
+//! \file joint_velocity_generator.h
+//! \author Benjamin Navarro
+//! \brief Base class for all joint_velocity generators
+//! \date 05-2019
+//! \ingroup phri
 
 #pragma once
 
@@ -36,42 +34,57 @@
 
 namespace phri {
 
-/** @brief Base class for all joint_velocity generators.
- *  @details Provides a pure virtual compute method.
- */
+//! \brief Base class for all joint_velocity generators.
+//! \details Provides a pure virtual compute method to be implemented by derived
+//! classes.
 class JointVelocityGenerator {
 public:
+    //! \brief Default constructor
     JointVelocityGenerator() = default;
+
+    //! \brief Default copy constructor
+    JointVelocityGenerator(const JointVelocityGenerator&) = default;
+
+    //! \brief Default move constructor
+    JointVelocityGenerator(JointVelocityGenerator&&) = default;
+
+    //! \brief Default virtual destructor
     virtual ~JointVelocityGenerator() = default;
 
-    /**
-     * @brief Compute the value associated with the joint_velocity generator.
-     * @return The joint_velocity generator's evaluated value.
-     */
+    //! \brief Default copy operator
+    JointVelocityGenerator& operator=(const JointVelocityGenerator&) = default;
+
+    //! \brief Default move operator
+    JointVelocityGenerator& operator=(JointVelocityGenerator&&) = default;
+
+    //! \brief Compute the value associated with the joint_velocity generator.
+    //! \return The joint_velocity generator's evaluated value.
     virtual VectorXd compute() final;
 
-    /**
-     * @brief Call operator, shortcut for compute().
-     * @return The joint_velocity generator's evaluated value.
-     */
+    //! \brief Call operator, shortcut for compute().
+    //! \return The joint_velocity generator's evaluated value.
     virtual VectorXd operator()() final;
 
 protected:
     friend class SafetyController;
 
+    //! \brief Derived classed must implement this to provide their velocity
+    //! output
+    //! \param velocity A reference to the velocity to set
     virtual void update(VectorXd& velocity) = 0;
 
-    /**
-     * @brief Set the robot to work with.
-     * @param robot The robot.
-     */
+    //! \brief Set the robot to work with.
+    //! \param robot The robot.
     virtual void setRobot(Robot const* robot);
 
-    Robot const* robot_;
-};
+    //! \brief Read/write access the controlled robot
+    //! \return double& A reference to the controlled robot
+    virtual const Robot& robot() const final;
 
-using JointVelocityGeneratorPtr = std::shared_ptr<JointVelocityGenerator>;
-using JointVelocityGeneratorConstPtr =
-    std::shared_ptr<const JointVelocityGenerator>;
+private:
+    Robot const* robot_;
+
+    VectorXd velocity_;
+};
 
 } // namespace phri

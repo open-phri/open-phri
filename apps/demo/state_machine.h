@@ -62,7 +62,8 @@ public:
 private:
     bool setupTrajectoryGenerator();
     bool setupJointTrajectoryGenerator();
-    void computeLaserDistanceInTCPFrame(phri::PosePtr obstacle_position);
+    void
+    computeLaserDistanceInTCPFrame(std::shared_ptr<Pose> obstacle_position);
     void computeNullSpaceVelocityVector();
 
     phri::RobotPtr robot_;

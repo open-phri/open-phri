@@ -35,7 +35,7 @@ struct TrajectoryWrap : public Trajectory {
 };
 
 std::shared_ptr<TrajectoryPoint>
-NewTrajectoryPointPtr(doublePtr y, doublePtr dy, doublePtr d2y) {
+NewTrajectoryPointPtr(std::shared_ptr<double> y, std::shared_ptr<double> dy, std::shared_ptr<double> d2y) {
     return std::make_shared<TrajectoryPoint>(y, dy, d2y);
 }
 
@@ -79,7 +79,7 @@ NewLinearInterpolator(LinearPointPtr from, LinearPointPtr to) {
 }
 
 std::shared_ptr<LinearInterpolatorWrap>
-NewLinearInterpolator(LinearPointPtr from, LinearPointPtr to, doublePtr input) {
+NewLinearInterpolator(LinearPointPtr from, LinearPointPtr to, std::shared_ptr<double> input) {
     return std::make_shared<LinearInterpolatorWrap>(from, to, input);
 }
 BOOST_PYTHON_FUNCTION_OVERLOADS(NewLinearInterpolator_overloads,
@@ -92,7 +92,7 @@ NewPolynomialInterpolator(PolynomialPointPtr from, PolynomialPointPtr to) {
 
 std::shared_ptr<PolynomialInterpolatorWrap>
 NewPolynomialInterpolator(PolynomialPointPtr from, PolynomialPointPtr to,
-                          doublePtr input) {
+                          std::shared_ptr<double> input) {
     return std::make_shared<PolynomialInterpolatorWrap>(from, to, input);
 }
 BOOST_PYTHON_FUNCTION_OVERLOADS(NewPolynomialInterpolator_overloads,
@@ -118,7 +118,7 @@ void wrapInterpolators() {
 
     class_<TrajectoryPoint>("TrajectoryPoint",
                             "Point used by the TrajectoryGenerator",
-                            init<doublePtr, doublePtr, doublePtr>())
+                            init<std::shared_ptr<double>, std::shared_ptr<double>, std::shared_ptr<double>>())
         .def(init<double, double, double>())
         .add_property(
             "y", +[](const TrajectoryPoint& pt) -> double { return *pt.y; },
@@ -138,7 +138,7 @@ void wrapInterpolators() {
         "Trajectory",
         "A Trajectory is composed of multiple TrajectoryPoint with time or "
         "velocity/acceleration constraints",
-        init<TrajectoryOutputType, TrajectoryPointPtr, doublePtr, double>())
+        init<TrajectoryOutputType, TrajectoryPointPtr, std::shared_ptr<double>, double>())
         .def(init<TrajectoryOutputType, TrajectoryPointPtr, double>())
         .def("addPathTo", addPathTo_Max)
         .def("addPathTo", addPathTo_Fixed)
@@ -202,14 +202,14 @@ void wrapInterpolators() {
     /*********************************************************************************/
     def("NewLinearInterpolator",
         (std::shared_ptr<LinearInterpolatorWrap>(*)(
-            LinearPointPtr, LinearPointPtr, doublePtr))0,
+            LinearPointPtr, LinearPointPtr, std::shared_ptr<double>))0,
         NewLinearInterpolator_overloads(
             args("from", "to", "rob_pos"),
             "Create a new instance of a LinearInterpolator shared_ptr"));
 
     def("NewPolynomialInterpolator",
         (std::shared_ptr<PolynomialInterpolatorWrap>(*)(
-            PolynomialPointPtr, PolynomialPointPtr, doublePtr))0,
+            PolynomialPointPtr, PolynomialPointPtr, std::shared_ptr<double>))0,
         NewPolynomialInterpolator_overloads(
             args("from", "to", "rob_pos"),
             "Create a new instance of a PolynomialInterpolator shared_ptr"));
@@ -235,7 +235,7 @@ void wrapInterpolators() {
 
     class_<LinearPoint>("LinearPoint",
                         "Interpolation point to use with LinearInterpolator",
-                        init<doublePtr, doublePtr>())
+                        init<std::shared_ptr<double>, std::shared_ptr<double>>())
         .def(init<double, double>())
         .add_property(
             "x", +[](const LinearPoint& pt) -> double { return *pt.x; },
@@ -246,7 +246,7 @@ void wrapInterpolators() {
 
     def(
         "NewLinearPoint",
-        +[](doublePtr x, doublePtr y) -> std::shared_ptr<LinearPoint> {
+        +[](std::shared_ptr<double> x, std::shared_ptr<double> y) -> std::shared_ptr<LinearPoint> {
             return std::make_shared<LinearPoint>(x, y);
         });
     def(
@@ -265,7 +265,7 @@ void wrapInterpolators() {
     class_<PolynomialPoint, bases<TrajectoryPoint>>(
         "PolynomialPoint",
         "Interpolation point to use with PolynomialInterpolator",
-        init<doublePtr, doublePtr, doublePtr, doublePtr>())
+        init<std::shared_ptr<double>, std::shared_ptr<double>, std::shared_ptr<double>, std::shared_ptr<double>>())
         .def(init<double, double, double, double>())
         .add_property(
             "x", +[](const PolynomialPoint& pt) -> double { return *pt.x; },
@@ -273,8 +273,8 @@ void wrapInterpolators() {
 
     def(
         "NewPolynomialPoint",
-        +[](doublePtr x, doublePtr y, doublePtr dy,
-            doublePtr d2y) -> std::shared_ptr<PolynomialPoint> {
+        +[](std::shared_ptr<double> x, std::shared_ptr<double> y, std::shared_ptr<double> dy,
+            std::shared_ptr<double> d2y) -> std::shared_ptr<PolynomialPoint> {
             return std::make_shared<PolynomialPoint>(x, y, dy, d2y);
         });
     def(

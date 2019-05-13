@@ -233,7 +233,8 @@ using TrajectoryPointConstPtr = std::shared_ptr<const TrajectoryPoint<T>>;
  * and second derivatives
  */
 struct PolynomialPoint : public TrajectoryPoint<double> {
-    PolynomialPoint(doublePtr x, doublePtr y, doublePtr dy, doublePtr d2y)
+    PolynomialPoint(std::shared_ptr<double> x, std::shared_ptr<double> y,
+                    std::shared_ptr<double> dy, std::shared_ptr<double> d2y)
         : TrajectoryPoint<double>(y, dy, d2y), x(x) {
     }
 
@@ -241,7 +242,7 @@ struct PolynomialPoint : public TrajectoryPoint<double> {
         : TrajectoryPoint<double>(y, dy, d2y), x(std::make_shared<double>(x)) {
     }
 
-    doublePtr x; // x value
+    std::shared_ptr<double> x; // x value
 };
 
 using PolynomialPointPtr = std::shared_ptr<PolynomialPoint>;
@@ -251,15 +252,16 @@ using PolynomialPointConstPtr = std::shared_ptr<const PolynomialPoint>;
  *  @details A LinearPoint is described by a 2D point (x,y)
  */
 struct LinearPoint {
-    LinearPoint(doublePtr x, doublePtr y) : x(x), y(y) {
+    LinearPoint(std::shared_ptr<double> x, std::shared_ptr<double> y)
+        : x(x), y(y) {
     }
 
     LinearPoint(double x, double y)
         : x(std::make_shared<double>(x)), y(std::make_shared<double>(y)) {
     }
 
-    doublePtr x; // x value
-    doublePtr y; // y value
+    std::shared_ptr<double> x; // x value
+    std::shared_ptr<double> y; // y value
 };
 
 using LinearPointPtr = std::shared_ptr<LinearPoint>;

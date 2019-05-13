@@ -52,7 +52,7 @@ public:
      * @param delay_disk_write     Log data in RAM and write it to the disk when
      * writeStoredDataToDisk is called or on destruction (default = false)
      */
-    DataLogger(const std::string& directory, doubleConstPtr time,
+    DataLogger(const std::string& directory, std::shared_ptr<const double> time,
                bool create_gnuplot_files = false,
                bool delay_disk_write = false);
     ~DataLogger();
@@ -117,7 +117,7 @@ private:
 
     SafetyController* controller_;
     std::string directory_;
-    doubleConstPtr time_;
+    std::shared_ptr<const double> time_;
     bool create_gnuplot_files_;
     bool delay_disk_write_;
 

@@ -10,24 +10,24 @@ safety_controller.setVerbose(True)
 
 tcp_velocity = safety_controller.getTCPVelocity()
 
-rob_pos = NewVector6dPtr()
+rob_pos = Newstd::shared_ptr<Vector6d>()
 potential_field_generator = NewPotentialFieldGenerator(rob_pos)
 potential_field_generator.setVerbose(True)
 
 safety_controller.addForceGenerator("potential field", potential_field_generator)
 
-obs_pos = NewVector6dPtr()
+obs_pos = Newstd::shared_ptr<Vector6d>()
 obstacle = NewPotentialFieldObject(
 	PotentialFieldType.Repulsive,
-	NewDoublePtr(10.),   # gain
-	NewDoublePtr(0.2),   # threshold distance
+	Newstd::shared_ptr<double>(10.),   # gain
+	Newstd::shared_ptr<double>(0.2),   # threshold distance
 	obs_pos)
 
-tgt_pos = NewVector6dPtr()
+tgt_pos = Newstd::shared_ptr<Vector6d>()
 target = NewPotentialFieldObject(
 	PotentialFieldType.Attractive,
-	NewDoublePtr(10.),  		# gain
-	NewDoublePtr(math.inf),   	# threshold distance
+	Newstd::shared_ptr<double>(10.),  		# gain
+	Newstd::shared_ptr<double>(math.inf),   	# threshold distance
 	tgt_pos)
 
 # Step #1 : add

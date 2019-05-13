@@ -18,13 +18,11 @@
  * program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * @file mass_generator.h
- * @author Benjamin Navarro
- * @brief Definition of the MassGenerator class
- * @date April 2017
- * @ingroup OpenPHRI
- */
+//! \file mass_generator.h
+//! \author Benjamin Navarro
+//! \brief Generates a force as if a virtual mass is attached to the robot.
+//! \date 05-2019
+//! \ingroup phri
 
 #pragma once
 
@@ -33,8 +31,7 @@
 
 namespace phri {
 
-/** @brief Generates a force as if a virtual mass is attached to the robot.
- */
+//! \brief Generates a force as if a virtual mass is attached to the robot.
 class MassGenerator : public ForceGenerator {
 public:
     /**
@@ -46,20 +43,18 @@ public:
      * @param target_acceleration_frame The frame in which the acceleration
      * target is expressed.
      */
-    MassGenerator(
-        Matrix6dConstPtr mass, AccelerationConstPtr target_acceleration,
-        ReferenceFrame mass_frame = ReferenceFrame::TCP,
-        ReferenceFrame target_acceleration_frame = ReferenceFrame::TCP);
+    MassGenerator(std::shared_ptr<Matrix6d> mass,
+                  std::shared_ptr<Acceleration> target_acceleration,
+                  ReferenceFrame mass_frame);
 
     ~MassGenerator() = default;
 
 protected:
-    virtual void update(Vector6d& force) override;
+    virtual void update(Wrench& force) override;
 
-    Matrix6dConstPtr mass_;
-    AccelerationConstPtr target_acceleration_;
+    std::shared_ptr<Matrix6d> mass_;
+    std::shared_ptr<Acceleration> target_acceleration_;
     ReferenceFrame mass_frame_;
-    ReferenceFrame target_acceleration_frame_;
 };
 
 using MassGeneratorPtr = std::shared_ptr<MassGenerator>;

@@ -6,9 +6,11 @@ from signal import *
 SAMPLE_TIME = 0.01
 stop = False
 
+
 def sigint_handler(signal, frame):
     global stop
     stop = True
+
 
 ###                 Controller configuration                ###
 damping_matrix = NewMatrix6dPtr(Matrix6.Identity * 100)
@@ -16,13 +18,13 @@ safety_controller = NewSafetyController(damping_matrix)
 
 tcp_velocity = safety_controller.getTCPVelocity()
 
-maximum_velocity = NewDoublePtr(0.1)
+maximum_velocity = Newstd: : shared_ptr < double > (0.1)
 velocity_constraint = NewVelocityConstraint(maximum_velocity)
 
-reference_vel = NewVector6dPtr()
+reference_vel = Newstd: : shared_ptr < Vector6d > ()
 constant_vel_gen = NewVelocityProxy(reference_vel)
 
-ext_force = NewVector6dPtr()
+ext_force = Newstd: : shared_ptr < Vector6d > ()
 ext_force_generator = NewForceProxy(ext_force)
 
 safety_controller.addConstraint(

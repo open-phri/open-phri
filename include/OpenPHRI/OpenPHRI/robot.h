@@ -144,6 +144,8 @@ public:
 
     //! \brief Holds a task state (either current, target or command)
     struct TaskData {
+        TaskData() {
+        }
         //! \brief Task pose (m, rad)
         phri::Pose pose;
         //! \brief Task velocity (m/s, rad/s)

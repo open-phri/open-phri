@@ -153,10 +153,10 @@ struct RobotModel::pImpl {
 
     Robot& robot;
     int control_point_body_index;
-    VectorXdPtr lower_limit;
-    VectorXdPtr upper_limit;
-    VectorXdPtr velocity_limit;
-    VectorXdPtr force_limit;
+    std::shared_ptr<VectorXd> lower_limit;
+    std::shared_ptr<VectorXd> upper_limit;
+    std::shared_ptr<VectorXd> velocity_limit;
+    std::shared_ptr<VectorXd> force_limit;
 };
 
 RobotModel::RobotModel(Robot& robot, const std::string& model_path,
@@ -215,16 +215,16 @@ void RobotModel::forwardKinematics() const {
     impl_->forwardKinematics();
 }
 
-VectorXdConstPtr RobotModel::getLowerLimits() const {
+std::shared_ptr<const VectorXd> RobotModel::getLowerLimits() const {
     return impl_->lower_limit;
 }
-VectorXdConstPtr RobotModel::getUpperLimits() const {
+std::shared_ptr<const VectorXd> RobotModel::getUpperLimits() const {
     return impl_->upper_limit;
 }
-VectorXdConstPtr RobotModel::getVelocityLimits() const {
+std::shared_ptr<const VectorXd> RobotModel::getVelocityLimits() const {
     return impl_->velocity_limit;
 }
-VectorXdConstPtr RobotModel::getForceLimits() const {
+std::shared_ptr<const VectorXd> RobotModel::getForceLimits() const {
     return impl_->force_limit;
 }
 size_t RobotModel::jointCount() const {

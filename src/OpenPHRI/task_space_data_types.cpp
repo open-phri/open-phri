@@ -22,26 +22,31 @@
 namespace phri {
 
 /***			Pose			***/
-Pose::Pose() : Pose(phri::Vector3d::Zero(), Eigen::Quaterniond::Identity()) {
+Pose::Pose(ReferenceFrame frame)
+    : Pose(phri::Vector3d::Zero(), Eigen::Quaterniond::Identity(), frame) {
 }
 
-Pose::Pose(phri::Vector3d translation, Eigen::Quaterniond orientation)
-    : translation_(translation), orientation_(orientation) {
+Pose::Pose(phri::Vector3d translation, Eigen::Quaterniond orientation,
+           ReferenceFrame frame)
+    : TaskSpaceData<Pose>(frame),
+      translation_(translation),
+      orientation_(orientation) {
 }
 
-Pose::Pose(phri::Vector3d translation, phri::Vector3d euler_angles)
+Pose::Pose(phri::Vector3d translation, phri::Vector3d euler_angles,
+           ReferenceFrame frame)
     : Pose(translation,
            Eigen::AngleAxisd(euler_angles.x(), Eigen::Vector3d::UnitX()) // Roll
                * Eigen::AngleAxisd(euler_angles.y(),
                                    Eigen::Vector3d::UnitY()) // Pitch
                * Eigen::AngleAxisd(euler_angles.z(),
-                                   Eigen::Vector3d::UnitZ())) // Yaw
-{
+                                   Eigen::Vector3d::UnitZ()), // Yaw
+           frame) {
 }
 
-Pose::Pose(phri::AffineTransform transformation)
+Pose::Pose(phri::AffineTransform transformation, ReferenceFrame frame)
     : Pose(transformation.translation(),
-           static_cast<Eigen::Quaterniond>(transformation.rotation())) {
+           static_cast<Eigen::Quaterniond>(transformation.rotation()), frame) {
 }
 
 const phri::Vector3d& Pose::translation() const {
@@ -96,14 +101,17 @@ Pose& Pose::operator=(const phri::Vector6d& pos_euler) {
 }
 
 /***			Twist			***/
-Twist::Twist() : Twist(phri::Vector3d::Zero(), phri::Vector3d::Zero()) {
+Twist::Twist(ReferenceFrame frame)
+    : Twist(phri::Vector3d::Zero(), phri::Vector3d::Zero(), frame) {
 }
-Twist::Twist(const phri::Vector3d& translation,
-             const phri::Vector3d& rotation) {
-    twist_.block<3, 1>(0, 0) = translation;
-    twist_.block<3, 1>(3, 0) = rotation;
+Twist::Twist(const phri::Vector3d& translation, const phri::Vector3d& rotation,
+             ReferenceFrame frame)
+    : TaskSpaceData<Twist>(frame) {
+    this->translation() = translation;
+    this->rotation() = rotation;
 }
-Twist::Twist(const phri::Vector6d& twist) : twist_(twist) {
+Twist::Twist(const phri::Vector6d& twist, ReferenceFrame frame)
+    : Twist(twist.segment<3>(0), twist.segment<3>(3), frame) {
 }
 
 Eigen::Ref<const phri::Vector3d> Twist::translation() const {
@@ -156,32 +164,62 @@ Twist& Twist::operator=(const phri::Vector6d& twist) {
 }
 
 Twist Twist::operator-(const phri::Twist& other) const {
-    return Twist(vector() - other.vector());
+    return Twist(*this) -= other;
 }
 
 Twist Twist::operator+(const phri::Twist& other) const {
-    return Twist(vector() + other.vector());
+    return Twist(*this) += other;
 }
 
 Twist Twist::operator*(double scalar) const {
-    return Twist(vector() * scalar);
+    return Twist(*this) *= scalar;
 }
 
 Twist Twist::operator/(double scalar) const {
-    return Twist(vector() / scalar);
+    return Twist(*this) /= scalar;
+}
+
+Twist& Twist::operator-=(const phri::Twist& other) {
+    vector() -= other.transform(frame()).vector();
+    return *this;
+}
+
+Twist& Twist::operator+=(const phri::Twist& other) {
+    vector() += other.transform(frame()).vector();
+    return *this;
+}
+
+Twist& Twist::operator*=(double scalar) {
+    vector() *= scalar;
+    return *this;
+}
+
+Twist& Twist::operator/=(double scalar) {
+    vector() /= scalar;
+    return *this;
+}
+
+Twist operator*(const AffineTransform& transform, const Twist& twist) {
+    Twist new_twist;
+    new_twist.translation() = transform.rotation() * twist.translation();
+    new_twist.rotation() = transform.rotation() * twist.rotation();
+    return new_twist;
 }
 
 /***			Acceleration			***/
-Acceleration::Acceleration()
-    : Acceleration(phri::Vector3d::Zero(), phri::Vector3d::Zero()) {
+Acceleration::Acceleration(ReferenceFrame frame)
+    : Acceleration(phri::Vector3d::Zero(), phri::Vector3d::Zero(), frame) {
 }
-Acceleration::Acceleration(phri::Vector3d translation,
-                           phri::Vector3d rotation) {
-    acceleration_.block<3, 1>(0, 0) = translation;
-    acceleration_.block<3, 1>(3, 0) = rotation;
+Acceleration::Acceleration(phri::Vector3d translation, phri::Vector3d rotation,
+                           ReferenceFrame frame)
+    : TaskSpaceData<Acceleration>(frame) {
+
+    this->translation() = translation;
+    this->rotation() = rotation;
 }
-Acceleration::Acceleration(phri::Vector6d acceleration)
-    : acceleration_(acceleration) {
+Acceleration::Acceleration(phri::Vector6d acceleration, ReferenceFrame frame)
+    : Acceleration(acceleration.segment<3>(0), acceleration.segment<3>(3),
+                   frame) {
 }
 
 Eigen::Ref<const phri::Vector3d> Acceleration::translation() const {
@@ -227,14 +265,64 @@ Acceleration& Acceleration::operator=(const phri::Vector6d& acceleration) {
     return *this;
 }
 
+Acceleration Acceleration::operator-(const phri::Acceleration& other) const {
+    return Acceleration(*this) -= other;
+}
+
+Acceleration Acceleration::operator+(const phri::Acceleration& other) const {
+    return Acceleration(*this) += other;
+}
+
+Acceleration Acceleration::operator*(double scalar) const {
+    return Acceleration(*this) *= scalar;
+}
+
+Acceleration Acceleration::operator/(double scalar) const {
+    return Acceleration(*this) /= scalar;
+}
+
+Acceleration& Acceleration::operator-=(const phri::Acceleration& other) {
+    vector() -= other.transform(frame()).vector();
+    return *this;
+}
+
+Acceleration& Acceleration::operator+=(const phri::Acceleration& other) {
+    vector() += other.transform(frame()).vector();
+    return *this;
+}
+
+Acceleration& Acceleration::operator*=(double scalar) {
+    vector() *= scalar;
+    return *this;
+}
+
+Acceleration& Acceleration::operator/=(double scalar) {
+    vector() /= scalar;
+    return *this;
+}
+
+Acceleration operator*(const AffineTransform& transform,
+                       const Acceleration& acceleration) {
+    Acceleration new_acceleration;
+    new_acceleration.translation() =
+        transform.rotation() * acceleration.translation();
+    new_acceleration.rotation() =
+        transform.rotation() * acceleration.rotation();
+    return new_acceleration;
+}
+
 /***			Wrench			***/
-Wrench::Wrench() : Wrench(phri::Vector3d::Zero(), phri::Vector3d::Zero()) {
+Wrench::Wrench(ReferenceFrame frame)
+    : Wrench(phri::Vector3d::Zero(), phri::Vector3d::Zero(), frame) {
 }
-Wrench::Wrench(phri::Vector3d force, phri::Vector3d torque) {
-    wrench_.block<3, 1>(0, 0) = force;
-    wrench_.block<3, 1>(3, 0) = torque;
+Wrench::Wrench(phri::Vector3d force, phri::Vector3d torque,
+               ReferenceFrame frame)
+    : TaskSpaceData<Wrench>(frame) {
+    this->force() = force;
+    this->torque() = torque;
 }
-Wrench::Wrench(phri::Vector6d wrench) : wrench_(wrench) {
+Wrench::Wrench(phri::Vector6d wrench, ReferenceFrame frame)
+    : Wrench(wrench.segment<3>(0), wrench.segment<3>(3), frame) {
 }
 
 Eigen::Ref<const phri::Vector3d> Wrench::force() const {
@@ -278,6 +366,49 @@ Wrench& Wrench::operator=(const phri::Vector6d& wrench) {
     force() = wrench.block<3, 1>(0, 0);
     torque() = wrench.block<3, 1>(3, 0);
     return *this;
+}
+
+Wrench Wrench::operator-(const phri::Wrench& other) const {
+    return Wrench(*this) -= other;
+}
+
+Wrench Wrench::operator+(const phri::Wrench& other) const {
+    return Wrench(*this) += other;
+}
+
+Wrench Wrench::operator*(double scalar) const {
+    return Wrench(*this) *= scalar;
+}
+
+Wrench Wrench::operator/(double scalar) const {
+    return Wrench(*this) /= scalar;
+}
+
+Wrench& Wrench::operator-=(const phri::Wrench& other) {
+    vector() -= other.transform(frame()).vector();
+    return *this;
+}
+
+Wrench& Wrench::operator+=(const phri::Wrench& other) {
+    vector() += other.transform(frame()).vector();
+    return *this;
+}
+
+Wrench& Wrench::operator*=(double scalar) {
+    vector() *= scalar;
+    return *this;
+}
+
+Wrench& Wrench::operator/=(double scalar) {
+    vector() /= scalar;
+    return *this;
+}
+
+Wrench operator*(const AffineTransform& transform, const Wrench& wrench) {
+    Wrench new_wrench;
+    new_wrench.force() = transform.rotation() * wrench.force();
+    new_wrench.torque() = transform.rotation() * wrench.torque();
+    return new_wrench;
 }
 
 } // namespace phri

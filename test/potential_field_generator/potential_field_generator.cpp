@@ -15,6 +15,10 @@ int main(int argc, char const* argv[]) {
     auto model = phri::RobotModel(
         robot, PID_PATH("robot_models/kuka_lwr4.yaml"), "end-effector");
 
+    FrameAdapter::setTransform(FrameAdapter::world(),
+                               AffineTransform::Identity(),
+                               FrameAdapter::frame("end-effector"));
+
     robot.joints.state.position.setOnes();
     model.forwardKinematics();
 

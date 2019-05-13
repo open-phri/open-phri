@@ -70,23 +70,19 @@ public:
     //! \brief  Construct a new Force Control object with default parameters and
     //! with an initial target set to zero
     //! \details Use ForceControl::target() to set the desired force value
-    //! \param frame The reference frame in which the target force is expressed.
     //! \param type If the regulated force is the one applied to the environment
     //! or to the robot
-    ForceControl(ReferenceFrame frame,
-                 TargetType type = TargetType::Environment);
+    explicit ForceControl(TargetType type);
 
     //! \brief  Construct a new Force Control object with given pointed target
     //! and parameters
     //! \details Use ForceControl::target() to set the desired force value
     //! \param target The targeted force
     //! \param parameters The force control law parameters
-    //! \param frame The reference frame in which the target force is expressed.
     //! \param type If the regulated force is the one applied to the environment
     //! or to the robot
     ForceControl(std::shared_ptr<Wrench> target,
-                 std::shared_ptr<Parameters> parameters, ReferenceFrame frame,
-                 TargetType type = TargetType::Environment);
+                 std::shared_ptr<Parameters> parameters, TargetType type);
 
     //! \brief  Construct a new Force Control object with given referenced
     //! target and parameters
@@ -95,34 +91,29 @@ public:
     //! generator
     //! \param parameters The force control law parameters. Make sure that \p
     //! parameters outlives the generator
-    //! \param frame The reference frame in which the target force is expressed.
     //! \param type If the regulated force is the one applied to the environment
     //! or to the robot
-    ForceControl(Wrench& target, Parameters& parameters, ReferenceFrame frame,
-                 TargetType type = TargetType::Environment);
+    ForceControl(Wrench& target, Parameters& parameters, TargetType type);
 
     //! \brief  Construct a new Force Control object with given target
     //! and parameters values
     //! \details Use ForceControl::target() to set the desired force value
     //! \param target The targeted force
     //! \param parameters The force control law parameters
-    //! \param frame The reference frame in which the target force is expressed.
     //! \param type If the regulated force is the one applied to the environment
     //! or to the robot
     ForceControl(const Wrench& target, const Parameters& parameters,
-                 ReferenceFrame frame,
-                 TargetType type = TargetType::Environment);
+
+                 TargetType type);
 
     //! \brief  Construct a new Force Control object with given target
     //! and parameters values
     //! \details Use ForceControl::target() to set the desired force value
     //! \param target The targeted force
     //! \param parameters The force control law parameters
-    //! \param frame The reference frame in which the target force is expressed.
     //! \param type If the regulated force is the one applied to the environment
     //! or to the robot
-    ForceControl(Wrench&& target, Parameters&& parameters, ReferenceFrame frame,
-                 TargetType type = TargetType::Environment);
+    ForceControl(Wrench&& target, Parameters&& parameters, TargetType type);
 
     //! \brief Default copy constructor
     ForceControl(const ForceControl&) = default;
@@ -162,7 +153,7 @@ public:
 
     //! \brief Read access the target wrench used by the generator
     //! \return double The target wrench value
-    Wrench target() const;
+    const Wrench& target() const;
 
     //! \brief Access to the shared pointer holding the target wrench used
     //! by the generator
@@ -175,7 +166,7 @@ public:
 
     //! \brief Read access the control parameters used by the generator
     //! \return double The target control parameters
-    Parameters parameters() const;
+    const Parameters& parameters() const;
 
     //! \brief Access to the shared pointer holding the control parameters used
     //! by the generator
@@ -191,7 +182,7 @@ protected:
     std::shared_ptr<Parameters> parameters_;
     TargetType type_;
     double filter_coeff_;
-    Vector6d prev_error_;
+    Wrench prev_error_;
 };
 
 } // namespace phri

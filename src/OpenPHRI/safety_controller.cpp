@@ -294,15 +294,13 @@ void SafetyController::print() const {
     for (const auto& gen : force_generators_) {
         std::cout << "\t\t- " << gen.first << " ("
                   << getTypeName(*gen.second.object)
-                  << "): " << gen.second.last_value.transpose() << "\n";
+                  << "): " << gen.second.last_value << "\n";
     }
     std::cout << "\tVelocity generators:\n";
     for (const auto& gen : velocity_generators_) {
-        std::cout
-            << "\t\t- " << gen.first << " (" << getTypeName(*gen.second.object)
-            << "): "
-            << static_cast<const Vector6d&>(gen.second.last_value).transpose()
-            << "\n";
+        std::cout << "\t\t- " << gen.first << " ("
+                  << getTypeName(*gen.second.object)
+                  << "): " << gen.second.last_value << "\n";
     }
     std::cout << "\tTorque generators:\n";
     for (const auto& gen : torque_generators_) {
@@ -391,7 +389,7 @@ const Vector6d& SafetyController::computeForceSum() {
     for (auto& force_generator : force_generators_) {
         force_generator.second.last_value =
             force_generator.second.object->compute();
-        sum += force_generator.second.last_value;
+        sum += force_generator.second.last_value.vector();
     }
 
     return sum;

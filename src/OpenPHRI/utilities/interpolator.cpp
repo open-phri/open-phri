@@ -22,10 +22,10 @@
 
 using namespace phri;
 
-doubleConstPtr Interpolator::getOutput() const {
+std::shared_ptr<const double> Interpolator::getOutput() const {
     return output_;
 }
 
-void Interpolator::setInput(doubleConstPtr input) {
+void Interpolator::setInput(std::shared_ptr<const double> input) {
     input_ = input;
 }

@@ -15,6 +15,10 @@ TEST_CASE("Stop constraint") {
     auto model = phri::RobotModel(
         robot, PID_PATH("robot_models/kuka_lwr4.yaml"), "end-effector");
 
+    FrameAdapter::setTransform(FrameAdapter::world(),
+                               AffineTransform::Identity(),
+                               FrameAdapter::frame("end-effector"));
+
     robot.joints.state.position.setOnes();
     model.forwardKinematics();
 
@@ -38,9 +42,8 @@ TEST_CASE("Stop constraint") {
     auto joint_stop_constraint = make_shared<JointEmergencyStopConstraint>(
         activation_torque_threshold, deactivation_torque_threshold);
 
-    auto constant_vel = make_shared<Twist>();
-    auto constant_velocity_generator =
-        make_shared<VelocityProxy>(constant_vel, ReferenceFrame::TCP);
+    auto constant_vel = make_shared<Twist>(FrameAdapter::frame("end-effector"));
+    auto constant_velocity_generator = make_shared<VelocityProxy>(constant_vel);
     auto constant_force_generator = make_shared<ExternalForce>();
 
     safety_controller.add("task stop constraint", task_stop_constraint);

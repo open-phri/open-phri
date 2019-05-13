@@ -23,8 +23,7 @@
 
 namespace phri {
 
-AccelerationConstraint::AccelerationConstraint()
-    : maximum_acceleration_(std::make_shared<double>(0.)) {
+AccelerationConstraint::AccelerationConstraint() : AccelerationConstraint(0.) {
 }
 
 AccelerationConstraint::AccelerationConstraint(
@@ -37,17 +36,17 @@ AccelerationConstraint::AccelerationConstraint(
 }
 
 AccelerationConstraint::AccelerationConstraint(double& maximum_acceleration)
-    : maximum_acceleration_(
+    : AccelerationConstraint(
           std::shared_ptr<double>(&maximum_acceleration, [](auto p) {})) {
 }
 
 AccelerationConstraint::AccelerationConstraint(
     const double& maximum_acceleration)
-    : maximum_acceleration_(std::make_shared<double>(maximum_acceleration)) {
+    : AccelerationConstraint(std::make_shared<double>(maximum_acceleration)) {
 }
 
 AccelerationConstraint::AccelerationConstraint(double&& maximum_acceleration)
-    : maximum_acceleration_(
+    : AccelerationConstraint(
           std::make_shared<double>(std::move(maximum_acceleration))) {
 }
 

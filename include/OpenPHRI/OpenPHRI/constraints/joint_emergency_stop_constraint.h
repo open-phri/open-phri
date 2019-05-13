@@ -111,6 +111,9 @@ public:
     const VectorXd& deactivationThreshold() const;
     std::shared_ptr<VectorXd> deactivationThresholdPtr() const;
 
+protected:
+    virtual void setRobot(Robot const* robot) override;
+
 private:
     std::shared_ptr<VectorXd> activation_threshold_;
     std::shared_ptr<VectorXd> deactivation_threshold_;

@@ -74,6 +74,10 @@ protected:
     //! \param robot The robot.
     virtual void setRobot(Robot const* robot);
 
+    //! \brief Read/write access the controlled robot
+    //! \return double& A reference to the controlled robot
+    virtual const Robot& robot() const final;
+
     //! \brief The robot on which the constraint is applied.
     //! \details This will automatically set by the SafetyController or a
     //! SeparationDistanceConstraint

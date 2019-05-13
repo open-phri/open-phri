@@ -23,11 +23,9 @@
 
 using namespace phri;
 
-LaserScannerDetector::LaserScannerDetector(VectorXdConstPtr laser_data,
-                                           double scanning_angle,
-                                           double minimum_distance,
-                                           double maximum_distance,
-                                           double threshold)
+LaserScannerDetector::LaserScannerDetector(
+    std::shared_ptr<const VectorXd> laser_data, double scanning_angle,
+    double minimum_distance, double maximum_distance, double threshold)
     : laser_data_(laser_data),
       scanning_angle_(scanning_angle),
       minimum_distance_(minimum_distance),
@@ -37,11 +35,11 @@ LaserScannerDetector::LaserScannerDetector(VectorXdConstPtr laser_data,
     distance_ = std::make_shared<double>();
 }
 
-Vector2dConstPtr LaserScannerDetector::getPosition() const {
+std::shared_ptr<const Vector2d> LaserScannerDetector::getPosition() const {
     return position_;
 }
 
-doubleConstPtr LaserScannerDetector::getDistance() const {
+std::shared_ptr<const double> LaserScannerDetector::getDistance() const {
     return distance_;
 }
 

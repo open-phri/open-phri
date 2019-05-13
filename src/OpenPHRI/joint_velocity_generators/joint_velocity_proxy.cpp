@@ -20,22 +20,50 @@
 
 #include <OpenPHRI/joint_velocity_generators/joint_velocity_proxy.h>
 
-using namespace phri;
+namespace phri {
 
-JointVelocityProxy::JointVelocityProxy(VectorXdConstPtr joint_velocity)
-    : joint_velocity_(joint_velocity) {
+JointVelocityProxy::JointVelocityProxy() : JointVelocityProxy(VectorXd{}) {
 }
 
-JointVelocityProxy::JointVelocityProxy(
-    VectorXdConstPtr joint_velocity,
-    const std::function<void(void)>& update_func)
-    : JointVelocityProxy(joint_velocity) {
-    update_func_ = update_func;
+JointVelocityProxy::JointVelocityProxy(std::shared_ptr<VectorXd> velocity)
+    : joint_velocity_(velocity) {
+}
+
+JointVelocityProxy::JointVelocityProxy(VectorXd& velocity)
+    : JointVelocityProxy(std::shared_ptr<VectorXd>(&velocity, [](auto p) {})) {
+}
+
+JointVelocityProxy::JointVelocityProxy(const VectorXd& velocity)
+    : JointVelocityProxy(std::make_shared<VectorXd>(velocity)) {
+}
+
+JointVelocityProxy::JointVelocityProxy(VectorXd&& velocity)
+    : JointVelocityProxy(std::make_shared<VectorXd>(std::move(velocity))) {
 }
 
 void JointVelocityProxy::update(VectorXd& velocity) {
-    if (update_func_) {
-        update_func_();
+    if (generator_) {
+        velocity = generator_();
+    } else {
+        velocity = *joint_velocity_;
     }
-    velocity = *joint_velocity_;
 }
+
+VectorXd& JointVelocityProxy::velocity() {
+    return *joint_velocity_;
+}
+
+VectorXd JointVelocityProxy::velocity() const {
+    return *joint_velocity_;
+}
+
+std::shared_ptr<VectorXd> JointVelocityProxy::velocityPtr() const {
+    return joint_velocity_;
+}
+
+void JointVelocityProxy::setRobot(Robot const* new_robot) {
+    JointVelocityGenerator::setRobot(new_robot);
+    velocity().resize(robot().jointCount());
+}
+
+} // namespace phri

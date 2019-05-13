@@ -15,6 +15,10 @@ TEST_CASE("Velocity constraint") {
     auto model = phri::RobotModel(
         robot, PID_PATH("robot_models/kuka_lwr4.yaml"), "end-effector");
 
+    FrameAdapter::setTransform(FrameAdapter::world(),
+                               AffineTransform::Identity(),
+                               FrameAdapter::frame("end-effector"));
+
     robot.joints.state.position.setOnes();
     model.forwardKinematics();
 
@@ -25,9 +29,10 @@ TEST_CASE("Velocity constraint") {
     auto velocity_constraint =
         std::make_shared<phri::VelocityConstraint>(maximum_velocity);
 
-    auto constant_vel = std::make_shared<phri::Twist>();
-    auto constant_velocity_generator = std::make_shared<phri::VelocityProxy>(
-        constant_vel, ReferenceFrame::TCP);
+    auto constant_vel =
+        std::make_shared<phri::Twist>(FrameAdapter::frame("end-effector"));
+    auto constant_velocity_generator =
+        std::make_shared<phri::VelocityProxy>(constant_vel);
 
     safety_controller.add("velocity constraint", velocity_constraint);
     safety_controller.add("vel proxy", constant_velocity_generator);

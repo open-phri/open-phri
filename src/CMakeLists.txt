@@ -15,12 +15,12 @@ PID_Component(
 )
 
 ###         OpenPHRI V-REP DRIVER        ###
-PID_Component(
-    SHARED_LIB
-    NAME open-phri-vrep-driver
-    DIRECTORY vrep_driver
-    EXPORT open-phri vrep-driver
-)
+# PID_Component(
+#     SHARED_LIB
+#     NAME vrep-driver
+#     DIRECTORY vrep_driver
+#     EXPORT open-phri/open-phri api-driver-vrep/vrep-driver
+# )
 
 ###         pyOpenPHRI        ###
 if(GEN_PYTHON_BINDINGS)
@@ -28,7 +28,7 @@ if(GEN_PYTHON_BINDINGS)
         MODULE_LIB
         NAME openphri
         DIRECTORY pyOpenPHRI
-        DEPEND open-phri open-phri-vrep-driver boost-python
+        DEPEND open-phri/open-phri open-phri/vrep-driver boost/boost-python
     )
 
     PID_Component_Dependency(

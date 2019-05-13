@@ -46,7 +46,7 @@ public:
      * interpolator.
      */
     LinearInterpolator(LinearPointConstPtr from, LinearPointConstPtr to,
-                       doubleConstPtr input);
+                       std::shared_ptr<const double> input);
 
     /**
      * @brief Construct a linear interpolator given starting and ending points.

@@ -17,6 +17,10 @@ TEST_CASE("Acceleration constraint") {
     auto model = phri::RobotModel(
         robot, PID_PATH("robot_models/kuka_lwr4.yaml"), "end-effector");
 
+    FrameAdapter::setTransform(FrameAdapter::world(),
+                               AffineTransform::Identity(),
+                               FrameAdapter::frame("end-effector"));
+
     robot.joints.state.position.setOnes();
     model.forwardKinematics();
 
@@ -25,13 +29,13 @@ TEST_CASE("Acceleration constraint") {
 
     auto maximum_acceleration = 0.5;
     auto dv_max = maximum_acceleration * robot.control.time_step;
-    auto constant_vel = std::make_shared<phri::Twist>();
+    auto constant_vel =
+        std::make_shared<phri::Twist>(FrameAdapter::frame("end-effector"));
 
     safety_controller.add("acceleration constraint",
                           phri::AccelerationConstraint(maximum_acceleration));
 
-    safety_controller.add(
-        "vel proxy", phri::VelocityProxy(constant_vel, ReferenceFrame::TCP));
+    safety_controller.add("vel proxy", phri::VelocityProxy(constant_vel));
 
     const phri::Vector6d& cp_velocity = robot.task.command.twist;
     const phri::Vector6d& cp_total_velocity = robot.control.task.total_twist;

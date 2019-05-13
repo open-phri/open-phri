@@ -51,7 +51,8 @@ public:
      * interpolator.
      */
     PolynomialInterpolator(PolynomialPointConstPtr from,
-                           PolynomialPointConstPtr to, doubleConstPtr input);
+                           PolynomialPointConstPtr to,
+                           std::shared_ptr<const double> input);
 
     /**
      * @brief Construct a polynomial interpolator given starting and ending

@@ -36,7 +36,7 @@ SeparationDistanceConstraint::SeparationDistanceConstraint(
 
 SeparationDistanceConstraint::SeparationDistanceConstraint(
     std::shared_ptr<Constraint> constraint, InterpolatorPtr interpolator,
-    Vector6dConstPtr robot_position)
+    std::shared_ptr<const Vector6d> robot_position)
     : SeparationDistanceConstraint(constraint, interpolator) {
     robot_position_ = robot_position;
 }
@@ -47,7 +47,8 @@ double SeparationDistanceConstraint::compute() {
     return constraint_->compute();
 }
 
-doubleConstPtr SeparationDistanceConstraint::getSeparationDistance() const {
+std::shared_ptr<const double>
+SeparationDistanceConstraint::getSeparationDistance() const {
     return separation_distance_;
 }
 

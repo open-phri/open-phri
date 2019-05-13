@@ -19,18 +19,41 @@
  */
 
 #include <OpenPHRI/constraints/joint_acceleration_constraint.h>
+#include <OpenPHRI/utilities/exceptions.h>
 
-using namespace phri;
+namespace phri {
 
-using namespace Eigen;
-
-/***		Constructor & destructor		***/
-JointAccelerationConstraint::JointAccelerationConstraint(
-    VectorXdConstPtr maximum_acceleration, double sample_time)
-    : maximum_acceleration_(maximum_acceleration), sample_time_(sample_time) {
+JointAccelerationConstraint::JointAccelerationConstraint()
+    : JointAccelerationConstraint(VectorXd{}) {
 }
 
-/***		Algorithm		***/
+JointAccelerationConstraint::JointAccelerationConstraint(
+    std::shared_ptr<VectorXd> maximum_acceleration)
+    : maximum_acceleration_(maximum_acceleration) {
+    if (not maximum_acceleration) {
+        throw std::runtime_error(
+            OPEN_PHRI_ERROR("You provided an empty shared pointer"));
+    }
+}
+
+JointAccelerationConstraint::JointAccelerationConstraint(
+    VectorXd& maximum_acceleration)
+    : JointAccelerationConstraint(
+          std::shared_ptr<VectorXd>(&maximum_acceleration, [](auto p) {})) {
+}
+
+JointAccelerationConstraint::JointAccelerationConstraint(
+    const VectorXd& maximum_acceleration)
+    : JointAccelerationConstraint(
+          std::make_shared<VectorXd>(maximum_acceleration)) {
+}
+
+JointAccelerationConstraint::JointAccelerationConstraint(
+    VectorXd&& maximum_acceleration)
+    : JointAccelerationConstraint(
+          std::make_shared<VectorXd>(std::move(maximum_acceleration))) {
+}
+
 double JointAccelerationConstraint::compute() {
     double constraint = 1.;
     const auto& joint_vel = robot_->control.joints.total_velocity;
@@ -41,10 +64,31 @@ double JointAccelerationConstraint::compute() {
         if (joint_vel(i) < 1e-6) {
             continue;
         }
-        constraint = std::min(constraint, (std::abs(prev_joint_vel(i)) +
-                                           max_joint_acc(i) * sample_time_) /
-                                              std::abs(joint_vel(i)));
+        constraint = std::min(constraint,
+                              (std::abs(prev_joint_vel(i)) +
+                               max_joint_acc(i) * robot().control.time_step) /
+                                  std::abs(joint_vel(i)));
     }
 
     return constraint;
 }
+
+VectorXd& JointAccelerationConstraint::maximumAcceleration() {
+    return *maximum_acceleration_;
+}
+
+VectorXd JointAccelerationConstraint::maximumAcceleration() const {
+    return *maximum_acceleration_;
+}
+
+std::shared_ptr<VectorXd>
+JointAccelerationConstraint::maximumAccelerationPtr() const {
+    return maximum_acceleration_;
+}
+
+void JointAccelerationConstraint::setRobot(Robot const* new_robot) {
+    Constraint::setRobot(new_robot);
+    maximumAcceleration().resize(robot().jointCount());
+}
+
+} // namespace phri

@@ -191,8 +191,8 @@ public:
      * @return A shared pointer to the object's postion. Updated on
      * VREPDriver::updateTrackedObjectsPosition.
      */
-    phri::PoseConstPtr trackObjectPosition(const std::string& name,
-                                           phri::ReferenceFrame frame);
+    std::shared_ptr<const Pose> trackObjectPosition(const std::string& name,
+                                                    phri::ReferenceFrame frame);
 
     /**
      * @brief Update all tracked objects' position.
@@ -200,7 +200,7 @@ public:
      */
     bool updateTrackedObjectsPosition();
 
-    phri::VectorXdConstPtr initLaserScanner(const std::string& name);
+    std::shared_ptr<const VectorXd> initLaserScanner(const std::string& name);
     bool updateLaserScanners();
 
     bool readJointPosition(phri::VectorXd& position) const;
@@ -224,8 +224,8 @@ private:
     int client_id_;
 
     std::unordered_map<std::string, int> object_handles_;
-    std::map<std::string, phri::VectorXdPtr> lasers_data_;
-    std::map<std::pair<int, int>, phri::PosePtr> tracked_objects_;
+    std::map<std::string, std::shared_ptr<VectorXd>> lasers_data_;
+    std::map<std::pair<int, int>, std::shared_ptr<Pose>> tracked_objects_;
 
     static const bool registered_in_factory;
     static std::map<std::string, int> connection_to_client_id;

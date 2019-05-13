@@ -18,13 +18,11 @@
  * program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * @file force_generator.h
- * @author Benjamin Navarro
- * @brief Base class definition for force generators
- * @date April 2017
- * @ingroup OpenPHRI
- */
+//! \file force_generator.h
+//! \author Benjamin Navarro
+//! \brief
+//! \date 05-2019
+//! \ingroup phri
 
 #pragma once
 
@@ -34,50 +32,60 @@
 
 namespace phri {
 
-/** @brief Base class for all force generators.
- *  @details Provides a pure virtual compute method.
- */
+//! \brief Base class for all force generators.
+//! \details Provides a pure virtual compute method to be implemented by derived
+//! classes.
 class ForceGenerator {
 public:
+    //! \brief Default constructor
+    ForceGenerator() = default;
+
+    //! \brief Default copy constructor
+    ForceGenerator(const ForceGenerator&) = default;
+
+    //! \brief Default move constructor
+    ForceGenerator(ForceGenerator&&) = default;
+
+    //! \brief Default virtual destructor
     virtual ~ForceGenerator() = default;
 
-    /**
-     * @brief Compute the value associated with the force generator.
-     * @return The force generator's evaluated value.
-     */
-    virtual Vector6d compute() final;
+    //! \brief Default copy operator
+    ForceGenerator& operator=(const ForceGenerator&) = default;
 
-    /**
-     * @brief Call operator, shortcut for compute().
-     * @return The force generator's evaluated value.
-     */
-    virtual Vector6d operator()() final;
+    //! \brief Default move operator
+    ForceGenerator& operator=(ForceGenerator&&) = default;
+
+    //! \brief Compute the value associated with the force generator.
+    //! \return The force generator's evaluated value.
+    virtual const Wrench& compute() final;
+
+    //! \brief Call operator, shortcut for compute().
+    //! \return The force generator's evaluated value.
+    virtual const Wrench& operator()() final;
 
 protected:
     friend class SafetyController;
 
-    /**
-     * @brief Construct a force generator
-     * @param frame The reference frame in which the force is expressed.
-     */
-    explicit ForceGenerator(ReferenceFrame frame);
+    //! \brief Derived classed must implement this to provide their wrench
+    //! output
+    //! \param wrench A reference to the wrench to set
+    virtual void update(Wrench& wrench) = 0;
 
-    /**
-     * @brief Transform the given force in the TCP frame, if necessary.
-     * @param force The force to transform.
-     */
-    virtual Vector6d transform(const Vector6d& force) final;
-
-    virtual void update(Vector6d& force) = 0;
-
-    /**
-     * @brief Set the robot to work with.
-     * @param robot The robot.
-     */
+    //! \brief Set the robot to work with.
+    //! \param robot The robot.
     virtual void setRobot(Robot const* robot);
 
+    //! \brief Read/write access the controlled robot
+    //! \return double& A reference to the controlled robot
+    virtual const Robot& robot() const final;
+
+    //! \brief Read access to the internal wrench
+    //! \return ReferenceFrame The internal wrench
+    const Wrench& internalWrench() const;
+
+private:
     Robot const* robot_;
-    ReferenceFrame frame_;
+    Wrench wrench_;
 };
 
 using ForceGeneratorPtr = std::shared_ptr<ForceGenerator>;

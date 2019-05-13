@@ -20,12 +20,12 @@
 
 #include <OpenPHRI/joint_velocity_generators/joint_velocity_generator.h>
 
-using namespace phri;
+namespace phri {
 
 VectorXd JointVelocityGenerator::compute() {
-    VectorXd velocity(robot_->jointCount());
-    update(velocity);
-    return velocity;
+    velocity_.setZero();
+    update(velocity_);
+    return velocity_;
 }
 
 VectorXd JointVelocityGenerator::operator()() {
@@ -34,4 +34,11 @@ VectorXd JointVelocityGenerator::operator()() {
 
 void JointVelocityGenerator::setRobot(Robot const* robot) {
     robot_ = robot;
+    velocity_.resize(robot_->jointCount());
 }
+
+const Robot& JointVelocityGenerator::robot() const {
+    return *robot_;
+}
+
+} // namespace phri

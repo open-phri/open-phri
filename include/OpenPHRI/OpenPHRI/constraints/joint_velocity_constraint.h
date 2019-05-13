@@ -102,6 +102,9 @@ public:
     //! limit
     std::shared_ptr<VectorXd> maximumVelocitiesPtr() const;
 
+protected:
+    virtual void setRobot(Robot const* robot) override;
+
 private:
     std::shared_ptr<VectorXd> maximum_velocities_;
 };

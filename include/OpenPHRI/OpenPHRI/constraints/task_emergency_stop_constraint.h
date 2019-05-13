@@ -18,13 +18,11 @@
  * program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * @file stop_constraint.h
- * @author Benjamin Navarro
- * @brief Definition of the JointEmergencyStopConstraint class
- * @date April 2017
- * @ingroup phri
- */
+//! \file task_emergency_stop_constraint.h
+//! \author Benjamin Navarro
+//! \brief A constraint to stop the robot when a contant occurs.
+//! \date 05-2019
+//! \ingroup phri
 
 #pragma once
 
@@ -33,11 +31,10 @@
 
 namespace phri {
 
-/** @brief A constraint to stop the robot when a contant occurs.
- *  @details Two thresholds are used. The robot is stopped when the external
- * force is above the activation threshold and released when the external force
- * gets below the deactivation threshold.
- */
+//! brief A constraint to stop the robot when a contant occurs.
+//! details Two thresholds are used. The robot is stopped when the external
+//! force is above the activation threshold and released when the external force
+//! gets below the deactivation threshold.
 class TaskEmergencyStopConstraint : public Constraint {
 public:
     //! \brief Construct a new TaskEmergencyStopConstraint object with an

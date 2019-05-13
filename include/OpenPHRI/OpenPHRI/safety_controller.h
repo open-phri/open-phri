@@ -28,12 +28,13 @@
 
 #pragma once
 
-#include <map>
-
 #include <OpenPHRI/definitions.h>
 #include <OpenPHRI/robot.h>
 #include <OpenPHRI/fwd_decl.h>
 #include <OpenPHRI/utilities/object_collection.hpp>
+
+#include <map>
+#include <type_traits>
 
 namespace phri {
 
@@ -427,7 +428,10 @@ public:
     void print() const;
 
     template <typename T> struct StorageWrapper {
-        using value_type = decltype(std::declval<T>().compute());
+        template <typename U>
+        using remove_cref_t = std::remove_const_t<std::remove_reference_t<U>>;
+
+        using value_type = remove_cref_t<decltype(std::declval<T>().compute())>;
 
         std::shared_ptr<T> object;
         value_type last_value;

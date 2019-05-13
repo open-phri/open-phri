@@ -20,21 +20,45 @@
 
 #include <OpenPHRI/force_generators/force_proxy.h>
 
-using namespace phri;
+namespace phri {
 
-ForceProxy::ForceProxy(Vector6dConstPtr force, ReferenceFrame frame)
-    : ForceGenerator(frame), force_ptr_(force) {
+ForceProxy::ForceProxy() : ForceProxy(Wrench{}) {
 }
 
-ForceProxy::ForceProxy(Vector6dConstPtr force, ReferenceFrame frame,
-                       std::function<void(void)> update_func)
-    : ForceProxy(force, frame) {
-    update_func_ = update_func;
+ForceProxy::ForceProxy(std::shared_ptr<Wrench> velocity)
+    : external_force_(velocity) {
 }
 
-void ForceProxy::update(Vector6d& force) {
-    if (update_func_) {
-        update_func_();
+ForceProxy::ForceProxy(Wrench& velocity)
+    : ForceProxy(std::shared_ptr<Wrench>(&velocity, [](auto p) {})) {
+}
+
+ForceProxy::ForceProxy(const Wrench& velocity)
+    : ForceProxy(std::make_shared<Wrench>(velocity)) {
+}
+
+ForceProxy::ForceProxy(Wrench&& velocity)
+    : ForceProxy(std::make_shared<Wrench>(std::move(velocity))) {
+}
+
+void ForceProxy::update(Wrench& velocity) {
+    if (generator_) {
+        velocity = generator_();
+    } else {
+        velocity = *external_force_;
     }
-    force = *force_ptr_;
 }
+
+Wrench& ForceProxy::force() {
+    return *external_force_;
+}
+
+const Wrench& ForceProxy::force() const {
+    return *external_force_;
+}
+
+std::shared_ptr<Wrench> ForceProxy::forcePtr() const {
+    return external_force_;
+}
+
+} // namespace phri

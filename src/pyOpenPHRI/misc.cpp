@@ -49,27 +49,31 @@ NewMatrix6dPtr(Matrix6d init_value = Matrix6d::Zero()) {
 BOOST_PYTHON_FUNCTION_OVERLOADS(NewMatrix6dPtr_overloads, NewMatrix6dPtr, 0, 1)
 
 std::shared_ptr<Vector2d>
-NewVector2dPtr(Vector2d init_value = Vector2d::Zero()) {
+Newstd::shared_ptr<Vector2d>(Vector2d init_value = Vector2d::Zero()) {
     return std::make_shared<Vector2d>(init_value);
 }
-BOOST_PYTHON_FUNCTION_OVERLOADS(NewVector2dPtr_overloads, NewVector2dPtr, 0, 1)
+BOOST_PYTHON_FUNCTION_OVERLOADS(Newstd::shared_ptr<Vector2d> _overloads,
+                                Newstd::shared_ptr<Vector2d>, 0, 1)
 
 std::shared_ptr<Vector3d>
-NewVector3dPtr(Vector3d init_value = Vector3d::Zero()) {
+Newstd::shared_ptr<Vector3d>(Vector3d init_value = Vector3d::Zero()) {
     return std::make_shared<Vector3d>(init_value);
 }
-BOOST_PYTHON_FUNCTION_OVERLOADS(NewVector3dPtr_overloads, NewVector3dPtr, 0, 1)
+BOOST_PYTHON_FUNCTION_OVERLOADS(Newstd::shared_ptr<Vector3d> _overloads,
+                                Newstd::shared_ptr<Vector3d>, 0, 1)
 
 std::shared_ptr<Vector6d>
-NewVector6dPtr(Vector6d init_value = Vector6d::Zero()) {
+Newstd::shared_ptr<Vector6d>(Vector6d init_value = Vector6d::Zero()) {
     return std::make_shared<Vector6d>(init_value);
 }
-BOOST_PYTHON_FUNCTION_OVERLOADS(NewVector6dPtr_overloads, NewVector6dPtr, 0, 1)
+BOOST_PYTHON_FUNCTION_OVERLOADS(Newstd::shared_ptr<Vector6d> _overloads,
+                                Newstd::shared_ptr<Vector6d>, 0, 1)
 
-std::shared_ptr<DoubleWrap> NewDoublePtr(double init_value = 0.) {
+std::shared_ptr<DoubleWrap> Newstd::shared_ptr<double>(double init_value = 0.) {
     return std::make_shared<DoubleWrap>(init_value);
 }
-BOOST_PYTHON_FUNCTION_OVERLOADS(NewDoublePtr_overloads, NewDoublePtr, 0, 1)
+BOOST_PYTHON_FUNCTION_OVERLOADS(Newstd::shared_ptr<double> _overloads,
+                                Newstd::shared_ptr<double>, 0, 1)
 
 void SetIdentity(std::shared_ptr<Matrix6d> mat) {
     mat->setIdentity();
@@ -89,24 +93,25 @@ void wrapMisc() {
             args("init_value"),
             "Create a new instance of a Matrix6d shared_ptr"));
 
-    def("NewVector2dPtr", NewVector2dPtr,
-        NewVector2dPtr_overloads(
+    def("Newstd::shared_ptr<Vector2d>", Newstd::shared_ptr<Vector2d>,
+        Newstd::shared_ptr<Vector2d> _overloads(
             args("init_value"),
             "Create a new instance of a Vector2d shared_ptr"));
 
-    def("NewVector3dPtr", NewVector3dPtr,
-        NewVector3dPtr_overloads(
+    def("Newstd::shared_ptr<Vector3d>", Newstd::shared_ptr<Vector3d>,
+        Newstd::shared_ptr<Vector3d> _overloads(
             args("init_value"),
             "Create a new instance of a Vector3d shared_ptr"));
 
-    def("NewVector6dPtr", NewVector6dPtr,
-        NewVector6dPtr_overloads(
+    def("Newstd::shared_ptr<Vector6d>", Newstd::shared_ptr<Vector6d>,
+        Newstd::shared_ptr<Vector6d> _overloads(
             args("init_value"),
             "Create a new instance of a Vector6d shared_ptr"));
 
-    def("NewDoublePtr", NewDoublePtr,
-        NewDoublePtr_overloads(args("init_value"),
-                               "Create a new instance of a double shared_ptr"));
+    def("Newstd::shared_ptr<double>", Newstd::shared_ptr<double>,
+        Newstd::shared_ptr<double> _overloads(
+            args("init_value"),
+            "Create a new instance of a double shared_ptr"));
 
     def("SetIdentity", SetIdentity);
 
@@ -140,6 +145,7 @@ void wrapMisc() {
         .def("set", &DoubleWrap::set, "Set the internal value")
         .def("get", &DoubleWrap::get, "Get the internal value");
 
-    class_<ConstDoubleWrap>("ConstDoubleWrap", init<doubleConstPtr>())
+    class_<ConstDoubleWrap>("ConstDoubleWrap",
+                            init<std::shared_ptr<const double>>())
         .def("get", &ConstDoubleWrap::get, "Get the internal value");
 }

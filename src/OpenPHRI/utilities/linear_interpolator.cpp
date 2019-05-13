@@ -24,7 +24,7 @@ using namespace phri;
 
 LinearInterpolator::LinearInterpolator(LinearPointConstPtr from,
                                        LinearPointConstPtr to,
-                                       doubleConstPtr input)
+                                       std::shared_ptr<const double> input)
     : LinearInterpolator(from, to) {
     setInput(input);
 }

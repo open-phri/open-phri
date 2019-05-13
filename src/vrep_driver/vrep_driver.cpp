@@ -304,8 +304,9 @@ bool VREPDriver::readTransformationMatrix(phri::Matrix4d& matrix) const {
     return all_ok;
 }
 
-phri::PoseConstPtr VREPDriver::trackObjectPosition(const std::string& name,
-                                                   phri::ReferenceFrame frame) {
+std::shared_ptr<const Pose>
+VREPDriver::trackObjectPosition(const std::string& name,
+                                phri::ReferenceFrame frame) {
     int handle = -1;
     int ref_frame = getFrameHandle(frame);
     float data[3];
@@ -348,7 +349,8 @@ bool VREPDriver::updateTrackedObjectsPosition() {
     return all_ok;
 }
 
-phri::VectorXdConstPtr VREPDriver::initLaserScanner(const std::string& name) {
+std::shared_ptr<const VectorXd>
+VREPDriver::initLaserScanner(const std::string& name) {
     std::string data_name = name + "_data";
     simxUChar* sigVal;
     simxInt sigLen;
@@ -466,7 +468,7 @@ void VREPDriver::startStreaming() const {
 
     phri::ReferenceFrame frames[] = {phri::ReferenceFrame::TCP,
                                      phri::ReferenceFrame::Base,
-                                     phri::ReferenceFrame::World};
+                                     phri::FrameAdapter::world()};
     string objects[] = {"_tcp"};
 
     for (auto& object : objects) {
@@ -517,7 +519,7 @@ int VREPDriver::getFrameHandle(phri::ReferenceFrame frame) const {
     case phri::ReferenceFrame::Base:
         return object_handles_.at(robot_.name() + "_base_frame" + suffix_);
         break;
-    case phri::ReferenceFrame::World:
+    case phri::FrameAdapter::world():
         return object_handles_.at(robot_.name() + "_world_frame" + suffix_);
         break;
     }

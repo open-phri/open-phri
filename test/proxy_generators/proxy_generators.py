@@ -5,23 +5,27 @@ import sys
 
 sys.settrace
 
-def isClose(v1, v2, eps = 1e-3):
-	return abs(v1-v2) < eps
+
+def isClose(v1, v2, eps=1e-3):
+    return abs(v1-v2) < eps
+
 
 def setZero(vec):
-	for i in range(0,6):
-		vec[i] = 0
+    for i in range(0, 6):
+        vec[i] = 0
+
 
 def setIdentity(mat):
-	for i in range(0,6):
-		mat[i,i] = 1
+    for i in range(0, 6):
+        mat[i, i] = 1
+
 
 damping_matrix = NewMatrix6dPtr()
 setIdentity(damping_matrix)
 damping_matrix *= 10
 
-constant_vel = NewVector6dPtr()
-constant_force = NewVector6dPtr()
+constant_vel = Newstd: : shared_ptr < Vector6d > ()
+constant_force = Newstd: : shared_ptr < Vector6d > ()
 
 constant_velocity_generator = NewVelocityProxy(constant_vel)
 constant_force_generator = NewForceProxy(constant_force)
@@ -30,7 +34,8 @@ safety_controller = NewSafetyController(damping_matrix)
 safety_controller.setVerbose(True)
 tcp_velocity = safety_controller.getTCPVelocity()
 
-safety_controller.addVelocityGenerator("vel proxy", constant_velocity_generator)
+safety_controller.addVelocityGenerator(
+    "vel proxy", constant_velocity_generator)
 safety_controller.addForceGenerator("force proxy", constant_force_generator)
 
 # Step #1 : no velocity, no force
