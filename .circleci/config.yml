@@ -6,13 +6,13 @@ jobs:
       - image: benjaminn13/pid-workspace-ci:ubuntu-16.04
     working_directory: /home/piduser/pid-workspace/pid
     steps:
-      - run: make upgrade && make deploy package=open-phri branch=$CIRCLE_BRANCH test=true
+      - run: git config --global user.name "CI Bot" && git config --global user.email dontcare@CI.com && make upgrade && make deploy package=open-phri branch=$CIRCLE_BRANCH test=true
   "build_ubuntu1804":
     docker:
       - image: benjaminn13/pid-workspace-ci:ubuntu-18.04
     working_directory: /home/piduser/pid-workspace/pid
     steps:
-      - run: make upgrade && make deploy package=open-phri branch=$CIRCLE_BRANCH test=true
+      - run: git config --global user.name "CI Bot" && git config --global user.email dontcare@CI.com && make upgrade && make deploy package=open-phri branch=$CIRCLE_BRANCH test=true
 
 
 workflows:
