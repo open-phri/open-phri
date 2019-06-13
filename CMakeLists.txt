@@ -19,7 +19,7 @@ PID_Package(
 			LICENSE 	    GNULGPL
 			DESCRIPTION     "OpenPHRI: a generic framework to easily and safely control robots in interactions with humans"
 			README			instructions.md
-			VERSION			1.0.0
+			VERSION			1.1.0
 )
 
 check_PID_Platform(CONFIGURATION posix)
