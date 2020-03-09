@@ -84,7 +84,7 @@ public:
     /**
      * @brief Call operator, shortcut for compute()
      */
-    virtual void operator()() final {
+    void operator()() {
         compute();
     }
 

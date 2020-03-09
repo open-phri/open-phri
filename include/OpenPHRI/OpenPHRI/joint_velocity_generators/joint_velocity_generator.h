@@ -59,11 +59,11 @@ public:
 
     //! \brief Compute the value associated with the joint_velocity generator.
     //! \return The joint_velocity generator's evaluated value.
-    virtual Eigen::VectorXd compute() final;
+    Eigen::VectorXd compute();
 
     //! \brief Call operator, shortcut for compute().
     //! \return The joint_velocity generator's evaluated value.
-    virtual Eigen::VectorXd operator()() final;
+    Eigen::VectorXd operator()();
 
 protected:
     friend class SafetyController;
@@ -79,7 +79,7 @@ protected:
 
     //! \brief Read/write access the controlled robot
     //! \return double& A reference to the controlled robot
-    virtual const Robot& robot() const final;
+    const Robot& robot() const;
 
 private:
     Robot const* robot_;

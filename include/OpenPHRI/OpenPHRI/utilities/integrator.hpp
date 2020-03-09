@@ -113,7 +113,7 @@ public:
      * @brief Call operator, shortcut for compute().
      * @return The new integrator output.
      */
-    virtual T operator()() final {
+    T operator()() {
         return compute();
     }
 

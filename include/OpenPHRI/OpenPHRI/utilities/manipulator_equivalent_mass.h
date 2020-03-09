@@ -87,7 +87,7 @@ public:
      * @brief Call operator, shortcut for compute()
      * @return The new output data.
      */
-    virtual double operator()() final;
+    double operator()();
 
 private:
     Eigen::Vector3d closestObjectDirection();

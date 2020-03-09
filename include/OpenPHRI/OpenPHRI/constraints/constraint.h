@@ -64,7 +64,7 @@ public:
 
     //! \brief Call operator, shortcut for Constraint::compute()
     //! \return double \see Constraint::compute()
-    virtual double operator()() final;
+    double operator()();
 
 protected:
     friend class SafetyController;
@@ -76,7 +76,7 @@ protected:
 
     //! \brief Read/write access the controlled robot
     //! \return double& A reference to the controlled robot
-    virtual const Robot& robot() const final;
+    const Robot& robot() const;
 
     //! \brief The robot on which the constraint is applied.
     //! \details This will automatically set by the SafetyController or a

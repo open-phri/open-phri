@@ -129,7 +129,7 @@ public:
      * @brief Call operator, shortcut for compute()
      * @return The new estimation.
      */
-    virtual Output operator()() final {
+    Output operator()() {
         return compute();
     }
 

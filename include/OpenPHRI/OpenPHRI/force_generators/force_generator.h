@@ -60,11 +60,11 @@ public:
 
     //! \brief Compute the value associated with the force generator.
     //! \return The force generator's evaluated value.
-    virtual const spatial::Force& compute() final;
+    const spatial::Force& compute();
 
     //! \brief Call operator, shortcut for compute().
     //! \return The force generator's evaluated value.
-    virtual const spatial::Force& operator()() final;
+    const spatial::Force& operator()();
 
     const spatial::Frame& frame() const;
 

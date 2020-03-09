@@ -61,11 +61,11 @@ public:
 
     //! \brief Compute the value associated with the velocity generator.
     //! \return The velocity generator's evaluated value.
-    virtual const spatial::Velocity& compute() final;
+    const spatial::Velocity& compute();
 
     //! \brief Call operator, shortcut for compute().
     //! \return The velocity generator's evaluated value.
-    virtual const spatial::Velocity& operator()() final;
+    const spatial::Velocity& operator()();
 
     const spatial::Frame& frame() const;
 
@@ -85,7 +85,7 @@ protected:
 
     //! \brief Read/write access the controlled robot
     //! \return double& A reference to the controlled robot
-    virtual const Robot& robot() const final;
+    const Robot& robot() const;
 
     //! \brief Read access to the internal velocity
     //! \return Twist The internal velocity
