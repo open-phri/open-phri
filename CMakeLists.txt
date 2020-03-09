@@ -13,8 +13,8 @@ PID_Package(
 	AUTHOR 		    Benjamin Navarro
 	INSTITUTION	    LIRMM
 	MAIL		    navarro@lirmm.fr
-	ADDRESS 	    git@github.com:BenjaminNavarro/open-phri.git
-	PUBLIC_ADDRESS  https://github.com/BenjaminNavarro/open-phri.git
+	ADDRESS 	    git@github.com:open-phri/open-phri.git
+	PUBLIC_ADDRESS  https://github.com/open-phri/open-phri.git
 	YEAR 		    2018
 	LICENSE 	    GNULGPL
 	DESCRIPTION     "OpenPHRI: a generic framework to easily and safely control robots in interactions with humans"
