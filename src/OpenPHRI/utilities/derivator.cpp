@@ -23,8 +23,8 @@
 namespace phri {
 
 template class Derivator<double>;
-template class Derivator<Vector2d>;
-template class Derivator<Vector3d>;
-template class Derivator<Vector6d>;
+template class Derivator<Eigen::Vector2d>;
+template class Derivator<Eigen::Vector3d>;
+template class Derivator<Eigen::Vector6d>;
 
 } // namespace phri

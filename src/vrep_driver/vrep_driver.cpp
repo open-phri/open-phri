@@ -59,7 +59,7 @@ VREPDriver::VREPDriver(phri::Robot& robot, const YAML::Node& configuration)
 
     if (vrep) {
         try {
-            robot_.control.time_step = vrep["sample_time"].as<double>();
+            robot_.control().time_step = vrep["sample_time"].as<double>();
         } catch (...) {
             throw std::runtime_error(
                 OPEN_PHRI_ERROR("You must provide a 'sample_time' field in the "
@@ -182,7 +182,7 @@ bool VREPDriver::readTCPPose(phri::Pose& pose,
                                   simx_opmode_buffer) == simx_return_ok);
 
     if (all_ok) {
-        phri::Vector6d pose_vec;
+        Eigen::Vector6d pose_vec;
         for (size_t i = 0; all_ok and i < 6; ++i) {
             pose_vec[i] = data[i];
         }
@@ -192,7 +192,7 @@ bool VREPDriver::readTCPPose(phri::Pose& pose,
     return all_ok;
 }
 
-bool VREPDriver::readTCPVelocity(phri::Twist& velocity,
+bool VREPDriver::readTCPVelocity(spatial::Velocity& velocity,
                                  phri::ReferenceFrame frame) const {
     using namespace Eigen;
 
@@ -245,7 +245,7 @@ bool VREPDriver::readTCPWrench(phri::Wrench& wrench) const {
     return all_ok;
 }
 
-bool VREPDriver::readJacobian(phri::MatrixXd& jacobian) const {
+bool VREPDriver::readJacobian(Eigen::MatrixXd& jacobian) const {
     bool all_ok = false;
 
     simxUChar* jacobian_buf;
@@ -281,7 +281,7 @@ bool VREPDriver::readJacobian(phri::MatrixXd& jacobian) const {
     return all_ok;
 }
 
-bool VREPDriver::readTransformationMatrix(phri::Matrix4d& matrix) const {
+bool VREPDriver::readTransformationMatrix(Eigen::Matrix4d& matrix) const {
     bool all_ok = false;
 
     simxUChar* matrix_buf;
@@ -335,7 +335,7 @@ bool VREPDriver::updateTrackedObjectsPosition() {
                                          obj.first.second, data,
                                          simx_opmode_buffer) == simx_return_ok);
         if (all_ok) {
-            phri::Vector6d pose_vec;
+            Eigen::Vector6d pose_vec;
             for (size_t i = 0; all_ok and i < 3; ++i) {
                 pose_vec[i] = data[i];
             }
@@ -358,7 +358,7 @@ VREPDriver::initLaserScanner(const std::string& name) {
     simxReadStringStream(client_id_, data_name.c_str(), &sigVal, &sigLen,
                          simx_opmode_streaming);
 
-    auto ptr = std::make_shared<phri::VectorXd>();
+    auto ptr = std::make_shared<Eigen::VectorXd>();
     lasers_data_[data_name] = ptr;
 
     return ptr;
@@ -393,7 +393,7 @@ bool VREPDriver::updateLaserScanners() {
     return all_ok;
 }
 
-bool VREPDriver::readJointPosition(phri::VectorXd& position) const {
+bool VREPDriver::readJointPosition(Eigen::VectorXd& position) const {
     bool all_ok = true;
 
     float positions[robot_.jointCount()];
@@ -412,7 +412,8 @@ bool VREPDriver::readJointPosition(phri::VectorXd& position) const {
     return all_ok;
 }
 
-bool VREPDriver::sendJointTargetPosition(const phri::VectorXd& position) const {
+bool VREPDriver::sendJointTargetPosition(
+    const Eigen::VectorXd& position) const {
     bool all_ok = true;
 
     for (size_t i = 0; i < robot_.jointCount(); ++i) {
@@ -426,12 +427,13 @@ bool VREPDriver::sendJointTargetPosition(const phri::VectorXd& position) const {
     return all_ok;
 }
 
-bool VREPDriver::sendJointTargetVelocity(const phri::VectorXd& velocity) const {
+bool VREPDriver::sendJointTargetVelocity(
+    const Eigen::VectorXd& velocity) const {
     bool all_ok = true;
 
-    robot_.joints.command.position += velocity * getSampleTime();
+    robot_.joints().command.position += velocity * getSampleTime();
 
-    all_ok &= sendJointTargetPosition(robot_.joints.command.position);
+    all_ok &= sendJointTargetPosition(robot_.joints().command.position);
 
     return all_ok;
 }
@@ -536,9 +538,9 @@ bool VREPDriver::read() {
     }
 
     all_ok &=
-        readTCPVelocity(robot_.task.state.twist, phri::ReferenceFrame::Base);
-    all_ok &= readTCPWrench(robot_.task.state.wrench);
-    all_ok &= readJointPosition(robot_.joints.state.position);
+        readTCPVelocity(robot_.task().state.twist, phri::ReferenceFrame::Base);
+    all_ok &= readTCPWrench(robot_.task().state.wrench);
+    all_ok &= readJointPosition(robot_.joints().state.position);
     all_ok &= updateTrackedObjectsPosition();
     all_ok &= updateLaserScanners();
 
@@ -551,7 +553,7 @@ bool VREPDriver::send() {
     // Make sure all commands are sent at the same time
     simxPauseCommunication(client_id_, true);
 
-    all_ok &= sendJointTargetVelocity(robot_.joints.command.velocity);
+    all_ok &= sendJointTargetVelocity(robot_.joints().command.velocity);
 
     simxPauseCommunication(client_id_, false);
 

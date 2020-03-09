@@ -29,6 +29,8 @@
 #pragma once
 
 #include <OpenPHRI/definitions.h>
+#include <physical_quantities/spatial/velocity.h>
+#include <physical_quantities/spatial/acceleration.h>
 
 namespace phri {
 
@@ -94,8 +96,8 @@ public:
      * @brief Reset the derivator's internal state to its original state
      */
     template <typename TT = Output>
-    typename std::enable_if<std::is_same<TT, phri::Twist>::value or
-                                std::is_same<TT, phri::Acceleration>::value,
+    typename std::enable_if<std::is_same<TT, spatial::Velocity>::value or
+                                std::is_same<TT, spatial::Acceleration>::value,
                             void>::type
     reset() {
         output_->vector().setZero();
@@ -143,8 +145,8 @@ template <typename T>
 using DerivatorConstPtr = std::shared_ptr<const Derivator<T>>;
 
 extern template class Derivator<double>;
-extern template class Derivator<Vector2d>;
-extern template class Derivator<Vector3d>;
-extern template class Derivator<Vector6d>;
+extern template class Derivator<Eigen::Vector2d>;
+extern template class Derivator<Eigen::Vector3d>;
+extern template class Derivator<Eigen::Vector6d>;
 
 } // namespace phri

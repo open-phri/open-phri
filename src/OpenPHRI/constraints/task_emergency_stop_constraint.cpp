@@ -65,7 +65,7 @@ TaskEmergencyStopConstraint::TaskEmergencyStopConstraint(
 double TaskEmergencyStopConstraint::compute() {
     double constraint;
 
-    double norm = robot_->task.state.wrench.force().norm();
+    double norm = robot_->task().state().force().linear().norm();
 
     if (norm >= activationThreshold()) {
         constraint = 0.;

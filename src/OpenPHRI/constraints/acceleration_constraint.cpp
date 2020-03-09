@@ -52,12 +52,13 @@ AccelerationConstraint::AccelerationConstraint(double&& maximum_acceleration)
 
 double AccelerationConstraint::compute() {
     double constraint = 1.;
-    double v_norm = robot_->control.task.total_twist.translation().norm();
+    double v_norm = robot_->control().task().totalVelocity().linear().norm();
 
     if (v_norm > 0.) {
-        double prev_v_norm = robot_->task.command.twist.translation().norm();
+        double prev_v_norm =
+            robot_->task().command().velocity().linear().norm();
         double vmax = prev_v_norm + std::abs(*maximum_acceleration_) *
-                                        robot_->control.time_step;
+                                        robot_->control().timeStep();
         constraint = vmax / v_norm;
     }
 

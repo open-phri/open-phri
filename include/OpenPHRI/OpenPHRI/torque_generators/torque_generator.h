@@ -44,18 +44,18 @@ public:
      * @brief Compute the value associated with the torque generator.
      * @return The torque generator's evaluated value.
      */
-    virtual VectorXd compute() final;
+    virtual Eigen::VectorXd compute() final;
 
     /**
      * @brief Call operator, shortcut for compute().
      * @return The torque generator's evaluated value.
      */
-    virtual VectorXd operator()() final;
+    virtual Eigen::VectorXd operator()() final;
 
 protected:
     friend class SafetyController;
 
-    virtual void update(VectorXd& torque) = 0;
+    virtual void update(Eigen::VectorXd& torque) = 0;
 
     /**
      * @brief Set the robot to work with.

@@ -71,7 +71,7 @@ int main(int argc, char const* argv[]) {
     auto point_3 = TrajectoryPoint<Vector2d>(
         Vector2d(-0.15, 0.85), Vector2d(0., 0.), Vector2d(0., 0.));
 
-    auto velocity_target = make_shared<Twist>();
+    auto velocity_target = make_shared<spatial::Velocity>();
     auto position_target = make_shared<Pose>();
 
     *robot->controlPointDampingMatrix() *= 250.;

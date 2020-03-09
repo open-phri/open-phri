@@ -56,7 +56,7 @@ StateMachine::StateMachine(
 
     if (skip_teaching) {
         auto q = Eigen::Quaterniond(0.499977, 0.500029, -0.499972, 0.500021);
-        phri::Vector3d wp;
+        Eigen::Vector3d wp;
         wp << -0.176542, -0.0672858, 0.772875;
         waypoints_.emplace_back(wp, q);
         waypoints_.emplace_back(wp, q);
@@ -73,10 +73,10 @@ StateMachine::StateMachine(
     }
 
     joint_trajectory_generator_ =
-        std::make_shared<phri::TrajectoryGenerator<phri::VectorXd>>(
+        std::make_shared<phri::TrajectoryGenerator<Eigen::VectorXd>>(
             joint_start_point_, SAMPLE_TIME,
             phri::TrajectorySynchronization::SynchronizeTrajectory);
-    phri::VectorXd dqmax(robot_->jointCount()), d2qmax(robot_->jointCount());
+    Eigen::VectorXd dqmax(robot_->jointCount()), d2qmax(robot_->jointCount());
     dqmax.setConstant(REPLAY_DQMAX);
     d2qmax.setConstant(REPLAY_D2QMAX);
     joint_trajectory_generator_->addPathTo(joint_end_point_, dqmax, d2qmax);
@@ -85,11 +85,11 @@ StateMachine::StateMachine(
         std::make_shared<phri::TrajectoryGenerator<phri::Pose>>(
             start_point_, SAMPLE_TIME,
             phri::TrajectorySynchronization::SynchronizeTrajectory);
-    phri::Vector6d err_th;
-    phri::Twist vmax(phri::Vector3d::Ones() * REPLAY_VMAX,
-                     phri::Vector3d::Ones() * REPLAY_WMAX);
-    phri::Acceleration amax(phri::Vector3d::Ones() * REPLAY_AMAX,
-                            phri::Vector3d::Ones() * REPLAY_DWMAX);
+    Eigen::Vector6d err_th;
+    spatial::Velocity vmax(Eigen::Vector3d::Ones() * REPLAY_VMAX,
+                           Eigen::Vector3d::Ones() * REPLAY_WMAX);
+    phri::Acceleration amax(Eigen::Vector3d::Ones() * REPLAY_AMAX,
+                            Eigen::Vector3d::Ones() * REPLAY_DWMAX);
     trajectory_generator_->addPathTo(end_point_, vmax, amax);
     err_th.block<3, 1>(0, 0).setConstant(REPLAY_ERROR_THRESHOLD_TRANS);
     err_th.block<3, 1>(3, 0).setConstant(REPLAY_ERROR_THRESHOLD_ROT);
@@ -99,7 +99,7 @@ StateMachine::StateMachine(
     if (static_cast<bool>(laser_detector_)) {
         operator_position_laser_ = laser_detector_->getPosition();
     } else {
-        operator_position_laser_ = std::make_shared<phri::Vector2d>(3., 0.);
+        operator_position_laser_ = std::make_shared<Eigen::Vector2d>(3., 0.);
     }
     operator_position_tcp_ = std::make_shared<phri::Pose>();
 
@@ -112,24 +112,24 @@ StateMachine::StateMachine(
 
     // Fixed transformation between the laser and the arm's base. Matches the
     // configuration on the Bazar robot_.
-    laser_base_transform_ = phri::Matrix4d::Identity();
-    phri::Matrix3d laser_base_rot{
-        Eigen::AngleAxisd(-M_PI / 2., phri::Vector3d::UnitX()) *
-        Eigen::AngleAxisd(0., phri::Vector3d::UnitY()) *
-        Eigen::AngleAxisd(-35. * M_PI / 180., phri::Vector3d::UnitZ())};
+    laser_base_transform_ = Eigen::Matrix4d::Identity();
+    Eigen::Matrix3d laser_base_rot{
+        Eigen::AngleAxisd(-M_PI / 2., Eigen::Vector3d::UnitX()) *
+        Eigen::AngleAxisd(0., Eigen::Vector3d::UnitY()) *
+        Eigen::AngleAxisd(-35. * M_PI / 180., Eigen::Vector3d::UnitZ())};
     laser_base_transform_.block<3, 3>(0, 0) = laser_base_rot;
     laser_base_transform_.block<3, 1>(0, 3) =
-        phri::Vector3d(+4.2856e-01, 0., +2.6822e-02);
+        Eigen::Vector3d(+4.2856e-01, 0., +2.6822e-02);
 
     init_position_ = std::make_shared<phri::Pose>();
-    traj_vel_ = std::make_shared<phri::Twist>();
-    stiffness_mat_ = std::make_shared<phri::Matrix6d>(
-        phri::Matrix6d::Identity() * STIFFNESS);
+    traj_vel_ = std::make_shared<spatial::Velocity>();
+    stiffness_mat_ = std::make_shared<Eigen::Matrix6d>(
+        Eigen::Matrix6d::Identity() * STIFFNESS);
     // stiffness_mat_->block<3,3>(3,3).setZero();
     (*stiffness_mat_)(4, 4) =
         0.; // TODO it works but it should be z axis, fix it
     tcp_collision_sphere_center_ = std::make_shared<phri::Pose>();
-    tcp_collision_sphere_offset_ = phri::Vector3d(0., 0., -7.44e-2);
+    tcp_collision_sphere_offset_ = Eigen::Vector3d(0., 0., -7.44e-2);
     end_of_teach_ = false;
 }
 
@@ -165,7 +165,8 @@ bool StateMachine::compute() {
 
     if (not end_of_teach_) {
         double velocity =
-            static_cast<phri::Vector6d>(*robot_->controlPointVelocity()).norm();
+            static_cast<Eigen::Vector6d>(*robot_->controlPointVelocity())
+                .norm();
         switch (teach_state_) {
         case TeachStates::Init: {
             auto velocity_constraint =
@@ -243,13 +244,13 @@ bool StateMachine::compute() {
 
             auto potential_field_generator =
                 std::make_shared<phri::PotentialFieldGenerator>(
-                    std::make_shared<phri::Vector3d>(
+                    std::make_shared<Eigen::Vector3d>(
                         tcp_collision_sphere_offset_),
                     phri::ReferenceFrame::Base);
 
             auto obstacle_position = std::make_shared<phri::Pose>(
-                phri::Vector3d(+6.3307e-03, -1.5126e-01, +9.9744e-01),
-                phri::Vector3d(0., 0., 0.));
+                Eigen::Vector3d(+6.3307e-03, -1.5126e-01, +9.9744e-01),
+                Eigen::Vector3d(0., 0., 0.));
             auto obstacle = std::make_shared<phri::PotentialFieldObject>(
                 phri::PotentialFieldType::Repulsive,
                 std::make_shared<double>(300.), // gain
@@ -329,13 +330,13 @@ bool StateMachine::compute() {
                     std::make_shared<double>(FORCE_CTRL_ALIM), SAMPLE_TIME);
 
             auto target_force =
-                std::make_shared<phri::Vector6d>(phri::Vector6d::Zero());
-            auto p_gain = std::make_shared<phri::Vector6d>(
-                phri::Vector6d::Ones() * FORCE_CTRL_PGAIN);
-            auto d_gain = std::make_shared<phri::Vector6d>(
-                phri::Vector6d::Ones() * FORCE_CTRL_DGAIN);
+                std::make_shared<Eigen::Vector6d>(Eigen::Vector6d::Zero());
+            auto p_gain = std::make_shared<Eigen::Vector6d>(
+                Eigen::Vector6d::Ones() * FORCE_CTRL_PGAIN);
+            auto d_gain = std::make_shared<Eigen::Vector6d>(
+                Eigen::Vector6d::Ones() * FORCE_CTRL_DGAIN);
             auto selection =
-                std::make_shared<phri::Vector6d>(phri::Vector6d::Zero());
+                std::make_shared<Eigen::Vector6d>(Eigen::Vector6d::Zero());
 
             target_force->z() = FORCE_TARGET;
             selection->z() = 1.;
@@ -441,7 +442,7 @@ bool StateMachine::setupTrajectoryGenerator() {
 
 bool StateMachine::setupJointTrajectoryGenerator() {
     const auto& from = *robot_->jointCurrentPosition();
-    phri::VectorXd to(7);
+    Eigen::VectorXd to(7);
     to << 90., -45., 0., -90., 0., 45., 0.;
     to *= M_PI / 180.;
 
@@ -458,25 +459,25 @@ bool StateMachine::setupJointTrajectoryGenerator() {
 
 void StateMachine::computeLaserDistanceInTCPFrame(
     std::shared_ptr<Pose> obstacle_position) {
-    phri::Vector4d position_laser = phri::Vector4d::Ones();
+    Eigen::Vector4d position_laser = Eigen::Vector4d::Ones();
     position_laser.x() = operator_position_laser_->x();
     position_laser.y() = operator_position_laser_->y();
     position_laser.z() = 0.;
 
-    phri::Vector4d position_base = laser_base_transform_ * position_laser;
+    Eigen::Vector4d position_base = laser_base_transform_ * position_laser;
 
     const auto& tcp_base_transform = *robot_->transformationMatrix();
-    phri::Matrix4d base_tcp_transform = phri::Matrix4d::Identity();
+    Eigen::Matrix4d base_tcp_transform = Eigen::Matrix4d::Identity();
     base_tcp_transform.block<3, 3>(0, 0) =
         tcp_base_transform.block<3, 3>(0, 0).transpose();
     base_tcp_transform.block<3, 1>(0, 3) =
         -tcp_base_transform.block<3, 3>(0, 0).transpose() *
         tcp_base_transform.block<3, 1>(0, 3);
 
-    phri::Vector4d position_tcp = base_tcp_transform * position_base;
+    Eigen::Vector4d position_tcp = base_tcp_transform * position_base;
 
     // The following is to remove the vertical component from the position
-    phri::Vector3d position_tcp_rbase =
+    Eigen::Vector3d position_tcp_rbase =
         tcp_base_transform.block<3, 3>(0, 0) * position_tcp.block<3, 1>(0, 0);
     position_tcp_rbase.y() = 0.;
 
@@ -487,7 +488,7 @@ void StateMachine::computeLaserDistanceInTCPFrame(
 
 void StateMachine::computeNullSpaceVelocityVector() {
     if (static_cast<bool>(null_space_velocity_)) {
-        phri::VectorXd grad(robot_->jointCount());
+        Eigen::VectorXd grad(robot_->jointCount());
         const auto& joint_pos = *robot_->jointCurrentPosition();
         for (size_t i = 0; i < robot_->jointCount(); ++i) {
             double avg =

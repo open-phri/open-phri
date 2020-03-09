@@ -31,12 +31,13 @@ SeparationDistanceConstraint::SeparationDistanceConstraint(
 
     interpolator->setInput(separation_distance_);
 
-    robot_position_ = std::make_shared<Vector6d>(Vector6d::Zero());
+    robot_position_ =
+        std::make_shared<Eigen::Vector6d>(Eigen::Vector6d::Zero());
 }
 
 SeparationDistanceConstraint::SeparationDistanceConstraint(
     std::shared_ptr<Constraint> constraint, InterpolatorPtr interpolator,
-    std::shared_ptr<const Vector6d> robot_position)
+    std::shared_ptr<const Eigen::Vector6d> robot_position)
     : SeparationDistanceConstraint(constraint, interpolator) {
     robot_position_ = robot_position;
 }
@@ -58,11 +59,11 @@ void SeparationDistanceConstraint::setRobot(Robot const* robot) {
 }
 
 double SeparationDistanceConstraint::closestObjectDistance() {
-    const Vector3d& rob_pos = robot_position_->block<3, 1>(0, 0);
+    const Eigen::Vector3d& rob_pos = robot_position_->block<3, 1>(0, 0);
 
     double min_dist = std::numeric_limits<double>::infinity();
     for (const auto& item : items_) {
-        Vector3d obj_rob_vec = item.second->translation() - rob_pos;
+        Eigen::Vector3d obj_rob_vec = item.second->linear() - rob_pos;
 
         min_dist = std::min(min_dist, obj_rob_vec.norm());
     }

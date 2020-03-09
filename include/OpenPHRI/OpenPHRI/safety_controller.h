@@ -60,6 +60,7 @@ public:
      */
     explicit SafetyController(Robot& robot, YAML::Node& configuration);
 
+    SafetyController(SafetyController&&) = default;
     ~SafetyController() = default;
 
     /**
@@ -166,6 +167,13 @@ public:
         return addConstraint(name, std::make_shared<T>(std::move(obj)), force);
     }
 
+    template <typename T, typename... Args>
+    typename std::enable_if<std::is_base_of<Constraint, T>::value, bool>::type
+    add(const std::string& name, Args&&... args) {
+        return addConstraint(
+            name, std::make_shared<T>(std::forward<Args>(args)...), false);
+    }
+
     /**
      * @brief Shortcut for the SafetyController::addForceGenerator method.
      */
@@ -186,6 +194,14 @@ public:
     add(const std::string& name, T&& obj, bool force = false) {
         return addForceGenerator(name, std::make_shared<T>(std::move(obj)),
                                  force);
+    }
+
+    template <typename T, typename... Args>
+    typename std::enable_if<std::is_base_of<ForceGenerator, T>::value,
+                            bool>::type
+    add(const std::string& name, Args&&... args) {
+        return addForceGenerator(
+            name, std::make_shared<T>(std::forward<Args>(args)...), false);
     }
 
     /**
@@ -210,6 +226,14 @@ public:
                                   force);
     }
 
+    template <typename T, typename... Args>
+    typename std::enable_if<std::is_base_of<TorqueGenerator, T>::value,
+                            bool>::type
+    add(const std::string& name, Args&&... args) {
+        return addTorqueGenerator(
+            name, std::make_shared<T>(std::forward<Args>(args)...), false);
+    }
+
     /**
      * @brief Shortcut for the SafetyController::addVelocityGenerator method.
      */
@@ -230,6 +254,14 @@ public:
     add(const std::string& name, T&& obj, bool force = false) {
         return addVelocityGenerator(name, std::make_shared<T>(std::move(obj)),
                                     force);
+    }
+
+    template <typename T, typename... Args>
+    typename std::enable_if<std::is_base_of<VelocityGenerator, T>::value,
+                            bool>::type
+    add(const std::string& name, Args&&... args) {
+        return addVelocityGenerator(
+            name, std::make_shared<T>(std::forward<Args>(args)...), false);
     }
 
     /**
@@ -254,6 +286,14 @@ public:
     add(const std::string& name, T&& obj, bool force = false) {
         return addJointVelocityGenerator(
             name, std::make_shared<T>(std::move(obj)), force);
+    }
+
+    template <typename T, typename... Args>
+    typename std::enable_if<std::is_base_of<JointVelocityGenerator, T>::value,
+                            bool>::type
+    add(const std::string& name, Args&&... args) {
+        return addJointVelocityGenerator(
+            name, std::make_shared<T>(std::forward<Args>(args)...), false);
     }
 
     /**
@@ -433,6 +473,33 @@ public:
 
         using value_type = remove_cref_t<decltype(std::declval<T>().compute())>;
 
+        template <typename U = T>
+        StorageWrapper(typename std::enable_if<
+                           std::is_same<VelocityGenerator, U>::value or
+                           std::is_same<ForceGenerator, U>::value>::type* = 0)
+            : last_value{spatial::Frame(uint64_t{0})} {
+        }
+
+        template <typename U = T>
+        StorageWrapper(
+            typename std::enable_if<
+                not std::is_same<VelocityGenerator, U>::value and
+                not std::is_same<ForceGenerator, U>::value>::type* = 0)
+            : last_value{} {
+        }
+
+        StorageWrapper(std::shared_ptr<T> obj,
+                       const value_type& value = value_type{})
+            : object{obj}, last_value{value} {
+        }
+
+        StorageWrapper(const StorageWrapper&) = default;
+        StorageWrapper(StorageWrapper&&) = default;
+        ~StorageWrapper() = default;
+
+        StorageWrapper& operator=(const StorageWrapper&) = default;
+        StorageWrapper& operator=(StorageWrapper&&) = default;
+
         std::shared_ptr<T> object;
         value_type last_value;
     };
@@ -460,11 +527,11 @@ public:
 
 protected:
     double computeConstraintValue();
-    const Vector6d& computeForceSum();
-    const VectorXd& computeTorqueSum();
-    const Vector6d& computeVelocitySum();
-    const VectorXd& computeJointVelocitySum();
-    const MatrixXd& computeJacobianInverse() const;
+    const spatial::Force& computeForceSum();
+    const Eigen::VectorXd& computeTorqueSum();
+    const spatial::Velocity& computeVelocitySum();
+    const Eigen::VectorXd& computeJointVelocitySum();
+    const Eigen::MatrixXd& computeJacobianInverse() const;
 
     ObjectCollection<StorageWrapper<Constraint>> constraints_;
     ObjectCollection<StorageWrapper<ForceGenerator>> force_generators_;

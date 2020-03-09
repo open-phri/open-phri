@@ -74,32 +74,32 @@ private:
     TeachStates teach_state_;
     ReplayStates replay_state_;
     std::list<phri::Pose> waypoints_;
-    phri::TrajectoryPoint<phri::VectorXd> joint_start_point_;
-    phri::TrajectoryPoint<phri::VectorXd> joint_end_point_;
+    phri::TrajectoryPoint<Eigen::VectorXd> joint_start_point_;
+    phri::TrajectoryPoint<Eigen::VectorXd> joint_end_point_;
     phri::TrajectoryPoint<phri::Pose> start_point_;
     phri::TrajectoryPoint<phri::Pose> end_point_;
     std::shared_ptr<phri::TaskSpaceTrajectoryGenerator> trajectory_generator_;
-    std::shared_ptr<phri::TrajectoryGenerator<phri::VectorXd>>
+    std::shared_ptr<phri::TrajectoryGenerator<Eigen::VectorXd>>
         joint_trajectory_generator_;
     std::shared_ptr<phri::LinearInterpolator> max_vel_interpolator_;
     std::shared_ptr<phri::Pose> init_position_;
-    std::shared_ptr<phri::Twist> traj_vel_;
-    std::shared_ptr<phri::Matrix6d> stiffness_mat_;
+    std::shared_ptr<spatial::Velocity> traj_vel_;
+    std::shared_ptr<Eigen::Matrix6d> stiffness_mat_;
     std::shared_ptr<const double> vmax_interpolator_output_;
-    std::shared_ptr<const phri::Vector2d> operator_position_laser_;
+    std::shared_ptr<const Eigen::Vector2d> operator_position_laser_;
     std::shared_ptr<phri::Pose> operator_position_tcp_;
     std::shared_ptr<phri::Pose> tcp_collision_sphere_center_;
-    phri::Vector3d tcp_collision_sphere_offset_;
-    phri::Matrix4d laser_base_transform_;
+    Eigen::Vector3d tcp_collision_sphere_offset_;
+    Eigen::Matrix4d laser_base_transform_;
     bool end_of_teach_;
     bool force_control_at_next_wp_;
 
     std::chrono::high_resolution_clock::time_point last_time_point_;
     bool is_force_ok_;
 
-    std::shared_ptr<phri::VectorXd> null_space_velocity_;
-    phri::VectorXd joint_min_positions_;
-    phri::VectorXd joint_max_positions_;
+    std::shared_ptr<Eigen::VectorXd> null_space_velocity_;
+    Eigen::VectorXd joint_min_positions_;
+    Eigen::VectorXd joint_max_positions_;
     double null_space_gain_;
 
     bool is_robot_stopped_;

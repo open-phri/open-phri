@@ -8,11 +8,11 @@ using namespace phri;
 using namespace std;
 
 TEST_CASE("Acceleration constraint") {
+    using namespace spatial::literals;
 
-    auto robot = phri::Robot{"rob", // Robot's name
-                             7};    // Robot's joint count
+    auto robot = phri::Robot{"tcp"_frame, "base"_frame, "rob", 7};
 
-    robot.control.time_step = 1.;
+    robot.control().time_step = 1.;
 
     auto model = phri::RobotModel(
         robot, PID_PATH("robot_models/kuka_lwr4.yaml"), "end-effector");
@@ -21,28 +21,27 @@ TEST_CASE("Acceleration constraint") {
                                AffineTransform::Identity(),
                                FrameAdapter::frame("end-effector"));
 
-    robot.joints.state.position.setOnes();
+    robot.joints().state.position.setOnes();
     model.forwardKinematics();
 
     auto safety_controller = phri::SafetyController(robot);
     safety_controller.setVerbose(true);
 
     auto maximum_acceleration = 0.5;
-    auto dv_max = maximum_acceleration * robot.control.time_step;
-    auto constant_vel =
-        std::make_shared<phri::Twist>(FrameAdapter::frame("end-effector"));
+    auto dv_max = maximum_acceleration * robot.control().time_step;
+    auto constant_vel = std::make_shared<spatial::Velocity>("tcp"_frame);
 
     safety_controller.add("acceleration constraint",
                           phri::AccelerationConstraint(maximum_acceleration));
 
     safety_controller.add("vel proxy", phri::VelocityProxy(constant_vel));
 
-    const phri::Vector6d& cp_velocity = robot.task.command.twist;
-    const phri::Vector6d& cp_total_velocity = robot.control.task.total_twist;
+    const Eigen::Vector6d& cp_velocity = robot.task().command.twist;
+    const Eigen::Vector6d& cp_total_velocity = robot.control().task.total_twist;
 
     auto vnorm = std::make_shared<double>(0.);
     auto anorm = std::make_shared<double>(0.);
-    phri::Derivator<double> derivator(vnorm, anorm, robot.control.time_step);
+    phri::Derivator<double> derivator(vnorm, anorm, robot.control().time_step);
 
     derivator.reset();
 

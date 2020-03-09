@@ -22,13 +22,13 @@
 
 namespace phri {
 
-VectorXd JointVelocityGenerator::compute() {
+Eigen::VectorXd JointVelocityGenerator::compute() {
     velocity_.setZero();
     update(velocity_);
     return velocity_;
 }
 
-VectorXd JointVelocityGenerator::operator()() {
+Eigen::VectorXd JointVelocityGenerator::operator()() {
     return compute();
 }
 

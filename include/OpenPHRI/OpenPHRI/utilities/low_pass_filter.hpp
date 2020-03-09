@@ -13,6 +13,8 @@
 #include <cmath>
 #include <iostream>
 
+#include <physical_quantities/spatial/type_aliases.h>
+
 namespace phri {
 
 /** @brief A simple low pass filter
@@ -99,9 +101,9 @@ template <typename T>
 using LowPassFilterConstPtr = std::shared_ptr<const LowPassFilter<T>>;
 
 extern template class LowPassFilter<double>;
-extern template class LowPassFilter<Vector2d>;
-extern template class LowPassFilter<Vector3d>;
-extern template class LowPassFilter<Vector6d>;
-extern template class LowPassFilter<VectorXd>;
+extern template class LowPassFilter<Eigen::Vector2d>;
+extern template class LowPassFilter<Eigen::Vector3d>;
+extern template class LowPassFilter<Eigen::Vector6d>;
+extern template class LowPassFilter<Eigen::VectorXd>;
 
 } // namespace phri

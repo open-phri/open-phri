@@ -160,7 +160,7 @@ public:
      * @param frame [in] The reference frame.
      * @return True if correctly read, false otherwise.
      */
-    bool readTCPVelocity(phri::Twist& velocity,
+    bool readTCPVelocity(spatial::Velocity& velocity,
                          phri::ReferenceFrame frame) const;
 
     /**
@@ -175,14 +175,14 @@ public:
      * @param jacobian [out] The current Jacobian matrix.
      * @return True if correctly read, false otherwise.
      */
-    bool readJacobian(phri::MatrixXd& jacobian) const;
+    bool readJacobian(Eigen::MatrixXd& jacobian) const;
 
     /**
      * @brief Get the transformation matrix associated with the TCP.
      * @param matrix [out] The current transformation matrix.
      * @return True if correctly read, false otherwise.
      */
-    bool readTransformationMatrix(phri::Matrix4d& matrix) const;
+    bool readTransformationMatrix(Eigen::Matrix4d& matrix) const;
 
     /**
      * @brief Start tracking a given object in the specified frame.
@@ -203,9 +203,9 @@ public:
     std::shared_ptr<const VectorXd> initLaserScanner(const std::string& name);
     bool updateLaserScanners();
 
-    bool readJointPosition(phri::VectorXd& position) const;
-    bool sendJointTargetPosition(const phri::VectorXd& position) const;
-    bool sendJointTargetVelocity(const phri::VectorXd& velocity) const;
+    bool readJointPosition(Eigen::VectorXd& position) const;
+    bool sendJointTargetPosition(const Eigen::VectorXd& position) const;
+    bool sendJointTargetVelocity(const Eigen::VectorXd& velocity) const;
 
     virtual bool read() override;
     virtual bool send() override;

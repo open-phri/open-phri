@@ -58,10 +58,10 @@ struct RobotModel::pImpl {
         std::vector<double> rbd_velocity_limit(rbd_joint_count);
         std::vector<double> rbd_force_limit(rbd_joint_count);
 
-        lower_limit = std::make_shared<VectorXd>(joint_count);
-        upper_limit = std::make_shared<VectorXd>(joint_count);
-        velocity_limit = std::make_shared<VectorXd>(joint_count);
-        force_limit = std::make_shared<VectorXd>(joint_count);
+        lower_limit = std::make_shared<Eigen::VectorXd>(joint_count);
+        upper_limit = std::make_shared<Eigen::VectorXd>(joint_count);
+        velocity_limit = std::make_shared<Eigen::VectorXd>(joint_count);
+        force_limit = std::make_shared<Eigen::VectorXd>(joint_count);
 
         for (const auto& index : indexes) {
             if (index.second == 0) {
@@ -102,7 +102,7 @@ struct RobotModel::pImpl {
     }
 
     void updateJointPositions() {
-        const auto& joint_pos = robot.joints.state.position;
+        const auto& joint_pos = robot.joints().state().position();
         for (size_t idx = 0, rbd_idx = 1; idx < robot.jointCount(); ++rbd_idx) {
             if (mbc.q[rbd_idx].size() > 0) {
                 mbc.q[rbd_idx][0] = joint_pos(idx);
@@ -111,37 +111,25 @@ struct RobotModel::pImpl {
         }
     }
 
-    void updateSpatialTransformation() {
-        auto& mat = robot.control.spatial_transformation_matrix;
-        const auto& rot_mat =
-            robot.control.transformation_matrix.block<3, 3>(0, 0);
-        mat.block<3, 3>(3, 0).setZero();
-        mat.block<3, 3>(0, 0) = rot_mat;
-        mat.block<3, 3>(0, 3).setZero();
-        mat.block<3, 3>(3, 3) = rot_mat;
-    }
-
     void forwardKinematics() {
         updateJointPositions();
         rbd::forwardKinematics(mb, mbc);
         rbd::forwardVelocity(mb, mbc);
 
         const auto& tcp_pose = mbc.bodyPosW[control_point_body_index];
-        robot.task.state.pose = Pose(
-            tcp_pose.translation(),
-            static_cast<Eigen::Quaterniond>(tcp_pose.rotation().transpose()));
-        robot.control.transformation_matrix.setIdentity();
-        robot.control.transformation_matrix.block<3, 1>(0, 3) =
-            tcp_pose.translation();
-        robot.control.transformation_matrix.block<3, 3>(0, 0) =
+        robot.task().state_.position() = spatial::Position(
+            tcp_pose.translation(), tcp_pose.rotation().transpose(),
+            robot.controlPointFrame());
+        robot.control().transformation_.setIdentity();
+        robot.control().transformation_.translation() = tcp_pose.translation();
+        robot.control().transformation_.linear() =
             tcp_pose.rotation().transpose();
-        updateSpatialTransformation();
 
         auto joint_count = robot.jointCount();
         Eigen::MatrixXd jac_mat = jacobian.jacobian(mb, mbc);
-        robot.control.jacobian.block(0, 0, 3, joint_count) =
+        robot.control().jacobian_.block(0, 0, 3, joint_count) =
             jac_mat.block(3, 0, 3, joint_count);
-        robot.control.jacobian.block(3, 0, 3, joint_count) =
+        robot.control().jacobian_.block(3, 0, 3, joint_count) =
             jac_mat.block(0, 0, 3, joint_count);
     }
 
@@ -153,10 +141,10 @@ struct RobotModel::pImpl {
 
     Robot& robot;
     int control_point_body_index;
-    std::shared_ptr<VectorXd> lower_limit;
-    std::shared_ptr<VectorXd> upper_limit;
-    std::shared_ptr<VectorXd> velocity_limit;
-    std::shared_ptr<VectorXd> force_limit;
+    std::shared_ptr<Eigen::VectorXd> lower_limit;
+    std::shared_ptr<Eigen::VectorXd> upper_limit;
+    std::shared_ptr<Eigen::VectorXd> velocity_limit;
+    std::shared_ptr<Eigen::VectorXd> force_limit;
 };
 
 RobotModel::RobotModel(Robot& robot, const std::string& model_path,
@@ -215,16 +203,16 @@ void RobotModel::forwardKinematics() const {
     impl_->forwardKinematics();
 }
 
-std::shared_ptr<const VectorXd> RobotModel::getLowerLimits() const {
+std::shared_ptr<const Eigen::VectorXd> RobotModel::getLowerLimits() const {
     return impl_->lower_limit;
 }
-std::shared_ptr<const VectorXd> RobotModel::getUpperLimits() const {
+std::shared_ptr<const Eigen::VectorXd> RobotModel::getUpperLimits() const {
     return impl_->upper_limit;
 }
-std::shared_ptr<const VectorXd> RobotModel::getVelocityLimits() const {
+std::shared_ptr<const Eigen::VectorXd> RobotModel::getVelocityLimits() const {
     return impl_->velocity_limit;
 }
-std::shared_ptr<const VectorXd> RobotModel::getForceLimits() const {
+std::shared_ptr<const Eigen::VectorXd> RobotModel::getForceLimits() const {
     return impl_->force_limit;
 }
 size_t RobotModel::jointCount() const {

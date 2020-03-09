@@ -30,7 +30,8 @@ ForceControl::Parameters::Parameters() {
 }
 
 ForceControl::Parameters::Parameters(
-    const Vector6d& proportional_gain, const Vector6d& derivative_gain,
+    const Eigen::Vector6d& proportional_gain,
+    const Eigen::Vector6d& derivative_gain,
     const std::array<bool, 6>& selection_vector)
     : proportional_gain(proportional_gain),
       derivative_gain(derivative_gain),
@@ -38,41 +39,42 @@ ForceControl::Parameters::Parameters(
 }
 
 ForceControl::ForceControl(TargetType type)
-    : ForceControl(Wrench{}, Parameters{}, type) {
+    : ForceControl(spatial::Force::Zero(spatial::Frame::Ref(frame())),
+                   Parameters{}, type) {
 }
 
-ForceControl::ForceControl(std::shared_ptr<Wrench> target,
+ForceControl::ForceControl(std::shared_ptr<spatial::Force> target,
                            std::shared_ptr<Parameters> parameters,
                            TargetType type)
-    : VelocityGenerator(),
-      target_(std::make_shared<Wrench>()),
-      parameters_(std::make_shared<Parameters>()),
+    : target_(target),
+      parameters_(parameters),
       type_(type),
-      filter_coeff_(1.) {
+      filter_coeff_(1.),
+      prev_error_{spatial::Force::Zero(spatial::Frame::Ref(frame()))} {
 }
 
-ForceControl::ForceControl(Wrench& target, Parameters& parameters,
+ForceControl::ForceControl(spatial::Force& target, Parameters& parameters,
                            TargetType type)
-    : ForceControl(std::shared_ptr<Wrench>(&target, [](auto p) {}),
+    : ForceControl(std::shared_ptr<spatial::Force>(&target, [](auto p) {}),
                    std::shared_ptr<Parameters>(&parameters, [](auto p) {}),
                    type) {
 }
 
-ForceControl::ForceControl(const Wrench& target, const Parameters& parameters,
-                           TargetType type)
-    : ForceControl(std::make_shared<Wrench>(target),
+ForceControl::ForceControl(const spatial::Force& target,
+                           const Parameters& parameters, TargetType type)
+    : ForceControl(std::make_shared<spatial::Force>(target),
                    std::make_shared<Parameters>(parameters), type) {
 }
 
-ForceControl::ForceControl(Wrench&& target, Parameters&& parameters,
+ForceControl::ForceControl(spatial::Force&& target, Parameters&& parameters,
                            TargetType type)
-    : ForceControl(std::make_shared<Wrench>(std::move(target)),
+    : ForceControl(std::make_shared<spatial::Force>(std::move(target)),
                    std::make_shared<Parameters>(std::move(parameters)), type) {
 }
 
-void ForceControl::configureFilter(units::time::second_t time_constant) {
-    auto time_constant_sec = time_constant.to<double>();
-    auto sample_time = robot().control.time_step;
+void ForceControl::configureFilter(scalar::TimeConstant time_constant) {
+    auto time_constant_sec = time_constant.value();
+    auto sample_time = robot().control().timeStep();
     assert(sample_time > 0);
     assert(time_constant_sec > 0);
 
@@ -87,13 +89,12 @@ void ForceControl::configureFilter(units::time::second_t time_constant) {
     filter_coeff_ = (sample_time / (time_constant_sec + sample_time));
 }
 
-void ForceControl::configureFilter(units::frequency::hertz_t cutoff_frequency) {
-    configureFilter(units::time::second_t(
-        1. / (2. * M_PI * cutoff_frequency.to<double>())));
+void ForceControl::configureFilter(scalar::CutoffFrequency cutoff_frequency) {
+    configureFilter(cutoff_frequency.inverse());
 }
 
-void ForceControl::update(Twist& velocity) {
-    auto error = target() - robot().task.state.wrench;
+void ForceControl::update(spatial::Velocity& velocity) {
+    auto error = target() - robot().task().state().force();
 
     // Zero the error on unused components
     applySelection(error);
@@ -102,19 +103,19 @@ void ForceControl::update(Twist& velocity) {
     error = error * filter_coeff_ + prev_error_ * (1. - filter_coeff_);
 
     // Proportional action
-    Vector6d command =
-        parameters().proportional_gain.cwiseProduct(error.vector());
+    Eigen::Vector6d command =
+        parameters().proportional_gain.cwiseProduct(error);
 
     // Derivative action
     command += parameters().derivative_gain.cwiseProduct(
-        (error - prev_error_).vector() / robot().control.time_step);
+        (error - prev_error_) / robot().control().timeStep());
 
     prev_error_ = error;
 
-    velocity = Twist(command, target().frame());
+    velocity = spatial::Velocity(command, target().frame());
 }
 
-void ForceControl::applySelection(Vector6d& vec) const {
+void ForceControl::applySelection(Eigen::Vector6d& vec) const {
     const auto& sel = parameters().selection_vector;
     for (size_t i = 0; i < 6; ++i) {
         if (not sel[i]) {
@@ -123,15 +124,15 @@ void ForceControl::applySelection(Vector6d& vec) const {
     }
 }
 
-Wrench& ForceControl::target() {
+spatial::Force& ForceControl::target() {
     return *target_;
 }
 
-const Wrench& ForceControl::target() const {
+const spatial::Force& ForceControl::target() const {
     return *target_;
 }
 
-std::shared_ptr<Wrench> ForceControl::targetPtr() const {
+std::shared_ptr<spatial::Force> ForceControl::targetPtr() const {
     return target_;
 }
 

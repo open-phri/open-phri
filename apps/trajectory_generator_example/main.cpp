@@ -96,29 +96,33 @@ TaskSpaceTrajectoryGenerator createTrajectoryGenerator(double sample_time) {
     auto quat_1 = Eigen::Quaterniond::Identity();
     auto quat_2 = quat_1.integrate(Vector3d(0., 0., 0.25));
     auto quat_3 = quat_1.integrate(Vector3d(0., 0., -0.25));
-    auto pose_1 = TrajectoryPoint<Pose>(
-        Pose(Vector3d(-0.197, 0., 1.1249), quat_1), Twist(), Acceleration());
+    auto pose_1 =
+        TrajectoryPoint<Pose>(Pose(Vector3d(-0.197, 0., 1.1249), quat_1),
+                              spatial::Velocity(), Acceleration());
 
     auto pose_2 = TrajectoryPoint<Pose>(Pose(Vector3d(-0.25, 0., 1.), quat_2),
-                                        Twist(), Acceleration());
+                                        spatial::Velocity(), Acceleration());
 
     auto pose_3 = TrajectoryPoint<Pose>(Pose(Vector3d(-0.15, 0., 0.85), quat_3),
-                                        Twist(), Acceleration());
+                                        spatial::Velocity(), Acceleration());
 
     auto trajectory_generator = TaskSpaceTrajectoryGenerator(
         pose_1, sample_time, TrajectorySynchronization::SynchronizeWaypoints);
 
     // Generate paths between waypoints with maximum twist and acceleration
     trajectory_generator.addPathTo(
-        pose_2, Twist(Vector3d(0.05, 1., 0.05), 0.5 * Vector3d::Ones()),
+        pose_2,
+        spatial::Velocity(Vector3d(0.05, 1., 0.05), 0.5 * Vector3d::Ones()),
         Acceleration(Vector3d(0.1, 1., 0.1), 0.5 * Vector3d::Ones()));
 
     trajectory_generator.addPathTo(
-        pose_3, Twist(Vector3d(0.10, 1., 0.05), 0.5 * Vector3d::Ones()),
+        pose_3,
+        spatial::Velocity(Vector3d(0.10, 1., 0.05), 0.5 * Vector3d::Ones()),
         Acceleration(Vector3d(0.2, 1., 0.2), 0.5 * Vector3d::Ones()));
 
     trajectory_generator.addPathTo(
-        pose_1, Twist(Vector3d(0.05, 1., 0.05), 0.5 * Vector3d::Ones()),
+        pose_1,
+        spatial::Velocity(Vector3d(0.05, 1., 0.05), 0.5 * Vector3d::Ones()),
         Acceleration(Vector3d(0.1, 1., 0.1), 0.5 * Vector3d::Ones()));
 
     return trajectory_generator;

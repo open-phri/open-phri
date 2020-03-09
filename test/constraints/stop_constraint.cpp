@@ -19,18 +19,18 @@ TEST_CASE("Stop constraint") {
                                AffineTransform::Identity(),
                                FrameAdapter::frame("end-effector"));
 
-    robot.joints.state.position.setOnes();
+    robot.joints().state.position.setOnes();
     model.forwardKinematics();
 
     auto safety_controller = phri::SafetyController(robot);
     safety_controller.setVerbose(true);
 
     auto damping_matrix = make_shared<Matrix6d>(Matrix6d::Identity());
-    auto& ext_force = robot.task.state.wrench;
+    auto& ext_force = robot.task().state.wrench;
     auto activation_force_threshold = make_shared<double>(25.);
     auto deactivation_force_threshold = make_shared<double>(5.);
 
-    auto& ext_torque = robot.joints.state.force;
+    auto& ext_torque = robot.joints().state.force;
     auto activation_torque_threshold = make_shared<VectorXd>(7);
     activation_torque_threshold->setConstant(5);
     auto deactivation_torque_threshold = make_shared<VectorXd>(7);
@@ -42,7 +42,8 @@ TEST_CASE("Stop constraint") {
     auto joint_stop_constraint = make_shared<JointEmergencyStopConstraint>(
         activation_torque_threshold, deactivation_torque_threshold);
 
-    auto constant_vel = make_shared<Twist>(FrameAdapter::frame("end-effector"));
+    auto constant_vel =
+        make_shared<spatial::Velocity>(FrameAdapter::frame("end-effector"));
     auto constant_velocity_generator = make_shared<VelocityProxy>(constant_vel);
     auto constant_force_generator = make_shared<ExternalForce>();
 
@@ -51,8 +52,8 @@ TEST_CASE("Stop constraint") {
     safety_controller.add("vel proxy", constant_velocity_generator);
     safety_controller.add("force proxy", constant_force_generator);
 
-    const Vector6d& cp_velocity = robot.task.command.twist;
-    const Vector6d& cp_total_velocity = robot.control.task.total_twist;
+    const Vector6d& cp_velocity = robot.task().command.twist;
+    const Vector6d& cp_total_velocity = robot.control().task.total_twist;
 
     // Step #1 : no velocity, no force
     safety_controller.compute();

@@ -24,14 +24,14 @@
 namespace phri {
 
 JointEmergencyStopConstraint::JointEmergencyStopConstraint()
-    : activation_threshold_(std::make_shared<VectorXd>()),
-      deactivation_threshold_(std::make_shared<VectorXd>()),
+    : activation_threshold_(std::make_shared<Eigen::VectorXd>()),
+      deactivation_threshold_(std::make_shared<Eigen::VectorXd>()),
       previous_constraint_value_(1.) {
 }
 
 JointEmergencyStopConstraint::JointEmergencyStopConstraint(
-    std::shared_ptr<VectorXd> activation_threshold,
-    std::shared_ptr<VectorXd> deactivation_threshold)
+    std::shared_ptr<Eigen::VectorXd> activation_threshold,
+    std::shared_ptr<Eigen::VectorXd> deactivation_threshold)
     : activation_threshold_(activation_threshold),
       deactivation_threshold_(deactivation_threshold),
       previous_constraint_value_(1.) {
@@ -42,25 +42,30 @@ JointEmergencyStopConstraint::JointEmergencyStopConstraint(
 }
 
 JointEmergencyStopConstraint::JointEmergencyStopConstraint(
-    VectorXd& activation_threshold, VectorXd& deactivation_threshold)
+    Eigen::VectorXd& activation_threshold,
+    Eigen::VectorXd& deactivation_threshold)
     : JointEmergencyStopConstraint(
-          std::shared_ptr<VectorXd>(&activation_threshold, [](auto p) {}),
-          std::shared_ptr<VectorXd>(&deactivation_threshold, [](auto p) {})) {
+          std::shared_ptr<Eigen::VectorXd>(&activation_threshold,
+                                           [](auto p) {}),
+          std::shared_ptr<Eigen::VectorXd>(&deactivation_threshold,
+                                           [](auto p) {})) {
 }
 
 JointEmergencyStopConstraint::JointEmergencyStopConstraint(
-    const VectorXd& activation_threshold,
-    const VectorXd& deactivation_threshold)
+    const Eigen::VectorXd& activation_threshold,
+    const Eigen::VectorXd& deactivation_threshold)
     : JointEmergencyStopConstraint(
-          std::make_shared<VectorXd>(activation_threshold),
-          std::make_shared<VectorXd>(deactivation_threshold)) {
+          std::make_shared<Eigen::VectorXd>(activation_threshold),
+          std::make_shared<Eigen::VectorXd>(deactivation_threshold)) {
 }
 
 JointEmergencyStopConstraint::JointEmergencyStopConstraint(
-    VectorXd&& activation_threshold, VectorXd&& deactivation_threshold)
+    Eigen::VectorXd&& activation_threshold,
+    Eigen::VectorXd&& deactivation_threshold)
     : JointEmergencyStopConstraint(
-          std::make_shared<VectorXd>(std::move(activation_threshold)),
-          std::make_shared<VectorXd>(std::move(deactivation_threshold))) {
+          std::make_shared<Eigen::VectorXd>(std::move(activation_threshold)),
+          std::make_shared<Eigen::VectorXd>(
+              std::move(deactivation_threshold))) {
 }
 
 double JointEmergencyStopConstraint::compute() {
@@ -81,7 +86,7 @@ double JointEmergencyStopConstraint::compute() {
     double constraint = 1.;
 
     for (size_t i = 0; i < robot_->jointCount(); i++) {
-        auto joint_force{std::abs(robot_->joints.state.force(i))};
+        auto joint_force{std::abs(robot_->joints().state().force()(i))};
         if (joint_force >= activationThreshold()(i)) {
             constraint = 0.;
             break;
@@ -91,7 +96,7 @@ double JointEmergencyStopConstraint::compute() {
     if (constraint != 0.) {
         bool all_ok = true;
         for (size_t i = 0; i < robot_->jointCount(); i++) {
-            auto joint_force = std::abs(robot_->joints.state.force(i));
+            auto joint_force = std::abs(robot_->joints().state().force()(i));
             if (joint_force > deactivationThreshold()(i)) {
                 all_ok = false;
                 break;
@@ -103,28 +108,30 @@ double JointEmergencyStopConstraint::compute() {
     return constraint;
 }
 
-VectorXd& JointEmergencyStopConstraint::activationThreshold() {
+Eigen::VectorXd& JointEmergencyStopConstraint::activationThreshold() {
     return *activation_threshold_;
 }
 
-const VectorXd& JointEmergencyStopConstraint::activationThreshold() const {
+const Eigen::VectorXd&
+JointEmergencyStopConstraint::activationThreshold() const {
     return *activation_threshold_;
 }
 
-std::shared_ptr<VectorXd>
+std::shared_ptr<Eigen::VectorXd>
 JointEmergencyStopConstraint::activationThresholdPtr() const {
     return activation_threshold_;
 }
 
-VectorXd& JointEmergencyStopConstraint::deactivationThreshold() {
+Eigen::VectorXd& JointEmergencyStopConstraint::deactivationThreshold() {
     return *deactivation_threshold_;
 }
 
-const VectorXd& JointEmergencyStopConstraint::deactivationThreshold() const {
+const Eigen::VectorXd&
+JointEmergencyStopConstraint::deactivationThreshold() const {
     return *deactivation_threshold_;
 }
 
-std::shared_ptr<VectorXd>
+std::shared_ptr<Eigen::VectorXd>
 JointEmergencyStopConstraint::deactivationThresholdPtr() const {
     return deactivation_threshold_;
 }

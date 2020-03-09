@@ -28,14 +28,7 @@
 
 #pragma once
 
-// Select only the units useful to OpenPHRI to improve compilation times
-#define DISABLE_PREDEFINED_UNITS
-#define ENABLE_PREDEFINED_FREQUENCY_UNITS
-#define ENABLE_PREDEFINED_TIME_UNITS
-#include <OpenPHRI/units.h>
-
 #include <OpenPHRI/type_aliases.h>
-#include <OpenPHRI/task_space_data_types.h>
 
 #include <memory>
 #include <type_traits>

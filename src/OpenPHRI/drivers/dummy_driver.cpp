@@ -12,7 +12,8 @@ bool DummyDriver::registered_in_factory =
     phri::DriverFactory::add<DummyDriver>("dummy");
 
 DummyDriver::DummyDriver(phri::Robot& robot, double sample_time)
-    : Driver(robot, sample_time) {
+    : Driver(robot, sample_time),
+      last_sync_{std::chrono::high_resolution_clock::now()} {
 }
 
 DummyDriver::DummyDriver(phri::Robot& robot, const YAML::Node& configuration)
@@ -21,7 +22,7 @@ DummyDriver::DummyDriver(phri::Robot& robot, const YAML::Node& configuration)
 
     if (driver) {
         try {
-            robot_.control.time_step = driver["sample_time"].as<double>();
+            setTimeStep(driver["sample_time"].as<double>());
         } catch (...) {
             throw std::runtime_error(
                 OPEN_PHRI_ERROR("You must provide a 'sample_time' field in the "
@@ -36,7 +37,7 @@ DummyDriver::DummyDriver(phri::Robot& robot, const YAML::Node& configuration)
                     "match the number of joints."));
             }
             for (size_t i = 0; i < robot_.jointCount(); ++i) {
-                robot_.joints.state.position(i) =
+                jointState().position()(i) =
                     init_joint_positions[i] * M_PI / 180.;
             }
         } catch (...) {
@@ -61,8 +62,10 @@ bool DummyDriver::stop() {
 }
 
 bool DummyDriver::sync() {
-    std::this_thread::sleep_for(
-        std::chrono::microseconds(static_cast<int>(getSampleTime() * 1e6)));
+    std::this_thread::sleep_until(
+        last_sync_ +
+        std::chrono::microseconds(static_cast<int>(getTimeStep() * 1e6)));
+    last_sync_ = std::chrono::high_resolution_clock::now();
     return true;
 }
 
@@ -71,7 +74,6 @@ bool DummyDriver::read() {
 }
 
 bool DummyDriver::send() {
-    robot_.joints.state.position +=
-        robot_.joints.command.velocity * getSampleTime();
+    jointState().position() += jointCommand().velocity() * getTimeStep();
     return true;
 }

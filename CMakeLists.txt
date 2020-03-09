@@ -10,26 +10,27 @@ option(USE_OPENMP 			"Make use of OpenMP to parallize certain parts of the libra
 PROJECT(open-phri)
 
 PID_Package(
-			AUTHOR 		    Benjamin Navarro
-			INSTITUTION	    LIRMM
-			MAIL		    navarro@lirmm.fr
-			ADDRESS 	    git@github.com:BenjaminNavarro/open-phri.git
-            PUBLIC_ADDRESS  https://github.com/BenjaminNavarro/open-phri.git
-			YEAR 		    2018
-			LICENSE 	    GNULGPL
-			DESCRIPTION     "OpenPHRI: a generic framework to easily and safely control robots in interactions with humans"
-			README			instructions.md
-			CODE_STYLE		pid11
-			VERSION			2.0.0
+	AUTHOR 		    Benjamin Navarro
+	INSTITUTION	    LIRMM
+	MAIL		    navarro@lirmm.fr
+	ADDRESS 	    git@github.com:BenjaminNavarro/open-phri.git
+	PUBLIC_ADDRESS  https://github.com/BenjaminNavarro/open-phri.git
+	YEAR 		    2018
+	LICENSE 	    GNULGPL
+	DESCRIPTION     "OpenPHRI: a generic framework to easily and safely control robots in interactions with humans"
+	README			instructions.md
+	CODE_STYLE		pid11
+	VERSION			2.0.0
 )
 
-check_PID_Platform(CONFIGURATION posix)
+# check_PID_Platform(CONFIGURATION posix) TODO OpenMP
 
 PID_Dependency(api-driver-vrep VERSION 1.0)
 PID_Dependency(eigen-extensions VERSION 0.6)
 PID_Dependency(pid-rpath VERSION 2.0)
 PID_Dependency(rbdyn VERSION 1.3)
 PID_Dependency(yaml-cpp)
+PID_Dependency(physical-quantities)
 
 if(BUILD_EXAMPLES)
 	PID_Dependency(pid-os-utilities)

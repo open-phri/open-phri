@@ -32,6 +32,8 @@
 namespace phri {
 
 class SafetyController;
+class RobotModel;
+class Driver;
 class Constraint;
 class SeparationDistanceConstraint;
 class VelocityGenerator;

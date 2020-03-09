@@ -33,6 +33,7 @@
 #include <memory>
 #include <fstream>
 #include <sstream>
+#include <map>
 
 namespace phri {
 

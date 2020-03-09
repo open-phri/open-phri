@@ -22,11 +22,11 @@
 
 namespace phri {
 
-ExternalForce::ExternalForce() {
-}
+// ExternalForce::ExternalForce(spatial::Frame frame) : ForceGenerator{frame} {
+// }
 
-void ExternalForce::update(Wrench& force) {
-    force = robot().task.state.wrench;
+void ExternalForce::update(spatial::Force& force) {
+    force = robot().task().state().force();
 }
 
 } // namespace phri

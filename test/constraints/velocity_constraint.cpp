@@ -19,7 +19,7 @@ TEST_CASE("Velocity constraint") {
                                AffineTransform::Identity(),
                                FrameAdapter::frame("end-effector"));
 
-    robot.joints.state.position.setOnes();
+    robot.joints().state.position.setOnes();
     model.forwardKinematics();
 
     auto safety_controller = phri::SafetyController(robot);
@@ -29,8 +29,8 @@ TEST_CASE("Velocity constraint") {
     auto velocity_constraint =
         std::make_shared<phri::VelocityConstraint>(maximum_velocity);
 
-    auto constant_vel =
-        std::make_shared<phri::Twist>(FrameAdapter::frame("end-effector"));
+    auto constant_vel = std::make_shared<spatial::Velocity>(
+        FrameAdapter::frame("end-effector"));
     auto constant_velocity_generator =
         std::make_shared<phri::VelocityProxy>(constant_vel);
 
@@ -38,9 +38,9 @@ TEST_CASE("Velocity constraint") {
     safety_controller.add("vel proxy", constant_velocity_generator);
 
     auto cp_velocity =
-        static_cast<const phri::Vector6d&>(robot.task.command.twist);
+        static_cast<const Eigen::Vector6d&>(robot.task().command.twist);
     auto cp_total_velocity =
-        static_cast<const phri::Vector6d&>(robot.control.task.total_twist);
+        static_cast<const Eigen::Vector6d&>(robot.control().task.total_twist);
 
     // Step #1 : no velocity
     safety_controller.compute();
@@ -57,7 +57,7 @@ TEST_CASE("Velocity constraint") {
     constant_vel->translation().x() = 0.6;
     safety_controller.compute();
 
-    REQUIRE(isClose(robot.task.command.twist.translation().norm(),
+    REQUIRE(isClose(robot.task().command.twist.translation().norm(),
                     *maximum_velocity));
 
     // Step #4 : velocity 3 axes < max
@@ -74,11 +74,11 @@ TEST_CASE("Velocity constraint") {
     constant_vel->translation().z() = 0.6;
     safety_controller.compute();
 
-    REQUIRE(isClose(robot.task.command.twist.translation().norm(),
+    REQUIRE(isClose(robot.task().command.twist.translation().norm(),
                     *maximum_velocity));
 
     // Step #6 : rotational velocity only
-    static_cast<phri::Vector6d&>(*constant_vel).setZero();
+    static_cast<Eigen::Vector6d&>(*constant_vel).setZero();
     constant_vel->rotation().x() = 0.5;
     constant_vel->rotation().y() = 0.4;
     constant_vel->rotation().z() = 0.6;

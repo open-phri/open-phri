@@ -59,7 +59,7 @@ int main(int argc, char const* argv[]) {
     auto stop_constraint = make_shared<EmergencyStopConstraint>(
         activation_force_threshold, deactivation_force_threshold);
 
-    auto constant_vel = make_shared<Twist>();
+    auto constant_vel = make_shared<spatial::Velocity>();
     auto constant_velocity_generator = make_shared<VelocityProxy>(constant_vel);
     auto external_force_generator = make_shared<ForceProxy>(ext_force);
 

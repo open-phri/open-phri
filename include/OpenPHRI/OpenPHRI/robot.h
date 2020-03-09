@@ -30,6 +30,12 @@
 
 #include <OpenPHRI/definitions.h>
 #include <OpenPHRI/fwd_decl.h>
+#include <physical_quantities/spatial/position.h>
+#include <physical_quantities/spatial/velocity.h>
+#include <physical_quantities/spatial/acceleration.h>
+#include <physical_quantities/spatial/force.h>
+#include <physical_quantities/spatial/impedance/damping.h>
+#include <physical_quantities/spatial/transformation.h>
 
 namespace phri {
 
@@ -38,294 +44,364 @@ namespace phri {
 class Robot {
 public:
     //! \brief Holds a joint state (either current, target or command)
-    struct JointData {
+    class JointData {
+    public:
         //! \brief Construct a JointData with zero sized vectors
         JointData() = default;
 
         //! \brief Construct a JointData with \p joint_count sized vectors
         //! \see JointData::resize()
-        JointData(size_t joint_count) {
-            resize(joint_count);
-        }
+        explicit JointData(size_t joint_count);
 
         //! \brief resize all the vectors to \p joint_count and fill them with
         //! zeros
-        void resize(size_t joint_count) {
-            position.resize(joint_count);
-            velocity.resize(joint_count);
-            acceleration.resize(joint_count);
-            force.resize(joint_count);
-
-            position.setZero();
-            velocity.setZero();
-            acceleration.setZero();
-            force.setZero();
-        }
+        void resize(size_t joint_count);
 
         //! \brief Joints position (rad or m)
-        phri::VectorXd position;
+        Eigen::VectorXd& position();
+        const Eigen::VectorXd& position() const;
         //! \brief Joints velocity (rad/s or m/s)
-        phri::VectorXd velocity;
+        Eigen::VectorXd& velocity();
+        const Eigen::VectorXd& velocity() const;
         //! \brief Joints acceleration (rad/s² or m/s²)
-        phri::VectorXd acceleration;
+        Eigen::VectorXd& acceleration();
+        const Eigen::VectorXd& acceleration() const;
         //! \brief Joints force (Nm or N)
-        phri::VectorXd force;
+        Eigen::VectorXd& force();
+        const Eigen::VectorXd& force() const;
+
+    private:
+        Eigen::VectorXd position_;
+        Eigen::VectorXd velocity_;
+        Eigen::VectorXd acceleration_;
+        Eigen::VectorXd force_;
     };
 
     //! \brief Holds joints mechanical limits
-    struct JointLimits {
+    class JointLimits {
+    public:
         //! \brief Construct a JointLimits with zero sized vectors
         JointLimits() = default;
 
         //! \brief Construct a JointLimits with \p joint_count sized vectors
         //! \see JointLimits::resize()
-        JointLimits(size_t joint_count) {
-            resize(joint_count);
-        }
+        JointLimits(size_t joint_count);
 
         //! \brief resize all the vectors to \p joint_count and fill them with
         //! + or - infinity
-        void resize(size_t joint_count) {
-            min_position.resize(joint_count);
-            max_position.resize(joint_count);
-            max_velocity.resize(joint_count);
-            max_acceleration.resize(joint_count);
-            max_force.resize(joint_count);
-
-            min_position.setConstant(-std::numeric_limits<double>::infinity());
-            max_position.setConstant(std::numeric_limits<double>::infinity());
-            max_velocity.setConstant(std::numeric_limits<double>::infinity());
-            max_acceleration.setConstant(
-                std::numeric_limits<double>::infinity());
-            max_force.setConstant(std::numeric_limits<double>::infinity());
-        }
+        void resize(size_t joint_count);
 
         //! \brief Joints minimum position (rad or m)
-        phri::VectorXd min_position;
+        Eigen::Ref<const Eigen::VectorXd> minPosition() const;
         //! \brief Joints maximum position (rad or m)
-        phri::VectorXd max_position;
+        Eigen::Ref<const Eigen::VectorXd> maxPosition() const;
         //! \brief Joints minimum velocity (rad/s or m/s)
-        phri::VectorXd max_velocity;
+        Eigen::Ref<const Eigen::VectorXd> maxVelocity() const;
         //! \brief Joints minimum acceleration (rad/s² or m/s²)
-        phri::VectorXd max_acceleration;
+        Eigen::Ref<const Eigen::VectorXd> maxAcceleration() const;
         //! \brief Joints minimum force (Nm or N)
-        phri::VectorXd max_force;
+        Eigen::Ref<const Eigen::VectorXd> maxForce() const;
+
+        mutable double safety_factor;
+
+    private:
+        friend class RobotModel;
+        Eigen::VectorXd min_position_;
+        Eigen::VectorXd max_position_;
+        Eigen::VectorXd max_velocity_;
+        Eigen::VectorXd max_acceleration_;
+        Eigen::VectorXd max_force_;
     };
 
     //! \brief Pack all joint related data (state, target, command, limits)
-    struct Joints {
+    class Joints {
+    public:
         //! \brief Construct a Joints with zero sized vectors
         Joints() = default;
 
         //! \brief Construct a Joints with \p joint_count sized vectors
         //! \see JointLimits::resize()
-        Joints(size_t joint_count) {
-            resize(joint_count);
-        }
+        explicit Joints(size_t joint_count);
 
         //! \brief Call JointData::resize() on Joints::state, Joints::target and
         //! Joints::command and JointLimits::resize() on limits
-        void resize(size_t joint_count) {
-            state.resize(joint_count);
-            target.resize(joint_count);
-            command.resize(joint_count);
-            limits.resize(joint_count);
-        }
+        void resize(size_t joint_count);
 
         //! \brief Joints current state (read from the robot)
-        JointData state;
+        const JointData& state() const;
+
         //! \brief Joints targets (desired state)
-        JointData target;
+        JointData& target();
+        const JointData& target() const;
+
         //! \brief Joints commands (sent to the robot)
-        JointData command;
+        const JointData& command() const;
+
         //! \brief Joints mechanical limits
-        JointLimits limits;
+        const JointLimits& limits() const;
+
+    private:
+        friend class SafetyController;
+        friend class RobotModel;
+        friend class Driver;
+
+        JointData state_;
+        JointData target_;
+        JointData command_;
+        JointLimits limits_;
     };
 
     //! \brief Holds a task state (either current, target or command)
-    struct TaskData {
-        TaskData() {
-        }
+    class TaskData {
+    public:
+        TaskData(spatial::Frame frame);
+
         //! \brief Task pose (m, rad)
-        phri::Pose pose;
+        spatial::Position& position();
+        const spatial::Position& position() const;
+
         //! \brief Task velocity (m/s, rad/s)
-        phri::Twist twist;
+        spatial::Velocity& velocity();
+        const spatial::Velocity& velocity() const;
+
         //! \brief Task acceleration (m/s², rad/s²)
-        phri::Acceleration acceleration;
+        spatial::Acceleration& acceleration();
+        const spatial::Acceleration& acceleration() const;
+
         //! \brief Task force (N, Nm)
-        phri::Wrench wrench;
+        spatial::Force& force();
+        const spatial::Force& force() const;
+
+    private:
+        spatial::Position position_;
+        spatial::Velocity velocity_;
+        spatial::Acceleration acceleration_;
+        spatial::Force wrench_;
     };
 
     //! \brief Holds task physical limits
-    struct TaskLimits {
-        TaskLimits() {
-            min_pose.translation().setConstant(
-                -std::numeric_limits<double>::infinity());
-            max_pose.translation().setConstant(
-                std::numeric_limits<double>::infinity());
-            max_twist.vector().setConstant(
-                std::numeric_limits<double>::infinity());
-            max_acceleration.vector().setConstant(
-                std::numeric_limits<double>::infinity());
-            max_wrench.vector().setConstant(
-                std::numeric_limits<double>::infinity());
-        }
+    class TaskLimits {
+    public:
+        TaskLimits(spatial::Frame frame);
 
         //! \brief Task minimum pose (m, rad)
-        phri::Pose min_pose;
+        spatial::Position& minPosition();
+        const spatial::Position& minPosition() const;
+
         //! \brief Task maximum pose (m, rad)
-        phri::Pose max_pose;
+        spatial::Position& maxPosition();
+        const spatial::Position& maxPosition() const;
+
         //! \brief Task maximum velocity (m/s, rad/s)
-        phri::Twist max_twist;
+        spatial::Velocity& maxVelocity();
+        const spatial::Velocity& maxVelocity() const;
+
         //! \brief Task maximum acceleration (m/s², rad/s²)
-        phri::Acceleration max_acceleration;
+        spatial::Acceleration& maxAcceleration();
+        const spatial::Acceleration& maxAcceleration() const;
+
         //! \brief Task maximum force (N, Nm)
-        phri::Wrench max_wrench;
+        spatial::Force& maxForce();
+        const spatial::Force& maxForce() const;
+
+    private:
+        spatial::Position min_position_;
+        spatial::Position max_position_;
+        spatial::Velocity max_velocity_;
+        spatial::Acceleration max_acceleration_;
+        spatial::Force max_force_;
     };
 
     //! \brief Pack all task related data (state, target, command, limits)
-    struct Task {
+    class Task {
+    public:
+        explicit Task(spatial::Frame frame);
+
         //! \brief Task current state (read from the robot or set from the
         //! kinematic)
-        TaskData state;
+        const TaskData& state() const;
+
         //! \brief Task targets (desired state)
-        TaskData target;
+        const TaskData& target() const;
+        TaskData& target();
+
         //! \brief Task commands (sent to the robot, directly or after
         //! transformation to joint space)
-        TaskData command;
+        const TaskData& command() const;
+
         //! \brief Task physical limits
-        TaskLimits limits;
+        const TaskLimits& limits() const;
+
+    private:
+        friend class SafetyController;
+        friend class RobotModel;
+        friend class Driver;
+
+        TaskData state_;
+        TaskData target_;
+        TaskData command_;
+        TaskLimits limits_;
     };
 
     //! \brief Holds control related data. Mainly used by the SafetyController
     struct ControlData {
         //! \brief Construct a ControlData with no joints
-        ControlData() = default;
+        ControlData(spatial::Frame frame, spatial::Frame parent);
 
         //! \brief Construct a ControlData with \p joint_count joints
         //! \see ControlData::resize()
-        ControlData(size_t joint_count) {
-            resize(joint_count);
-        }
+        ControlData(spatial::Frame frame, spatial::Frame parent,
+                    size_t joint_count);
 
         //! \brief Call ControlData::Joints::resize() on Joints::joints and
         //! resize ControlData::jacobian to a 6 x \p joint_count matrix and
         //! ControlData::jacobian_inverse to a \p joint_count x 6 matrix
-        void resize(size_t joint_count) {
-            joints.resize(joint_count);
-            jacobian.resize(6, joint_count);
-            jacobian_inverse.resize(joint_count, 6);
-        }
+        void resize(size_t joint_count);
 
         //! \brief Holds joint control related data
-        struct Joints {
+        class Joints {
+        public:
             //! \brief Construct a Joints with zero sized vectors
             Joints() = default;
 
             //! \brief Construct a Joints with \p joint_count sized vectors
             //! \see Joints::resize()
-            Joints(size_t joint_count) {
-                resize(joint_count);
-            }
+            Joints(size_t joint_count);
 
             //! \brief resize all the vectors to \p joint_count and fill them
             //! with zeros, except for Joints::damping which is set to infinity
-            void resize(size_t joint_count) {
-                damping.resize(joint_count);
-                velocity_sum.resize(joint_count);
-                force_sum.resize(joint_count);
-                velocity_command.resize(joint_count);
-                total_velocity.resize(joint_count);
-                total_force.resize(joint_count);
-
-                damping.setConstant(std::numeric_limits<double>::max());
-                velocity_sum.setZero();
-                force_sum.setZero();
-                velocity_command.setZero();
-                total_velocity.setZero();
-                total_force.setZero();
-            }
+            void resize(size_t joint_count);
 
             //! \brief Damping matrix used by the joint-level damping
             //! control
-            phri::VectorXd damping;
+            Eigen::VectorXd& damping();
+            const Eigen::VectorXd& damping() const;
             //! \brief Sum of all joint velocity inputs
-            phri::VectorXd velocity_sum;
+            const Eigen::VectorXd& velocitySum() const;
+
             //! \brief Sum of all joint force inputs
-            phri::VectorXd force_sum;
+            const Eigen::VectorXd& forceSum() const;
+
             //! \brief Output of the joint-level admittance controller
-            phri::VectorXd velocity_command;
+            const Eigen::VectorXd& velocityCommand() const;
+
             //! \brief Cumulative effect on the joint velocity of all inputs.
             //! \details Same as joints.command.velocity but without the scaling
             //! factor.
-            phri::VectorXd total_velocity;
+            const Eigen::VectorXd& totalVelocity() const;
+
             //! \brief Cumulative effect of both joint torque and control point
             //! force inputs.
-            phri::VectorXd total_force;
+            const Eigen::VectorXd& totalForce() const;
+
+        private:
+            friend class SafetyController;
+            Eigen::VectorXd damping_;
+            Eigen::VectorXd velocity_sum_;
+            Eigen::VectorXd force_sum_;
+            Eigen::VectorXd velocity_command_;
+            Eigen::VectorXd total_velocity_;
+            Eigen::VectorXd total_force_;
         };
 
         //! \brief Holds task control related data
-        struct Task {
-            Task() {
-                damping.setConstant(std::numeric_limits<double>::max());
-                twist_sum.vector().setZero();
-                wrench_sum.vector().setZero();
-                twist_command.vector().setZero();
-                total_twist.vector().setZero();
-                total_wrench.vector().setZero();
-            }
+        class Task {
+        public:
+            Task(spatial::Frame frame);
 
             //! \brief Damping matrix used by the task-level damping control
-            phri::Vector6d damping;
+            spatial::Damping& damping();
+            const spatial::Damping& damping() const;
+
             //! \brief Sum of all task velocity inputs
-            phri::Twist twist_sum;
+            const spatial::Velocity& velocitySum() const;
+
             //! \brief Sum of all task force inputs
-            phri::Wrench wrench_sum;
+            const spatial::Force& forceSum() const;
+
             //! \brief Output of the task-level admittance controller
-            phri::Twist twist_command;
+            const spatial::Velocity& velocityCommand() const;
+
             //! \brief Cumulative effect on the task velocity of all inputs.
             //! \details Same as task.command.velocity but without the scaling
             //! factor.
-            phri::Twist total_twist;
+            const spatial::Velocity& totalVelocity() const;
+
             //! \brief Cumulative effect of both joint torque and control point
             //! force inputs.
-            phri::Wrench total_wrench;
+            const spatial::Force& totalForce() const;
+
+        private:
+            friend class SafetyController;
+            spatial::Damping damping_;
+            spatial::Velocity velocity_sum_;
+            spatial::Force force_sum_;
+            spatial::Velocity velocity_command_;
+            spatial::Velocity total_velocity_;
+            spatial::Force total_force_;
         };
 
         //! \brief Joint control related data
-        Joints joints;
+        Joints& joints();
+        const Joints& joints() const;
 
         //! \brief task control related data
-        Task task;
+        Task& task();
+        const Task& task() const;
 
         //! \brief Velocity scaling factor. Computed by the SafetyController to
         //! ensure the constraints
-        double scaling_factor;
+        const double& scalingFactor() const;
 
         //! \brief The time step, in seconds, used to control the robot
-        double time_step;
+        const double& timeStep() const;
 
         //! \brief Task Jacobian matrix
-        phri::MatrixXd jacobian;
+        const Eigen::MatrixXd& jacobian() const;
 
         //! \brief Task Jacobian (pseudo-)matrix
-        phri::MatrixXd jacobian_inverse;
+        const Eigen::MatrixXd& jacobianInverse() const;
 
         //! \brief Task transformation matrix (R T;0 1)
-        phri::Matrix4d transformation_matrix;
+        const spatial::Transformation& transformation() const;
 
-        //! \brief Task spatial transformation matrix ([R 0;0 R])
-        phri::Matrix6d spatial_transformation_matrix;
+    private:
+        friend class SafetyController;
+        friend class Driver;
+        friend class RobotModel;
+
+        //! \brief Joint control related data
+        Joints joints_;
+
+        //! \brief task control related data
+        Task task_;
+
+        //! \brief Velocity scaling factor. Computed by the SafetyController to
+        //! ensure the constraints
+        double scaling_factor_;
+
+        //! \brief The time step, in seconds, used to control the robot
+        double time_step_;
+
+        //! \brief Task Jacobian matrix
+        Eigen::MatrixXd jacobian_;
+
+        //! \brief Task Jacobian (pseudo-)matrix
+        Eigen::MatrixXd jacobian_inverse_;
+
+        //! \brief Task transformation matrix (R T;0 1)
+        spatial::Transformation transformation_;
     };
 
-    //! \brief Construct a new Robot object with no name and zero joints. In
-    //! this case, Robot::create() must be called before use
-    Robot() = default;
+    Robot(spatial::Frame control_point_frame,
+          spatial::Frame control_point_parent_frame);
 
     //! \brief Construct a new Robot object with a name and a number of joints
     //! \param name The name of the robot
     //! \param joint_count The number of joints
-    Robot(const std::string& name, size_t joint_count);
+    Robot(spatial::Frame control_point_frame,
+          spatial::Frame control_point_parent_frame, const std::string& name,
+          size_t joint_count);
 
     //! \brief Construct a new Robot object with the given configuration
     //! \details The \p configuration node must contain a \a name field and a \a
@@ -337,6 +413,15 @@ public:
     //! \param name The name of the robot
     //! \param joint_count The number of joints
     void create(const std::string& name, size_t joint_count);
+
+    //! \brief Change the name, number of joints and controlled frame of the
+    //! robot
+    //! \param name The name of the robot
+    //! \param joint_count The number of joints
+    //! \param frame The controlled frame
+    void create(const std::string& name, size_t joint_count,
+                spatial::Frame control_point_frame,
+                spatial::Frame control_point_parent_frame);
 
     //! \brief Change the name and number of joints of the robot according to
     //! the given configuration
@@ -353,18 +438,40 @@ public:
     //! \return The number of joints.
     size_t jointCount() const;
 
+    //! \brief Frame associated with the control point
+    //! \return The frame.
+    spatial::Frame controlPointFrame() const;
+
+    //! \brief Parent frame of the one associated with the control point
+    //! \return The frame.
+    spatial::Frame controlPointParentFrame() const;
+
     //! \brief The robot's joints data
-    Joints joints;
+    Joints& joints();
+    const Joints& joints() const;
 
     //! \brief The robot's task data
-    Task task;
+    Task& task();
+    const Task& task() const;
 
     //! \brief Control related data
-    ControlData control;
+    ControlData& control();
+    const ControlData& control() const;
 
 private:
+    spatial::Frame control_point_frame_;
+    spatial::Frame control_point_parent_frame_;
     std::string name_;
     size_t joint_count_;
+
+    //! \brief The robot's joints data
+    Joints joints_;
+
+    //! \brief The robot's task data
+    Task task_;
+
+    //! \brief Control related data
+    ControlData control_;
 };
 
 using RobotPtr = std::shared_ptr<Robot>;

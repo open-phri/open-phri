@@ -14,6 +14,7 @@ struct AppMaker::pImpl {
     YAML::Node app_configuration;
     double init_timeout;
     double start_timeout;
+    bool initialized;
 };
 
 AppMaker::AppMaker(const std::string& configuration_file)
@@ -25,7 +26,10 @@ AppMaker::AppMaker(const std::string& configuration_file)
 
     /***				Robot				***/
     std::cout << "[phri::AppMaker] Creating a new robot..." << std::flush;
-    impl_->robot = std::make_shared<Robot>();
+    auto cp_conf = conf["robot"]["control_point"];
+    impl_->robot = std::make_shared<Robot>(
+        spatial::Frame::getAndSave(cp_conf["frame"].as<std::string>()),
+        spatial::Frame::getAndSave(cp_conf["parent"].as<std::string>()));
     std::cout << " done." << std::endl;
 
     std::cout << "[phri::AppMaker] Loading the robot model..." << std::flush;
@@ -64,7 +68,7 @@ AppMaker::AppMaker(const std::string& configuration_file)
 
     /***			Data logger configuration			***/
     std::cout << "[phri::AppMaker] Creating the data logger..." << std::flush;
-    impl_->clock = std::make_shared<Clock>(impl_->driver->getSampleTime());
+    impl_->clock = std::make_shared<Clock>(impl_->driver->getTimeStep());
     impl_->data_logger = std::make_shared<DataLogger>(
         PID_PATH(conf["data_logger"]["folder"].as<std::string>("/tmp")),
         impl_->clock->getTime(), true);
@@ -79,11 +83,15 @@ AppMaker::AppMaker(const std::string& configuration_file)
 
     impl_->app_configuration = conf["parameters"];
 
+    impl_->initialized = false;
+
     std::cout << "[phri::AppMaker] The application is now fully configured."
               << std::endl;
 }
 
-AppMaker::~AppMaker() = default;
+AppMaker::~AppMaker() {
+    stop();
+}
 
 bool AppMaker::init(std::function<bool(void)> init_code) {
     bool all_ok = true;
@@ -97,32 +105,39 @@ bool AppMaker::init(std::function<bool(void)> init_code) {
         all_ok &= init_code();
         std::cout << " done." << std::endl;
     }
+    impl_->initialized = all_ok;
     return all_ok;
 }
 
 bool AppMaker::run(const callback& pre_controller_code,
                    const callback& post_controller_code) {
     bool ok = true;
-    if (impl_->driver->read()) {
-        impl_->model->forwardKinematics();
-        if (pre_controller_code) {
-            ok &= pre_controller_code();
-        }
-        impl_->controller->compute();
-        if (post_controller_code) {
-            ok &= post_controller_code();
-        }
-        if (not impl_->driver->send()) {
-            std::cerr << "[phri::AppMaker] Can'send data to the driver"
+    if (not impl_->initialized) {
+        std::cerr << "[phri::AppMaker] You must call init() once before run()"
+                  << std::endl;
+        ok = false;
+    } else {
+        if (impl_->driver->syncThenRead()) {
+            impl_->model->forwardKinematics();
+            if (pre_controller_code) {
+                ok &= pre_controller_code();
+            }
+            impl_->controller->compute();
+            if (post_controller_code) {
+                ok &= post_controller_code();
+            }
+            if (not impl_->driver->send()) {
+                std::cerr << "[phri::AppMaker] Can'send data to the driver"
+                          << std::endl;
+                ok = false;
+            }
+            impl_->clock->update();
+            impl_->data_logger->process();
+        } else {
+            std::cerr << "[phri::AppMaker] Can't get data from the driver"
                       << std::endl;
             ok = false;
         }
-        impl_->clock->update();
-        impl_->data_logger->process();
-    } else {
-        std::cerr << "[phri::AppMaker] Can't get data from the driver"
-                  << std::endl;
-        ok = false;
     }
     return ok;
 }
@@ -133,9 +148,13 @@ bool AppMaker::operator()(const callback& pre_controller_code,
 }
 
 bool AppMaker::stop() {
-    std::cout << "[phri::AppMaker] Stopping the robot..." << std::flush;
-    bool ok = impl_->driver->stop();
-    std::cout << " done." << std::endl;
+    bool ok = true;
+    if (impl_->initialized) {
+        std::cout << "[phri::AppMaker] Stopping the robot..." << std::flush;
+        ok = impl_->driver->stop();
+        std::cout << " done." << std::endl;
+        impl_->initialized = false;
+    }
     return ok;
 }
 

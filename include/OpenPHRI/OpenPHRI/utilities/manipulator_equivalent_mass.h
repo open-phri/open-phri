@@ -31,6 +31,8 @@
 #include <OpenPHRI/definitions.h>
 #include <OpenPHRI/utilities/object_collection.hpp>
 
+#include <physical_quantities/spatial/type_aliases.h>
+
 namespace phri {
 
 /** @brief A utility to compute a manipulator's equivalent mass.
@@ -39,7 +41,7 @@ namespace phri {
  *  @tparam joint_count Number of joints of the manipulator.
  */
 class ManipulatorEquivalentMass
-    : public ObjectCollection<std::shared_ptr<const Vector6d>> {
+    : public ObjectCollection<std::shared_ptr<const Eigen::Vector6d>> {
 public:
     /**
      * @brief Construct a manipulator equivalent mass utility given an inertia
@@ -48,8 +50,9 @@ public:
      * @param inertia_matrix A shared pointer to the inertia matrix.
      * @param jacobian_matrix A shared pointer to the Jacobian matrix.
      */
-    ManipulatorEquivalentMass(std::shared_ptr<const MatrixXd> inertia_matrix,
-                              std::shared_ptr<const MatrixXd> jacobian_matrix);
+    ManipulatorEquivalentMass(
+        std::shared_ptr<const Eigen::MatrixXd> inertia_matrix,
+        std::shared_ptr<const Eigen::MatrixXd> jacobian_matrix);
 
     /**
      * @brief Construct a manipulator equivalent mass utility given an inertia
@@ -60,9 +63,10 @@ public:
      * @param robot_position A shared pointer to the robot position in the
      * chosen frame.
      */
-    ManipulatorEquivalentMass(std::shared_ptr<const MatrixXd> inertia_matrix,
-                              std::shared_ptr<const MatrixXd> jacobian_matrix,
-                              std::shared_ptr<const Vector6d> robot_position);
+    ManipulatorEquivalentMass(
+        std::shared_ptr<const Eigen::MatrixXd> inertia_matrix,
+        std::shared_ptr<const Eigen::MatrixXd> jacobian_matrix,
+        std::shared_ptr<const Eigen::Vector6d> robot_position);
 
     ~ManipulatorEquivalentMass() = default;
 
@@ -86,11 +90,11 @@ public:
     virtual double operator()() final;
 
 private:
-    Vector3d closestObjectDirection();
+    Eigen::Vector3d closestObjectDirection();
 
-    std::shared_ptr<const MatrixXd> inertia_matrix_;
-    std::shared_ptr<const MatrixXd> jacobian_matrix_;
-    std::shared_ptr<const Vector6d> robot_position_;
+    std::shared_ptr<const Eigen::MatrixXd> inertia_matrix_;
+    std::shared_ptr<const Eigen::MatrixXd> jacobian_matrix_;
+    std::shared_ptr<const Eigen::Vector6d> robot_position_;
     std::shared_ptr<double> mass_;
 };
 

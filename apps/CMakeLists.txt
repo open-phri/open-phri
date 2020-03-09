@@ -6,7 +6,7 @@ function(add_application app)
     RUNTIME_RESOURCES configuration_examples
     DEPEND 
       open-phri/open-phri 
-      open-phri/vrep-driver
+      # open-phri/vrep-driver
       pid-os-utilities/pid-signal-manager
   )
 endfunction()
@@ -22,4 +22,4 @@ endfunction()
 # add_application(stop_constraint_example)
 # add_application(trajectory_generator_benchmark)
 # add_application(trajectory_generator_example)
-# add_application(velocity_constraint_example)
+add_application(velocity_constraint_example)

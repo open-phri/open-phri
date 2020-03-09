@@ -35,46 +35,48 @@
 namespace phri {
 
 template <>
-class TrajectoryGenerator<Pose> : public TrajectoryGenerator<Vector6d> {
-    using super = TrajectoryGenerator<Vector6d>;
+class TrajectoryGenerator<spatial::Position>
+    : public TrajectoryGenerator<Eigen::Vector6d> {
+    using super = TrajectoryGenerator<Eigen::Vector6d>;
 
 public:
     TrajectoryGenerator(
-        const TrajectoryPoint<Pose>& start, double sample_time,
+        const TrajectoryPoint<spatial::Position>& start, double sample_time,
         TrajectorySynchronization sync =
             TrajectorySynchronization::NoSynchronization,
         TrajectoryOutputType output_type = TrajectoryOutputType::All)
-        : TrajectoryGenerator<Vector6d>(sample_time, sync, output_type),
+        : TrajectoryGenerator<Eigen::Vector6d>(sample_time, sync, output_type),
           start_pose_(start) {
         super::create(start_vec_);
-        pose_output_ = std::make_shared<Pose>(*start.y);
-        twist_output_ = std::make_shared<Twist>(*start.dy);
+        pose_output_ = std::make_shared<spatial::Position>(*start.y);
+        twist_output_ = std::make_shared<spatial::Velocity>(*start.dy);
         task_space_acceleration_output_ =
-            std::make_shared<Acceleration>(*start.d2y);
+            std::make_shared<spatial::Acceleration>(*start.d2y);
     }
 
-    void addPathTo(const TrajectoryPoint<Pose>& to, const Twist& max_velocity,
-                   const Acceleration& max_acceleration) {
+    void addPathTo(const TrajectoryPoint<spatial::Position>& to,
+                   const spatial::Velocity& max_velocity,
+                   const spatial::Acceleration& max_acceleration) {
         waypoints_.emplace_back(to, max_velocity, max_acceleration);
     }
 
-    std::shared_ptr<const Pose> getPoseOutput() {
+    std::shared_ptr<const spatial::Position> getPoseOutput() {
         return pose_output_;
     }
 
-    std::shared_ptr<const Pose> getPositionOutput() {
+    std::shared_ptr<const spatial::Position> getPositionOutput() {
         return getPoseOutput();
     }
 
-    std::shared_ptr<const Twist> getTwistOutput() {
+    std::shared_ptr<const spatial::Velocity> getTwistOutput() {
         return twist_output_;
     }
 
-    std::shared_ptr<const Twist> getVelocityOutput() {
+    std::shared_ptr<const spatial::Velocity> getVelocityOutput() {
         return getTwistOutput();
     }
 
-    std::shared_ptr<const Acceleration> getAccelerationOutput() {
+    std::shared_ptr<const spatial::Acceleration> getAccelerationOutput() {
         return task_space_acceleration_output_;
     }
 
@@ -86,29 +88,27 @@ public:
 
     virtual bool compute() override {
         if (error_tracking_params_) {
-            reference_pose_vec_->block<3, 1>(0, 0) =
-                reference_pose_->translation();
+            reference_pose_vec_->block<3, 1>(0, 0) = reference_pose_->linear();
             reference_pose_vec_->block<3, 1>(3, 0) =
-                start_pose_.y->orientation().getAngularError(
-                    reference_pose_->orientation());
+                start_pose_.y->getErrorWith(*reference_pose_).tail<3>();
         }
 
         bool ret = super::compute();
 
         if (output_type_ == TrajectoryOutputType::Position or
             output_type_ == TrajectoryOutputType::All) {
-            pose_output_->translation() = position_output_->block<3, 1>(0, 0);
+            pose_output_->linear() = position_output_->block<3, 1>(0, 0);
             pose_output_->orientation() =
-                start_pose_.y->orientation().integrate(
+                start_pose_.y->orientation().asQuaternion().integrate(
                     position_output_->block<3, 1>(3, 0));
         }
         if (output_type_ == TrajectoryOutputType::Velocity or
             output_type_ == TrajectoryOutputType::All) {
-            *twist_output_ = *velocity_output_;
+            twist_output_->value() = *velocity_output_;
         }
         if (output_type_ == TrajectoryOutputType::Acceleration or
             output_type_ == TrajectoryOutputType::All) {
-            *task_space_acceleration_output_ = *acceleration_output_;
+            task_space_acceleration_output_->value() = *acceleration_output_;
         }
 
         return ret;
@@ -119,12 +119,12 @@ public:
         super::removeAllPoints();
     }
 
-    void enableErrorTracking(std::shared_ptr<const Pose> reference,
-                             const Vector6d& threshold,
+    void enableErrorTracking(std::shared_ptr<const spatial::Position> reference,
+                             const Eigen::Vector6d& threshold,
                              bool recompute_when_resumed,
                              double hysteresis_threshold = 0.1) {
         reference_pose_ = reference;
-        reference_pose_vec_ = std::make_shared<Vector6d>();
+        reference_pose_vec_ = std::make_shared<Eigen::Vector6d>();
         error_tracking_params_.reference = reference_pose_vec_;
         error_tracking_params_.threshold = threshold;
         error_tracking_params_.hysteresis_threshold = hysteresis_threshold;
@@ -137,25 +137,27 @@ public:
         }
     }
 
-    void enableErrorTracking(const Pose* reference, const Vector6d& threshold,
+    void enableErrorTracking(const spatial::Position* reference,
+                             const Eigen::Vector6d& threshold,
                              bool recompute_when_resumed,
                              double hysteresis_threshold = 0.1) {
-        enableErrorTracking(
-            std::shared_ptr<const Pose>(reference, [](const Pose* p) {}),
-            threshold, recompute_when_resumed);
+        enableErrorTracking(std::shared_ptr<const spatial::Position>(
+                                reference, [](const spatial::Position* p) {}),
+                            threshold, recompute_when_resumed);
     }
 
 private:
     struct Point {
-        Point(TrajectoryPoint<Pose> pose, Twist max_velocity,
-              Acceleration max_acceleration)
+        Point(TrajectoryPoint<spatial::Position> pose,
+              spatial::Velocity max_velocity,
+              spatial::Acceleration max_acceleration)
             : pose(pose),
               max_velocity(max_velocity),
               max_acceleration(max_acceleration) {
         }
-        TrajectoryPoint<Pose> pose;
-        Twist max_velocity;
-        Acceleration max_acceleration;
+        TrajectoryPoint<spatial::Position> pose;
+        spatial::Velocity max_velocity;
+        spatial::Acceleration max_acceleration;
     };
 
     void updatePoints() {
@@ -167,44 +169,45 @@ private:
 
         auto wp = waypoints_.begin();
         if (wp != waypoints_.end()) {
-            start_vec_.y->block<3, 1>(0, 0) = start_pose_.y->translation();
+            start_vec_.y->block<3, 1>(0, 0) = start_pose_.y->linear();
             start_vec_.y->block<3, 1>(3, 0).setZero();
-            *start_vec_.dy = static_cast<Vector6d>(*start_pose_.dy);
-            *start_vec_.d2y = static_cast<Vector6d>(*start_pose_.d2y);
+            *start_vec_.dy = static_cast<Eigen::Vector6d>(*start_pose_.dy);
+            *start_vec_.d2y = static_cast<Eigen::Vector6d>(*start_pose_.d2y);
 
-            Point prev(start_pose_, Twist(), Acceleration());
+            Point prev(start_pose_, spatial::Velocity(start_pose_.y->frame()),
+                       spatial::Acceleration(start_pose_.y->frame()));
             while (wp != waypoints_.end()) {
-                TrajectoryPoint<Vector6d> to;
-                to.y->block<3, 1>(0, 0) = wp->pose.y->translation();
+                TrajectoryPoint<Eigen::Vector6d> to;
+                to.y->block<3, 1>(0, 0) = wp->pose.y->linear();
                 to.y->block<3, 1>(3, 0) =
-                    prev.pose.y->orientation().getAngularError(
-                        wp->pose.y->orientation());
+                    prev.pose.y->getErrorWith(*wp->pose.y).tail<3>();
                 *to.dy = *wp->pose.dy;
                 *to.d2y = *wp->pose.d2y;
-                super::addPathTo(to, static_cast<Vector6d>(wp->max_velocity),
-                                 static_cast<Vector6d>(wp->max_acceleration));
+                super::addPathTo(
+                    to, static_cast<Eigen::Vector6d>(wp->max_velocity),
+                    static_cast<Eigen::Vector6d>(wp->max_acceleration));
                 prev = *wp;
                 ++wp;
             }
         }
     }
 
-    TrajectoryPoint<Vector6d> start_vec_;
-    TrajectoryPoint<Pose> start_pose_;
-    std::shared_ptr<const Pose> reference_pose_;
-    std::shared_ptr<Vector6d> reference_pose_vec_;
+    TrajectoryPoint<Eigen::Vector6d> start_vec_;
+    TrajectoryPoint<spatial::Position> start_pose_;
+    std::shared_ptr<const spatial::Position> reference_pose_;
+    std::shared_ptr<Eigen::Vector6d> reference_pose_vec_;
     std::list<Point> waypoints_;
-    std::shared_ptr<Pose> pose_output_;
-    std::shared_ptr<Twist> twist_output_;
-    std::shared_ptr<Acceleration> task_space_acceleration_output_;
+    std::shared_ptr<spatial::Position> pose_output_;
+    std::shared_ptr<spatial::Velocity> twist_output_;
+    std::shared_ptr<spatial::Acceleration> task_space_acceleration_output_;
 };
 
-using TaskSpaceTrajectoryGenerator = TrajectoryGenerator<Pose>;
+using TaskSpaceTrajectoryGenerator = TrajectoryGenerator<spatial::Position>;
 using TaskSpaceTrajectoryGeneratorPtr =
     std::shared_ptr<TaskSpaceTrajectoryGenerator>;
 using TaskSpaceTrajectoryGeneratorConstPtr =
     std::shared_ptr<const TaskSpaceTrajectoryGenerator>;
 
-extern template class TrajectoryGenerator<Pose>;
+extern template class TrajectoryGenerator<spatial::Position>;
 
 } // namespace phri

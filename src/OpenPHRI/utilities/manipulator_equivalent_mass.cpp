@@ -23,16 +23,17 @@
 using namespace phri;
 
 ManipulatorEquivalentMass::ManipulatorEquivalentMass(
-    std::shared_ptr<const MatrixXd> inertia_matrix,
-    std::shared_ptr<const MatrixXd> jacobian_matrix)
-    : ManipulatorEquivalentMass(inertia_matrix, jacobian_matrix,
-                                std::make_shared<Vector6d>(Vector6d::Zero())) {
+    std::shared_ptr<const Eigen::MatrixXd> inertia_matrix,
+    std::shared_ptr<const Eigen::MatrixXd> jacobian_matrix)
+    : ManipulatorEquivalentMass(
+          inertia_matrix, jacobian_matrix,
+          std::make_shared<Eigen::Vector6d>(Eigen::Vector6d::Zero())) {
 }
 
 ManipulatorEquivalentMass::ManipulatorEquivalentMass(
-    std::shared_ptr<const MatrixXd> inertia_matrix,
-    std::shared_ptr<const MatrixXd> jacobian_matrix,
-    std::shared_ptr<const Vector6d> robot_position)
+    std::shared_ptr<const Eigen::MatrixXd> inertia_matrix,
+    std::shared_ptr<const Eigen::MatrixXd> jacobian_matrix,
+    std::shared_ptr<const Eigen::Vector6d> robot_position)
     : inertia_matrix_(inertia_matrix),
       jacobian_matrix_(jacobian_matrix),
       robot_position_(robot_position) {
@@ -45,11 +46,11 @@ ManipulatorEquivalentMass::getEquivalentMass() const {
 }
 
 double ManipulatorEquivalentMass::compute() {
-    MatrixXd jac = *jacobian_matrix_;
-    MatrixXd inertia = *inertia_matrix_;
-    Vector3d direction = closestObjectDirection();
+    Eigen::MatrixXd jac = *jacobian_matrix_;
+    Eigen::MatrixXd inertia = *inertia_matrix_;
+    Eigen::Vector3d direction = closestObjectDirection();
 
-    Matrix6d mass_inv = jac * inertia.inverse() * jac.transpose();
+    Eigen::Matrix6d mass_inv = jac * inertia.inverse() * jac.transpose();
 
     *mass_ =
         1. / (direction.transpose() * mass_inv.block<3, 3>(0, 0) * direction);
@@ -57,14 +58,14 @@ double ManipulatorEquivalentMass::compute() {
     return *mass_;
 }
 
-Vector3d ManipulatorEquivalentMass::closestObjectDirection() {
-    Vector3d direction = Vector3d::Zero();
-    const Vector3d& rob_pos = robot_position_->block<3, 1>(0, 0);
+Eigen::Vector3d ManipulatorEquivalentMass::closestObjectDirection() {
+    Eigen::Vector3d direction = Eigen::Vector3d::Zero();
+    const Eigen::Vector3d& rob_pos = robot_position_->block<3, 1>(0, 0);
 
     double min_dist = std::numeric_limits<double>::infinity();
     for (const auto& item : items_) {
-        Vector6d obj_pos = *item.second;
-        Vector3d obj_rob_vec = obj_pos.block<3, 1>(0, 0) - rob_pos;
+        Eigen::Vector6d obj_pos = *item.second;
+        Eigen::Vector3d obj_rob_vec = obj_pos.block<3, 1>(0, 0) - rob_pos;
 
         double dist = obj_rob_vec.norm();
         min_dist = std::min(min_dist, dist);

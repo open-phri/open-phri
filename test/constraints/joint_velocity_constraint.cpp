@@ -15,7 +15,7 @@ TEST_CASE("Joint velocity constraint") {
     auto model = phri::RobotModel(
         robot, PID_PATH("robot_models/kuka_lwr4.yaml"), "end-effector");
 
-    robot.joints.state.position.setOnes();
+    robot.joints().state.position.setOnes();
     model.forwardKinematics();
 
     auto safety_controller = phri::SafetyController(robot);
@@ -37,20 +37,21 @@ TEST_CASE("Joint velocity constraint") {
     // Step #1 : no velocity
     safety_controller.compute();
 
-    REQUIRE(robot.joints.command.velocity.isZero());
+    REQUIRE(robot.joints().command.velocity.isZero());
 
     // Step #2 : velocity 1 axis < max
     (*constant_vel)(0) = 0.5;
     safety_controller.compute();
 
-    REQUIRE(robot.joints.command.velocity.isApprox(
-        robot.control.joints.total_velocity));
+    REQUIRE(robot.joints().command.velocity.isApprox(
+        robot.control().joints.total_velocity));
 
     // Step #3 : velocity 1 axis > max
     (*constant_vel)(0) = 1.5;
     safety_controller.compute();
 
-    REQUIRE(isLessOrEqual(robot.joints.command.velocity, *maximum_velocities));
+    REQUIRE(
+        isLessOrEqual(robot.joints().command.velocity, *maximum_velocities));
 
     // Step #4 : velocity 3 axes < max
     (*constant_vel)(0) = 0.5;
@@ -58,8 +59,8 @@ TEST_CASE("Joint velocity constraint") {
     (*constant_vel)(2) = 1.5;
     safety_controller.compute();
 
-    REQUIRE(robot.task.command.twist.vector().isApprox(
-        robot.control.task.total_twist.vector()));
+    REQUIRE(robot.task().command.twist.vector().isApprox(
+        robot.control().task.total_twist.vector()));
 
     // Step #5 : velocity 3 axes > max
     (*constant_vel)(0) = 1.5;
@@ -67,5 +68,6 @@ TEST_CASE("Joint velocity constraint") {
     (*constant_vel)(2) = 3.5;
     safety_controller.compute();
 
-    REQUIRE(isLessOrEqual(robot.joints.command.velocity, *maximum_velocities));
+    REQUIRE(
+        isLessOrEqual(robot.joints().command.velocity, *maximum_velocities));
 }

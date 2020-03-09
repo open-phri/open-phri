@@ -23,40 +23,41 @@
 
 namespace phri {
 
-NullSpaceMotion::NullSpaceMotion() : NullSpaceMotion(VectorXd{}) {
+NullSpaceMotion::NullSpaceMotion() : NullSpaceMotion(Eigen::VectorXd{}) {
 }
 
-NullSpaceMotion::NullSpaceMotion(std::shared_ptr<VectorXd> velocity)
+NullSpaceMotion::NullSpaceMotion(std::shared_ptr<Eigen::VectorXd> velocity)
     : joint_velocity_(velocity) {
 }
 
-NullSpaceMotion::NullSpaceMotion(VectorXd& velocity)
-    : NullSpaceMotion(std::shared_ptr<VectorXd>(&velocity, [](auto p) {})) {
+NullSpaceMotion::NullSpaceMotion(Eigen::VectorXd& velocity)
+    : NullSpaceMotion(
+          std::shared_ptr<Eigen::VectorXd>(&velocity, [](auto p) {})) {
 }
 
-NullSpaceMotion::NullSpaceMotion(const VectorXd& velocity)
-    : NullSpaceMotion(std::make_shared<VectorXd>(velocity)) {
+NullSpaceMotion::NullSpaceMotion(const Eigen::VectorXd& velocity)
+    : NullSpaceMotion(std::make_shared<Eigen::VectorXd>(velocity)) {
 }
 
-NullSpaceMotion::NullSpaceMotion(VectorXd&& velocity)
-    : NullSpaceMotion(std::make_shared<VectorXd>(std::move(velocity))) {
+NullSpaceMotion::NullSpaceMotion(Eigen::VectorXd&& velocity)
+    : NullSpaceMotion(std::make_shared<Eigen::VectorXd>(std::move(velocity))) {
 }
 
-void NullSpaceMotion::update(VectorXd& joint_velocity) {
-    null_space_projector_ =
-        identity_ - robot().control.jacobian_inverse * robot().control.jacobian;
+void NullSpaceMotion::update(Eigen::VectorXd& joint_velocity) {
+    null_space_projector_ = identity_ - robot().control().jacobianInverse() *
+                                            robot().control().jacobian();
     joint_velocity = null_space_projector_ * velocity();
 }
 
-VectorXd& NullSpaceMotion::velocity() {
+Eigen::VectorXd& NullSpaceMotion::velocity() {
     return *joint_velocity_;
 }
 
-VectorXd NullSpaceMotion::velocity() const {
+Eigen::VectorXd NullSpaceMotion::velocity() const {
     return *joint_velocity_;
 }
 
-std::shared_ptr<VectorXd> NullSpaceMotion::velocityPtr() const {
+std::shared_ptr<Eigen::VectorXd> NullSpaceMotion::velocityPtr() const {
     return joint_velocity_;
 }
 

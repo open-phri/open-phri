@@ -22,26 +22,30 @@
 
 namespace phri {
 
-JointVelocityProxy::JointVelocityProxy() : JointVelocityProxy(VectorXd{}) {
+JointVelocityProxy::JointVelocityProxy()
+    : JointVelocityProxy(Eigen::VectorXd{}) {
 }
 
-JointVelocityProxy::JointVelocityProxy(std::shared_ptr<VectorXd> velocity)
+JointVelocityProxy::JointVelocityProxy(
+    std::shared_ptr<Eigen::VectorXd> velocity)
     : joint_velocity_(velocity) {
 }
 
-JointVelocityProxy::JointVelocityProxy(VectorXd& velocity)
-    : JointVelocityProxy(std::shared_ptr<VectorXd>(&velocity, [](auto p) {})) {
+JointVelocityProxy::JointVelocityProxy(Eigen::VectorXd& velocity)
+    : JointVelocityProxy(
+          std::shared_ptr<Eigen::VectorXd>(&velocity, [](auto p) {})) {
 }
 
-JointVelocityProxy::JointVelocityProxy(const VectorXd& velocity)
-    : JointVelocityProxy(std::make_shared<VectorXd>(velocity)) {
+JointVelocityProxy::JointVelocityProxy(const Eigen::VectorXd& velocity)
+    : JointVelocityProxy(std::make_shared<Eigen::VectorXd>(velocity)) {
 }
 
-JointVelocityProxy::JointVelocityProxy(VectorXd&& velocity)
-    : JointVelocityProxy(std::make_shared<VectorXd>(std::move(velocity))) {
+JointVelocityProxy::JointVelocityProxy(Eigen::VectorXd&& velocity)
+    : JointVelocityProxy(
+          std::make_shared<Eigen::VectorXd>(std::move(velocity))) {
 }
 
-void JointVelocityProxy::update(VectorXd& velocity) {
+void JointVelocityProxy::update(Eigen::VectorXd& velocity) {
     if (generator_) {
         velocity = generator_();
     } else {
@@ -49,15 +53,15 @@ void JointVelocityProxy::update(VectorXd& velocity) {
     }
 }
 
-VectorXd& JointVelocityProxy::velocity() {
+Eigen::VectorXd& JointVelocityProxy::velocity() {
     return *joint_velocity_;
 }
 
-VectorXd JointVelocityProxy::velocity() const {
+Eigen::VectorXd JointVelocityProxy::velocity() const {
     return *joint_velocity_;
 }
 
-std::shared_ptr<VectorXd> JointVelocityProxy::velocityPtr() const {
+std::shared_ptr<Eigen::VectorXd> JointVelocityProxy::velocityPtr() const {
     return joint_velocity_;
 }
 

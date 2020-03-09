@@ -39,7 +39,9 @@ class ExternalForce : public ForceGenerator {
 public:
     //! \brief Default constructor
     //! \details Equivalent to a ForceProxy on phri::Robot.task.state.wrench
-    ExternalForce();
+    ExternalForce() = default;
+
+    // ExternalForce(spatial::Frame frame);
 
     //! \brief Default copy constructor
     ExternalForce(const ExternalForce&) = default;
@@ -57,7 +59,7 @@ public:
     ExternalForce& operator=(ExternalForce&&) = default;
 
 protected:
-    virtual void update(Wrench& force) override;
+    virtual void update(spatial::Force& force) override;
 };
 
 } // namespace phri

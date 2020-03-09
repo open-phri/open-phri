@@ -22,26 +22,34 @@
 
 namespace phri {
 
-const Twist& VelocityGenerator::compute() {
-    velocity_.vector().setZero();
+const spatial::Velocity& VelocityGenerator::compute() {
+    velocity_.setZero();
     update(velocity_);
     return velocity_;
 }
 
-const Twist& VelocityGenerator::operator()() {
+const spatial::Velocity& VelocityGenerator::operator()() {
     return compute();
+}
+
+const spatial::Frame& VelocityGenerator::frame() const {
+    return internalVelocity().frame();
 }
 
 const Robot& VelocityGenerator::robot() const {
     return *robot_;
 }
 
-const Twist& VelocityGenerator::internalVelocity() const {
+const spatial::Velocity& VelocityGenerator::internalVelocity() const {
     return velocity_;
 }
 
 void VelocityGenerator::setRobot(Robot const* robot) {
     robot_ = robot;
+}
+
+void VelocityGenerator::setFrame(const spatial::Frame& frame) {
+    velocity_.changeFrame(frame);
 }
 
 } // namespace phri

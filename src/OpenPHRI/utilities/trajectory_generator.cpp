@@ -22,6 +22,6 @@
 
 namespace phri {
 template class TrajectoryGenerator<double>;
-template class TrajectoryGenerator<VectorXd>;
-template class TrajectoryGenerator<Vector6d>;
+template class TrajectoryGenerator<Eigen::VectorXd>;
+template class TrajectoryGenerator<Eigen::Vector6d>;
 } // namespace phri

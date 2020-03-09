@@ -50,8 +50,8 @@ PowerConstraint::PowerConstraint(double&& maximum_power)
 
 double PowerConstraint::compute() {
     double constraint = 1.;
-    const Vector3d& velocity = robot_->control.task.total_twist.translation();
-    const Vector3d& force = robot_->task.state.wrench.force();
+    const auto& velocity = robot_->control().task().totalVelocity().linear();
+    const auto& force = robot_->task().state().force().linear();
     double power = force.dot(velocity);
     *power_ = power;
 

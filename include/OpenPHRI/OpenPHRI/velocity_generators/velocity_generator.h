@@ -32,6 +32,8 @@
 #include <OpenPHRI/robot.h>
 #include <OpenPHRI/fwd_decl.h>
 
+#include <physical_quantities/spatial/velocity.h>
+
 namespace phri {
 
 //! \brief Base class for all velocity generators.
@@ -59,11 +61,13 @@ public:
 
     //! \brief Compute the value associated with the velocity generator.
     //! \return The velocity generator's evaluated value.
-    virtual const Twist& compute() final;
+    virtual const spatial::Velocity& compute() final;
 
     //! \brief Call operator, shortcut for compute().
     //! \return The velocity generator's evaluated value.
-    virtual const Twist& operator()() final;
+    virtual const spatial::Velocity& operator()() final;
+
+    const spatial::Frame& frame() const;
 
 protected:
     friend class SafetyController;
@@ -71,11 +75,13 @@ protected:
     //! \brief Derived classed must implement this to provide their velocity
     //! output
     //! \param velocity A reference to the velocity to set
-    virtual void update(Twist& velocity) = 0;
+    virtual void update(spatial::Velocity& velocity) = 0;
 
     //! \brief Set the robot to work with.
     //! \param robot The robot.
     virtual void setRobot(Robot const* robot);
+
+    void setFrame(const spatial::Frame& frame);
 
     //! \brief Read/write access the controlled robot
     //! \return double& A reference to the controlled robot
@@ -83,11 +89,11 @@ protected:
 
     //! \brief Read access to the internal velocity
     //! \return Twist The internal velocity
-    virtual const Twist& internalVelocity() const;
+    virtual const spatial::Velocity& internalVelocity() const;
 
 private:
     Robot const* robot_;
-    Twist velocity_;
+    spatial::Velocity velocity_;
 };
 
 } // namespace phri

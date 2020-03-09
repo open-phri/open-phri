@@ -24,11 +24,11 @@
 namespace phri {
 
 JointAccelerationConstraint::JointAccelerationConstraint()
-    : JointAccelerationConstraint(VectorXd{}) {
+    : JointAccelerationConstraint(Eigen::VectorXd{}) {
 }
 
 JointAccelerationConstraint::JointAccelerationConstraint(
-    std::shared_ptr<VectorXd> maximum_acceleration)
+    std::shared_ptr<Eigen::VectorXd> maximum_acceleration)
     : maximum_acceleration_(maximum_acceleration) {
     if (not maximum_acceleration) {
         throw std::runtime_error(
@@ -37,51 +37,51 @@ JointAccelerationConstraint::JointAccelerationConstraint(
 }
 
 JointAccelerationConstraint::JointAccelerationConstraint(
-    VectorXd& maximum_acceleration)
-    : JointAccelerationConstraint(
-          std::shared_ptr<VectorXd>(&maximum_acceleration, [](auto p) {})) {
+    Eigen::VectorXd& maximum_acceleration)
+    : JointAccelerationConstraint(std::shared_ptr<Eigen::VectorXd>(
+          &maximum_acceleration, [](auto p) {})) {
 }
 
 JointAccelerationConstraint::JointAccelerationConstraint(
-    const VectorXd& maximum_acceleration)
+    const Eigen::VectorXd& maximum_acceleration)
     : JointAccelerationConstraint(
-          std::make_shared<VectorXd>(maximum_acceleration)) {
+          std::make_shared<Eigen::VectorXd>(maximum_acceleration)) {
 }
 
 JointAccelerationConstraint::JointAccelerationConstraint(
-    VectorXd&& maximum_acceleration)
+    Eigen::VectorXd&& maximum_acceleration)
     : JointAccelerationConstraint(
-          std::make_shared<VectorXd>(std::move(maximum_acceleration))) {
+          std::make_shared<Eigen::VectorXd>(std::move(maximum_acceleration))) {
 }
 
 double JointAccelerationConstraint::compute() {
     double constraint = 1.;
-    const auto& joint_vel = robot_->control.joints.total_velocity;
+    const auto& joint_vel = robot_->control().joints().totalVelocity();
     const auto& max_joint_acc = *maximum_acceleration_;
-    const auto& prev_joint_vel = robot_->joints.command.velocity;
+    const auto& prev_joint_vel = robot_->joints().command().velocity();
 
     for (size_t i = 0; i < joint_vel.size(); ++i) {
         if (joint_vel(i) < 1e-6) {
             continue;
         }
-        constraint = std::min(constraint,
-                              (std::abs(prev_joint_vel(i)) +
-                               max_joint_acc(i) * robot().control.time_step) /
-                                  std::abs(joint_vel(i)));
+        constraint = std::min(
+            constraint, (std::abs(prev_joint_vel(i)) +
+                         max_joint_acc(i) * robot().control().timeStep()) /
+                            std::abs(joint_vel(i)));
     }
 
     return constraint;
 }
 
-VectorXd& JointAccelerationConstraint::maximumAcceleration() {
+Eigen::VectorXd& JointAccelerationConstraint::maximumAcceleration() {
     return *maximum_acceleration_;
 }
 
-VectorXd JointAccelerationConstraint::maximumAcceleration() const {
+Eigen::VectorXd JointAccelerationConstraint::maximumAcceleration() const {
     return *maximum_acceleration_;
 }
 
-std::shared_ptr<VectorXd>
+std::shared_ptr<Eigen::VectorXd>
 JointAccelerationConstraint::maximumAccelerationPtr() const {
     return maximum_acceleration_;
 }

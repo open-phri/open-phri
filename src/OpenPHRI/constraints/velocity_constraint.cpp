@@ -51,7 +51,7 @@ VelocityConstraint::VelocityConstraint(double&& maximum_velocity)
 
 double VelocityConstraint::compute() {
     double constraint = 1.;
-    double v_norm = robot_->control.task.total_twist.translation().norm();
+    double v_norm = robot_->control().task().totalVelocity().linear().norm();
 
     if (v_norm > 0.) {
         constraint = std::abs(*maximum_velocity_) / v_norm;

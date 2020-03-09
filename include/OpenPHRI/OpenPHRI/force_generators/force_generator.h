@@ -30,6 +30,8 @@
 #include <OpenPHRI/robot.h>
 #include <OpenPHRI/fwd_decl.h>
 
+#include <physical_quantities/spatial/force.h>
+
 namespace phri {
 
 //! \brief Base class for all force generators.
@@ -38,6 +40,7 @@ namespace phri {
 class ForceGenerator {
 public:
     //! \brief Default constructor
+    // ForceGenerator(spatial::Frame frame);
     ForceGenerator() = default;
 
     //! \brief Default copy constructor
@@ -57,11 +60,13 @@ public:
 
     //! \brief Compute the value associated with the force generator.
     //! \return The force generator's evaluated value.
-    virtual const Wrench& compute() final;
+    virtual const spatial::Force& compute() final;
 
     //! \brief Call operator, shortcut for compute().
     //! \return The force generator's evaluated value.
-    virtual const Wrench& operator()() final;
+    virtual const spatial::Force& operator()() final;
+
+    const spatial::Frame& frame() const;
 
 protected:
     friend class SafetyController;
@@ -69,23 +74,25 @@ protected:
     //! \brief Derived classed must implement this to provide their wrench
     //! output
     //! \param wrench A reference to the wrench to set
-    virtual void update(Wrench& wrench) = 0;
+    virtual void update(spatial::Force& wrench) = 0;
 
     //! \brief Set the robot to work with.
     //! \param robot The robot.
     virtual void setRobot(Robot const* robot);
 
-    //! \brief Read/write access the controlled robot
+    //! \brief Read only access the controlled robot
     //! \return double& A reference to the controlled robot
-    virtual const Robot& robot() const final;
+    const Robot& robot() const;
+
+    void setFrame(const spatial::Frame& frame);
 
     //! \brief Read access to the internal wrench
     //! \return ReferenceFrame The internal wrench
-    const Wrench& internalWrench() const;
+    const spatial::Force& internalWrench() const;
 
 private:
     Robot const* robot_;
-    Wrench wrench_;
+    spatial::Force wrench_;
 };
 
 using ForceGeneratorPtr = std::shared_ptr<ForceGenerator>;

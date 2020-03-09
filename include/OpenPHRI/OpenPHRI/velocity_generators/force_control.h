@@ -29,6 +29,9 @@
 #include <OpenPHRI/definitions.h>
 #include <array>
 
+#include <physical_quantities/scalar/cutoff_frequency.h>
+#include <physical_quantities/scalar/time_constant.h>
+
 namespace phri {
 
 //! \brief Generates a velocity to regulate the external force to a given target
@@ -54,14 +57,14 @@ public:
         //! applied to the force error \param derivative_gain Gain applied to
         //! the force error derivative \param selection_vector A non-zero value
         //! indicates that equivalent degree of freedom is force controled
-        Parameters(const Vector6d& proportional_gain,
-                   const Vector6d& derivative_gain,
+        Parameters(const Eigen::Vector6d& proportional_gain,
+                   const Eigen::Vector6d& derivative_gain,
                    const std::array<bool, 6>& selection_vector);
 
         //! \brief Gain applied to the force error
-        Vector6d proportional_gain;
+        Eigen::Vector6d proportional_gain;
         //! \brief Gain applied to the force error derivative
-        Vector6d derivative_gain;
+        Eigen::Vector6d derivative_gain;
         //! \brief A non-zero value indicates that equivalent degree of freedom
         //! is force controled
         std::array<bool, 6> selection_vector;
@@ -81,7 +84,7 @@ public:
     //! \param parameters The force control law parameters
     //! \param type If the regulated force is the one applied to the environment
     //! or to the robot
-    ForceControl(std::shared_ptr<Wrench> target,
+    ForceControl(std::shared_ptr<spatial::Force> target,
                  std::shared_ptr<Parameters> parameters, TargetType type);
 
     //! \brief  Construct a new Force Control object with given referenced
@@ -93,7 +96,8 @@ public:
     //! parameters outlives the generator
     //! \param type If the regulated force is the one applied to the environment
     //! or to the robot
-    ForceControl(Wrench& target, Parameters& parameters, TargetType type);
+    ForceControl(spatial::Force& target, Parameters& parameters,
+                 TargetType type);
 
     //! \brief  Construct a new Force Control object with given target
     //! and parameters values
@@ -102,7 +106,7 @@ public:
     //! \param parameters The force control law parameters
     //! \param type If the regulated force is the one applied to the environment
     //! or to the robot
-    ForceControl(const Wrench& target, const Parameters& parameters,
+    ForceControl(const spatial::Force& target, const Parameters& parameters,
 
                  TargetType type);
 
@@ -113,7 +117,8 @@ public:
     //! \param parameters The force control law parameters
     //! \param type If the regulated force is the one applied to the environment
     //! or to the robot
-    ForceControl(Wrench&& target, Parameters&& parameters, TargetType type);
+    ForceControl(spatial::Force&& target, Parameters&& parameters,
+                 TargetType type);
 
     //! \brief Default copy constructor
     ForceControl(const ForceControl&) = default;
@@ -138,27 +143,27 @@ public:
     //! error at the cost of a delay. A simple first order low-pass filter is
     //! used internally.
     //! \param time_constant The time constant for the filter
-    void configureFilter(units::time::second_t time_constant);
+    void configureFilter(scalar::TimeConstant time_constant);
 
     //! \brief Configure the filter acting on the error
     //! \details Using this filter will provide a smoother derivative of the
     //! error at the cost of a delay. A simple first order low-pass filter is
     //! used internally.
     //! \param cutoff_frequency The filter cutoff frequency
-    void configureFilter(units::frequency::hertz_t cutoff_frequency);
+    void configureFilter(scalar::CutoffFrequency cutoff_frequency);
 
-    //! \brief Read/write access the target wrench used by the generator
-    //! \return double& A reference to the target wrench
-    Wrench& target();
+    //! \brief Read/write access the target spatial::Force used by the generator
+    //! \return double& A reference to the target spatial::Force
+    spatial::Force& target();
 
-    //! \brief Read access the target wrench used by the generator
-    //! \return double The target wrench value
-    const Wrench& target() const;
+    //! \brief Read access the target spatial::Force used by the generator
+    //! \return double The target spatial::Force value
+    const spatial::Force& target() const;
 
-    //! \brief Access to the shared pointer holding the target wrench used
-    //! by the generator
-    //! \return std::shared_ptr<double> A shared pointer to the wrench target
-    std::shared_ptr<Wrench> targetPtr() const;
+    //! \brief Access to the shared pointer holding the target spatial::Force
+    //! used by the generator \return std::shared_ptr<double> A shared pointer
+    //! to the spatial::Force target
+    std::shared_ptr<spatial::Force> targetPtr() const;
 
     //! \brief Read/write access the control parameters used by the generator
     //! \return double& A reference to the control parameters
@@ -175,14 +180,14 @@ public:
     std::shared_ptr<Parameters> parametersPtr() const;
 
 protected:
-    virtual void update(Twist& velocity) override;
-    void applySelection(Vector6d& vec) const;
+    virtual void update(spatial::Velocity& velocity) override;
+    void applySelection(Eigen::Vector6d& vec) const;
 
-    std::shared_ptr<Wrench> target_;
+    std::shared_ptr<spatial::Force> target_;
     std::shared_ptr<Parameters> parameters_;
     TargetType type_;
     double filter_coeff_;
-    Wrench prev_error_;
+    spatial::Force prev_error_;
 };
 
 } // namespace phri

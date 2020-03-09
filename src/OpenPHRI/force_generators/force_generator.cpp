@@ -22,14 +22,21 @@
 
 namespace phri {
 
-const Wrench& ForceGenerator::compute() {
-    wrench_.vector().setZero();
+// ForceGenerator::ForceGenerator(spatial::Frame frame) : wrench_{frame} {
+// }
+
+const spatial::Force& ForceGenerator::compute() {
+    wrench_.setZero();
     update(wrench_);
     return wrench_;
 }
 
-const Wrench& ForceGenerator::operator()() {
+const spatial::Force& ForceGenerator::operator()() {
     return compute();
+}
+
+const spatial::Frame& ForceGenerator::frame() const {
+    return internalWrench().frame();
 }
 
 void ForceGenerator::setRobot(Robot const* robot) {
@@ -40,7 +47,11 @@ const Robot& ForceGenerator::robot() const {
     return *robot_;
 }
 
-const Wrench& ForceGenerator::internalWrench() const {
+void ForceGenerator::setFrame(const spatial::Frame& frame) {
+    wrench_.changeFrame(frame);
+}
+
+const spatial::Force& ForceGenerator::internalWrench() const {
     return wrench_;
 }
 

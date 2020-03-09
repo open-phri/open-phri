@@ -22,12 +22,12 @@
 
 using namespace phri;
 
-VectorXd TorqueGenerator::compute() {
-    VectorXd torque(robot_->jointCount());
+Eigen::VectorXd TorqueGenerator::compute() {
+    Eigen::VectorXd torque(robot_->jointCount());
     update(torque);
     return torque;
 }
-VectorXd TorqueGenerator::operator()() {
+Eigen::VectorXd TorqueGenerator::operator()() {
     return compute();
 }
 

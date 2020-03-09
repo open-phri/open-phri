@@ -18,22 +18,22 @@ int main(int argc, char const* argv[]) {
     auto model = phri::RobotModel(
         robot, PID_PATH("robot_models/kuka_lwr4.yaml"), "end-effector");
 
-    robot.joints.state.position.setOnes();
+    robot.joints().state.position.setOnes();
     model.forwardKinematics();
 
     auto safety_controller = phri::SafetyController(robot);
     safety_controller.setVerbose(true);
 
-    robot.control.task.damping.setConstant(10.);
+    robot.control().task.damping.setConstant(10.);
 
-    auto constant_vel = make_shared<Twist>();
+    auto constant_vel = make_shared<spatial::Velocity>();
     Vector6d& constant_vel_ref = *constant_vel;
     auto constant_force = Vector6d::Zero();
 
     auto constant_velocity_generator = make_shared<VelocityProxy>(constant_vel);
     auto constant_force_generator = make_shared<ForceProxy>(constant_force);
 
-    const Vector6d& cp_velocity = robot.task.command.twist;
+    const Vector6d& cp_velocity = robot.task().command.twist;
 
     safety_controller.add("vel proxy", constant_velocity_generator);
     safety_controller.add("force proxy", constant_force_generator);

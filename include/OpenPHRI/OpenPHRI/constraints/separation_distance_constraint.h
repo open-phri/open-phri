@@ -43,7 +43,7 @@ namespace phri {
  */
 class SeparationDistanceConstraint
     : public Constraint,
-      public ObjectCollection<std::shared_ptr<Pose>> {
+      public ObjectCollection<std::shared_ptr<spatial::Position>> {
 public:
     /**
      * @brief Construct a separaration distance constraint with a given
@@ -66,7 +66,7 @@ public:
      */
     SeparationDistanceConstraint(
         std::shared_ptr<Constraint> constraint, InterpolatorPtr interpolator,
-        std::shared_ptr<const Vector6d> robot_position);
+        std::shared_ptr<const Eigen::Vector6d> robot_position);
 
     virtual ~SeparationDistanceConstraint() = default;
 
@@ -86,7 +86,7 @@ private:
 
     std::shared_ptr<Constraint> constraint_;
     InterpolatorPtr interpolator_;
-    std::shared_ptr<const Vector6d> robot_position_;
+    std::shared_ptr<const Eigen::Vector6d> robot_position_;
     std::shared_ptr<double> separation_distance_;
 };
 

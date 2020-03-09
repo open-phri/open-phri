@@ -29,6 +29,8 @@
 #include <OpenPHRI/force_generators/force_generator.h>
 #include <OpenPHRI/definitions.h>
 
+#include <physical_quantities/spatial/impedance/mass.h>
+
 namespace phri {
 
 //! \brief Generates a force as if a virtual mass is attached to the robot.
@@ -43,18 +45,17 @@ public:
      * @param target_acceleration_frame The frame in which the acceleration
      * target is expressed.
      */
-    MassGenerator(std::shared_ptr<Matrix6d> mass,
-                  std::shared_ptr<Acceleration> target_acceleration,
-                  ReferenceFrame mass_frame);
+    MassGenerator(std::shared_ptr<spatial::Mass> mass,
+                  std::shared_ptr<spatial::Acceleration> target_acceleration);
 
     ~MassGenerator() = default;
 
 protected:
-    virtual void update(Wrench& force) override;
+    virtual void update(spatial::Force& force) override;
 
-    std::shared_ptr<Matrix6d> mass_;
-    std::shared_ptr<Acceleration> target_acceleration_;
-    ReferenceFrame mass_frame_;
+    std::shared_ptr<spatial::Mass> mass_;
+    std::shared_ptr<spatial::Acceleration> target_acceleration_;
+    // spatial::Frame mass_frame_;
 };
 
 using MassGeneratorPtr = std::shared_ptr<MassGenerator>;

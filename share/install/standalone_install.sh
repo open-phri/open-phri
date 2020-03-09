@@ -28,16 +28,19 @@ package_name=`basename $package_root_path`
 
 #manage user arguments
 with_tests="OFF"
+with_sanitizers="OFF"
 with_examples="OFF"
 
 for an_arg in "$@"
 do
   if [ $an_arg = "test" ]; then
     with_tests="ON"
+  elif [ $an_arg = "sanitizers" ]; then
+    with_sanitizers="ON"
   elif [ $an_arg = "example" ]; then
     with_examples="ON"
   elif [ $an_arg = "help" ]; then
-    echo "Usage: `\n` + argument \"test\" builds and run tests `\n` + argument \"example\" builds the examples."
+    echo "Usage: `\n` + argument \"test\" builds and run tests `\n` + argument \"sanitizers\" to enable sanitizers `\n` + argument \"example\" builds the examples."
   fi
 done
 
@@ -78,7 +81,7 @@ echo "Building $package_name ..."
 # go to project build dir
 cd $package_root_path/build && rm -Rf *
 # configuring the package's project
-cmake -DREQUIRED_PACKAGES_AUTOMATIC_DOWNLOAD=ON -DADDITIONNAL_DEBUG_INFO=OFF -DBUILD_AND_RUN_TESTS=$with_tests -DENABLE_PARALLEL_BUILD=ON -DBUILD_EXAMPLES=$with_examples -DBUILD_API_DOC=OFF -DBUILD_STATIC_CODE_CHECKING_REPORT=OFF -DGENERATE_INSTALLER=OFF -DWORKSPACE_DIR="../binaries/pid-workspace" ..
+cmake -DREQUIRED_PACKAGES_AUTOMATIC_DOWNLOAD=ON -DADDITIONNAL_DEBUG_INFO=OFF -DBUILD_AND_RUN_TESTS=$with_tests -DENABLE_SANITIZERS=$with_sanitizers -DENABLE_PARALLEL_BUILD=ON -DBUILD_EXAMPLES=$with_examples -DBUILD_API_DOC=OFF -DBUILD_STATIC_CODE_CHECKING_REPORT=OFF -DGENERATE_INSTALLER=OFF -DWORKSPACE_DIR="../binaries/pid-workspace" ..
 # building the project
 cmake --build . --target build -- force=true && echo "The path $package_root_path/binaries/pid-workspace/pid/share/pkgconfig must be added to your PKG_CONFIG_PATH environment variable. To make the change permanent, write the line \"export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$package_root_path/binaries/pid-workspace/pid/share/pkgconfig\" into your .bashrc file."
 #NB: provide the generated libraries as pkg-config modules

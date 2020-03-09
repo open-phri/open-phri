@@ -23,80 +23,72 @@
 
 namespace phri {
 
-StiffnessGenerator::StiffnessGenerator(ReferenceFrame stiffness_frame)
-    : StiffnessGenerator(std::make_shared<Vector6d>(Vector6d::Zero()),
-                         std::make_shared<Pose>(), stiffness_frame) {
-}
-
-StiffnessGenerator::StiffnessGenerator(std::shared_ptr<Vector6d> stiffness,
-                                       std::shared_ptr<Pose> target_pose,
-                                       ReferenceFrame stiffness_frame)
-    : stiffness_(stiffness),
-      target_pose_(target_pose),
-      stiffness_frame_(stiffness_frame) {
+StiffnessGenerator::StiffnessGenerator(
+    std::shared_ptr<spatial::Stiffness> stiffness,
+    std::shared_ptr<spatial::Position> target_pose)
+    : stiffness_(stiffness), target_pose_(target_pose) {
     if (not stiffness or not target_pose) {
         throw std::runtime_error(
             OPEN_PHRI_ERROR("You provided an empty shared pointer"));
     }
 }
 
-StiffnessGenerator::StiffnessGenerator(Vector6d& stiffness, Pose& target_pose,
-                                       ReferenceFrame stiffness_frame)
-    : StiffnessGenerator(std::shared_ptr<Vector6d>(&stiffness, [](auto p) {}),
-                         std::shared_ptr<Pose>(&target_pose, [](auto p) {}),
-                         stiffness_frame) {
+StiffnessGenerator::StiffnessGenerator(spatial::Stiffness& stiffness,
+                                       spatial::Position& target_pose)
+    : StiffnessGenerator(
+          std::shared_ptr<spatial::Stiffness>(&stiffness, [](auto p) {}),
+          std::shared_ptr<spatial::Position>(&target_pose, [](auto p) {})) {
 }
 
-StiffnessGenerator::StiffnessGenerator(const Vector6d& stiffness,
-                                       const Pose& target_pose,
-                                       ReferenceFrame stiffness_frame)
-    : StiffnessGenerator(std::make_shared<Vector6d>(stiffness),
-                         std::make_shared<Pose>(target_pose), stiffness_frame) {
+StiffnessGenerator::StiffnessGenerator(const spatial::Stiffness& stiffness,
+                                       const spatial::Position& target_pose)
+    : StiffnessGenerator(std::make_shared<spatial::Stiffness>(stiffness),
+                         std::make_shared<spatial::Position>(target_pose)) {
 }
 
-StiffnessGenerator::StiffnessGenerator(Vector6d&& stiffness, Pose&& target_pose,
-                                       ReferenceFrame stiffness_frame)
-    : StiffnessGenerator(std::make_shared<Vector6d>(std::move(stiffness)),
-                         std::make_shared<Pose>(std::move(target_pose)),
-                         stiffness_frame) {
+StiffnessGenerator::StiffnessGenerator(spatial::Stiffness&& stiffness,
+                                       spatial::Position&& target_pose)
+    : StiffnessGenerator(
+          std::make_shared<spatial::Stiffness>(std::move(stiffness)),
+          std::make_shared<spatial::Position>(std::move(target_pose))) {
 }
 
-void StiffnessGenerator::update(Wrench& force) {
+void StiffnessGenerator::update(spatial::Force& force) {
     // TODO rewrite
-    // Vector6d error;
+    // spatial::Stiffness error;
 
-    // if (stiffness_frame_ == ReferenceFrame::TCP) {
-    //     error = robot().control.spatial_transformation_matrix.transpose() *
-    //             (robot().task.state.pose.getErrorWith(*target_pose_));
+    // if (stiffness_frame_ == spatial::Frame::TCP) {
+    //     error = robot().control().spatial_transformation_matrix.transpose() *
+    //             (robot().task().state.pose.getErrorWith(*target_pose_));
     // } else {
-    //     error = robot().task.state.pose.getErrorWith(*target_pose_);
+    //     error = robot().task().state.pose.getErrorWith(*target_pose_);
     // }
 
     // error.segment<3>(0) *= -1.;
     // force = stiffness_->cwiseProduct(error);
 }
 
-Vector6d& StiffnessGenerator::stiffness() {
+spatial::Stiffness& StiffnessGenerator::stiffness() {
     return *stiffness_;
 }
 
-const Vector6d& StiffnessGenerator::stiffness() const {
+const spatial::Stiffness& StiffnessGenerator::stiffness() const {
     return *stiffness_;
 }
 
-std::shared_ptr<Vector6d> StiffnessGenerator::stiffnessPtr() const {
+std::shared_ptr<spatial::Stiffness> StiffnessGenerator::stiffnessPtr() const {
     return stiffness_;
 }
 
-Pose& StiffnessGenerator::targetPose() {
+spatial::Position& StiffnessGenerator::targetPose() {
     return *target_pose_;
 }
 
-const Pose& StiffnessGenerator::targetPose() const {
+const spatial::Position& StiffnessGenerator::targetPose() const {
     return *target_pose_;
 }
 
-std::shared_ptr<Pose> StiffnessGenerator::targetPosePtr() const {
+std::shared_ptr<spatial::Position> StiffnessGenerator::targetPosePtr() const {
     return target_pose_;
 }
 

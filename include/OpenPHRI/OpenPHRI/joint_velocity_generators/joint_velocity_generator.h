@@ -59,11 +59,11 @@ public:
 
     //! \brief Compute the value associated with the joint_velocity generator.
     //! \return The joint_velocity generator's evaluated value.
-    virtual VectorXd compute() final;
+    virtual Eigen::VectorXd compute() final;
 
     //! \brief Call operator, shortcut for compute().
     //! \return The joint_velocity generator's evaluated value.
-    virtual VectorXd operator()() final;
+    virtual Eigen::VectorXd operator()() final;
 
 protected:
     friend class SafetyController;
@@ -71,7 +71,7 @@ protected:
     //! \brief Derived classed must implement this to provide their velocity
     //! output
     //! \param velocity A reference to the velocity to set
-    virtual void update(VectorXd& velocity) = 0;
+    virtual void update(Eigen::VectorXd& velocity) = 0;
 
     //! \brief Set the robot to work with.
     //! \param robot The robot.
@@ -84,7 +84,7 @@ protected:
 private:
     Robot const* robot_;
 
-    VectorXd velocity_;
+    Eigen::VectorXd velocity_;
 };
 
 } // namespace phri

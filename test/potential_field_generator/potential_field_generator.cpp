@@ -19,7 +19,7 @@ int main(int argc, char const* argv[]) {
                                AffineTransform::Identity(),
                                FrameAdapter::frame("end-effector"));
 
-    robot.joints.state.position.setOnes();
+    robot.joints().state.position.setOnes();
     model.forwardKinematics();
 
     auto safety_controller = phri::SafetyController(robot);
@@ -78,12 +78,12 @@ int main(int argc, char const* argv[]) {
     // Step #7 : 1 obstacle > threshold distance
     obs_pos->translation().x() = 0.3;
     safety_controller.compute();
-    assert_msg("Step #7", robot.task.command.twist.vector().isZero());
+    assert_msg("Step #7", robot.task().command.twist.vector().isZero());
 
     // Step #8 : 1 obstacle < threshold distance
     obs_pos->translation().x() = 0.1;
     safety_controller.compute();
-    assert_msg("Step #8", robot.task.command.twist.translation().dot(
+    assert_msg("Step #8", robot.task().command.twist.translation().dot(
                               obs_pos->translation()) < 0.);
 
     // Step #9 : 1 target
@@ -92,7 +92,7 @@ int main(int argc, char const* argv[]) {
     tgt_pos->translation().x() = 0.1;
     tgt_pos->translation().y() = 0.2;
     safety_controller.compute();
-    assert_msg("Step #9", robot.task.command.twist.translation().dot(
+    assert_msg("Step #9", robot.task().command.twist.translation().dot(
                               tgt_pos->translation()) > 0.);
 
     return 0;

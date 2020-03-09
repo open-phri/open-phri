@@ -48,9 +48,20 @@ public:
 
     virtual bool sync();
 
-    virtual double getSampleTime() const final;
+    //! \brief Calls sync() then read()
+    //!
+    //! \return bool True if both calls succeded, false otherwise
+    bool syncThenRead();
+
+    double getTimeStep() const;
 
 protected:
+    void setTimeStep(double time_step);
+    Robot::JointData& jointState();
+    const Robot::JointData& jointCommand() const;
+    Robot::TaskData& taskState();
+    const Robot::TaskData& taskCommand() const;
+
     Robot& robot_;
 };
 

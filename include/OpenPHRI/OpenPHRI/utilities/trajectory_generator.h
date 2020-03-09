@@ -773,7 +773,7 @@ using TrajectoryGeneratorConstPtr =
     std::shared_ptr<const TrajectoryGenerator<T>>;
 
 extern template class TrajectoryGenerator<double>;
-extern template class TrajectoryGenerator<VectorXd>;
-extern template class TrajectoryGenerator<Vector6d>;
+extern template class TrajectoryGenerator<Eigen::VectorXd>;
+extern template class TrajectoryGenerator<Eigen::Vector6d>;
 
 } // namespace phri

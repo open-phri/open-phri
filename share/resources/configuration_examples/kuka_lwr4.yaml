@@ -1,15 +1,24 @@
 robot:
     name: LBR4p
     joint_count: 7
+    control_point: 
+        frame: end-effector
+        parent: link1
 
 model:
     path: robot_models/kuka_lwr4.yaml
     control_point: end-effector
 
+# driver:
+#     type: vrep
+#     sample_time: 0.01
+#     synchronous: true
+
 driver:
-    type: vrep
+    type: dummy
     sample_time: 0.01
-    synchronous: true
+    # init_joint_positions: [1, 1, 1, 1, 1, 1, 1]
+    init_joint_positions: [0, 1, 0, 1, 0, 0, 0]
 
 controller:
     use_dynamic_dls: true

@@ -23,8 +23,8 @@
 namespace phri {
 
 template class Integrator<double>;
-template class Integrator<Vector2d>;
-template class Integrator<Vector3d>;
-template class Integrator<Vector6d>;
+template class Integrator<Eigen::Vector2d>;
+template class Integrator<Eigen::Vector3d>;
+template class Integrator<Eigen::Vector6d>;
 
 } // namespace phri

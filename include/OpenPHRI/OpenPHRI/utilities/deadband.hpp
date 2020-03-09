@@ -29,6 +29,7 @@
 #pragma once
 
 #include <OpenPHRI/definitions.h>
+#include <physical_quantities/spatial/type_aliases.h>
 
 namespace phri {
 
@@ -70,8 +71,8 @@ private:
     std::shared_ptr<const T> threshold_;
 };
 
-extern template class Deadband<phri::Vector3d>;
-extern template class Deadband<phri::Vector6d>;
-extern template class Deadband<phri::VectorXd>;
+extern template class Deadband<Eigen::Vector3d>;
+extern template class Deadband<Eigen::Vector6d>;
+extern template class Deadband<Eigen::VectorXd>;
 
 } // namespace phri

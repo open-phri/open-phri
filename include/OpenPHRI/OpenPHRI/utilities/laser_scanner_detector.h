@@ -34,13 +34,13 @@ namespace phri {
 
 class LaserScannerDetector {
 public:
-    LaserScannerDetector(std::shared_ptr<const VectorXd> laser_data,
+    LaserScannerDetector(std::shared_ptr<const Eigen::VectorXd> laser_data,
                          double scanning_angle, double minimum_distance,
                          double maximum_distance, double threshold = 0.1);
 
     ~LaserScannerDetector() = default;
 
-    std::shared_ptr<const Vector2d> getPosition() const;
+    std::shared_ptr<const Eigen::Vector2d> getPosition() const;
     std::shared_ptr<const double> getDistance() const;
 
     void init();
@@ -48,15 +48,15 @@ public:
     double operator()();
 
 private:
-    std::shared_ptr<Vector2d> position_;
+    std::shared_ptr<Eigen::Vector2d> position_;
     std::shared_ptr<double> distance_;
-    std::shared_ptr<const VectorXd> laser_data_;
+    std::shared_ptr<const Eigen::VectorXd> laser_data_;
     double scanning_angle_;
     double minimum_distance_;
     double maximum_distance_;
     double threshold_;
 
-    VectorXd maximum_distances_;
+    Eigen::VectorXd maximum_distances_;
 };
 
 } // namespace phri

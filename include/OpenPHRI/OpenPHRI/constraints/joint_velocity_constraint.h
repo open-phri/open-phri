@@ -45,28 +45,28 @@ public:
     //! \param maximum_velocities A shared pointer to the desired
     //! maximum velocity (rad/s, m/s). Throws if the pointer is empty.
     explicit JointVelocityConstraint(
-        std::shared_ptr<VectorXd> maximum_velocities);
+        std::shared_ptr<Eigen::VectorXd> maximum_velocities);
 
     //! \brief Construct a new JointVelocityConstraint object using the given
     //! referenced value
     //! \param maximum_velocities A reference to the desired
     //! maximum velocity (rad/s, m/s). Make sure that \p maximum_velocities
     //! outlives the constraint
-    explicit JointVelocityConstraint(VectorXd& maximum_velocities);
+    explicit JointVelocityConstraint(Eigen::VectorXd& maximum_velocities);
 
     //! \brief Construct a new JointVelocityConstraint object using the given
     //! value
     //! \param maximum_velocities The value of the desired maximum
     //! velocity (rad/s, m/s). Use JointVelocityConstraint::maximumvelocity() to
     //! update the limit
-    explicit JointVelocityConstraint(const VectorXd& maximum_velocities);
+    explicit JointVelocityConstraint(const Eigen::VectorXd& maximum_velocities);
 
     //! \brief Construct a new JointVelocityConstraint object using the given
     //! value
     //! \param maximum_velocities The value of the desired maximum
     //! velocity (rad/s, m/s). Use JointVelocityConstraint::maximumvelocity() to
     //! update the limit
-    explicit JointVelocityConstraint(VectorXd&& maximum_velocities);
+    explicit JointVelocityConstraint(Eigen::VectorXd&& maximum_velocities);
 
     //! \brief Default copy constructor
     JointVelocityConstraint(const JointVelocityConstraint&) = default;
@@ -90,23 +90,23 @@ public:
 
     //! \brief Read/write access the velocity limit used by the constraint
     //! \return double& A reference to the velocity limit
-    VectorXd& maximumVelocities();
+    Eigen::VectorXd& maximumVelocities();
 
     //! \brief Read access the velocity limit used by the constraint
     //! \return double The velocity limit value
-    const VectorXd& maximumVelocities() const;
+    const Eigen::VectorXd& maximumVelocities() const;
 
     //! \brief Access to the shared pointer holding the velocity limit used
     //! by the constraint
     //! \return std::shared_ptr<double> A shared pointer to the velocity
     //! limit
-    std::shared_ptr<VectorXd> maximumVelocitiesPtr() const;
+    std::shared_ptr<Eigen::VectorXd> maximumVelocitiesPtr() const;
 
 protected:
     virtual void setRobot(Robot const* robot) override;
 
 private:
-    std::shared_ptr<VectorXd> maximum_velocities_;
+    std::shared_ptr<Eigen::VectorXd> maximum_velocities_;
 };
 
 } // namespace phri

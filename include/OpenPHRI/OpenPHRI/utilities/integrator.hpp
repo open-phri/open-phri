@@ -29,6 +29,7 @@
 #pragma once
 
 #include <OpenPHRI/definitions.h>
+#include <physical_quantities/spatial/type_aliases.h>
 
 namespace phri {
 
@@ -127,8 +128,8 @@ template <typename T>
 using IntegratorConstPtr = std::shared_ptr<const Integrator<T>>;
 
 extern template class Integrator<double>;
-extern template class Integrator<Vector2d>;
-extern template class Integrator<Vector3d>;
-extern template class Integrator<Vector6d>;
+extern template class Integrator<Eigen::Vector2d>;
+extern template class Integrator<Eigen::Vector3d>;
+extern template class Integrator<Eigen::Vector6d>;
 
 } // namespace phri

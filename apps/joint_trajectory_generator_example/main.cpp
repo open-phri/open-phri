@@ -42,17 +42,18 @@ int main(int argc, char const* argv[]) {
 
     AppMaker app("configuration_examples/kuka_lwr4.yaml");
 
-    phri::TrajectoryPoint<phri::VectorXd> joint_start_point;
-    phri::TrajectoryPoint<phri::VectorXd> joint_end_point;
+    phri::TrajectoryPoint<Eigen::VectorXd> joint_start_point;
+    phri::TrajectoryPoint<Eigen::VectorXd> joint_end_point;
 
     joint_start_point.resize(app.getRobot()->jointCount());
     joint_end_point.resize(app.getRobot()->jointCount());
 
-    auto joint_trajectory_generator = phri::TrajectoryGenerator<phri::VectorXd>(
-        joint_start_point, app.getDriver()->getSampleTime(),
-        phri::TrajectorySynchronization::SynchronizeTrajectory);
+    auto joint_trajectory_generator =
+        phri::TrajectoryGenerator<Eigen::VectorXd>(
+            joint_start_point, app.getDriver()->getSampleTime(),
+            phri::TrajectorySynchronization::SynchronizeTrajectory);
 
-    phri::VectorXd dqmax(app.getRobot()->jointCount()),
+    Eigen::VectorXd dqmax(app.getRobot()->jointCount()),
         d2qmax(app.getRobot()->jointCount());
     dqmax.setConstant(1.5);
     d2qmax.setConstant(0.5);

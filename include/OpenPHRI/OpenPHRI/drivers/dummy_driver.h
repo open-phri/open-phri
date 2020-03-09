@@ -33,6 +33,8 @@
 #include <OpenPHRI/fwd_decl.h>
 #include <OpenPHRI/drivers/driver.h>
 
+#include <chrono>
+
 namespace phri {
 
 /** @brief A dummy driver that set its current joint state with the last command
@@ -66,6 +68,7 @@ public:
 
 private:
     static bool registered_in_factory;
+    std::chrono::high_resolution_clock::time_point last_sync_;
 };
 
 using DummyDriverPtr = std::shared_ptr<DummyDriver>;

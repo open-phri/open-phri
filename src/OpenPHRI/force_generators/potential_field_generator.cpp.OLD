@@ -42,8 +42,8 @@ void PotentialFieldGenerator::update(Wrench& wrench) {
         rob_pos = *offset_;
     } else {
         rob_pos =
-            robot().task.state.pose.translation() +
-            robot().control.transformation_matrix.block<3, 3>(0, 0) * *offset_;
+            robot().task().state.pose.translation() +
+            robot().control().transformation_matrix.block<3, 3>(0, 0) * *offset_;
     }
 
     for (const auto& item : items_) {

@@ -2,6 +2,7 @@
 
 #include <OpenPHRI/type_aliases.h>
 #include <OpenPHRI/definitions.h>
+#include "exceptions.h"
 
 #include <fstream>
 #include <string>

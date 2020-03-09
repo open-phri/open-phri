@@ -24,11 +24,11 @@
 namespace phri {
 
 JointVelocityConstraint::JointVelocityConstraint()
-    : maximum_velocities_(std::make_shared<VectorXd>()) {
+    : maximum_velocities_(std::make_shared<Eigen::VectorXd>()) {
 }
 
 JointVelocityConstraint::JointVelocityConstraint(
-    std::shared_ptr<VectorXd> maximum_velocities)
+    std::shared_ptr<Eigen::VectorXd> maximum_velocities)
     : maximum_velocities_(maximum_velocities) {
     if (not maximum_velocities) {
         throw std::runtime_error(
@@ -36,19 +36,22 @@ JointVelocityConstraint::JointVelocityConstraint(
     }
 }
 
-JointVelocityConstraint::JointVelocityConstraint(VectorXd& maximum_velocities)
-    : JointVelocityConstraint(
-          std::shared_ptr<VectorXd>(&maximum_velocities, [](auto p) {})) {
+JointVelocityConstraint::JointVelocityConstraint(
+    Eigen::VectorXd& maximum_velocities)
+    : JointVelocityConstraint(std::shared_ptr<Eigen::VectorXd>(
+          &maximum_velocities, [](auto p) {})) {
 }
 
 JointVelocityConstraint::JointVelocityConstraint(
-    const VectorXd& maximum_velocities)
-    : JointVelocityConstraint(std::make_shared<VectorXd>(maximum_velocities)) {
+    const Eigen::VectorXd& maximum_velocities)
+    : JointVelocityConstraint(
+          std::make_shared<Eigen::VectorXd>(maximum_velocities)) {
 }
 
-JointVelocityConstraint::JointVelocityConstraint(VectorXd&& maximum_velocities)
+JointVelocityConstraint::JointVelocityConstraint(
+    Eigen::VectorXd&& maximum_velocities)
     : JointVelocityConstraint(
-          std::make_shared<VectorXd>(std::move(maximum_velocities))) {
+          std::make_shared<Eigen::VectorXd>(std::move(maximum_velocities))) {
 }
 
 double JointVelocityConstraint::compute() {
@@ -60,7 +63,7 @@ double JointVelocityConstraint::compute() {
     }
 
     double constraint = 1.;
-    const auto& joint_vel = robot_->control.joints.total_velocity;
+    const auto& joint_vel = robot_->control().joints().totalVelocity();
     const auto& max_joint_vel = *maximum_velocities_;
 
     for (size_t i = 0; i < joint_vel.size(); ++i) {
@@ -71,15 +74,15 @@ double JointVelocityConstraint::compute() {
     return constraint;
 }
 
-VectorXd& JointVelocityConstraint::maximumVelocities() {
+Eigen::VectorXd& JointVelocityConstraint::maximumVelocities() {
     return *maximum_velocities_;
 }
 
-const VectorXd& JointVelocityConstraint::maximumVelocities() const {
+const Eigen::VectorXd& JointVelocityConstraint::maximumVelocities() const {
     return *maximum_velocities_;
 }
 
-std::shared_ptr<VectorXd>
+std::shared_ptr<Eigen::VectorXd>
 JointVelocityConstraint::maximumVelocitiesPtr() const {
     return maximum_velocities_;
 }

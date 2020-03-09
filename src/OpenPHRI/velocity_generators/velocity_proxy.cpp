@@ -22,30 +22,28 @@
 
 namespace phri {
 
-VelocityProxy::VelocityProxy() : VelocityProxy(Twist{}) {
+VelocityProxy::VelocityProxy(std::shared_ptr<spatial::Velocity> velocity)
+    : external_velocity_(velocity) {
 }
 
-VelocityProxy::VelocityProxy(std::shared_ptr<Twist> velocity)
-    : VelocityGenerator(), external_velocity_(velocity) {
+VelocityProxy::VelocityProxy(spatial::Velocity& velocity)
+    : VelocityProxy(
+          std::shared_ptr<spatial::Velocity>(&velocity, [](auto p) {})) {
 }
 
-VelocityProxy::VelocityProxy(Twist& velocity)
-    : VelocityProxy(std::shared_ptr<Twist>(&velocity, [](auto p) {})) {
+VelocityProxy::VelocityProxy(const spatial::Velocity& velocity)
+    : VelocityProxy(std::make_shared<spatial::Velocity>(velocity)) {
 }
 
-VelocityProxy::VelocityProxy(const Twist& velocity)
-    : VelocityProxy(std::make_shared<Twist>(velocity)) {
-}
-
-VelocityProxy::VelocityProxy(Twist&& velocity)
-    : VelocityProxy(std::make_shared<Twist>(std::move(velocity))) {
+VelocityProxy::VelocityProxy(spatial::Velocity&& velocity)
+    : VelocityProxy(std::make_shared<spatial::Velocity>(std::move(velocity))) {
 }
 
 VelocityProxy::VelocityProxy(const generator& generator)
     : generator_(generator) {
 }
 
-void VelocityProxy::update(Twist& velocity) {
+void VelocityProxy::update(spatial::Velocity& velocity) {
     if (generator_) {
         velocity = generator_();
     } else {
@@ -53,15 +51,15 @@ void VelocityProxy::update(Twist& velocity) {
     }
 }
 
-Twist& VelocityProxy::velocity() {
+spatial::Velocity& VelocityProxy::velocity() {
     return *external_velocity_;
 }
 
-const Twist& VelocityProxy::velocity() const {
+const spatial::Velocity& VelocityProxy::velocity() const {
     return *external_velocity_;
 }
 
-std::shared_ptr<Twist> VelocityProxy::velocityPtr() const {
+std::shared_ptr<spatial::Velocity> VelocityProxy::velocityPtr() const {
     return external_velocity_;
 }
 

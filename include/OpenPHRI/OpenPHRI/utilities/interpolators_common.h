@@ -34,6 +34,10 @@
 #include <functional>
 #include <tuple>
 
+#include <physical_quantities/spatial/position.h>
+#include <physical_quantities/spatial/velocity.h>
+#include <physical_quantities/spatial/acceleration.h>
+
 namespace phri {
 
 template <typename T> class TrajectoryGenerator;
@@ -73,21 +77,19 @@ template <typename T> struct TrajectoryPoint {
     }
 
     template <typename U = T>
-    TrajectoryPoint(
-        size_t size,
-        typename std::enable_if<std::is_same<U, std::vector<double>>::value or
-                                std::is_same<U, phri::VectorXd>::value>::type* =
-            0)
+    TrajectoryPoint(size_t size,
+                    typename std::enable_if<
+                        std::is_same<U, std::vector<double>>::value or
+                        std::is_same<U, Eigen::VectorXd>::value>::type* = 0)
         : TrajectoryPoint() {
         resize(size);
     }
 
     template <typename U = T>
-    void resize(
-        size_t size,
-        typename std::enable_if<std::is_same<U, std::vector<double>>::value or
-                                std::is_same<U, phri::VectorXd>::value>::type* =
-            0) {
+    void resize(size_t size,
+                typename std::enable_if<
+                    std::is_same<U, std::vector<double>>::value or
+                    std::is_same<U, Eigen::VectorXd>::value>::type* = 0) {
         y->resize(size);
         dy->resize(size);
         d2y->resize(size);
@@ -176,39 +178,41 @@ private:
     }
 };
 
-template <> struct TrajectoryPoint<Pose> {
-    TrajectoryPoint(const std::shared_ptr<Pose>& y,
-                    const std::shared_ptr<Twist>& dy,
-                    const std::shared_ptr<Acceleration>& d2y)
+template <> struct TrajectoryPoint<spatial::Position> {
+    TrajectoryPoint(const std::shared_ptr<spatial::Position>& y,
+                    const std::shared_ptr<spatial::Velocity>& dy,
+                    const std::shared_ptr<spatial::Acceleration>& d2y)
         : y(y), dy(dy), d2y(d2y) {
     }
 
-    TrajectoryPoint(const Pose& y, const Twist& dy, const Acceleration& d2y)
-        : y(std::make_shared<Pose>(y)),
-          dy(std::make_shared<Twist>(dy)),
-          d2y(std::make_shared<Acceleration>(d2y)) {
+    TrajectoryPoint(const spatial::Position& y, const spatial::Velocity& dy,
+                    const spatial::Acceleration& d2y)
+        : y(std::make_shared<spatial::Position>(y)),
+          dy(std::make_shared<spatial::Velocity>(dy)),
+          d2y(std::make_shared<spatial::Acceleration>(d2y)) {
     }
 
-    TrajectoryPoint()
-        : y(std::make_shared<Pose>()),
-          dy(std::make_shared<Twist>()),
-          d2y(std::make_shared<Acceleration>()) {
+    TrajectoryPoint(spatial::Frame frame)
+        : y(std::make_shared<spatial::Position>(frame)),
+          dy(std::make_shared<spatial::Velocity>(frame)),
+          d2y(std::make_shared<spatial::Acceleration>(frame)) {
     }
 
     void print() const {
+        Eigen::Quaterniond q = y->orientation().asQuaternion();
         std::cout << "[";
         std::cout << "(";
-        std::cout << y->translation().transpose() << "; ";
-        std::cout << y->orientation().w() << " + ";
-        std::cout << y->orientation().x() << "i + ";
-        std::cout << y->orientation().y() << "j + ";
-        std::cout << y->orientation().z() << "k";
+        std::cout << y->linear().transpose() << "; ";
+        std::cout << q.w() << " + ";
+        std::cout << q.x() << "i + ";
+        std::cout << q.y() << "j + ";
+        std::cout << q.z() << "k";
         std::cout << ")";
         std::cout << "(";
-        std::cout << static_cast<Vector6d>(*dy).transpose();
+        std::cout << static_cast<Eigen::Vector6d>(*dy).transpose();
         std::cout << ")";
         std::cout << "(";
-        std::cout << static_cast<Vector6d>(*d2y).transpose();
+        std::cout << static_cast<Eigen::Vector6d>(*d2y).transpose();
         std::cout << ")";
         std::cout << "]";
     }
@@ -218,9 +222,9 @@ template <> struct TrajectoryPoint<Pose> {
     //  return std::make_tuple(yrefs_[n], dyrefs_[n], d2yrefs_[n]);
     // }
 
-    std::shared_ptr<Pose> y;           // value
-    std::shared_ptr<Twist> dy;         // first derivative
-    std::shared_ptr<Acceleration> d2y; // second derivative
+    std::shared_ptr<spatial::Position> y;       // value
+    std::shared_ptr<spatial::Velocity> dy;      // first derivative
+    std::shared_ptr<spatial::Acceleration> d2y; // second derivative
 };
 
 template <typename T>

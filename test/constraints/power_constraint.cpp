@@ -19,20 +19,21 @@ TEST_CASE("Power constraint") {
                                AffineTransform::Identity(),
                                FrameAdapter::frame("end-effector"));
 
-    robot.joints.state.position.setOnes();
+    robot.joints().state.position.setOnes();
     model.forwardKinematics();
 
     auto safety_controller = phri::SafetyController(robot);
     safety_controller.setVerbose(true);
 
-    robot.control.task.damping.setConstant(10);
+    robot.control().task.damping.setConstant(10);
 
     auto maximum_power = make_shared<double>(10);
-    auto& external_wrench = robot.task.state.wrench;
-    auto& command_twist = robot.task.command.twist;
+    auto& external_wrench = robot.task().state.wrench;
+    auto& command_twist = robot.task().command.twist;
     auto power_constraint = make_shared<PowerConstraint>(maximum_power);
 
-    auto constant_vel = make_shared<Twist>(FrameAdapter::frame("end-effector"));
+    auto constant_vel =
+        make_shared<spatial::Velocity>(FrameAdapter::frame("end-effector"));
     auto constant_velocity_generator = make_shared<VelocityProxy>(constant_vel);
 
     safety_controller.add("power constraint", power_constraint);
@@ -72,5 +73,5 @@ TEST_CASE("Power constraint") {
     safety_controller.compute();
 
     REQUIRE(command_twist.vector().isApprox(
-        robot.control.task.total_twist.vector()));
+        robot.control().task.total_twist.vector()));
 }

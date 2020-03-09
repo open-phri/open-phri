@@ -22,15 +22,13 @@
 
 using namespace phri;
 
-MassGenerator::MassGenerator(std::shared_ptr<Matrix6d> mass,
-                             std::shared_ptr<Acceleration> target_acceleration,
-                             ReferenceFrame mass_frame)
-    : mass_(mass),
-      target_acceleration_(target_acceleration),
-      mass_frame_(mass_frame) {
+MassGenerator::MassGenerator(
+    std::shared_ptr<spatial::Mass> mass,
+    std::shared_ptr<spatial::Acceleration> target_acceleration)
+    : mass_(mass), target_acceleration_(target_acceleration) {
 }
 
-void MassGenerator::update(Wrench& force) {
+void MassGenerator::update(spatial::Force& force) {
     // TODO rewrite
     // Vector6d error;
 
@@ -39,20 +37,20 @@ void MassGenerator::update(Wrench& force) {
     //         error = *target_acceleration_;
     //     } else {
     //         error =
-    //             robot().control.spatial_transformation_matrix.transpose() *
+    //             robot().control().spatial_transformation_matrix.transpose() *
     //             (static_cast<const Vector6d&>(*target_acceleration_) -
     //              static_cast<const
-    //              Vector6d&>(robot().task.state.acceleration));
+    //              Vector6d&>(robot().task().state.acceleration));
     //     }
     // } else {
     //     if (target_acceleration_frame_ == ReferenceFrame::TCP) {
-    //         error = robot().control.spatial_transformation_matrix *
+    //         error = robot().control().spatial_transformation_matrix *
     //                 static_cast<const Vector6d&>(*target_acceleration_);
     //     } else {
     //         error =
     //             static_cast<const Vector6d&>(*target_acceleration_) -
     //             static_cast<const
-    //             Vector6d&>(robot().task.state.acceleration);
+    //             Vector6d&>(robot().task().state.acceleration);
     //     }
     // }
 
