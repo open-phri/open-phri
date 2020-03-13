@@ -34,6 +34,8 @@
 #include <OpenPHRI/utilities/object_collection.hpp>
 #include <map>
 
+#include <physical_quantities/spatial/position.h>
+
 namespace phri {
 
 /** @brief A meta-constraint to adapt a given constraint depending on the
@@ -66,7 +68,7 @@ public:
      */
     SeparationDistanceConstraint(
         std::shared_ptr<Constraint> constraint, InterpolatorPtr interpolator,
-        std::shared_ptr<const Eigen::Vector6d> robot_position);
+        std::shared_ptr<const spatial::Position> robot_position);
 
     virtual ~SeparationDistanceConstraint() = default;
 
@@ -86,7 +88,7 @@ private:
 
     std::shared_ptr<Constraint> constraint_;
     InterpolatorPtr interpolator_;
-    std::shared_ptr<const Eigen::Vector6d> robot_position_;
+    std::shared_ptr<const spatial::Position> robot_position_;
     std::shared_ptr<double> separation_distance_;
 };
 

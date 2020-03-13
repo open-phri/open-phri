@@ -29,6 +29,8 @@
 #include <OpenPHRI/definitions.h>
 #include <OpenPHRI/constraints/constraint.h>
 
+#include <physical_quantities/scalar/velocity.h>
+
 namespace phri {
 
 //! \brief A constraint to limit the TCP velocity.
@@ -44,28 +46,29 @@ public:
     //! pointed value
     //! \param maximum_velocity A shared pointer to the desired
     //! maximum velocity (m/s). Throws if the pointer is empty.
-    explicit VelocityConstraint(std::shared_ptr<double> maximum_velocity);
+    explicit VelocityConstraint(
+        std::shared_ptr<scalar::Velocity> maximum_velocity);
 
     //! \brief Construct a new VelocityConstraint object using the given
     //! referenced value
     //! \param maximum_velocity A reference to the desired
     //! maximum velocity (m/s). Make sure that \p maximum_velocity
     //! outlives the constraint
-    explicit VelocityConstraint(double& maximum_velocity);
+    explicit VelocityConstraint(scalar::Velocity& maximum_velocity);
 
     //! \brief Construct a new VelocityConstraint object using the given
     //! value
     //! \param maximum_velocity The value of the desired maximum
     //! velocity (m/s). Use VelocityConstraint::maximumVelocity()
     //! to update the limit
-    explicit VelocityConstraint(const double& maximum_velocity);
+    explicit VelocityConstraint(const scalar::Velocity& maximum_velocity);
 
     //! \brief Construct a new VelocityConstraint object using the given
     //! value
     //! \param maximum_velocity The value of the desired maximum
     //! velocity (m/s). Use VelocityConstraint::maximumVelocity()
     //! to update the limit
-    explicit VelocityConstraint(double&& maximum_velocity);
+    explicit VelocityConstraint(scalar::Velocity&& maximum_velocity);
 
     //! \brief Default copy constructor
     VelocityConstraint(const VelocityConstraint&) = default;
@@ -90,20 +93,20 @@ public:
 
     //! \brief Read/write access the velocity limit used by the constraint
     //! \return double& A reference to the velocity limit
-    double& maximumVelocity();
+    scalar::Velocity& maximumVelocity();
 
     //! \brief Read access the velocity limit used by the constraint
     //! \return double The velocity limit value
-    double maximumVelocity() const;
+    scalar::Velocity maximumVelocity() const;
 
     //! \brief Access to the shared pointer holding the velocity limit used
     //! by the constraint
     //! \return std::shared_ptr<double> A shared pointer to the velocity
     //! limit
-    std::shared_ptr<double> maximumVelocityPtr() const;
+    std::shared_ptr<scalar::Velocity> maximumVelocityPtr() const;
 
 protected:
-    std::shared_ptr<double> maximum_velocity_;
+    std::shared_ptr<scalar::Velocity> maximum_velocity_;
 };
 
 } // namespace phri

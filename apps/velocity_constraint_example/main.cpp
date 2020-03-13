@@ -65,7 +65,8 @@ int main() {
 
     // Configure the controller
     app.controller().add<phri::ExternalForce>("ext force");
-    app.controller().add<phri::VelocityConstraint>("vmax", 0.1);
+    app.controller().add<phri::VelocityConstraint>("vmax",
+                                                   scalar::Velocity{.1});
     app.controller().add<phri::VelocityProxy>(
         "vref", spatial::Velocity::Ones(app.robot().controlPointParentFrame()));
 

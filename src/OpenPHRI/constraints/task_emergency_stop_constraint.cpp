@@ -24,14 +24,14 @@
 namespace phri {
 
 TaskEmergencyStopConstraint::TaskEmergencyStopConstraint()
-    : activation_threshold_(std::make_shared<double>(0.)),
-      deactivation_threshold_(std::make_shared<double>(0.)),
+    : activation_threshold_(std::make_shared<scalar::Force>(0.)),
+      deactivation_threshold_(std::make_shared<scalar::Force>(0.)),
       previous_constraint_value_(1.) {
 }
 
 TaskEmergencyStopConstraint::TaskEmergencyStopConstraint(
-    std::shared_ptr<double> activation_threshold,
-    std::shared_ptr<double> deactivation_threshold)
+    std::shared_ptr<scalar::Force> activation_threshold,
+    std::shared_ptr<scalar::Force> deactivation_threshold)
     : activation_threshold_(activation_threshold),
       deactivation_threshold_(deactivation_threshold),
       previous_constraint_value_(1.) {
@@ -42,24 +42,27 @@ TaskEmergencyStopConstraint::TaskEmergencyStopConstraint(
 }
 
 TaskEmergencyStopConstraint::TaskEmergencyStopConstraint(
-    double& activation_threshold, double& deactivation_threshold)
+    scalar::Force& activation_threshold, scalar::Force& deactivation_threshold)
     : TaskEmergencyStopConstraint(
-          std::shared_ptr<double>(&activation_threshold, [](auto p) {}),
-          std::shared_ptr<double>(&deactivation_threshold, [](auto p) {})) {
+          std::shared_ptr<scalar::Force>(&activation_threshold, [](auto p) {}),
+          std::shared_ptr<scalar::Force>(&deactivation_threshold,
+                                         [](auto p) {})) {
 }
 
 TaskEmergencyStopConstraint::TaskEmergencyStopConstraint(
-    const double& activation_threshold, const double& deactivation_threshold)
+    const scalar::Force& activation_threshold,
+    const scalar::Force& deactivation_threshold)
     : TaskEmergencyStopConstraint(
-          std::make_shared<double>(activation_threshold),
-          std::make_shared<double>(deactivation_threshold)) {
+          std::make_shared<scalar::Force>(activation_threshold),
+          std::make_shared<scalar::Force>(deactivation_threshold)) {
 }
 
 TaskEmergencyStopConstraint::TaskEmergencyStopConstraint(
-    double&& activation_threshold, double&& deactivation_threshold)
+    scalar::Force&& activation_threshold,
+    scalar::Force&& deactivation_threshold)
     : TaskEmergencyStopConstraint(
-          std::make_shared<double>(std::move(activation_threshold)),
-          std::make_shared<double>(std::move(deactivation_threshold))) {
+          std::make_shared<scalar::Force>(std::move(activation_threshold)),
+          std::make_shared<scalar::Force>(std::move(deactivation_threshold))) {
 }
 
 double TaskEmergencyStopConstraint::compute() {
@@ -67,9 +70,9 @@ double TaskEmergencyStopConstraint::compute() {
 
     double norm = robot_->task().state().force().linear().norm();
 
-    if (norm >= activationThreshold()) {
+    if (norm >= activationThreshold().value()) {
         constraint = 0.;
-    } else if (norm <= deactivationThreshold()) {
+    } else if (norm <= deactivationThreshold().value()) {
         constraint = 1.;
     } else {
         constraint = previous_constraint_value_;
@@ -80,28 +83,28 @@ double TaskEmergencyStopConstraint::compute() {
     return constraint;
 }
 
-double& TaskEmergencyStopConstraint::activationThreshold() {
+scalar::Force& TaskEmergencyStopConstraint::activationThreshold() {
     return *activation_threshold_;
 }
 
-double TaskEmergencyStopConstraint::activationThreshold() const {
+scalar::Force TaskEmergencyStopConstraint::activationThreshold() const {
     return *activation_threshold_;
 }
 
-std::shared_ptr<double>
+std::shared_ptr<scalar::Force>
 TaskEmergencyStopConstraint::activationThresholdPtr() const {
     return activation_threshold_;
 }
 
-double& TaskEmergencyStopConstraint::deactivationThreshold() {
+scalar::Force& TaskEmergencyStopConstraint::deactivationThreshold() {
     return *deactivation_threshold_;
 }
 
-double TaskEmergencyStopConstraint::deactivationThreshold() const {
+scalar::Force TaskEmergencyStopConstraint::deactivationThreshold() const {
     return *deactivation_threshold_;
 }
 
-std::shared_ptr<double>
+std::shared_ptr<scalar::Force>
 TaskEmergencyStopConstraint::deactivationThresholdPtr() const {
     return deactivation_threshold_;
 }

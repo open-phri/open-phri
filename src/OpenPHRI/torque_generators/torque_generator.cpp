@@ -22,15 +22,16 @@
 
 using namespace phri;
 
-Eigen::VectorXd TorqueGenerator::compute() {
-    Eigen::VectorXd torque(robot_->jointCount());
-    update(torque);
-    return torque;
+const vector::dyn::Force& TorqueGenerator::compute() {
+    force_.setZero();
+    update(force_);
+    return force_;
 }
-Eigen::VectorXd TorqueGenerator::operator()() {
+const vector::dyn::Force& TorqueGenerator::operator()() {
     return compute();
 }
 
 void TorqueGenerator::setRobot(Robot const* robot) {
     robot_ = robot;
+    force_.resize(robot_->jointCount());
 }

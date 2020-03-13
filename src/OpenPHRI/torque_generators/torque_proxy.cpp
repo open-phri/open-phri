@@ -22,10 +22,10 @@
 
 using namespace phri;
 
-TorqueProxy::TorqueProxy(std::shared_ptr<const Eigen::VectorXd> torque)
+TorqueProxy::TorqueProxy(std::shared_ptr<const vector::dyn::Force> torque)
     : torque_(torque) {
 }
 
-void TorqueProxy::update(Eigen::VectorXd& torque) {
+void TorqueProxy::update(vector::dyn::Force& torque) {
     torque = *torque_;
 }

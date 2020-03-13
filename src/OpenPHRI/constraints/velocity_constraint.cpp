@@ -24,10 +24,11 @@
 namespace phri {
 
 VelocityConstraint::VelocityConstraint()
-    : maximum_velocity_(std::make_shared<double>(0.)) {
+    : maximum_velocity_(std::make_shared<scalar::Velocity>(0.)) {
 }
 
-VelocityConstraint::VelocityConstraint(std::shared_ptr<double> maximum_velocity)
+VelocityConstraint::VelocityConstraint(
+    std::shared_ptr<scalar::Velocity> maximum_velocity)
     : maximum_velocity_(maximum_velocity) {
     if (not maximum_velocity) {
         throw std::runtime_error(
@@ -35,18 +36,18 @@ VelocityConstraint::VelocityConstraint(std::shared_ptr<double> maximum_velocity)
     }
 }
 
-VelocityConstraint::VelocityConstraint(double& maximum_velocity)
+VelocityConstraint::VelocityConstraint(scalar::Velocity& maximum_velocity)
     : VelocityConstraint(
-          std::shared_ptr<double>(&maximum_velocity, [](auto p) {})) {
+          std::shared_ptr<scalar::Velocity>(&maximum_velocity, [](auto p) {})) {
 }
 
-VelocityConstraint::VelocityConstraint(const double& maximum_velocity)
-    : VelocityConstraint(std::make_shared<double>(maximum_velocity)) {
+VelocityConstraint::VelocityConstraint(const scalar::Velocity& maximum_velocity)
+    : VelocityConstraint(std::make_shared<scalar::Velocity>(maximum_velocity)) {
 }
 
-VelocityConstraint::VelocityConstraint(double&& maximum_velocity)
+VelocityConstraint::VelocityConstraint(scalar::Velocity&& maximum_velocity)
     : VelocityConstraint(
-          std::make_shared<double>(std::move(maximum_velocity))) {
+          std::make_shared<scalar::Velocity>(std::move(maximum_velocity))) {
 }
 
 double VelocityConstraint::compute() {
@@ -54,21 +55,22 @@ double VelocityConstraint::compute() {
     double v_norm = robot_->control().task().totalVelocity().linear().norm();
 
     if (v_norm > 0.) {
-        constraint = std::abs(*maximum_velocity_) / v_norm;
+        constraint = std::abs(maximum_velocity_->value()) / v_norm;
     }
 
     return constraint;
 }
 
-double& VelocityConstraint::maximumVelocity() {
+scalar::Velocity& VelocityConstraint::maximumVelocity() {
     return *maximum_velocity_;
 }
 
-double VelocityConstraint::maximumVelocity() const {
+scalar::Velocity VelocityConstraint::maximumVelocity() const {
     return *maximum_velocity_;
 }
 
-std::shared_ptr<double> VelocityConstraint::maximumVelocityPtr() const {
+std::shared_ptr<scalar::Velocity>
+VelocityConstraint::maximumVelocityPtr() const {
     return maximum_velocity_;
 }
 

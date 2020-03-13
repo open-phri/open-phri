@@ -29,6 +29,8 @@
 #include <OpenPHRI/definitions.h>
 #include <OpenPHRI/constraints/constraint.h>
 
+#include <physical_quantities/scalar/acceleration.h>
+
 namespace phri {
 
 //! \brief A phri::Constraint to limit the task space acceleration.
@@ -45,28 +47,30 @@ public:
     //! \param maximum_acceleration A shared pointer to the desired
     //! maximum acceleration (m/s²). Throws if the pointer is empty.
     explicit AccelerationConstraint(
-        std::shared_ptr<double> maximum_acceleration);
+        std::shared_ptr<scalar::Acceleration> maximum_acceleration);
 
     //! \brief Construct a new AccelerationConstraint object using the given
     //! referenced value
     //! \param maximum_acceleration A reference to the desired
     //! maximum acceleration (m/s²). Make sure that \p maximum_acceleration
     //! outlives the constraint
-    explicit AccelerationConstraint(double& maximum_acceleration);
+    explicit AccelerationConstraint(scalar::Acceleration& maximum_acceleration);
 
     //! \brief Construct a new AccelerationConstraint object using the given
     //! value
     //! \param maximum_acceleration The value of the desired maximum
     //! acceleration (m/s²). Use AccelerationConstraint::maximumAcceleration()
     //! to update the limit
-    explicit AccelerationConstraint(const double& maximum_acceleration);
+    explicit AccelerationConstraint(
+        const scalar::Acceleration& maximum_acceleration);
 
     //! \brief Construct a new AccelerationConstraint object using the given
     //! value
     //! \param maximum_acceleration The value of the desired maximum
     //! acceleration (m/s²). Use AccelerationConstraint::maximumAcceleration()
     //! to update the limit
-    explicit AccelerationConstraint(double&& maximum_acceleration);
+    explicit AccelerationConstraint(
+        scalar::Acceleration&& maximum_acceleration);
 
     //! \brief Default copy constructor
     AccelerationConstraint(const AccelerationConstraint&) = default;
@@ -91,21 +95,21 @@ public:
 
     //! \brief Read/write access the acceleration limit used by the constraint
     //! \return double& A reference to the acceleration limit
-    double& maximumAcceleration();
+    scalar::Acceleration& maximumAcceleration();
 
     //! \brief Read access the acceleration limit used by the constraint
     //! \return double The acceleration limit value
-    double maximumAcceleration() const;
+    scalar::Acceleration maximumAcceleration() const;
 
     //! \brief Access to the shared pointer holding the acceleration limit used
     //! by the constraint
     //! \return std::shared_ptr<double> A shared pointer to the acceleration
     //! limit
-    std::shared_ptr<double> maximumAccelerationPtr() const;
+    std::shared_ptr<scalar::Acceleration> maximumAccelerationPtr() const;
 
 private:
     //! \brief Shared pointer holding the acceleration limit.
-    std::shared_ptr<double> maximum_acceleration_;
+    std::shared_ptr<scalar::Acceleration> maximum_acceleration_;
 };
 
 } // namespace phri

@@ -24,11 +24,11 @@
 namespace phri {
 
 JointVelocityConstraint::JointVelocityConstraint()
-    : maximum_velocities_(std::make_shared<Eigen::VectorXd>()) {
+    : maximum_velocities_(std::make_shared<vector::dyn::Velocity>()) {
 }
 
 JointVelocityConstraint::JointVelocityConstraint(
-    std::shared_ptr<Eigen::VectorXd> maximum_velocities)
+    std::shared_ptr<vector::dyn::Velocity> maximum_velocities)
     : maximum_velocities_(maximum_velocities) {
     if (not maximum_velocities) {
         throw std::runtime_error(
@@ -37,21 +37,21 @@ JointVelocityConstraint::JointVelocityConstraint(
 }
 
 JointVelocityConstraint::JointVelocityConstraint(
-    Eigen::VectorXd& maximum_velocities)
-    : JointVelocityConstraint(std::shared_ptr<Eigen::VectorXd>(
+    vector::dyn::Velocity& maximum_velocities)
+    : JointVelocityConstraint(std::shared_ptr<vector::dyn::Velocity>(
           &maximum_velocities, [](auto p) {})) {
 }
 
 JointVelocityConstraint::JointVelocityConstraint(
-    const Eigen::VectorXd& maximum_velocities)
+    const vector::dyn::Velocity& maximum_velocities)
     : JointVelocityConstraint(
-          std::make_shared<Eigen::VectorXd>(maximum_velocities)) {
+          std::make_shared<vector::dyn::Velocity>(maximum_velocities)) {
 }
 
 JointVelocityConstraint::JointVelocityConstraint(
-    Eigen::VectorXd&& maximum_velocities)
-    : JointVelocityConstraint(
-          std::make_shared<Eigen::VectorXd>(std::move(maximum_velocities))) {
+    vector::dyn::Velocity&& maximum_velocities)
+    : JointVelocityConstraint(std::make_shared<vector::dyn::Velocity>(
+          std::move(maximum_velocities))) {
 }
 
 double JointVelocityConstraint::compute() {
@@ -74,15 +74,16 @@ double JointVelocityConstraint::compute() {
     return constraint;
 }
 
-Eigen::VectorXd& JointVelocityConstraint::maximumVelocities() {
+vector::dyn::Velocity& JointVelocityConstraint::maximumVelocities() {
     return *maximum_velocities_;
 }
 
-const Eigen::VectorXd& JointVelocityConstraint::maximumVelocities() const {
+const vector::dyn::Velocity&
+JointVelocityConstraint::maximumVelocities() const {
     return *maximum_velocities_;
 }
 
-std::shared_ptr<Eigen::VectorXd>
+std::shared_ptr<vector::dyn::Velocity>
 JointVelocityConstraint::maximumVelocitiesPtr() const {
     return maximum_velocities_;
 }

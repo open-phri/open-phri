@@ -528,9 +528,9 @@ public:
 protected:
     double computeConstraintValue();
     const spatial::Force& computeForceSum();
-    const Eigen::VectorXd& computeTorqueSum();
+    const vector::dyn::Force& computeTorqueSum();
     const spatial::Velocity& computeVelocitySum();
-    const Eigen::VectorXd& computeJointVelocitySum();
+    const vector::dyn::Velocity& computeJointVelocitySum();
     const Eigen::MatrixXd& computeJacobianInverse() const;
 
     ObjectCollection<StorageWrapper<Constraint>> constraints_;

@@ -31,6 +31,8 @@
 #include <OpenPHRI/definitions.h>
 #include <OpenPHRI/constraints/constraint.h>
 
+#include <physical_quantities/vector/force.h>
+
 namespace phri {
 
 /** @brief A constraint to stop the robot when a contant occurs.
@@ -55,8 +57,8 @@ public:
     //! \param deactivation_threshold A shared pointer to the deactivation
     //! threshold (N,Nm). Throws if the pointer is empty.
     JointEmergencyStopConstraint(
-        std::shared_ptr<Eigen::VectorXd> activation_threshold,
-        std::shared_ptr<Eigen::VectorXd> deactivation_threshold);
+        std::shared_ptr<vector::dyn::Force> activation_threshold,
+        std::shared_ptr<vector::dyn::Force> deactivation_threshold);
 
     //! \brief Construct a new JointEmergencyStopConstraint object using
     //! the given referenced values
@@ -65,24 +67,25 @@ public:
     //! \param deactivation_threshold A reference to the deactivation
     //! threshold (N,Nm). Make sure that \p deactivation_threshold outlives
     //! the constraint
-    JointEmergencyStopConstraint(Eigen::VectorXd& activation_threshold,
-                                 Eigen::VectorXd& deactivation_threshold);
+    JointEmergencyStopConstraint(vector::dyn::Force& activation_threshold,
+                                 vector::dyn::Force& deactivation_threshold);
 
     //! \brief Construct a new JointEmergencyStopConstraint object using
     //! the given values
     //! \param activation_threshold The value of the activation threshold (N,Nm)
     //! \param deactivation_threshold The value of the deactivation threshold
     //! (N,Nm)
-    JointEmergencyStopConstraint(const Eigen::VectorXd& activation_threshold,
-                                 const Eigen::VectorXd& deactivation_threshold);
+    JointEmergencyStopConstraint(
+        const vector::dyn::Force& activation_threshold,
+        const vector::dyn::Force& deactivation_threshold);
 
     //! \brief Construct a new JointEmergencyStopConstraint object using
     //! the given values
     //! \param activation_threshold The value of the activation threshold (N,Nm)
     //! \param deactivation_threshold The value of the deactivation threshold
     //! (N,Nm)
-    JointEmergencyStopConstraint(Eigen::VectorXd&& activation_threshold,
-                                 Eigen::VectorXd&& deactivation_threshold);
+    JointEmergencyStopConstraint(vector::dyn::Force&& activation_threshold,
+                                 vector::dyn::Force&& deactivation_threshold);
 
     //! \brief Default copy constructor
     JointEmergencyStopConstraint(const JointEmergencyStopConstraint&) = default;
@@ -103,20 +106,20 @@ public:
 
     virtual double compute() override;
 
-    Eigen::VectorXd& activationThreshold();
-    const Eigen::VectorXd& activationThreshold() const;
-    std::shared_ptr<Eigen::VectorXd> activationThresholdPtr() const;
+    vector::dyn::Force& activationThreshold();
+    const vector::dyn::Force& activationThreshold() const;
+    std::shared_ptr<vector::dyn::Force> activationThresholdPtr() const;
 
-    Eigen::VectorXd& deactivationThreshold();
-    const Eigen::VectorXd& deactivationThreshold() const;
-    std::shared_ptr<Eigen::VectorXd> deactivationThresholdPtr() const;
+    vector::dyn::Force& deactivationThreshold();
+    const vector::dyn::Force& deactivationThreshold() const;
+    std::shared_ptr<vector::dyn::Force> deactivationThresholdPtr() const;
 
 protected:
     virtual void setRobot(Robot const* robot) override;
 
 private:
-    std::shared_ptr<Eigen::VectorXd> activation_threshold_;
-    std::shared_ptr<Eigen::VectorXd> deactivation_threshold_;
+    std::shared_ptr<vector::dyn::Force> activation_threshold_;
+    std::shared_ptr<vector::dyn::Force> deactivation_threshold_;
 
     double previous_constraint_value_;
 };

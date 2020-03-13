@@ -234,15 +234,14 @@ void SafetyController::compute() {
 
     // Joint level damping control
     robot_.control().joints().velocity_command_ =
-        torque_sum.cwiseQuotient(robot_.control().joints().damping()) +
-        joint_velocity_sum;
+        torque_sum / robot_.control().joints().damping() + joint_velocity_sum;
 
     // Control point level damping control
     robot_.control().task().velocity_command_ =
         force_sum / robot_.control().task().damping() + velocity_sum;
 
     // Cumulative effect on the joint velocity of all inputs
-    robot_.control().joints().total_velocity_ =
+    robot_.control().joints().total_velocity_.value() =
         jacobian_inverse *
             (transformation * robot_.control().task().velocityCommand()) +
         robot_.control().joints().velocityCommand();
@@ -270,7 +269,7 @@ void SafetyController::compute() {
 
     // Scale the joint velocities to comply with the constraints
     robot_.joints().command_.velocity() =
-        constraint_value * robot_.control().joints().totalVelocity();
+        robot_.control().joints().totalVelocity() * constraint_value;
 
     // Scale the control point velocities to comply with the constraints
     robot_.task().command_.velocity() =
@@ -403,7 +402,7 @@ const spatial::Force& SafetyController::computeForceSum() {
     return sum;
 }
 
-const Eigen::VectorXd& SafetyController::computeTorqueSum() {
+const vector::dyn::Force& SafetyController::computeTorqueSum() {
     auto& sum = robot_.control().joints().force_sum_;
     sum.setZero();
 
@@ -429,7 +428,7 @@ const spatial::Velocity& SafetyController::computeVelocitySum() {
     return sum;
 }
 
-const Eigen::VectorXd& SafetyController::computeJointVelocitySum() {
+const vector::dyn::Velocity& SafetyController::computeJointVelocitySum() {
     auto& sum = robot_.control().joints().velocity_sum_;
     sum.setZero();
 

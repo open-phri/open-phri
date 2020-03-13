@@ -29,6 +29,8 @@
 #include <OpenPHRI/definitions.h>
 #include <OpenPHRI/constraints/constraint.h>
 
+#include <physical_quantities/vector/acceleration.h>
+
 namespace phri {
 
 //! \brief A phri::Constraint to limit the task space acceleration.
@@ -45,14 +47,15 @@ public:
     //! \param maximum_acceleration A shared pointer to the desired maximum
     //! acceleration(rad/s², m/s²).Throws if the pointer is empty.
     explicit JointAccelerationConstraint(
-        std::shared_ptr<Eigen::VectorXd> maximum_acceleration);
+        std::shared_ptr<vector::dyn::Acceleration> maximum_acceleration);
 
     //! \brief Construct a new JointAccelerationConstraint object using the
     //! given referenced value
     //! \param maximum_acceleration A reference to the desired maximum
     //! acceleration (rad/s², m/s²). Make sure that \p maximum_acceleration
     //! outlives the constraint
-    explicit JointAccelerationConstraint(Eigen::VectorXd& maximum_acceleration);
+    explicit JointAccelerationConstraint(
+        vector::dyn::Acceleration& maximum_acceleration);
 
     //! \brief Construct a new JointAccelerationConstraint object using the
     //! given value
@@ -60,7 +63,7 @@ public:
     //! acceleration (rad/s², m/s²). Use
     //! JointAccelerationConstraint::maximumAcceleration() to update the limit
     explicit JointAccelerationConstraint(
-        const Eigen::VectorXd& maximum_acceleration);
+        const vector::dyn::Acceleration& maximum_acceleration);
 
     //! \brief Construct a new JointAccelerationConstraint object using the
     //! given value
@@ -68,7 +71,7 @@ public:
     //! acceleration (rad/s², m/s²). Use
     //! JointAccelerationConstraint::maximumAcceleration() to update the limit
     explicit JointAccelerationConstraint(
-        Eigen::VectorXd&& maximum_acceleration);
+        vector::dyn::Acceleration&& maximum_acceleration);
 
     //! \brief Default copy constructor
     JointAccelerationConstraint(const JointAccelerationConstraint&) = default;
@@ -94,25 +97,25 @@ public:
     virtual double compute() override;
 
     //! \brief Read/write access the acceleration limit used by the constraint
-    //! \return Eigen::VectorXd& A reference to the acceleration limit
-    Eigen::VectorXd& maximumAcceleration();
+    //! \return vector::dyn::Acceleration& A reference to the acceleration limit
+    vector::dyn::Acceleration& maximumAcceleration();
 
     //! \brief Read access the acceleration limit used by the constraint
-    //! \return Eigen::VectorXd The acceleration limit value
-    Eigen::VectorXd maximumAcceleration() const;
+    //! \return vector::dyn::Acceleration The acceleration limit value
+    vector::dyn::Acceleration maximumAcceleration() const;
 
     //! \brief Access to the shared pointer holding the acceleration limit used
     //! by the constraint
-    //! \return std::shared_ptr<Eigen::VectorXd> A shared pointer to the
-    //! acceleration limit
-    std::shared_ptr<Eigen::VectorXd> maximumAccelerationPtr() const;
+    //! \return std::shared_ptr<vector::dyn::Acceleration> A shared pointer to
+    //! the acceleration limit
+    std::shared_ptr<vector::dyn::Acceleration> maximumAccelerationPtr() const;
 
 protected:
     virtual void setRobot(Robot const* robot) override;
 
 private:
     //! \brief Shared pointer holding the acceleration limit.
-    std::shared_ptr<Eigen::VectorXd> maximum_acceleration_;
+    std::shared_ptr<vector::dyn::Acceleration> maximum_acceleration_;
 };
 
 } // namespace phri

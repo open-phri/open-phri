@@ -24,11 +24,11 @@
 namespace phri {
 
 JointAccelerationConstraint::JointAccelerationConstraint()
-    : JointAccelerationConstraint(Eigen::VectorXd{}) {
+    : JointAccelerationConstraint(vector::dyn::Acceleration{}) {
 }
 
 JointAccelerationConstraint::JointAccelerationConstraint(
-    std::shared_ptr<Eigen::VectorXd> maximum_acceleration)
+    std::shared_ptr<vector::dyn::Acceleration> maximum_acceleration)
     : maximum_acceleration_(maximum_acceleration) {
     if (not maximum_acceleration) {
         throw std::runtime_error(
@@ -37,21 +37,21 @@ JointAccelerationConstraint::JointAccelerationConstraint(
 }
 
 JointAccelerationConstraint::JointAccelerationConstraint(
-    Eigen::VectorXd& maximum_acceleration)
-    : JointAccelerationConstraint(std::shared_ptr<Eigen::VectorXd>(
+    vector::dyn::Acceleration& maximum_acceleration)
+    : JointAccelerationConstraint(std::shared_ptr<vector::dyn::Acceleration>(
           &maximum_acceleration, [](auto p) {})) {
 }
 
 JointAccelerationConstraint::JointAccelerationConstraint(
-    const Eigen::VectorXd& maximum_acceleration)
+    const vector::dyn::Acceleration& maximum_acceleration)
     : JointAccelerationConstraint(
-          std::make_shared<Eigen::VectorXd>(maximum_acceleration)) {
+          std::make_shared<vector::dyn::Acceleration>(maximum_acceleration)) {
 }
 
 JointAccelerationConstraint::JointAccelerationConstraint(
-    Eigen::VectorXd&& maximum_acceleration)
-    : JointAccelerationConstraint(
-          std::make_shared<Eigen::VectorXd>(std::move(maximum_acceleration))) {
+    vector::dyn::Acceleration&& maximum_acceleration)
+    : JointAccelerationConstraint(std::make_shared<vector::dyn::Acceleration>(
+          std::move(maximum_acceleration))) {
 }
 
 double JointAccelerationConstraint::compute() {
@@ -73,15 +73,16 @@ double JointAccelerationConstraint::compute() {
     return constraint;
 }
 
-Eigen::VectorXd& JointAccelerationConstraint::maximumAcceleration() {
+vector::dyn::Acceleration& JointAccelerationConstraint::maximumAcceleration() {
     return *maximum_acceleration_;
 }
 
-Eigen::VectorXd JointAccelerationConstraint::maximumAcceleration() const {
+vector::dyn::Acceleration
+JointAccelerationConstraint::maximumAcceleration() const {
     return *maximum_acceleration_;
 }
 
-std::shared_ptr<Eigen::VectorXd>
+std::shared_ptr<vector::dyn::Acceleration>
 JointAccelerationConstraint::maximumAccelerationPtr() const {
     return maximum_acceleration_;
 }

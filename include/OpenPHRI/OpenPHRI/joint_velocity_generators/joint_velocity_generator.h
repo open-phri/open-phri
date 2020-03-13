@@ -32,6 +32,8 @@
 #include <OpenPHRI/robot.h>
 #include <OpenPHRI/fwd_decl.h>
 
+#include <physical_quantities/vector/velocity.h>
+
 namespace phri {
 
 //! \brief Base class for all joint_velocity generators.
@@ -59,11 +61,11 @@ public:
 
     //! \brief Compute the value associated with the joint_velocity generator.
     //! \return The joint_velocity generator's evaluated value.
-    Eigen::VectorXd compute();
+    const vector::dyn::Velocity& compute();
 
     //! \brief Call operator, shortcut for compute().
     //! \return The joint_velocity generator's evaluated value.
-    Eigen::VectorXd operator()();
+    const vector::dyn::Velocity& operator()();
 
 protected:
     friend class SafetyController;
@@ -71,7 +73,7 @@ protected:
     //! \brief Derived classed must implement this to provide their velocity
     //! output
     //! \param velocity A reference to the velocity to set
-    virtual void update(Eigen::VectorXd& velocity) = 0;
+    virtual void update(vector::dyn::Velocity& velocity) = 0;
 
     //! \brief Set the robot to work with.
     //! \param robot The robot.
@@ -84,7 +86,7 @@ protected:
 private:
     Robot const* robot_;
 
-    Eigen::VectorXd velocity_;
+    vector::dyn::Velocity velocity_;
 };
 
 } // namespace phri

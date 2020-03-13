@@ -24,14 +24,14 @@
 namespace phri {
 
 JointEmergencyStopConstraint::JointEmergencyStopConstraint()
-    : activation_threshold_(std::make_shared<Eigen::VectorXd>()),
-      deactivation_threshold_(std::make_shared<Eigen::VectorXd>()),
+    : activation_threshold_(std::make_shared<vector::dyn::Force>()),
+      deactivation_threshold_(std::make_shared<vector::dyn::Force>()),
       previous_constraint_value_(1.) {
 }
 
 JointEmergencyStopConstraint::JointEmergencyStopConstraint(
-    std::shared_ptr<Eigen::VectorXd> activation_threshold,
-    std::shared_ptr<Eigen::VectorXd> deactivation_threshold)
+    std::shared_ptr<vector::dyn::Force> activation_threshold,
+    std::shared_ptr<vector::dyn::Force> deactivation_threshold)
     : activation_threshold_(activation_threshold),
       deactivation_threshold_(deactivation_threshold),
       previous_constraint_value_(1.) {
@@ -42,29 +42,29 @@ JointEmergencyStopConstraint::JointEmergencyStopConstraint(
 }
 
 JointEmergencyStopConstraint::JointEmergencyStopConstraint(
-    Eigen::VectorXd& activation_threshold,
-    Eigen::VectorXd& deactivation_threshold)
+    vector::dyn::Force& activation_threshold,
+    vector::dyn::Force& deactivation_threshold)
     : JointEmergencyStopConstraint(
-          std::shared_ptr<Eigen::VectorXd>(&activation_threshold,
-                                           [](auto p) {}),
-          std::shared_ptr<Eigen::VectorXd>(&deactivation_threshold,
-                                           [](auto p) {})) {
+          std::shared_ptr<vector::dyn::Force>(&activation_threshold,
+                                              [](auto p) {}),
+          std::shared_ptr<vector::dyn::Force>(&deactivation_threshold,
+                                              [](auto p) {})) {
 }
 
 JointEmergencyStopConstraint::JointEmergencyStopConstraint(
-    const Eigen::VectorXd& activation_threshold,
-    const Eigen::VectorXd& deactivation_threshold)
+    const vector::dyn::Force& activation_threshold,
+    const vector::dyn::Force& deactivation_threshold)
     : JointEmergencyStopConstraint(
-          std::make_shared<Eigen::VectorXd>(activation_threshold),
-          std::make_shared<Eigen::VectorXd>(deactivation_threshold)) {
+          std::make_shared<vector::dyn::Force>(activation_threshold),
+          std::make_shared<vector::dyn::Force>(deactivation_threshold)) {
 }
 
 JointEmergencyStopConstraint::JointEmergencyStopConstraint(
-    Eigen::VectorXd&& activation_threshold,
-    Eigen::VectorXd&& deactivation_threshold)
+    vector::dyn::Force&& activation_threshold,
+    vector::dyn::Force&& deactivation_threshold)
     : JointEmergencyStopConstraint(
-          std::make_shared<Eigen::VectorXd>(std::move(activation_threshold)),
-          std::make_shared<Eigen::VectorXd>(
+          std::make_shared<vector::dyn::Force>(std::move(activation_threshold)),
+          std::make_shared<vector::dyn::Force>(
               std::move(deactivation_threshold))) {
 }
 
@@ -108,30 +108,30 @@ double JointEmergencyStopConstraint::compute() {
     return constraint;
 }
 
-Eigen::VectorXd& JointEmergencyStopConstraint::activationThreshold() {
+vector::dyn::Force& JointEmergencyStopConstraint::activationThreshold() {
     return *activation_threshold_;
 }
 
-const Eigen::VectorXd&
+const vector::dyn::Force&
 JointEmergencyStopConstraint::activationThreshold() const {
     return *activation_threshold_;
 }
 
-std::shared_ptr<Eigen::VectorXd>
+std::shared_ptr<vector::dyn::Force>
 JointEmergencyStopConstraint::activationThresholdPtr() const {
     return activation_threshold_;
 }
 
-Eigen::VectorXd& JointEmergencyStopConstraint::deactivationThreshold() {
+vector::dyn::Force& JointEmergencyStopConstraint::deactivationThreshold() {
     return *deactivation_threshold_;
 }
 
-const Eigen::VectorXd&
+const vector::dyn::Force&
 JointEmergencyStopConstraint::deactivationThreshold() const {
     return *deactivation_threshold_;
 }
 
-std::shared_ptr<Eigen::VectorXd>
+std::shared_ptr<vector::dyn::Force>
 JointEmergencyStopConstraint::deactivationThresholdPtr() const {
     return deactivation_threshold_;
 }

@@ -23,11 +23,12 @@
 
 namespace phri {
 
-AccelerationConstraint::AccelerationConstraint() : AccelerationConstraint(0.) {
+AccelerationConstraint::AccelerationConstraint()
+    : AccelerationConstraint(scalar::Acceleration{0.}) {
 }
 
 AccelerationConstraint::AccelerationConstraint(
-    std::shared_ptr<double> maximum_acceleration)
+    std::shared_ptr<scalar::Acceleration> maximum_acceleration)
     : maximum_acceleration_(maximum_acceleration) {
     if (not maximum_acceleration) {
         throw std::runtime_error(
@@ -35,19 +36,22 @@ AccelerationConstraint::AccelerationConstraint(
     }
 }
 
-AccelerationConstraint::AccelerationConstraint(double& maximum_acceleration)
-    : AccelerationConstraint(
-          std::shared_ptr<double>(&maximum_acceleration, [](auto p) {})) {
+AccelerationConstraint::AccelerationConstraint(
+    scalar::Acceleration& maximum_acceleration)
+    : AccelerationConstraint(std::shared_ptr<scalar::Acceleration>(
+          &maximum_acceleration, [](auto p) {})) {
 }
 
 AccelerationConstraint::AccelerationConstraint(
-    const double& maximum_acceleration)
-    : AccelerationConstraint(std::make_shared<double>(maximum_acceleration)) {
+    const scalar::Acceleration& maximum_acceleration)
+    : AccelerationConstraint(
+          std::make_shared<scalar::Acceleration>(maximum_acceleration)) {
 }
 
-AccelerationConstraint::AccelerationConstraint(double&& maximum_acceleration)
-    : AccelerationConstraint(
-          std::make_shared<double>(std::move(maximum_acceleration))) {
+AccelerationConstraint::AccelerationConstraint(
+    scalar::Acceleration&& maximum_acceleration)
+    : AccelerationConstraint(std::make_shared<scalar::Acceleration>(
+          std::move(maximum_acceleration))) {
 }
 
 double AccelerationConstraint::compute() {
@@ -57,7 +61,7 @@ double AccelerationConstraint::compute() {
     if (v_norm > 0.) {
         double prev_v_norm =
             robot_->task().command().velocity().linear().norm();
-        double vmax = prev_v_norm + std::abs(*maximum_acceleration_) *
+        double vmax = prev_v_norm + std::abs(maximum_acceleration_->value()) *
                                         robot_->control().timeStep();
         constraint = vmax / v_norm;
     }
@@ -65,15 +69,16 @@ double AccelerationConstraint::compute() {
     return constraint;
 }
 
-double& AccelerationConstraint::maximumAcceleration() {
+scalar::Acceleration& AccelerationConstraint::maximumAcceleration() {
     return *maximum_acceleration_;
 }
 
-double AccelerationConstraint::maximumAcceleration() const {
+scalar::Acceleration AccelerationConstraint::maximumAcceleration() const {
     return *maximum_acceleration_;
 }
 
-std::shared_ptr<double> AccelerationConstraint::maximumAccelerationPtr() const {
+std::shared_ptr<scalar::Acceleration>
+AccelerationConstraint::maximumAccelerationPtr() const {
     return maximum_acceleration_;
 }
 

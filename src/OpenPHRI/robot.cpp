@@ -41,31 +41,31 @@ void Robot::JointData::resize(size_t joint_count) {
     force().setZero();
 }
 
-Eigen::VectorXd& Robot::JointData::position() {
+vector::dyn::Position& Robot::JointData::position() {
     return position_;
 }
-const Eigen::VectorXd& Robot::JointData::position() const {
+const vector::dyn::Position& Robot::JointData::position() const {
     return position_;
 }
 
-Eigen::VectorXd& Robot::JointData::velocity() {
+vector::dyn::Velocity& Robot::JointData::velocity() {
     return velocity_;
 }
-const Eigen::VectorXd& Robot::JointData::velocity() const {
+const vector::dyn::Velocity& Robot::JointData::velocity() const {
     return velocity_;
 }
 
-Eigen::VectorXd& Robot::JointData::acceleration() {
+vector::dyn::Acceleration& Robot::JointData::acceleration() {
     return acceleration_;
 }
-const Eigen::VectorXd& Robot::JointData::acceleration() const {
+const vector::dyn::Acceleration& Robot::JointData::acceleration() const {
     return acceleration_;
 }
 
-Eigen::VectorXd& Robot::JointData::force() {
+vector::dyn::Force& Robot::JointData::force() {
     return force_;
 }
-const Eigen::VectorXd& Robot::JointData::force() const {
+const vector::dyn::Force& Robot::JointData::force() const {
     return force_;
 }
 
@@ -88,19 +88,19 @@ void Robot::JointLimits::resize(size_t joint_count) {
     max_force_.setConstant(std::numeric_limits<double>::infinity());
 }
 
-Eigen::Ref<const Eigen::VectorXd> Robot::JointLimits::minPosition() const {
+vector::dyn::Position Robot::JointLimits::minPosition() const {
     return min_position_ * safety_factor;
 }
-Eigen::Ref<const Eigen::VectorXd> Robot::JointLimits::maxPosition() const {
+vector::dyn::Position Robot::JointLimits::maxPosition() const {
     return max_position_ * safety_factor;
 }
-Eigen::Ref<const Eigen::VectorXd> Robot::JointLimits::maxVelocity() const {
+vector::dyn::Velocity Robot::JointLimits::maxVelocity() const {
     return max_velocity_ * safety_factor;
 }
-Eigen::Ref<const Eigen::VectorXd> Robot::JointLimits::maxAcceleration() const {
+vector::dyn::Acceleration Robot::JointLimits::maxAcceleration() const {
     return max_acceleration_ * safety_factor;
 }
-Eigen::Ref<const Eigen::VectorXd> Robot::JointLimits::maxForce() const {
+vector::dyn::Force Robot::JointLimits::maxForce() const {
     return max_force_ * safety_factor;
 }
 
@@ -332,30 +332,31 @@ void Robot::ControlData::Joints::resize(size_t joint_count) {
     total_force_.setZero();
 }
 
-Eigen::VectorXd& Robot::ControlData::Joints::damping() {
+vector::dyn::Damping& Robot::ControlData::Joints::damping() {
     return damping_;
 }
-const Eigen::VectorXd& Robot::ControlData::Joints::damping() const {
+const vector::dyn::Damping& Robot::ControlData::Joints::damping() const {
     return damping_;
 }
 
-const Eigen::VectorXd& Robot::ControlData::Joints::velocitySum() const {
+const vector::dyn::Velocity& Robot::ControlData::Joints::velocitySum() const {
     return velocity_sum_;
 }
 
-const Eigen::VectorXd& Robot::ControlData::Joints::forceSum() const {
+const vector::dyn::Force& Robot::ControlData::Joints::forceSum() const {
     return force_sum_;
 }
 
-const Eigen::VectorXd& Robot::ControlData::Joints::velocityCommand() const {
+const vector::dyn::Velocity&
+Robot::ControlData::Joints::velocityCommand() const {
     return velocity_command_;
 }
 
-const Eigen::VectorXd& Robot::ControlData::Joints::totalVelocity() const {
+const vector::dyn::Velocity& Robot::ControlData::Joints::totalVelocity() const {
     return total_velocity_;
 }
 
-const Eigen::VectorXd& Robot::ControlData::Joints::totalForce() const {
+const vector::dyn::Force& Robot::ControlData::Joints::totalForce() const {
     return total_force_;
 }
 

@@ -29,6 +29,8 @@
 #include <OpenPHRI/definitions.h>
 #include <OpenPHRI/constraints/constraint.h>
 
+#include <physical_quantities/scalar/power.h>
+
 namespace phri {
 
 //! \brief A constraint to limit the exchanged power.
@@ -48,28 +50,28 @@ public:
     //! pointed value
     //! \param maximum_power A shared pointer to the desired
     //! maximum power (W). Throws if the pointer is empty.
-    explicit PowerConstraint(std::shared_ptr<double> maximum_power);
+    explicit PowerConstraint(std::shared_ptr<scalar::Power> maximum_power);
 
     //! \brief Construct a new PowerConstraint object using the given
     //! referenced value
     //! \param maximum_power A reference to the desired
     //! maximum power (W). Make sure that \p maximum_power
     //! outlives the constraint
-    explicit PowerConstraint(double& maximum_power);
+    explicit PowerConstraint(scalar::Power& maximum_power);
 
     //! \brief Construct a new PowerConstraint object using the given
     //! value
     //! \param maximum_power The value of the desired maximum
     //! power (W). Use PowerConstraint::maximumPower()
     //! to update the limit
-    explicit PowerConstraint(const double& maximum_power);
+    explicit PowerConstraint(const scalar::Power& maximum_power);
 
     //! \brief Construct a new PowerConstraint object using the given
     //! value
     //! \param maximum_power The value of the desired maximum
     //! power (W). Use PowerConstraint::maximumPower()
     //! to update the limit
-    explicit PowerConstraint(double&& maximum_power);
+    explicit PowerConstraint(scalar::Power&& maximum_power);
 
     //! \brief Default copy constructor
     PowerConstraint(const PowerConstraint&) = default;
@@ -94,32 +96,32 @@ public:
 
     //! \brief Read/write access the power limit used by the constraint
     //! \return double& A reference to the power limit
-    double& maximumPower();
+    scalar::Power& maximumPower();
 
     //! \brief Read access the power limit used by the constraint
     //! \return double The power limit value
-    double maximumPower() const;
+    scalar::Power maximumPower() const;
 
     //! \brief Access to the shared pointer holding the power limit used
     //! by the constraint
     //! \return std::shared_ptr<double> A shared pointer to the power
     //! limit
-    std::shared_ptr<double> maximumPowerPtr() const;
+    std::shared_ptr<scalar::Power> maximumPowerPtr() const;
 
     //! \brief Read access the current exchanged power
     //! \return double The exchanged power
-    double power() const;
+    scalar::Power power() const;
 
     //! \brief Access to the shared pointer holding the current exchanged power
     //! \return std::shared_ptr<double> A shared pointer to the exchanged power
-    std::shared_ptr<const double> powerPtr() const;
+    std::shared_ptr<const scalar::Power> powerPtr() const;
 
 private:
     //! \brief Shared pointer holding the power limit.
-    std::shared_ptr<double> maximum_power_;
+    std::shared_ptr<scalar::Power> maximum_power_;
 
     //! \brief Shared pointer the currently exchanged power.
-    std::shared_ptr<double> power_;
+    std::shared_ptr<scalar::Power> power_;
 };
 
 } // namespace phri

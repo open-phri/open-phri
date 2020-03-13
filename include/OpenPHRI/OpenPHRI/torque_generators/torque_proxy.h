@@ -41,13 +41,13 @@ class TorqueProxy : public TorqueGenerator {
 public:
     /** @brief Construct a torque proxy given an externally managed torque
      */
-    explicit TorqueProxy(std::shared_ptr<const Eigen::VectorXd> torque);
+    explicit TorqueProxy(std::shared_ptr<const vector::dyn::Force> torque);
     virtual ~TorqueProxy() = default;
 
 protected:
-    virtual void update(Eigen::VectorXd& torque) override;
+    virtual void update(vector::dyn::Force& torque) override;
 
-    std::shared_ptr<const Eigen::VectorXd> torque_;
+    std::shared_ptr<const vector::dyn::Force> torque_;
 };
 
 using TorqueProxyPtr = std::shared_ptr<TorqueProxy>;

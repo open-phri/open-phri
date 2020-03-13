@@ -45,23 +45,23 @@ public:
     //! \brief Construct a new NullSpaceMotion object using the given
     //! pointed value
     //! \param velocity The velocity to forward
-    explicit NullSpaceMotion(std::shared_ptr<Eigen::VectorXd> velocity);
+    explicit NullSpaceMotion(std::shared_ptr<vector::dyn::Velocity> velocity);
 
     //! \brief Construct a new NullSpaceMotion object using the given
     //! referenced value
     //! \param velocity The velocity to forward. Make sure that \p velocity
     //! outlives the generator
-    explicit NullSpaceMotion(Eigen::VectorXd& velocity);
+    explicit NullSpaceMotion(vector::dyn::Velocity& velocity);
 
     //! \brief Construct a new NullSpaceMotion object using the given
     //! value
     //! \param velocity The velocity to forward
-    explicit NullSpaceMotion(const Eigen::VectorXd& velocity);
+    explicit NullSpaceMotion(const vector::dyn::Velocity& velocity);
 
     //! \brief Construct a new NullSpaceMotion object using the given
     //! value
     //! \param velocity The velocity to forward
-    explicit NullSpaceMotion(Eigen::VectorXd&& velocity);
+    explicit NullSpaceMotion(vector::dyn::Velocity&& velocity);
 
     //! \brief Default copy constructor
     NullSpaceMotion(const NullSpaceMotion&) = default;
@@ -82,24 +82,24 @@ public:
 
     //! \brief Read/write access the velocity used by the generator
     //! \return double& A reference to the velocity
-    Eigen::VectorXd& velocity();
+    vector::dyn::Velocity& velocity();
 
     //! \brief Read access the velocity used by the generator
     //! \return double The velocity value
-    Eigen::VectorXd velocity() const;
+    const vector::dyn::Velocity& velocity() const;
 
     //! \brief Access to the shared pointer holding the velocity used
     //! by the generator
     //! \return std::shared_ptr<double> A shared pointer to the forwarded
     //! velocity
-    std::shared_ptr<Eigen::VectorXd> velocityPtr() const;
+    std::shared_ptr<vector::dyn::Velocity> velocityPtr() const;
 
 protected:
-    virtual void update(Eigen::VectorXd& velocity) override;
+    virtual void update(vector::dyn::Velocity& velocity) override;
 
     virtual void setRobot(Robot const* robot) override;
 
-    std::shared_ptr<Eigen::VectorXd> joint_velocity_;
+    std::shared_ptr<vector::dyn::Velocity> joint_velocity_;
     Eigen::MatrixXd null_space_projector_;
     Eigen::MatrixXd identity_;
 };

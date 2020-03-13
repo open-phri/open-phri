@@ -23,29 +23,29 @@
 namespace phri {
 
 JointVelocityProxy::JointVelocityProxy()
-    : JointVelocityProxy(Eigen::VectorXd{}) {
+    : JointVelocityProxy(vector::dyn::Velocity{}) {
 }
 
 JointVelocityProxy::JointVelocityProxy(
-    std::shared_ptr<Eigen::VectorXd> velocity)
+    std::shared_ptr<vector::dyn::Velocity> velocity)
     : joint_velocity_(velocity) {
 }
 
-JointVelocityProxy::JointVelocityProxy(Eigen::VectorXd& velocity)
+JointVelocityProxy::JointVelocityProxy(vector::dyn::Velocity& velocity)
     : JointVelocityProxy(
-          std::shared_ptr<Eigen::VectorXd>(&velocity, [](auto p) {})) {
+          std::shared_ptr<vector::dyn::Velocity>(&velocity, [](auto p) {})) {
 }
 
-JointVelocityProxy::JointVelocityProxy(const Eigen::VectorXd& velocity)
-    : JointVelocityProxy(std::make_shared<Eigen::VectorXd>(velocity)) {
+JointVelocityProxy::JointVelocityProxy(const vector::dyn::Velocity& velocity)
+    : JointVelocityProxy(std::make_shared<vector::dyn::Velocity>(velocity)) {
 }
 
-JointVelocityProxy::JointVelocityProxy(Eigen::VectorXd&& velocity)
+JointVelocityProxy::JointVelocityProxy(vector::dyn::Velocity&& velocity)
     : JointVelocityProxy(
-          std::make_shared<Eigen::VectorXd>(std::move(velocity))) {
+          std::make_shared<vector::dyn::Velocity>(std::move(velocity))) {
 }
 
-void JointVelocityProxy::update(Eigen::VectorXd& velocity) {
+void JointVelocityProxy::update(vector::dyn::Velocity& velocity) {
     if (generator_) {
         velocity = generator_();
     } else {
@@ -53,15 +53,15 @@ void JointVelocityProxy::update(Eigen::VectorXd& velocity) {
     }
 }
 
-Eigen::VectorXd& JointVelocityProxy::velocity() {
+vector::dyn::Velocity& JointVelocityProxy::velocity() {
     return *joint_velocity_;
 }
 
-Eigen::VectorXd JointVelocityProxy::velocity() const {
+vector::dyn::Velocity JointVelocityProxy::velocity() const {
     return *joint_velocity_;
 }
 
-std::shared_ptr<Eigen::VectorXd> JointVelocityProxy::velocityPtr() const {
+std::shared_ptr<vector::dyn::Velocity> JointVelocityProxy::velocityPtr() const {
     return joint_velocity_;
 }
 

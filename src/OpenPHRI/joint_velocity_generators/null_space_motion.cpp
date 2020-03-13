@@ -23,41 +23,43 @@
 
 namespace phri {
 
-NullSpaceMotion::NullSpaceMotion() : NullSpaceMotion(Eigen::VectorXd{}) {
+NullSpaceMotion::NullSpaceMotion() : NullSpaceMotion(vector::dyn::Velocity{}) {
 }
 
-NullSpaceMotion::NullSpaceMotion(std::shared_ptr<Eigen::VectorXd> velocity)
+NullSpaceMotion::NullSpaceMotion(
+    std::shared_ptr<vector::dyn::Velocity> velocity)
     : joint_velocity_(velocity) {
 }
 
-NullSpaceMotion::NullSpaceMotion(Eigen::VectorXd& velocity)
+NullSpaceMotion::NullSpaceMotion(vector::dyn::Velocity& velocity)
     : NullSpaceMotion(
-          std::shared_ptr<Eigen::VectorXd>(&velocity, [](auto p) {})) {
+          std::shared_ptr<vector::dyn::Velocity>(&velocity, [](auto p) {})) {
 }
 
-NullSpaceMotion::NullSpaceMotion(const Eigen::VectorXd& velocity)
-    : NullSpaceMotion(std::make_shared<Eigen::VectorXd>(velocity)) {
+NullSpaceMotion::NullSpaceMotion(const vector::dyn::Velocity& velocity)
+    : NullSpaceMotion(std::make_shared<vector::dyn::Velocity>(velocity)) {
 }
 
-NullSpaceMotion::NullSpaceMotion(Eigen::VectorXd&& velocity)
-    : NullSpaceMotion(std::make_shared<Eigen::VectorXd>(std::move(velocity))) {
+NullSpaceMotion::NullSpaceMotion(vector::dyn::Velocity&& velocity)
+    : NullSpaceMotion(
+          std::make_shared<vector::dyn::Velocity>(std::move(velocity))) {
 }
 
-void NullSpaceMotion::update(Eigen::VectorXd& joint_velocity) {
+void NullSpaceMotion::update(vector::dyn::Velocity& joint_velocity) {
     null_space_projector_ = identity_ - robot().control().jacobianInverse() *
                                             robot().control().jacobian();
-    joint_velocity = null_space_projector_ * velocity();
+    joint_velocity.value() = null_space_projector_ * velocity();
 }
 
-Eigen::VectorXd& NullSpaceMotion::velocity() {
+vector::dyn::Velocity& NullSpaceMotion::velocity() {
     return *joint_velocity_;
 }
 
-Eigen::VectorXd NullSpaceMotion::velocity() const {
+const vector::dyn::Velocity& NullSpaceMotion::velocity() const {
     return *joint_velocity_;
 }
 
-std::shared_ptr<Eigen::VectorXd> NullSpaceMotion::velocityPtr() const {
+std::shared_ptr<vector::dyn::Velocity> NullSpaceMotion::velocityPtr() const {
     return joint_velocity_;
 }
 

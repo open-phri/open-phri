@@ -30,6 +30,8 @@
 #include <OpenPHRI/robot.h>
 #include <OpenPHRI/fwd_decl.h>
 
+#include <physical_quantities/vector/force.h>
+
 namespace phri {
 
 //! \brief Base class for all torque generators.
@@ -44,26 +46,28 @@ public:
      * @brief Compute the value associated with the torque generator.
      * @return The torque generator's evaluated value.
      */
-    Eigen::VectorXd compute();
+    const vector::dyn::Force& compute();
 
     /**
      * @brief Call operator, shortcut for compute().
      * @return The torque generator's evaluated value.
      */
-    Eigen::VectorXd operator()();
+    const vector::dyn::Force& operator()();
 
 protected:
     friend class SafetyController;
 
-    virtual void update(Eigen::VectorXd& torque) = 0;
+    virtual void update(vector::dyn::Force& torque) = 0;
 
     /**
      * @brief Set the robot to work with.
      * @param robot The robot.
      */
-    void setRobot(Robot const* robot);
+    virtual void setRobot(Robot const* robot);
 
     Robot const* robot_;
+
+    vector::dyn::Force force_;
 };
 
 using TorqueGeneratorPtr = std::shared_ptr<TorqueGenerator>;

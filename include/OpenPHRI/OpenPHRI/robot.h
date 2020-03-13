@@ -36,6 +36,11 @@
 #include <physical_quantities/spatial/force.h>
 #include <physical_quantities/spatial/impedance/damping.h>
 #include <physical_quantities/spatial/transformation.h>
+#include <physical_quantities/vector/position.h>
+#include <physical_quantities/vector/velocity.h>
+#include <physical_quantities/vector/acceleration.h>
+#include <physical_quantities/vector/force.h>
+#include <physical_quantities/vector/impedance/damping.h>
 
 namespace phri {
 
@@ -58,23 +63,26 @@ public:
         void resize(size_t joint_count);
 
         //! \brief Joints position (rad or m)
-        Eigen::VectorXd& position();
-        const Eigen::VectorXd& position() const;
+        vector::dyn::Position& position();
+        const vector::dyn::Position& position() const;
+
         //! \brief Joints velocity (rad/s or m/s)
-        Eigen::VectorXd& velocity();
-        const Eigen::VectorXd& velocity() const;
+        vector::dyn::Velocity& velocity();
+        const vector::dyn::Velocity& velocity() const;
+
         //! \brief Joints acceleration (rad/s² or m/s²)
-        Eigen::VectorXd& acceleration();
-        const Eigen::VectorXd& acceleration() const;
+        vector::dyn::Acceleration& acceleration();
+        const vector::dyn::Acceleration& acceleration() const;
+
         //! \brief Joints force (Nm or N)
-        Eigen::VectorXd& force();
-        const Eigen::VectorXd& force() const;
+        vector::dyn::Force& force();
+        const vector::dyn::Force& force() const;
 
     private:
-        Eigen::VectorXd position_;
-        Eigen::VectorXd velocity_;
-        Eigen::VectorXd acceleration_;
-        Eigen::VectorXd force_;
+        vector::dyn::Position position_;
+        vector::dyn::Velocity velocity_;
+        vector::dyn::Acceleration acceleration_;
+        vector::dyn::Force force_;
     };
 
     //! \brief Holds joints mechanical limits
@@ -92,25 +100,30 @@ public:
         void resize(size_t joint_count);
 
         //! \brief Joints minimum position (rad or m)
-        Eigen::Ref<const Eigen::VectorXd> minPosition() const;
+        vector::dyn::Position minPosition() const;
+
         //! \brief Joints maximum position (rad or m)
-        Eigen::Ref<const Eigen::VectorXd> maxPosition() const;
+        vector::dyn::Position maxPosition() const;
+
         //! \brief Joints minimum velocity (rad/s or m/s)
-        Eigen::Ref<const Eigen::VectorXd> maxVelocity() const;
+        vector::dyn::Velocity maxVelocity() const;
+
         //! \brief Joints minimum acceleration (rad/s² or m/s²)
-        Eigen::Ref<const Eigen::VectorXd> maxAcceleration() const;
+        vector::dyn::Acceleration maxAcceleration() const;
+
         //! \brief Joints minimum force (Nm or N)
-        Eigen::Ref<const Eigen::VectorXd> maxForce() const;
+        vector::dyn::Force maxForce() const;
 
         mutable double safety_factor;
 
     private:
         friend class RobotModel;
-        Eigen::VectorXd min_position_;
-        Eigen::VectorXd max_position_;
-        Eigen::VectorXd max_velocity_;
-        Eigen::VectorXd max_acceleration_;
-        Eigen::VectorXd max_force_;
+
+        vector::dyn::Position min_position_;
+        vector::dyn::Position max_position_;
+        vector::dyn::Velocity max_velocity_;
+        vector::dyn::Acceleration max_acceleration_;
+        vector::dyn::Force max_force_;
     };
 
     //! \brief Pack all joint related data (state, target, command, limits)
@@ -274,34 +287,34 @@ public:
 
             //! \brief Damping matrix used by the joint-level damping
             //! control
-            Eigen::VectorXd& damping();
-            const Eigen::VectorXd& damping() const;
+            vector::dyn::Damping& damping();
+            const vector::dyn::Damping& damping() const;
             //! \brief Sum of all joint velocity inputs
-            const Eigen::VectorXd& velocitySum() const;
+            const vector::dyn::Velocity& velocitySum() const;
 
             //! \brief Sum of all joint force inputs
-            const Eigen::VectorXd& forceSum() const;
+            const vector::dyn::Force& forceSum() const;
 
             //! \brief Output of the joint-level admittance controller
-            const Eigen::VectorXd& velocityCommand() const;
+            const vector::dyn::Velocity& velocityCommand() const;
 
             //! \brief Cumulative effect on the joint velocity of all inputs.
             //! \details Same as joints.command.velocity but without the scaling
             //! factor.
-            const Eigen::VectorXd& totalVelocity() const;
+            const vector::dyn::Velocity& totalVelocity() const;
 
             //! \brief Cumulative effect of both joint torque and control point
             //! force inputs.
-            const Eigen::VectorXd& totalForce() const;
+            const vector::dyn::Force& totalForce() const;
 
         private:
             friend class SafetyController;
-            Eigen::VectorXd damping_;
-            Eigen::VectorXd velocity_sum_;
-            Eigen::VectorXd force_sum_;
-            Eigen::VectorXd velocity_command_;
-            Eigen::VectorXd total_velocity_;
-            Eigen::VectorXd total_force_;
+            vector::dyn::Damping damping_;
+            vector::dyn::Velocity velocity_sum_;
+            vector::dyn::Force force_sum_;
+            vector::dyn::Velocity velocity_command_;
+            vector::dyn::Velocity total_velocity_;
+            vector::dyn::Force total_force_;
         };
 
         //! \brief Holds task control related data
