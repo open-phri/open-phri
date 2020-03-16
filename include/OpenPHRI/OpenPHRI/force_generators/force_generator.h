@@ -43,8 +43,8 @@ public:
     // ForceGenerator(spatial::Frame frame);
     ForceGenerator() = default;
 
-    //! \brief Default copy constructor
-    ForceGenerator(const ForceGenerator&) = default;
+    //! \brief Delete copy constructor to avoid slicing
+    ForceGenerator(const ForceGenerator&) = delete;
 
     //! \brief Default move constructor
     ForceGenerator(ForceGenerator&&) = default;
@@ -52,8 +52,8 @@ public:
     //! \brief Default virtual destructor
     virtual ~ForceGenerator() = default;
 
-    //! \brief Default copy operator
-    ForceGenerator& operator=(const ForceGenerator&) = default;
+    //! \brief Delete copy operator to avoid slicing
+    ForceGenerator& operator=(const ForceGenerator&) = delete;
 
     //! \brief Default move operator
     ForceGenerator& operator=(ForceGenerator&&) = default;

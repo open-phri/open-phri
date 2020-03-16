@@ -73,23 +73,6 @@ public:
     //! to update the limit
     explicit PowerConstraint(scalar::Power&& maximum_power);
 
-    //! \brief Default copy constructor
-    PowerConstraint(const PowerConstraint&) = default;
-
-    //! \brief Default move constructor
-    PowerConstraint(PowerConstraint&&) = default;
-
-    //! \brief Default virtual destructor
-    //! \details If \ref PowerConstraint::maximum_power_ was
-    //! created using an rvalue reference, the pointed memory won't be released
-    virtual ~PowerConstraint() = default;
-
-    //! \brief Default copy operator
-    PowerConstraint& operator=(const PowerConstraint&) = default;
-
-    //! \brief Default move operator
-    PowerConstraint& operator=(PowerConstraint&&) = default;
-
     //! \brief Compute the power constraint based on the robot state
     //! \return double The constraint value [0,1]
     virtual double compute() override;

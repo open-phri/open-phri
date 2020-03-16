@@ -42,7 +42,6 @@ public:
     /** @brief Construct a torque proxy given an externally managed torque
      */
     explicit TorqueProxy(std::shared_ptr<const vector::dyn::Force> torque);
-    virtual ~TorqueProxy() = default;
 
 protected:
     virtual void update(vector::dyn::Force& torque) override;

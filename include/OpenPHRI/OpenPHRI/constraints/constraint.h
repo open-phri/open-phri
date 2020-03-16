@@ -43,8 +43,8 @@ public:
     //! \brief Default constructor
     Constraint() = default;
 
-    //! \brief Default copy constructor
-    Constraint(const Constraint&) = default;
+    //! \brief Delete copy constructor to avoid slicing
+    Constraint(const Constraint&) = delete;
 
     //! \brief Default move constructor
     Constraint(Constraint&&) = default;
@@ -52,8 +52,8 @@ public:
     //! \brief Default virtual destructor
     virtual ~Constraint() = default;
 
-    //! \brief Default copy operator
-    Constraint& operator=(const Constraint&) = default;
+    //! \brief Delete copy operator to avoid slicing
+    Constraint& operator=(const Constraint&) = delete;
 
     //! \brief Default move operator
     Constraint& operator=(Constraint&&) = default;

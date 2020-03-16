@@ -72,23 +72,6 @@ public:
     explicit AccelerationConstraint(
         scalar::Acceleration&& maximum_acceleration);
 
-    //! \brief Default copy constructor
-    AccelerationConstraint(const AccelerationConstraint&) = default;
-
-    //! \brief Default move constructor
-    AccelerationConstraint(AccelerationConstraint&&) = default;
-
-    //! \brief Default virtual destructor
-    //! \details If \ref AccelerationConstraint::maximum_acceleration_ was
-    //! created using an rvalue reference, the pointed memory won't be released
-    virtual ~AccelerationConstraint() = default;
-
-    //! \brief Default copy operator
-    AccelerationConstraint& operator=(const AccelerationConstraint&) = default;
-
-    //! \brief Default move operator
-    AccelerationConstraint& operator=(AccelerationConstraint&&) = default;
-
     //! \brief Compute the acceleration constraint based on the robot state
     //! \return double The constraint value [0,1]
     virtual double compute() override;

@@ -41,23 +41,6 @@ public:
     //! \details Equivalent to a ForceProxy on phri::Robot.task.state.wrench
     ExternalForce() = default;
 
-    // ExternalForce(spatial::Frame frame);
-
-    //! \brief Default copy constructor
-    ExternalForce(const ExternalForce&) = default;
-
-    //! \brief Default move constructor
-    ExternalForce(ExternalForce&&) = default;
-
-    //! \brief Default virtual destructor
-    virtual ~ExternalForce() = default;
-
-    //! \brief Default copy operator
-    ExternalForce& operator=(const ExternalForce&) = default;
-
-    //! \brief Default move operator
-    ExternalForce& operator=(ExternalForce&&) = default;
-
 protected:
     virtual void update(spatial::Force& force) override;
 };

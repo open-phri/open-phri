@@ -63,23 +63,6 @@ public:
     //! \param velocity The velocity to forward
     explicit NullSpaceMotion(vector::dyn::Velocity&& velocity);
 
-    //! \brief Default copy constructor
-    NullSpaceMotion(const NullSpaceMotion&) = default;
-
-    //! \brief Default move constructor
-    NullSpaceMotion(NullSpaceMotion&&) = default;
-
-    //! \brief Default virtual destructor
-    //! \details If \ref NullSpaceMotion::external_velocity_ was
-    //! created using an rvalue reference, the pointed memory won't be released
-    virtual ~NullSpaceMotion() = default;
-
-    //! \brief Default copy operator
-    NullSpaceMotion& operator=(const NullSpaceMotion&) = default;
-
-    //! \brief Default move operator
-    NullSpaceMotion& operator=(NullSpaceMotion&&) = default;
-
     //! \brief Read/write access the velocity used by the generator
     //! \return double& A reference to the velocity
     vector::dyn::Velocity& velocity();

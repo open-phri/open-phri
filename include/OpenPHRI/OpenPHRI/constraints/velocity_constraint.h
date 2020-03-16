@@ -63,30 +63,6 @@ public:
     //! to update the limit
     explicit VelocityConstraint(const scalar::Velocity& maximum_velocity);
 
-    //! \brief Construct a new VelocityConstraint object using the given
-    //! value
-    //! \param maximum_velocity The value of the desired maximum
-    //! velocity (m/s). Use VelocityConstraint::maximumVelocity()
-    //! to update the limit
-    explicit VelocityConstraint(scalar::Velocity&& maximum_velocity);
-
-    //! \brief Default copy constructor
-    VelocityConstraint(const VelocityConstraint&) = default;
-
-    //! \brief Default move constructor
-    VelocityConstraint(VelocityConstraint&&) = default;
-
-    //! \brief Default virtual destructor
-    //! \details If \ref VelocityConstraint::maximum_velocity_ was
-    //! created using an rvalue reference, the pointed memory won't be released
-    virtual ~VelocityConstraint() = default;
-
-    //! \brief Default copy operator
-    VelocityConstraint& operator=(const VelocityConstraint&) = default;
-
-    //! \brief Default move operator
-    VelocityConstraint& operator=(VelocityConstraint&&) = default;
-
     //! \brief Compute the velocity constraint based on the robot state
     //! \return double The constraint value [0,1]
     virtual double compute() override;

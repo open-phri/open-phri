@@ -70,8 +70,6 @@ public:
         std::shared_ptr<Constraint> constraint, InterpolatorPtr interpolator,
         std::shared_ptr<const spatial::Position> robot_position);
 
-    virtual ~SeparationDistanceConstraint() = default;
-
     virtual double compute() override;
 
     /**

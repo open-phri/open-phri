@@ -120,24 +120,6 @@ public:
     ForceControl(spatial::Force&& target, Parameters&& parameters,
                  TargetType type);
 
-    //! \brief Default copy constructor
-    ForceControl(const ForceControl&) = default;
-
-    //! \brief Default move constructor
-    ForceControl(ForceControl&&) = default;
-
-    //! \brief Default virtual destructor
-    //! \details If \ref ForceControl::target_ and ForceControl::parameters_
-    //! were created using rvalue references, the pointed memories won't be
-    //! released
-    virtual ~ForceControl() = default;
-
-    //! \brief Default copy operator
-    ForceControl& operator=(const ForceControl&) = default;
-
-    //! \brief Default move operator
-    ForceControl& operator=(ForceControl&&) = default;
-
     //! \brief Configure the filter acting on the error
     //! \details Using this filter will provide a smoother derivative of the
     //! error at the cost of a delay. A simple first order low-pass filter is

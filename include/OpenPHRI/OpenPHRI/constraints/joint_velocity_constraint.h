@@ -72,24 +72,6 @@ public:
     explicit JointVelocityConstraint(
         vector::dyn::Velocity&& maximum_velocities);
 
-    //! \brief Default copy constructor
-    JointVelocityConstraint(const JointVelocityConstraint&) = default;
-
-    //! \brief Default move constructor
-    JointVelocityConstraint(JointVelocityConstraint&&) = default;
-
-    //! \brief Default virtual destructor
-    //! \details If \ref JointVelocityConstraint::maximum_velocities_ was
-    //! created using an rvalue reference, the pointed memory won't be released
-    virtual ~JointVelocityConstraint() = default;
-
-    //! \brief Default copy operator
-    JointVelocityConstraint&
-    operator=(const JointVelocityConstraint&) = default;
-
-    //! \brief Default move operator
-    JointVelocityConstraint& operator=(JointVelocityConstraint&&) = default;
-
     virtual double compute() override;
 
     //! \brief Read/write access the velocity limit used by the constraint

@@ -73,25 +73,6 @@ public:
     explicit JointAccelerationConstraint(
         vector::dyn::Acceleration&& maximum_acceleration);
 
-    //! \brief Default copy constructor
-    JointAccelerationConstraint(const JointAccelerationConstraint&) = default;
-
-    //! \brief Default move constructor
-    JointAccelerationConstraint(JointAccelerationConstraint&&) = default;
-
-    //! \brief Default virtual destructor
-    //! \details If \ref JointAccelerationConstraint::maximum_acceleration_ was
-    //! created using an rvalue reference, the pointed memory won't be released
-    virtual ~JointAccelerationConstraint() = default;
-
-    //! \brief Default copy operator
-    JointAccelerationConstraint&
-    operator=(const JointAccelerationConstraint&) = default;
-
-    //! \brief Default move operator
-    JointAccelerationConstraint&
-    operator=(JointAccelerationConstraint&&) = default;
-
     //! \brief Compute the acceleration constraint based on the robot state
     //! \return double The constraint value [0,1]
     virtual double compute() override;

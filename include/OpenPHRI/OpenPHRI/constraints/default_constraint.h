@@ -33,24 +33,6 @@ namespace phri {
 //! \brief Default constraint. Always evaluate to one.
 class DefaultConstraint : public Constraint {
 public:
-    //! \brief Default constructor
-    DefaultConstraint() = default;
-
-    //! \brief Default copy constructor
-    DefaultConstraint(const DefaultConstraint&) = default;
-
-    //! \brief Default move constructor
-    DefaultConstraint(DefaultConstraint&&) = default;
-
-    //! \brief Default virtual destructor
-    virtual ~DefaultConstraint() = default;
-
-    //! \brief Default copy operator
-    DefaultConstraint& operator=(const DefaultConstraint&) = default;
-
-    //! \brief Default move operator
-    DefaultConstraint& operator=(DefaultConstraint&&) = default;
-
     //! \brief Evaluate the constraint to one
     //! \return double one
     virtual double compute() override;

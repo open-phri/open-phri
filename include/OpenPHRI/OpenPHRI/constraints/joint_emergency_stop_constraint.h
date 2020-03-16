@@ -87,23 +87,6 @@ public:
     JointEmergencyStopConstraint(vector::dyn::Force&& activation_threshold,
                                  vector::dyn::Force&& deactivation_threshold);
 
-    //! \brief Default copy constructor
-    JointEmergencyStopConstraint(const JointEmergencyStopConstraint&) = default;
-
-    //! \brief Default move constructor
-    JointEmergencyStopConstraint(JointEmergencyStopConstraint&&) = default;
-
-    //! \brief Default virtual destructor
-    virtual ~JointEmergencyStopConstraint() = default;
-
-    //! \brief Default copy operator
-    JointEmergencyStopConstraint&
-    operator=(const JointEmergencyStopConstraint&) = default;
-
-    //! \brief Default move operator
-    JointEmergencyStopConstraint&
-    operator=(JointEmergencyStopConstraint&&) = default;
-
     virtual double compute() override;
 
     vector::dyn::Force& activationThreshold();

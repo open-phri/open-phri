@@ -71,23 +71,6 @@ public:
     //! \param velocity The velocity to forward
     explicit JointVelocityProxy(const generator& generator);
 
-    //! \brief Default copy constructor
-    JointVelocityProxy(const JointVelocityProxy&) = default;
-
-    //! \brief Default move constructor
-    JointVelocityProxy(JointVelocityProxy&&) = default;
-
-    //! \brief Default virtual destructor
-    //! \details If \ref JointVelocityProxy::external_velocity_ was
-    //! created using an rvalue reference, the pointed memory won't be released
-    virtual ~JointVelocityProxy() = default;
-
-    //! \brief Default copy operator
-    JointVelocityProxy& operator=(const JointVelocityProxy&) = default;
-
-    //! \brief Default move operator
-    JointVelocityProxy& operator=(JointVelocityProxy&&) = default;
-
     //! \brief Read/write access the velocity used by the generator
     //! \return double& A reference to the velocity
     vector::dyn::Velocity& velocity();

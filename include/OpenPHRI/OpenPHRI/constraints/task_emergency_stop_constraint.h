@@ -82,23 +82,6 @@ public:
     TaskEmergencyStopConstraint(scalar::Force&& activation_threshold,
                                 scalar::Force&& deactivation_threshold);
 
-    //! \brief Default copy constructor
-    TaskEmergencyStopConstraint(const TaskEmergencyStopConstraint&) = default;
-
-    //! \brief Default move constructor
-    TaskEmergencyStopConstraint(TaskEmergencyStopConstraint&&) = default;
-
-    //! \brief Default virtual destructor
-    virtual ~TaskEmergencyStopConstraint() = default;
-
-    //! \brief Default copy operator
-    TaskEmergencyStopConstraint&
-    operator=(const TaskEmergencyStopConstraint&) = default;
-
-    //! \brief Default move operator
-    TaskEmergencyStopConstraint&
-    operator=(TaskEmergencyStopConstraint&&) = default;
-
     /***		Algorithm		***/
     virtual double compute() override;
 

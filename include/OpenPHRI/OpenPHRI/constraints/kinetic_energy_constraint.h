@@ -82,22 +82,6 @@ public:
     KineticEnergyConstraint(scalar::Mass&& mass,
                             scalar::Energy&& maximum_kinetic_energy);
 
-    //! \brief Default copy constructor
-    KineticEnergyConstraint(const KineticEnergyConstraint&) = default;
-
-    //! \brief Default move constructor
-    KineticEnergyConstraint(KineticEnergyConstraint&&) = default;
-
-    //! \brief Default virtual destructor
-    virtual ~KineticEnergyConstraint() = default;
-
-    //! \brief Default copy operator
-    KineticEnergyConstraint&
-    operator=(const KineticEnergyConstraint&) = default;
-
-    //! \brief Default move operator
-    KineticEnergyConstraint& operator=(KineticEnergyConstraint&&) = default;
-
     virtual double compute() override;
 
     //! \brief Read/write access the mass used by the constraint

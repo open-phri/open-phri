@@ -40,7 +40,21 @@ namespace phri {
 class TorqueGenerator {
 public:
     TorqueGenerator() = default;
+
+    //! \brief Delete copy constructor to avoid slicing
+    TorqueGenerator(const TorqueGenerator&) = delete;
+
+    //! \brief Default move constructor
+    TorqueGenerator(TorqueGenerator&&) = default;
+
+    //! \brief Default virtual destructor
     virtual ~TorqueGenerator() = default;
+
+    //! \brief Delete copy operator to avoid slicing
+    TorqueGenerator& operator=(const TorqueGenerator&) = delete;
+
+    //! \brief Default move operator
+    TorqueGenerator& operator=(TorqueGenerator&&) = default;
 
     /**
      * @brief Compute the value associated with the torque generator.

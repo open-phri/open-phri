@@ -44,8 +44,8 @@ public:
     //! \brief Default constructor
     VelocityGenerator() = default;
 
-    //! \brief Default copy constructor
-    VelocityGenerator(const VelocityGenerator&) = default;
+    //! \brief Delete copy constructor to avoid slicing
+    VelocityGenerator(const VelocityGenerator&) = delete;
 
     //! \brief Default move constructor
     VelocityGenerator(VelocityGenerator&&) = default;
@@ -53,8 +53,8 @@ public:
     //! \brief Default virtual destructor
     virtual ~VelocityGenerator() = default;
 
-    //! \brief Default copy operator
-    VelocityGenerator& operator=(const VelocityGenerator&) = default;
+    //! \brief Delete copy operator to avoid slicing
+    VelocityGenerator& operator=(const VelocityGenerator&) = delete;
 
     //! \brief Default move operator
     VelocityGenerator& operator=(VelocityGenerator&&) = default;

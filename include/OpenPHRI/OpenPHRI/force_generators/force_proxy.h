@@ -68,23 +68,6 @@ public:
     //! \param force The force to forward
     ForceProxy(const generator& generator);
 
-    //! \brief Default copy constructor
-    ForceProxy(const ForceProxy&) = default;
-
-    //! \brief Default move constructor
-    ForceProxy(ForceProxy&&) = default;
-
-    //! \brief Default virtual destructor
-    //! \details If \ref ForceProxy::external_force_ was
-    //! created using an rvalue reference, the pointed memory won't be released
-    virtual ~ForceProxy() = default;
-
-    //! \brief Default copy operator
-    ForceProxy& operator=(const ForceProxy&) = default;
-
-    //! \brief Default move operator
-    ForceProxy& operator=(ForceProxy&&) = default;
-
     //! \brief Read/write access the force used by the generator
     //! \return double& A reference to the force
     spatial::Force& force();

@@ -79,23 +79,6 @@ public:
     StiffnessGenerator(spatial::Stiffness&& stiffness,
                        spatial::Position&& target_pose);
 
-    //! \brief Default copy constructor
-    StiffnessGenerator(const StiffnessGenerator&) = default;
-
-    //! \brief Default move constructor
-    StiffnessGenerator(StiffnessGenerator&&) = default;
-
-    //! \brief Default virtual destructor
-    //! \details If \ref StiffnessGenerator::external_force_ was
-    //! created using an rvalue reference, the pointed memory won't be released
-    virtual ~StiffnessGenerator() = default;
-
-    //! \brief Default copy operator
-    StiffnessGenerator& operator=(const StiffnessGenerator&) = default;
-
-    //! \brief Default move operator
-    StiffnessGenerator& operator=(StiffnessGenerator&&) = default;
-
     //! \brief Read/write access the stiffness used by the generator
     //! \return double& A reference to the stiffness
     spatial::Stiffness& stiffness();

@@ -68,23 +68,6 @@ public:
     //! \param velocity The velocity to forward
     VelocityProxy(const generator& generator);
 
-    //! \brief Default copy constructor
-    VelocityProxy(const VelocityProxy&) = default;
-
-    //! \brief Default move constructor
-    VelocityProxy(VelocityProxy&&) = default;
-
-    //! \brief Default virtual destructor
-    //! \details If \ref VelocityProxy::external_velocity_ was
-    //! created using an rvalue reference, the pointed memory won't be released
-    virtual ~VelocityProxy() = default;
-
-    //! \brief Default copy operator
-    VelocityProxy& operator=(const VelocityProxy&) = default;
-
-    //! \brief Default move operator
-    VelocityProxy& operator=(VelocityProxy&&) = default;
-
     //! \brief Read/write access the velocity used by the generator
     //! \return double& A reference to the velocity
     spatial::Velocity& velocity();

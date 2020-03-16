@@ -44,8 +44,8 @@ public:
     //! \brief Default constructor
     JointVelocityGenerator() = default;
 
-    //! \brief Default copy constructor
-    JointVelocityGenerator(const JointVelocityGenerator&) = default;
+    //! \brief Delete copy constructor to avoid slicing
+    JointVelocityGenerator(const JointVelocityGenerator&) = delete;
 
     //! \brief Default move constructor
     JointVelocityGenerator(JointVelocityGenerator&&) = default;
@@ -53,8 +53,8 @@ public:
     //! \brief Default virtual destructor
     virtual ~JointVelocityGenerator() = default;
 
-    //! \brief Default copy operator
-    JointVelocityGenerator& operator=(const JointVelocityGenerator&) = default;
+    //! \brief Delete copy operator to avoid slicing
+    JointVelocityGenerator& operator=(const JointVelocityGenerator&) = delete;
 
     //! \brief Default move operator
     JointVelocityGenerator& operator=(JointVelocityGenerator&&) = default;
