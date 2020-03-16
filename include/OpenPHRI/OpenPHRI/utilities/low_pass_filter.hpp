@@ -95,11 +95,6 @@ private:
     double coefficient_;
 };
 
-template <typename T>
-using LowPassFilterPtr = std::shared_ptr<LowPassFilter<T>>;
-template <typename T>
-using LowPassFilterConstPtr = std::shared_ptr<const LowPassFilter<T>>;
-
 extern template class LowPassFilter<double>;
 extern template class LowPassFilter<Eigen::Vector2d>;
 extern template class LowPassFilter<Eigen::Vector3d>;

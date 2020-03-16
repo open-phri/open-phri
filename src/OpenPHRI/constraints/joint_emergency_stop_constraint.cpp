@@ -24,48 +24,9 @@
 namespace phri {
 
 JointEmergencyStopConstraint::JointEmergencyStopConstraint()
-    : activation_threshold_(std::make_shared<vector::dyn::Force>()),
-      deactivation_threshold_(std::make_shared<vector::dyn::Force>()),
+    : activation_threshold_(vector::dyn::Force{}),
+      deactivation_threshold_(vector::dyn::Force{}),
       previous_constraint_value_(1.) {
-}
-
-JointEmergencyStopConstraint::JointEmergencyStopConstraint(
-    std::shared_ptr<vector::dyn::Force> activation_threshold,
-    std::shared_ptr<vector::dyn::Force> deactivation_threshold)
-    : activation_threshold_(activation_threshold),
-      deactivation_threshold_(deactivation_threshold),
-      previous_constraint_value_(1.) {
-    if (not activation_threshold or not deactivation_threshold) {
-        throw std::runtime_error(
-            OPEN_PHRI_ERROR("You provided an empty shared pointer"));
-    }
-}
-
-JointEmergencyStopConstraint::JointEmergencyStopConstraint(
-    vector::dyn::Force& activation_threshold,
-    vector::dyn::Force& deactivation_threshold)
-    : JointEmergencyStopConstraint(
-          std::shared_ptr<vector::dyn::Force>(&activation_threshold,
-                                              [](auto p) {}),
-          std::shared_ptr<vector::dyn::Force>(&deactivation_threshold,
-                                              [](auto p) {})) {
-}
-
-JointEmergencyStopConstraint::JointEmergencyStopConstraint(
-    const vector::dyn::Force& activation_threshold,
-    const vector::dyn::Force& deactivation_threshold)
-    : JointEmergencyStopConstraint(
-          std::make_shared<vector::dyn::Force>(activation_threshold),
-          std::make_shared<vector::dyn::Force>(deactivation_threshold)) {
-}
-
-JointEmergencyStopConstraint::JointEmergencyStopConstraint(
-    vector::dyn::Force&& activation_threshold,
-    vector::dyn::Force&& deactivation_threshold)
-    : JointEmergencyStopConstraint(
-          std::make_shared<vector::dyn::Force>(std::move(activation_threshold)),
-          std::make_shared<vector::dyn::Force>(
-              std::move(deactivation_threshold))) {
 }
 
 double JointEmergencyStopConstraint::compute() {
@@ -109,30 +70,20 @@ double JointEmergencyStopConstraint::compute() {
 }
 
 vector::dyn::Force& JointEmergencyStopConstraint::activationThreshold() {
-    return *activation_threshold_;
+    return activation_threshold_;
 }
 
 const vector::dyn::Force&
 JointEmergencyStopConstraint::activationThreshold() const {
-    return *activation_threshold_;
-}
-
-std::shared_ptr<vector::dyn::Force>
-JointEmergencyStopConstraint::activationThresholdPtr() const {
     return activation_threshold_;
 }
 
 vector::dyn::Force& JointEmergencyStopConstraint::deactivationThreshold() {
-    return *deactivation_threshold_;
+    return deactivation_threshold_;
 }
 
 const vector::dyn::Force&
 JointEmergencyStopConstraint::deactivationThreshold() const {
-    return *deactivation_threshold_;
-}
-
-std::shared_ptr<vector::dyn::Force>
-JointEmergencyStopConstraint::deactivationThresholdPtr() const {
     return deactivation_threshold_;
 }
 

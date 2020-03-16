@@ -112,7 +112,4 @@ private:
     }
 };
 
-using DriverPtr = std::shared_ptr<Driver>;
-using DriverConstPtr = std::shared_ptr<const Driver>;
-
 } // namespace phri

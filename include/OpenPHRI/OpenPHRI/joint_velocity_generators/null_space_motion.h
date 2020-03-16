@@ -28,6 +28,7 @@
 
 #include <OpenPHRI/joint_velocity_generators/joint_velocity_generator.h>
 #include <OpenPHRI/definitions.h>
+#include <OpenPHRI/detail/universal_wrapper.hpp>
 
 namespace phri {
 
@@ -43,25 +44,17 @@ public:
     NullSpaceMotion();
 
     //! \brief Construct a new NullSpaceMotion object using the given
-    //! pointed value
-    //! \param velocity The velocity to forward
-    explicit NullSpaceMotion(std::shared_ptr<vector::dyn::Velocity> velocity);
-
-    //! \brief Construct a new NullSpaceMotion object using the given
-    //! referenced value
-    //! \param velocity The velocity to forward. Make sure that \p velocity
-    //! outlives the generator
-    explicit NullSpaceMotion(vector::dyn::Velocity& velocity);
-
-    //! \brief Construct a new NullSpaceMotion object using the given
-    //! value
-    //! \param velocity The velocity to forward
-    explicit NullSpaceMotion(const vector::dyn::Velocity& velocity);
-
-    //! \brief Construct a new NullSpaceMotion object using the given
-    //! value
-    //! \param velocity The velocity to forward
-    explicit NullSpaceMotion(vector::dyn::Velocity&& velocity);
+    //! vector::dyn::Velocity value, reference or (shared) pointer
+    //!
+    //! If velocity is a const reference/pointer, using velocity() to modify it
+    //! will result in undefined behavior
+    //!
+    //! \tparam VelT The type of the value (automatically deduced)
+    //! \param value The desired velocity (m/s, rad/s)
+    template <typename VelT>
+    explicit NullSpaceMotion(VelT&& joint_velocity) noexcept
+        : joint_velocity_{std::forward<VelT>(joint_velocity)} {
+    }
 
     //! \brief Read/write access the velocity used by the generator
     //! \return double& A reference to the velocity
@@ -71,18 +64,12 @@ public:
     //! \return double The velocity value
     const vector::dyn::Velocity& velocity() const;
 
-    //! \brief Access to the shared pointer holding the velocity used
-    //! by the generator
-    //! \return std::shared_ptr<double> A shared pointer to the forwarded
-    //! velocity
-    std::shared_ptr<vector::dyn::Velocity> velocityPtr() const;
-
 protected:
     virtual void update(vector::dyn::Velocity& velocity) override;
 
     virtual void setRobot(Robot const* robot) override;
 
-    std::shared_ptr<vector::dyn::Velocity> joint_velocity_;
+    detail::UniversalWrapper<vector::dyn::Velocity> joint_velocity_;
     Eigen::MatrixXd null_space_projector_;
     Eigen::MatrixXd identity_;
 };

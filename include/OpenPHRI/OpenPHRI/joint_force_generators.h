@@ -1,4 +1,4 @@
-/*      File: torque_generators.h
+/*      File: joint_force_generators.h
  *       This file is part of the program open-phri
  *       Program description : OpenPHRI: a generic framework to easily and
  * safely control robots in interactions with humans Copyright (C) 2017 -
@@ -19,13 +19,13 @@
  */
 
 /**
- * @file torque_generators.h
+ * @file joint_force_generators.h
  * @author Benjamin Navarro
- * @brief Include all implemented torque generators
+ * @brief Include all implemented joint force generators
  * @date April 2017
  * @ingroup OpenPHRI
  */
 
 #pragma once
 
-#include <OpenPHRI/torque_generators/torque_proxy.h>
+#include <OpenPHRI/joint_force_generators/joint_force_proxy.h>

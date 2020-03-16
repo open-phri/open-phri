@@ -1,4 +1,4 @@
-/*      File: torque_generator.h
+/*      File: force_generator.h
  *       This file is part of the program open-phri
  *       Program description : OpenPHRI: a generic framework to easily and
  * safely control robots in interactions with humans Copyright (C) 2017 -
@@ -18,9 +18,9 @@
  * program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-//! \file torque_generator.h
+//! \file force_generator.h
 //! \author Benjamin Navarro
-//! \brief Base class for all torque generators.
+//! \brief Base class for all force generators.
 //! \date 05-2019
 //! \ingroup phri
 
@@ -34,44 +34,44 @@
 
 namespace phri {
 
-//! \brief Base class for all torque generators.
+//! \brief Base class for all force generators.
 //! \details Provides a pure virtual compute method to be implemented by derived
 //! classes.
-class TorqueGenerator {
+class JointForceGenerator {
 public:
-    TorqueGenerator() = default;
+    JointForceGenerator() = default;
 
     //! \brief Delete copy constructor to avoid slicing
-    TorqueGenerator(const TorqueGenerator&) = delete;
+    JointForceGenerator(const JointForceGenerator&) = delete;
 
     //! \brief Default move constructor
-    TorqueGenerator(TorqueGenerator&&) = default;
+    JointForceGenerator(JointForceGenerator&&) = default;
 
     //! \brief Default virtual destructor
-    virtual ~TorqueGenerator() = default;
+    virtual ~JointForceGenerator() = default;
 
     //! \brief Delete copy operator to avoid slicing
-    TorqueGenerator& operator=(const TorqueGenerator&) = delete;
+    JointForceGenerator& operator=(const JointForceGenerator&) = delete;
 
     //! \brief Default move operator
-    TorqueGenerator& operator=(TorqueGenerator&&) = default;
+    JointForceGenerator& operator=(JointForceGenerator&&) = default;
 
     /**
-     * @brief Compute the value associated with the torque generator.
-     * @return The torque generator's evaluated value.
+     * @brief Compute the value associated with the force generator.
+     * @return The force generator's evaluated value.
      */
     const vector::dyn::Force& compute();
 
     /**
      * @brief Call operator, shortcut for compute().
-     * @return The torque generator's evaluated value.
+     * @return The force generator's evaluated value.
      */
     const vector::dyn::Force& operator()();
 
 protected:
     friend class SafetyController;
 
-    virtual void update(vector::dyn::Force& torque) = 0;
+    virtual void update(vector::dyn::Force& force) = 0;
 
     /**
      * @brief Set the robot to work with.
@@ -79,12 +79,13 @@ protected:
      */
     virtual void setRobot(Robot const* robot);
 
+    //! \brief Read/write access the controlled robot
+    //! \return double& A reference to the controlled robot
+    const Robot& robot() const;
+
     Robot const* robot_;
 
     vector::dyn::Force force_;
 };
-
-using TorqueGeneratorPtr = std::shared_ptr<TorqueGenerator>;
-using TorqueGeneratorConstPtr = std::shared_ptr<const TorqueGenerator>;
 
 } // namespace phri

@@ -27,37 +27,10 @@ JointAccelerationConstraint::JointAccelerationConstraint()
     : JointAccelerationConstraint(vector::dyn::Acceleration{}) {
 }
 
-JointAccelerationConstraint::JointAccelerationConstraint(
-    std::shared_ptr<vector::dyn::Acceleration> maximum_acceleration)
-    : maximum_acceleration_(maximum_acceleration) {
-    if (not maximum_acceleration) {
-        throw std::runtime_error(
-            OPEN_PHRI_ERROR("You provided an empty shared pointer"));
-    }
-}
-
-JointAccelerationConstraint::JointAccelerationConstraint(
-    vector::dyn::Acceleration& maximum_acceleration)
-    : JointAccelerationConstraint(std::shared_ptr<vector::dyn::Acceleration>(
-          &maximum_acceleration, [](auto p) {})) {
-}
-
-JointAccelerationConstraint::JointAccelerationConstraint(
-    const vector::dyn::Acceleration& maximum_acceleration)
-    : JointAccelerationConstraint(
-          std::make_shared<vector::dyn::Acceleration>(maximum_acceleration)) {
-}
-
-JointAccelerationConstraint::JointAccelerationConstraint(
-    vector::dyn::Acceleration&& maximum_acceleration)
-    : JointAccelerationConstraint(std::make_shared<vector::dyn::Acceleration>(
-          std::move(maximum_acceleration))) {
-}
-
 double JointAccelerationConstraint::compute() {
     double constraint = 1.;
     const auto& joint_vel = robot_->control().joints().totalVelocity();
-    const auto& max_joint_acc = *maximum_acceleration_;
+    const auto& max_joint_acc = maximumAcceleration().value();
     const auto& prev_joint_vel = robot_->joints().command().velocity();
 
     for (size_t i = 0; i < joint_vel.size(); ++i) {
@@ -74,16 +47,11 @@ double JointAccelerationConstraint::compute() {
 }
 
 vector::dyn::Acceleration& JointAccelerationConstraint::maximumAcceleration() {
-    return *maximum_acceleration_;
+    return maximum_acceleration_;
 }
 
-vector::dyn::Acceleration
+const vector::dyn::Acceleration&
 JointAccelerationConstraint::maximumAcceleration() const {
-    return *maximum_acceleration_;
-}
-
-std::shared_ptr<vector::dyn::Acceleration>
-JointAccelerationConstraint::maximumAccelerationPtr() const {
     return maximum_acceleration_;
 }
 

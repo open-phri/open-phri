@@ -766,12 +766,6 @@ protected:
     TrajectorySynchronization sync_;
 };
 
-template <typename T>
-using TrajectoryGeneratorPtr = std::shared_ptr<TrajectoryGenerator<T>>;
-template <typename T>
-using TrajectoryGeneratorConstPtr =
-    std::shared_ptr<const TrajectoryGenerator<T>>;
-
 extern template class TrajectoryGenerator<double>;
 extern template class TrajectoryGenerator<Eigen::VectorXd>;
 extern template class TrajectoryGenerator<Eigen::Vector6d>;

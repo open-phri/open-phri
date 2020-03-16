@@ -227,11 +227,6 @@ template <> struct TrajectoryPoint<spatial::Position> {
     std::shared_ptr<spatial::Acceleration> d2y; // second derivative
 };
 
-template <typename T>
-using TrajectoryPointPtr = std::shared_ptr<TrajectoryPoint<T>>;
-template <typename T>
-using TrajectoryPointConstPtr = std::shared_ptr<const TrajectoryPoint<T>>;
-
 /** @brief Description of a point used by the PolynomialInterpolator.
  *  @details A PolynomialPoint is described by a 2D point (x,y) and its first
  * and second derivatives
@@ -249,9 +244,6 @@ struct PolynomialPoint : public TrajectoryPoint<double> {
     std::shared_ptr<double> x; // x value
 };
 
-using PolynomialPointPtr = std::shared_ptr<PolynomialPoint>;
-using PolynomialPointConstPtr = std::shared_ptr<const PolynomialPoint>;
-
 /** @brief Description of a point used by the LinearInterpolator.
  *  @details A LinearPoint is described by a 2D point (x,y)
  */
@@ -267,8 +259,5 @@ struct LinearPoint {
     std::shared_ptr<double> x; // x value
     std::shared_ptr<double> y; // y value
 };
-
-using LinearPointPtr = std::shared_ptr<LinearPoint>;
-using LinearPointConstPtr = std::shared_ptr<const LinearPoint>;
 
 } // namespace phri

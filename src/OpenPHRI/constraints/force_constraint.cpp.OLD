@@ -50,7 +50,7 @@ private:
 };
 
 /***		Constructor & destructor		***/
-ForceConstraint::ForceConstraint(VelocityConstraintPtr constraint,
+ForceConstraint::ForceConstraint(std::shared_ptr<VelocityConstraint> constraint,
                                  std::shared_ptr<const double> maximum_force)
     : constraint_(constraint), maximum_force_(maximum_force) {
     velocity_generator_ = std::make_shared<ForceLimitationVelocityGenerator>(
@@ -62,6 +62,6 @@ double ForceConstraint::compute() {
     return constraint_->compute();
 }
 
-VelocityGeneratorPtr ForceConstraint::getVelocityGenerator() const {
+std::shared_ptr<VelocityGenerator> ForceConstraint::getVelocityGenerator() const {
     return velocity_generator_;
 }

@@ -43,10 +43,10 @@ void assert_msg_py(std::string msg, bool cond) {
 }
 
 std::shared_ptr<Matrix6d>
-NewMatrix6dPtr(Matrix6d init_value = Matrix6d::Zero()) {
+std::shared_ptr<NewMatrix6d>(Matrix6d init_value = Matrix6d::Zero()) {
     return std::make_shared<Matrix6d>(init_value);
 }
-BOOST_PYTHON_FUNCTION_OVERLOADS(NewMatrix6dPtr_overloads, NewMatrix6dPtr, 0, 1)
+BOOST_PYTHON_FUNCTION_OVERLOADS(std::shared_ptr<NewMatrix6d>_overloads, std::shared_ptr<NewMatrix6d>, 0, 1)
 
 std::shared_ptr<Vector2d>
 Newstd::shared_ptr<Vector2d>(Vector2d init_value = Vector2d::Zero()) {
@@ -88,8 +88,8 @@ void wrapMisc() {
     def("assert_msg", &assert_msg_py,
         "Call assert and print a message if it failts");
 
-    def("NewMatrix6dPtr", NewMatrix6dPtr,
-        NewMatrix6dPtr_overloads(
+    def("std::shared_ptr<NewMatrix6d>", std::shared_ptr<NewMatrix6d>,
+        std::shared_ptr<NewMatrix6d>_overloads(
             args("init_value"),
             "Create a new instance of a Matrix6d shared_ptr"));
 

@@ -45,7 +45,8 @@ public:
      * @param input A shared pointer to the input value used by the
      * interpolator.
      */
-    LinearInterpolator(LinearPointConstPtr from, LinearPointConstPtr to,
+    LinearInterpolator(std::shared_ptr<const LinearPoint> from,
+                       std::shared_ptr<const LinearPoint> to,
                        std::shared_ptr<const double> input);
 
     /**
@@ -55,7 +56,8 @@ public:
      * @param from Starting point.
      * @param to Ending point.
      */
-    LinearInterpolator(LinearPointConstPtr from, LinearPointConstPtr to);
+    LinearInterpolator(std::shared_ptr<const LinearPoint> from,
+                       std::shared_ptr<const LinearPoint> to);
 
     virtual ~LinearInterpolator() = default;
 
@@ -83,12 +85,9 @@ private:
 
     LinearParameters params_;
 
-    LinearPointConstPtr from_;
-    LinearPointConstPtr to_;
+    std::shared_ptr<const LinearPoint> from_;
+    std::shared_ptr<const LinearPoint> to_;
     bool saturation_;
 };
-
-using LinearInterpolatorPtr = std::shared_ptr<LinearInterpolator>;
-using LinearInterpolatorConstPtr = std::shared_ptr<const LinearInterpolator>;
 
 } // namespace phri

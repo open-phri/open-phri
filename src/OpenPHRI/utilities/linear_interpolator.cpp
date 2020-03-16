@@ -22,15 +22,15 @@
 
 using namespace phri;
 
-LinearInterpolator::LinearInterpolator(LinearPointConstPtr from,
-                                       LinearPointConstPtr to,
+LinearInterpolator::LinearInterpolator(std::shared_ptr<const LinearPoint> from,
+                                       std::shared_ptr<const LinearPoint> to,
                                        std::shared_ptr<const double> input)
     : LinearInterpolator(from, to) {
     setInput(input);
 }
 
-LinearInterpolator::LinearInterpolator(LinearPointConstPtr from,
-                                       LinearPointConstPtr to) {
+LinearInterpolator::LinearInterpolator(std::shared_ptr<const LinearPoint> from,
+                                       std::shared_ptr<const LinearPoint> to) {
     from_ = from;
     to_ = to;
     output_ = std::make_shared<double>(0.);

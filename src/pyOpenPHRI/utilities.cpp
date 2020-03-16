@@ -107,8 +107,8 @@ void wrapUtilities() {
     CREATE_DERIVATOR(Vector6d)
 
     CREATE_OBJECT_COLLECTION(std::shared_ptr<const Vector6d>)
-    CREATE_OBJECT_COLLECTION(PotentialFieldObjectPtr)
-    CREATE_OBJECT_COLLECTION(TrajectoryPtr)
+    CREATE_OBJECT_COLLECTION(std::shared_ptr<PotentialFieldObject>)
+    CREATE_OBJECT_COLLECTION(std::shared_ptr<Trajectory>)
 
     register_ptr_to_python<std::shared_ptr<Integrator<double>>>();
     register_ptr_to_python<std::shared_ptr<Integrator<Vector2d>>>();

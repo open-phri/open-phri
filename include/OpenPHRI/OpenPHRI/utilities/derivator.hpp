@@ -140,10 +140,6 @@ private:
     double frequency_;
 };
 
-template <typename T> using DerivatorPtr = std::shared_ptr<Derivator<T>>;
-template <typename T>
-using DerivatorConstPtr = std::shared_ptr<const Derivator<T>>;
-
 extern template class Derivator<double>;
 extern template class Derivator<Eigen::Vector2d>;
 extern template class Derivator<Eigen::Vector3d>;

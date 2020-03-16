@@ -50,8 +50,8 @@ public:
      * @param input A shared pointer to the input value used by the
      * interpolator.
      */
-    PolynomialInterpolator(PolynomialPointConstPtr from,
-                           PolynomialPointConstPtr to,
+    PolynomialInterpolator(std::shared_ptr<const PolynomialPoint> from,
+                           std::shared_ptr<const PolynomialPoint> to,
                            std::shared_ptr<const double> input);
 
     /**
@@ -61,8 +61,8 @@ public:
      * @param from Starting point.
      * @param to Ending point.
      */
-    PolynomialInterpolator(PolynomialPointConstPtr from,
-                           PolynomialPointConstPtr to);
+    PolynomialInterpolator(std::shared_ptr<const PolynomialPoint> from,
+                           std::shared_ptr<const PolynomialPoint> to);
 
     ~PolynomialInterpolator() = default;
 
@@ -72,12 +72,8 @@ public:
 private:
     FifthOrderPolynomial::Parameters params_;
 
-    PolynomialPointConstPtr from_;
-    PolynomialPointConstPtr to_;
+    std::shared_ptr<const PolynomialPoint> from_;
+    std::shared_ptr<const PolynomialPoint> to_;
 };
-
-using PolynomialInterpolatorPtr = std::shared_ptr<PolynomialInterpolator>;
-using PolynomialInterpolatorConstPtr =
-    std::shared_ptr<const PolynomialInterpolator>;
 
 } // namespace phri

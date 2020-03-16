@@ -95,7 +95,4 @@ private:
     spatial::Force wrench_;
 };
 
-using ForceGeneratorPtr = std::shared_ptr<ForceGenerator>;
-using ForceGeneratorConstPtr = std::shared_ptr<const ForceGenerator>;
-
 } // namespace phri

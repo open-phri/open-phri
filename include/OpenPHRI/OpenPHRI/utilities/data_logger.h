@@ -68,7 +68,7 @@ public:
      * Log all the data related to a Robot (all fields present in the structure)
      * @param robot A shared pointer to a Robot object
      */
-    void logRobotData(RobotConstPtr robot);
+    void logRobotData(Robot const* robot);
 
     /**
      * Log any array of data
@@ -122,8 +122,6 @@ private:
     bool create_gnuplot_files_;
     bool delay_disk_write_;
 
-    RobotConstPtr robot_;
-
     struct external_data {
         external_data() = default;
         virtual ~external_data() = default;
@@ -153,8 +151,5 @@ private:
     std::map<std::ofstream*, std::stringstream> stored_data_;
     std::map<std::ofstream*, std::unique_ptr<external_data>> external_data_;
 };
-
-using DataLoggerPtr = std::shared_ptr<DataLogger>;
-using DataLoggerConstPtr = std::shared_ptr<const DataLogger>;
 
 } // namespace phri

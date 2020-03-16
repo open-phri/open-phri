@@ -7,7 +7,7 @@ PID_Component(
     SHARED_LIB
     NAME open-phri
     DIRECTORY OpenPHRI
-    CXX_STANDARD 14
+    CXX_STANDARD 17
     EXPORT 
         eigen-extensions/eigen-extensions 
         pid-rpath/rpathlib

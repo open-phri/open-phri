@@ -64,9 +64,54 @@ int main() {
     auto virtual_force = VirtualForce{app.robot()};
 
     // Configure the controller
+    scalar::Velocity vmax{0.1};
+    const auto& cref = vmax;
     app.controller().add<phri::ExternalForce>("ext force");
-    app.controller().add<phri::VelocityConstraint>("vmax",
+
+    std::cout << "vmax1" << std::endl;
+    app.controller().add<phri::VelocityConstraint>("vmax1");
+    std::cout << app.controller()
+                     .get<phri::VelocityConstraint>("vmax1")
+                     ->maximumVelocity()
+              << std::endl;
+
+    std::cout << "vmax2" << std::endl;
+    app.controller().add<phri::VelocityConstraint>(
+        "vmax2", std::make_shared<scalar::Velocity>(0.1));
+    std::cout << app.controller()
+                     .get<phri::VelocityConstraint>("vmax2")
+                     ->maximumVelocity()
+              << std::endl;
+
+    std::cout << "vmax3" << std::endl;
+    app.controller().add<phri::VelocityConstraint>("vmax3", vmax);
+    std::cout << app.controller()
+                     .get<phri::VelocityConstraint>("vmax3")
+                     ->maximumVelocity()
+              << std::endl;
+
+    std::cout << "vmax4" << std::endl;
+    app.controller().add<phri::VelocityConstraint>("vmax4", cref);
+    std::cout << app.controller()
+                     .get<phri::VelocityConstraint>("vmax4")
+                     ->maximumVelocity()
+              << std::endl;
+
+    std::cout << "vmax5" << std::endl;
+    app.controller().add<phri::VelocityConstraint>("vmax5",
                                                    scalar::Velocity{.1});
+    std::cout << app.controller()
+                     .get<phri::VelocityConstraint>("vmax5")
+                     ->maximumVelocity()
+              << std::endl;
+
+    std::cout << "vmax6" << std::endl;
+    app.controller().add<phri::VelocityConstraint>("vmax6", &vmax);
+    std::cout << app.controller()
+                     .get<phri::VelocityConstraint>("vmax6")
+                     ->maximumVelocity()
+              << std::endl;
+
     app.controller().add<phri::VelocityProxy>(
         "vref", spatial::Velocity::Ones(app.robot().controlPointParentFrame()));
 

@@ -22,7 +22,7 @@
 #include <OpenPHRI/utilities/data_logger.h>
 #include <OpenPHRI/constraints/constraint.h>
 #include <OpenPHRI/force_generators/force_generator.h>
-#include <OpenPHRI/torque_generators/torque_generator.h>
+#include <OpenPHRI/joint_force_generators/joint_force_generator.h>
 #include <OpenPHRI/velocity_generators/velocity_generator.h>
 #include <OpenPHRI/joint_velocity_generators/joint_velocity_generator.h>
 #include <iomanip>
@@ -51,8 +51,8 @@ void DataLogger::logSafetyControllerData(SafetyController* controller) {
     controller_ = controller;
 }
 
-void DataLogger::logRobotData(RobotConstPtr robot) {
-    size_t joint_vec_size = robot->jointCount();
+void DataLogger::logRobotData(Robot const* robot) {
+    auto joint_vec_size = robot->jointCount();
 
     logExternalData("jointDampingMatrix",
                     robot->control().joints().damping().data(), joint_vec_size);
@@ -116,13 +116,10 @@ void DataLogger::logRobotData(RobotConstPtr robot) {
                     robot->task().state().force().data(), 6);
 
     logExternalData("scalingFactor", &robot->control().scalingFactor(), 1);
-
-    robot_ = robot;
 }
 
 void DataLogger::reset() {
     controller_ = nullptr;
-    robot_.reset();
     external_data_.clear();
 }
 

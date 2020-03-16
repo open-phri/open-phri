@@ -47,40 +47,25 @@ public:
     KineticEnergyConstraint();
 
     //! \brief Construct a new KineticEnergyConstraint object using the
-    //! given pointed values
-    //! \param mass The mass or equivalent mass of the robot (kg). Throws if
-    //! the pointer is empty.
+    //! given a spatial::Force and ForceControl::Parameters values, references
+    //! or (shared) pointers
+    //!
+    //! If either target/parameters are a const references/pointers, using
+    //! target()/parameters() to modify them will result in undefined behavior
+    //!
+    //! \tparam MassT The type of the value (automatically deduced)
+    //! \tparam EnergyT The type of the value (automatically deduced)
+    //! \param mass The mass or equivalent mass of the robot (kg)
     //! \param maximum_kinetic_energy A shared pointer to the maximum kinetic
-    //! energy (J). Throws if the pointer is empty.
-    KineticEnergyConstraint(
-        std::shared_ptr<scalar::Mass> mass,
-        std::shared_ptr<scalar::Energy> maximum_kinetic_energy);
-
-    //! \brief Construct a new KineticEnergyConstraint object using
-    //! the given referenced values
-    //! \param mass A reference to the mass or equivalent mass of the robot
-    //! (kg). Make sure that \p mass outlives the constraint
-    //! \param maximum_kinetic_energy A reference to the maximum kinetic
-    //! energy (J). Make sure that \p maximum_kinetic_energy outlives
-    //! the constraint
-    KineticEnergyConstraint(scalar::Mass& mass,
-                            scalar::Energy& maximum_kinetic_energy);
-
-    //! \brief Construct a new KineticEnergyConstraint object using the given
-    //! values
-    //! \param mass The value of the mass or equivalent mass of the robot (kg)
-    //! \param maximum_kinetic_energy The value of the maximum kinetic energy
-    //! (J)
-    KineticEnergyConstraint(const scalar::Mass& mass,
-                            const scalar::Energy& maximum_kinetic_energy);
-
-    //! \brief Construct a new KineticEnergyConstraint object using
-    //! the given values
-    //! \param mass The value of the mass or equivalent mass of the robot (kg)
-    //! \param maximum_kinetic_energy The value of the maximum kinetic energy
-    //! (J)
-    KineticEnergyConstraint(scalar::Mass&& mass,
-                            scalar::Energy&& maximum_kinetic_energy);
+    //! energy (J)
+    template <typename MassT, typename EnergyT>
+    explicit KineticEnergyConstraint(MassT&& mass,
+                                     EnergyT&& maximum_kinetic_energy) noexcept
+        : mass_{std::forward<MassT>(mass)},
+          maximum_kinetic_energy_{
+              std::forward<EnergyT>(maximum_kinetic_energy)} {
+        maximumVelocity() = scalar::Velocity{0.};
+    }
 
     virtual double compute() override;
 
@@ -90,12 +75,7 @@ public:
 
     //! \brief Read access the mass used by the constraint
     //! \return double The mass value
-    scalar::Mass mass() const;
-
-    //! \brief Access to the shared pointer holding the mass
-    //! used by the constraint
-    //! \return std::shared_ptr<double> A shared pointer to the mass
-    std::shared_ptr<scalar::Mass> massPtr() const;
+    const scalar::Mass& mass() const;
 
     //! \brief Read/write access the kinetic energy limit used by the constraint
     //! \return double& A reference to the kinetic energy limit
@@ -103,23 +83,13 @@ public:
 
     //! \brief Read access the kinetic energy limit used by the constraint
     //! \return double The kinetic energy limit value
-    scalar::Energy maximumKineticEnergy() const;
-
-    //! \brief Access to the shared pointer holding the kinetic energy limit
-    //! used by the constraint
-    //! \return std::shared_ptr<double> A shared pointer to the kinetic energy
-    //! limit
-    std::shared_ptr<scalar::Energy> maximumKineticEnergyPtr() const;
+    const scalar::Energy& maximumKineticEnergy() const;
 
 private:
-    void create();
-
     using VelocityConstraint::maximumVelocity;
-    using VelocityConstraint::maximumVelocityPtr;
 
-    std::shared_ptr<scalar::Mass> mass_;
-    std::shared_ptr<scalar::Energy> maximum_kinetic_energy_;
-    std::shared_ptr<scalar::Velocity> kinetic_energy_maximum_velocity_;
+    detail::UniversalWrapper<scalar::Mass> mass_;
+    detail::UniversalWrapper<scalar::Energy> maximum_kinetic_energy_;
 };
 
 } // namespace phri

@@ -42,7 +42,7 @@ public:
      * @param maximum_force A shared pointer to the maximum external force
      * allowed.
      */
-    ForceConstraint(VelocityConstraintPtr constraint,
+    ForceConstraint(std::shared_ptr<VelocityConstraint> constraint,
                     std::shared_ptr<const double> maximum_force);
 
     //! \brief Construct a new ForceConstraint object with initial
@@ -94,18 +94,18 @@ public:
 
     //! \brief Default move operator
     ForceConstraint& operator=(ForceConstraint&&) = default;
-    VelocityGeneratorPtr getVelocityGenerator() const;
+    std::shared_ptr<VelocityGenerator> getVelocityGenerator() const;
 
     /***		Algorithm		***/
     virtual double compute() override;
 
 private:
-    VelocityConstraintPtr constraint_;
-    VelocityGeneratorPtr velocity_generator_;
+    std::shared_ptr<VelocityConstraint> constraint_;
+    std::shared_ptr<VelocityGenerator> velocity_generator_;
     std::shared_ptr<const double> maximum_force_;
 };
 
-using ForceConstraintPtr = std::shared_ptr<ForceConstraint>;
-using ForceConstraintConstPtr = std::shared_ptr<const ForceConstraint>;
+
+
 
 } // namespace phri

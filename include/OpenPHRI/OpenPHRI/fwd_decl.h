@@ -39,7 +39,7 @@ class SeparationDistanceConstraint;
 class VelocityGenerator;
 class JointVelocityGenerator;
 class ForceGenerator;
-class TorqueGenerator;
+class JointForceGenerator;
 class LinearInterpolator;
 class PolynomialInterpolator;
 

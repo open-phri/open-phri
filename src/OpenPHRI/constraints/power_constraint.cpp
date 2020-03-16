@@ -24,31 +24,7 @@
 namespace phri {
 
 PowerConstraint::PowerConstraint()
-    : maximum_power_(std::make_shared<scalar::Power>(0.)),
-      power_(std::make_shared<scalar::Power>(0)) {
-}
-
-PowerConstraint::PowerConstraint(std::shared_ptr<scalar::Power> maximum_power)
-    : maximum_power_(maximum_power),
-      power_(std::make_shared<scalar::Power>(0)) {
-    if (not maximum_power) {
-        throw std::runtime_error(
-            OPEN_PHRI_ERROR("You provided an empty shared pointer"));
-    }
-}
-
-PowerConstraint::PowerConstraint(scalar::Power& maximum_power)
-    : PowerConstraint(
-          std::shared_ptr<scalar::Power>(&maximum_power, [](auto p) {})) {
-}
-
-PowerConstraint::PowerConstraint(const scalar::Power& maximum_power)
-    : PowerConstraint(std::make_shared<scalar::Power>(maximum_power)) {
-}
-
-PowerConstraint::PowerConstraint(scalar::Power&& maximum_power)
-    : PowerConstraint(
-          std::make_shared<scalar::Power>(std::move(maximum_power))) {
+    : maximum_power_{scalar::Power{0.}}, power_{0.} {
 }
 
 double PowerConstraint::compute() {
@@ -56,32 +32,24 @@ double PowerConstraint::compute() {
     const auto& velocity = robot_->control().task().totalVelocity().linear();
     const auto& force = robot_->task().state().force().linear();
     scalar::Power power = spatial::dot(force, velocity);
-    *power_ = power;
+    power_ = power;
 
     if (power < scalar::Power{0.}) {
-        constraint = std::abs(maximum_power_->value() / power.value());
+        constraint = std::abs(maximumPower().value() / power.value());
     }
 
     return constraint;
 }
 
 scalar::Power& PowerConstraint::maximumPower() {
-    return *maximum_power_;
-}
-
-scalar::Power PowerConstraint::maximumPower() const {
-    return *maximum_power_;
-}
-
-std::shared_ptr<scalar::Power> PowerConstraint::maximumPowerPtr() const {
     return maximum_power_;
 }
 
-scalar::Power PowerConstraint::power() const {
-    return *power_;
+const scalar::Power& PowerConstraint::maximumPower() const {
+    return maximum_power_;
 }
 
-std::shared_ptr<const scalar::Power> PowerConstraint::powerPtr() const {
+const scalar::Power& PowerConstraint::power() const {
     return power_;
 }
 

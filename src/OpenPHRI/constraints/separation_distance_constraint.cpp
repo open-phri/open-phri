@@ -23,7 +23,8 @@
 using namespace phri;
 
 SeparationDistanceConstraint::SeparationDistanceConstraint(
-    std::shared_ptr<Constraint> constraint, InterpolatorPtr interpolator) {
+    std::shared_ptr<Constraint> constraint,
+    std::shared_ptr<Interpolator> interpolator) {
     constraint_ = constraint;
     interpolator_ = interpolator;
 
@@ -36,7 +37,8 @@ SeparationDistanceConstraint::SeparationDistanceConstraint(
 }
 
 SeparationDistanceConstraint::SeparationDistanceConstraint(
-    std::shared_ptr<Constraint> constraint, InterpolatorPtr interpolator,
+    std::shared_ptr<Constraint> constraint,
+    std::shared_ptr<Interpolator> interpolator,
     std::shared_ptr<const spatial::Position> robot_position)
     : SeparationDistanceConstraint(constraint, interpolator) {
     robot_position_ = robot_position;

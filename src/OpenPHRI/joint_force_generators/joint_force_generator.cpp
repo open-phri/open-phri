@@ -1,4 +1,4 @@
-/*      File: torque_generator.cpp
+/*      File: joint_force_generator.cpp
  *       This file is part of the program open-phri
  *       Program description : OpenPHRI: a generic framework to easily and
  * safely control robots in interactions with humans Copyright (C) 2017 -
@@ -18,20 +18,26 @@
  * program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <OpenPHRI/torque_generators/torque_generator.h>
+#include <OpenPHRI/joint_force_generators/joint_force_generator.h>
 
-using namespace phri;
+namespace phri {
 
-const vector::dyn::Force& TorqueGenerator::compute() {
+const vector::dyn::Force& JointForceGenerator::compute() {
     force_.setZero();
     update(force_);
     return force_;
 }
-const vector::dyn::Force& TorqueGenerator::operator()() {
+const vector::dyn::Force& JointForceGenerator::operator()() {
     return compute();
 }
 
-void TorqueGenerator::setRobot(Robot const* robot) {
+void JointForceGenerator::setRobot(Robot const* robot) {
     robot_ = robot;
     force_.resize(robot_->jointCount());
 }
+
+const Robot& JointForceGenerator::robot() const {
+    return *robot_;
+}
+
+} // namespace phri

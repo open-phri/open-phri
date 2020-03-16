@@ -22,8 +22,8 @@
 
 #include <OpenPHRI/constraints/default_constraint.h>
 #include <OpenPHRI/force_generators/force_generator.h>
-#include <OpenPHRI/torque_generators/torque_generator.h>
 #include <OpenPHRI/velocity_generators/velocity_generator.h>
+#include <OpenPHRI/joint_force_generators/joint_force_generator.h>
 #include <OpenPHRI/joint_velocity_generators/joint_velocity_generator.h>
 #include <OpenPHRI/utilities/demangle.h>
 
@@ -67,7 +67,7 @@ void SafetyController::setVerbose(bool on) {
     force_generators_.setVerbose(on, "phri::SafetyController",
                                  "ForceGenerator");
     torque_generators_.setVerbose(on, "phri::SafetyController",
-                                  "TorqueGenerator");
+                                  "JointForceGenerator");
     velocity_generators_.setVerbose(on, "phri::SafetyController",
                                     "VelocityGenerator");
     joint_velocity_generators_.setVerbose(on, "phri::SafetyController",
@@ -95,8 +95,8 @@ bool SafetyController::addForceGenerator(
         force);
 }
 
-bool SafetyController::addTorqueGenerator(
-    const std::string& name, std::shared_ptr<TorqueGenerator> generator,
+bool SafetyController::addJointForceGenerator(
+    const std::string& name, std::shared_ptr<JointForceGenerator> generator,
     bool force) {
     generator->setRobot(&robot_);
     return torque_generators_.add(name, {generator}, force);
@@ -127,7 +127,7 @@ bool SafetyController::removeForceGenerator(const std::string& name) {
     return force_generators_.remove(name);
 }
 
-bool SafetyController::removeTorqueGenerator(const std::string& name) {
+bool SafetyController::removeJointForceGenerator(const std::string& name) {
     return torque_generators_.remove(name);
 }
 
@@ -149,8 +149,8 @@ SafetyController::getForceGenerator(const std::string& name) {
     return force_generators_.get(name).object;
 }
 
-std::shared_ptr<TorqueGenerator>
-SafetyController::getTorqueGenerator(const std::string& name) {
+std::shared_ptr<JointForceGenerator>
+SafetyController::getJointForceGenerator(const std::string& name) {
     return torque_generators_.get(name).object;
 }
 
@@ -351,11 +351,11 @@ SafetyController::force_generators_end() const {
     return force_generators_.end();
 }
 
-SafetyController::storage_const_iterator<TorqueGenerator>
+SafetyController::storage_const_iterator<JointForceGenerator>
 SafetyController::torque_generators_begin() const {
     return torque_generators_.begin();
 }
-SafetyController::storage_const_iterator<TorqueGenerator>
+SafetyController::storage_const_iterator<JointForceGenerator>
 SafetyController::torque_generators_end() const {
     return torque_generators_.end();
 }

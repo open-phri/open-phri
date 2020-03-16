@@ -24,34 +24,7 @@
 namespace phri {
 
 JointVelocityConstraint::JointVelocityConstraint()
-    : maximum_velocities_(std::make_shared<vector::dyn::Velocity>()) {
-}
-
-JointVelocityConstraint::JointVelocityConstraint(
-    std::shared_ptr<vector::dyn::Velocity> maximum_velocities)
-    : maximum_velocities_(maximum_velocities) {
-    if (not maximum_velocities) {
-        throw std::runtime_error(
-            OPEN_PHRI_ERROR("You provided an empty shared pointer"));
-    }
-}
-
-JointVelocityConstraint::JointVelocityConstraint(
-    vector::dyn::Velocity& maximum_velocities)
-    : JointVelocityConstraint(std::shared_ptr<vector::dyn::Velocity>(
-          &maximum_velocities, [](auto p) {})) {
-}
-
-JointVelocityConstraint::JointVelocityConstraint(
-    const vector::dyn::Velocity& maximum_velocities)
-    : JointVelocityConstraint(
-          std::make_shared<vector::dyn::Velocity>(maximum_velocities)) {
-}
-
-JointVelocityConstraint::JointVelocityConstraint(
-    vector::dyn::Velocity&& maximum_velocities)
-    : JointVelocityConstraint(std::make_shared<vector::dyn::Velocity>(
-          std::move(maximum_velocities))) {
+    : maximum_velocities_(vector::dyn::Velocity{}) {
 }
 
 double JointVelocityConstraint::compute() {
@@ -64,7 +37,7 @@ double JointVelocityConstraint::compute() {
 
     double constraint = 1.;
     const auto& joint_vel = robot_->control().joints().totalVelocity();
-    const auto& max_joint_vel = *maximum_velocities_;
+    const auto& max_joint_vel = maximumVelocities();
 
     for (size_t i = 0; i < joint_vel.size(); ++i) {
         constraint =
@@ -75,16 +48,11 @@ double JointVelocityConstraint::compute() {
 }
 
 vector::dyn::Velocity& JointVelocityConstraint::maximumVelocities() {
-    return *maximum_velocities_;
+    return maximum_velocities_;
 }
 
 const vector::dyn::Velocity&
 JointVelocityConstraint::maximumVelocities() const {
-    return *maximum_velocities_;
-}
-
-std::shared_ptr<vector::dyn::Velocity>
-JointVelocityConstraint::maximumVelocitiesPtr() const {
     return maximum_velocities_;
 }
 

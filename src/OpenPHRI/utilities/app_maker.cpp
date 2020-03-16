@@ -1,16 +1,24 @@
-#include <OpenPHRI/OpenPHRI.h>
+#include <OpenPHRI/utilities/app_maker.h>
+#include <OpenPHRI/utilities/clock.h>
+#include <OpenPHRI/constraints/constraint.h>
+#include <OpenPHRI/velocity_generators/velocity_generator.h>
+#include <OpenPHRI/force_generators/force_generator.h>
+#include <OpenPHRI/joint_velocity_generators/joint_velocity_generator.h>
+#include <OpenPHRI/joint_force_generators/joint_force_generator.h>
 
 #include <pid/rpath.h>
 
-using namespace phri;
+#include <optional>
+
+namespace phri {
 
 struct AppMaker::pImpl {
-    RobotPtr robot;
-    SafetyControllerPtr controller;
-    RobotModelPtr model;
-    DriverPtr driver;
-    DataLoggerPtr data_logger;
-    ClockPtr clock;
+    std::optional<Robot> robot;
+    std::optional<SafetyController> controller;
+    std::optional<RobotModel> model;
+    std::shared_ptr<Driver> driver;
+    std::optional<DataLogger> data_logger;
+    std::optional<Clock> clock;
     YAML::Node app_configuration;
     double init_timeout;
     double start_timeout;
@@ -27,13 +35,13 @@ AppMaker::AppMaker(const std::string& configuration_file)
     /***				Robot				***/
     std::cout << "[phri::AppMaker] Creating a new robot..." << std::flush;
     auto cp_conf = conf["robot"]["control_point"];
-    impl_->robot = std::make_shared<Robot>(
+    impl_->robot.emplace(
         spatial::Frame::getAndSave(cp_conf["frame"].as<std::string>()),
         spatial::Frame::getAndSave(cp_conf["parent"].as<std::string>()));
     std::cout << " done." << std::endl;
 
     std::cout << "[phri::AppMaker] Loading the robot model..." << std::flush;
-    impl_->model = std::make_shared<RobotModel>(*impl_->robot, conf);
+    impl_->model.emplace(*impl_->robot, conf);
     std::cout << " done." << std::endl;
 
     std::cout
@@ -63,21 +71,21 @@ AppMaker::AppMaker(const std::string& configuration_file)
     /***			Controller configuration			***/
     std::cout << "[phri::AppMaker] Creating the robot controller..."
               << std::flush;
-    impl_->controller = std::make_shared<SafetyController>(*impl_->robot, conf);
+    impl_->controller.emplace(*impl_->robot, conf);
     std::cout << " done." << std::endl;
 
     /***			Data logger configuration			***/
     std::cout << "[phri::AppMaker] Creating the data logger..." << std::flush;
-    impl_->clock = std::make_shared<Clock>(impl_->driver->getTimeStep());
-    impl_->data_logger = std::make_shared<DataLogger>(
+    impl_->clock.emplace(impl_->driver->getTimeStep());
+    impl_->data_logger.emplace(
         PID_PATH(conf["data_logger"]["folder"].as<std::string>("/tmp")),
         impl_->clock->getTime(), true);
 
     if (conf["data_logger"]["log_control_data"].as<bool>(false)) {
-        impl_->data_logger->logSafetyControllerData(impl_->controller.get());
+        impl_->data_logger->logSafetyControllerData(&impl_->controller.value());
     }
     if (conf["data_logger"]["log_robot_data"].as<bool>(false)) {
-        impl_->data_logger->logRobotData(impl_->robot);
+        impl_->data_logger->logRobotData(&impl_->robot.value());
     }
     std::cout << " done." << std::endl;
 
@@ -162,42 +170,24 @@ Robot& AppMaker::robot() {
     return *impl_->robot;
 }
 
-RobotPtr AppMaker::robotPtr() const {
-    return impl_->robot;
-}
-
 SafetyController& AppMaker::controller() {
     return *impl_->controller;
-}
-
-SafetyControllerPtr AppMaker::controllerPtr() const {
-    return impl_->controller;
 }
 
 RobotModel& AppMaker::model() {
     return *impl_->model;
 }
 
-RobotModelPtr AppMaker::modelPtr() const {
-    return impl_->model;
-}
-
 Driver& AppMaker::driver() {
     return *impl_->driver;
-}
-
-DriverPtr AppMaker::driverPtr() const {
-    return impl_->driver;
 }
 
 DataLogger& AppMaker::dataLogger() {
     return *impl_->data_logger;
 }
 
-DataLoggerPtr AppMaker::dataLoggerPtr() const {
-    return impl_->data_logger;
-}
-
 const YAML::Node& AppMaker::getParameters() const {
     return impl_->app_configuration;
 }
+
+} // namespace phri

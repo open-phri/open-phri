@@ -231,7 +231,7 @@ private:
     static std::map<std::string, int> connection_to_client_id;
 };
 
-using VREPDriverPtr = std::shared_ptr<VREPDriver>;
-using VREPDriverConstPtr = std::shared_ptr<const VREPDriver>;
+
+
 
 } // namespace phri

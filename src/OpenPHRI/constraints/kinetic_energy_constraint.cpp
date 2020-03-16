@@ -24,81 +24,29 @@
 namespace phri {
 
 KineticEnergyConstraint::KineticEnergyConstraint()
-    : mass_(std::make_shared<scalar::Mass>(0.)),
-      maximum_kinetic_energy_(std::make_shared<scalar::Energy>(0.)) {
-    create();
-}
-
-KineticEnergyConstraint::KineticEnergyConstraint(
-    std::shared_ptr<scalar::Mass> mass,
-    std::shared_ptr<scalar::Energy> maximum_kinetic_energy)
-    : mass_(mass), maximum_kinetic_energy_(maximum_kinetic_energy) {
-    if (not mass or not maximum_kinetic_energy) {
-        throw std::runtime_error(
-            OPEN_PHRI_ERROR("You provided an empty shared pointer"));
-    }
-    create();
-}
-
-KineticEnergyConstraint::KineticEnergyConstraint(
-    scalar::Mass& mass, scalar::Energy& maximum_kinetic_energy)
-    : KineticEnergyConstraint(
-          std::shared_ptr<scalar::Mass>(&mass, [](auto p) {}),
-          std::shared_ptr<scalar::Energy>(&maximum_kinetic_energy,
-                                          [](auto p) {})) {
-    create();
-}
-
-KineticEnergyConstraint::KineticEnergyConstraint(
-    const scalar::Mass& mass, const scalar::Energy& maximum_kinetic_energy)
-    : KineticEnergyConstraint(
-          std::make_shared<scalar::Mass>(mass),
-          std::make_shared<scalar::Energy>(maximum_kinetic_energy)) {
-    create();
-}
-
-KineticEnergyConstraint::KineticEnergyConstraint(
-    scalar::Mass&& mass, scalar::Energy&& maximum_kinetic_energy)
-    : KineticEnergyConstraint(
-          std::make_shared<scalar::Mass>(std::move(mass)),
-          std::make_shared<scalar::Energy>(std::move(maximum_kinetic_energy))) {
-    create();
+    : KineticEnergyConstraint{scalar::Mass{0.}, scalar::Energy{0.}} {
 }
 
 double KineticEnergyConstraint::compute() {
-    kinetic_energy_maximum_velocity_->value() =
-        std::sqrt(2. * maximum_kinetic_energy_->value() / mass_->value());
+    maximumVelocity().value() =
+        std::sqrt(2. * maximumKineticEnergy().value() / mass().value());
 
     return VelocityConstraint::compute();
 }
 
-void KineticEnergyConstraint::create() {
-    kinetic_energy_maximum_velocity_ = std::make_shared<scalar::Velocity>(0.);
-    maximum_velocity_ = kinetic_energy_maximum_velocity_;
-}
-
 scalar::Mass& KineticEnergyConstraint::mass() {
-    return *mass_;
+    return mass_;
 }
 
-scalar::Mass KineticEnergyConstraint::mass() const {
-    return *mass_;
-}
-
-std::shared_ptr<scalar::Mass> KineticEnergyConstraint::massPtr() const {
+const scalar::Mass& KineticEnergyConstraint::mass() const {
     return mass_;
 }
 
 scalar::Energy& KineticEnergyConstraint::maximumKineticEnergy() {
-    return *maximum_kinetic_energy_;
+    return maximum_kinetic_energy_;
 }
 
-scalar::Energy KineticEnergyConstraint::maximumKineticEnergy() const {
-    return *maximum_kinetic_energy_;
-}
-
-std::shared_ptr<scalar::Energy>
-KineticEnergyConstraint::maximumKineticEnergyPtr() const {
+const scalar::Energy& KineticEnergyConstraint::maximumKineticEnergy() const {
     return maximum_kinetic_energy_;
 }
 

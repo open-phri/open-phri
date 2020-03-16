@@ -36,6 +36,8 @@
 
 #include <physical_quantities/spatial/position.h>
 
+// TODO check and possibly improve the separation distance constraint
+
 namespace phri {
 
 /** @brief A meta-constraint to adapt a given constraint depending on the
@@ -55,7 +57,7 @@ public:
      * @param interpolator The interpolator used to tune the constraint.
      */
     SeparationDistanceConstraint(std::shared_ptr<Constraint> constraint,
-                                 InterpolatorPtr interpolator);
+                                 std::shared_ptr<Interpolator> interpolator);
 
     /**
      * @brief Construct a separaration distance constraint with a given
@@ -67,7 +69,8 @@ public:
      * objects.
      */
     SeparationDistanceConstraint(
-        std::shared_ptr<Constraint> constraint, InterpolatorPtr interpolator,
+        std::shared_ptr<Constraint> constraint,
+        std::shared_ptr<Interpolator> interpolator,
         std::shared_ptr<const spatial::Position> robot_position);
 
     virtual double compute() override;
@@ -85,7 +88,7 @@ private:
     double closestObjectDistance();
 
     std::shared_ptr<Constraint> constraint_;
-    InterpolatorPtr interpolator_;
+    std::shared_ptr<Interpolator> interpolator_;
     std::shared_ptr<const spatial::Position> robot_position_;
     std::shared_ptr<double> separation_distance_;
 };

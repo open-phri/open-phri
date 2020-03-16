@@ -22,43 +22,27 @@
 
 namespace phri {
 
-// ForceProxy::ForceProxy(spatial::Frame frame)
-//     : ForceProxy(frame, spatial::Force{frame}) {
-// }
-
-ForceProxy::ForceProxy(std::shared_ptr<spatial::Force> velocity)
-    : external_force_(velocity) {
+ForceProxy::ForceProxy()
+    : external_force_{spatial::Force::Zero(spatial::Frame::Ref(frame()))} {
 }
 
-ForceProxy::ForceProxy(spatial::Force& velocity)
-    : ForceProxy(std::shared_ptr<spatial::Force>(&velocity, [](auto p) {})) {
+ForceProxy::ForceProxy(const ForceProxy::generator& generator)
+    : generator_{generator} {
 }
 
-ForceProxy::ForceProxy(const spatial::Force& velocity)
-    : ForceProxy(std::make_shared<spatial::Force>(velocity)) {
-}
-
-ForceProxy::ForceProxy(spatial::Force&& velocity)
-    : ForceProxy(std::make_shared<spatial::Force>(std::move(velocity))) {
-}
-
-void ForceProxy::update(spatial::Force& velocity) {
+void ForceProxy::update(spatial::Force& wrench) {
     if (generator_) {
-        velocity = generator_();
+        wrench = generator_();
     } else {
-        velocity = *external_force_;
+        wrench = force();
     }
 }
 
 spatial::Force& ForceProxy::force() {
-    return *external_force_;
+    return external_force_;
 }
 
 const spatial::Force& ForceProxy::force() const {
-    return *external_force_;
-}
-
-std::shared_ptr<spatial::Force> ForceProxy::forcePtr() const {
     return external_force_;
 }
 

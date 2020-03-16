@@ -26,25 +26,6 @@ namespace phri {
 NullSpaceMotion::NullSpaceMotion() : NullSpaceMotion(vector::dyn::Velocity{}) {
 }
 
-NullSpaceMotion::NullSpaceMotion(
-    std::shared_ptr<vector::dyn::Velocity> velocity)
-    : joint_velocity_(velocity) {
-}
-
-NullSpaceMotion::NullSpaceMotion(vector::dyn::Velocity& velocity)
-    : NullSpaceMotion(
-          std::shared_ptr<vector::dyn::Velocity>(&velocity, [](auto p) {})) {
-}
-
-NullSpaceMotion::NullSpaceMotion(const vector::dyn::Velocity& velocity)
-    : NullSpaceMotion(std::make_shared<vector::dyn::Velocity>(velocity)) {
-}
-
-NullSpaceMotion::NullSpaceMotion(vector::dyn::Velocity&& velocity)
-    : NullSpaceMotion(
-          std::make_shared<vector::dyn::Velocity>(std::move(velocity))) {
-}
-
 void NullSpaceMotion::update(vector::dyn::Velocity& joint_velocity) {
     null_space_projector_ = identity_ - robot().control().jacobianInverse() *
                                             robot().control().jacobian();
@@ -52,22 +33,19 @@ void NullSpaceMotion::update(vector::dyn::Velocity& joint_velocity) {
 }
 
 vector::dyn::Velocity& NullSpaceMotion::velocity() {
-    return *joint_velocity_;
+    return joint_velocity_;
 }
 
 const vector::dyn::Velocity& NullSpaceMotion::velocity() const {
-    return *joint_velocity_;
-}
-
-std::shared_ptr<vector::dyn::Velocity> NullSpaceMotion::velocityPtr() const {
     return joint_velocity_;
 }
 
 void NullSpaceMotion::setRobot(Robot const* new_robot) {
     JointVelocityGenerator::setRobot(new_robot);
-    velocity().resize(robot().jointCount());
-
     auto dofs = robot().jointCount();
+
+    velocity().resize(dofs);
+    velocity().setZero();
 
     null_space_projector_.resize(dofs, dofs);
     identity_.resize(dofs, dofs);

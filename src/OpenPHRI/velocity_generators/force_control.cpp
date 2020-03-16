@@ -39,37 +39,8 @@ ForceControl::Parameters::Parameters(
 }
 
 ForceControl::ForceControl(TargetType type)
-    : ForceControl(spatial::Force::Zero(spatial::Frame::Ref(frame())),
-                   Parameters{}, type) {
-}
-
-ForceControl::ForceControl(std::shared_ptr<spatial::Force> target,
-                           std::shared_ptr<Parameters> parameters,
-                           TargetType type)
-    : target_(target),
-      parameters_(parameters),
-      type_(type),
-      filter_coeff_(1.),
-      prev_error_{spatial::Force::Zero(spatial::Frame::Ref(frame()))} {
-}
-
-ForceControl::ForceControl(spatial::Force& target, Parameters& parameters,
-                           TargetType type)
-    : ForceControl(std::shared_ptr<spatial::Force>(&target, [](auto p) {}),
-                   std::shared_ptr<Parameters>(&parameters, [](auto p) {}),
-                   type) {
-}
-
-ForceControl::ForceControl(const spatial::Force& target,
-                           const Parameters& parameters, TargetType type)
-    : ForceControl(std::make_shared<spatial::Force>(target),
-                   std::make_shared<Parameters>(parameters), type) {
-}
-
-ForceControl::ForceControl(spatial::Force&& target, Parameters&& parameters,
-                           TargetType type)
-    : ForceControl(std::make_shared<spatial::Force>(std::move(target)),
-                   std::make_shared<Parameters>(std::move(parameters)), type) {
+    : ForceControl{spatial::Force::Zero(spatial::Frame::Ref(frame())),
+                   Parameters{}, type} {
 }
 
 void ForceControl::configureFilter(scalar::TimeConstant time_constant) {
@@ -125,26 +96,18 @@ void ForceControl::applySelection(Eigen::Vector6d& vec) const {
 }
 
 spatial::Force& ForceControl::target() {
-    return *target_;
+    return target_;
 }
 
 const spatial::Force& ForceControl::target() const {
-    return *target_;
-}
-
-std::shared_ptr<spatial::Force> ForceControl::targetPtr() const {
     return target_;
 }
 
 ForceControl::Parameters& ForceControl::parameters() {
-    return *parameters_;
+    return parameters_;
 }
 
 const ForceControl::Parameters& ForceControl::parameters() const {
-    return *parameters_;
-}
-
-std::shared_ptr<ForceControl::Parameters> ForceControl::parametersPtr() const {
     return parameters_;
 }
 

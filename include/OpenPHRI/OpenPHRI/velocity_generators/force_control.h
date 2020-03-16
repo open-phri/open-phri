@@ -27,10 +27,12 @@
 
 #include <OpenPHRI/velocity_generators/velocity_generator.h>
 #include <OpenPHRI/definitions.h>
-#include <array>
+#include <OpenPHRI/detail/universal_wrapper.hpp>
 
 #include <physical_quantities/scalar/cutoff_frequency.h>
 #include <physical_quantities/scalar/time_constant.h>
+
+#include <array>
 
 namespace phri {
 
@@ -77,48 +79,28 @@ public:
     //! or to the robot
     explicit ForceControl(TargetType type);
 
-    //! \brief  Construct a new Force Control object with given pointed target
-    //! and parameters
-    //! \details Use ForceControl::target() to set the desired force value
+    //! \brief Construct a new ForceControl object using the
+    //! given a spatial::Force and ForceControl::Parameters values, references
+    //! or (shared) pointers
+    //!
+    //! If either target/parameters are a const references/pointers, using
+    //! target()/parameters() to modify them will result in undefined behavior
+    //!
+    //! \tparam ForceT The type of the value (automatically deduced)
+    //! \tparam ParamT The type of the value (automatically deduced)
     //! \param target The targeted force
     //! \param parameters The force control law parameters
     //! \param type If the regulated force is the one applied to the environment
     //! or to the robot
-    ForceControl(std::shared_ptr<spatial::Force> target,
-                 std::shared_ptr<Parameters> parameters, TargetType type);
-
-    //! \brief  Construct a new Force Control object with given referenced
-    //! target and parameters
-    //! \details Use ForceControl::target() to set the desired force value
-    //! \param target The targeted force. Make sure that \p target outlives the
-    //! generator
-    //! \param parameters The force control law parameters. Make sure that \p
-    //! parameters outlives the generator
-    //! \param type If the regulated force is the one applied to the environment
-    //! or to the robot
-    ForceControl(spatial::Force& target, Parameters& parameters,
-                 TargetType type);
-
-    //! \brief  Construct a new Force Control object with given target
-    //! and parameters values
-    //! \details Use ForceControl::target() to set the desired force value
-    //! \param target The targeted force
-    //! \param parameters The force control law parameters
-    //! \param type If the regulated force is the one applied to the environment
-    //! or to the robot
-    ForceControl(const spatial::Force& target, const Parameters& parameters,
-
-                 TargetType type);
-
-    //! \brief  Construct a new Force Control object with given target
-    //! and parameters values
-    //! \details Use ForceControl::target() to set the desired force value
-    //! \param target The targeted force
-    //! \param parameters The force control law parameters
-    //! \param type If the regulated force is the one applied to the environment
-    //! or to the robot
-    ForceControl(spatial::Force&& target, Parameters&& parameters,
-                 TargetType type);
+    template <typename ForceT, typename ParamT>
+    explicit ForceControl(ForceT&& target, ParamT&& parameters,
+                          TargetType type) noexcept
+        : target_{std::forward<ForceT>(target)},
+          parameters_{std::forward<ParamT>(parameters)},
+          type_{type},
+          filter_coeff_(1.),
+          prev_error_{spatial::Force::Zero(spatial::Frame::Ref(frame()))} {
+    }
 
     //! \brief Configure the filter acting on the error
     //! \details Using this filter will provide a smoother derivative of the
@@ -142,11 +124,6 @@ public:
     //! \return double The target spatial::Force value
     const spatial::Force& target() const;
 
-    //! \brief Access to the shared pointer holding the target spatial::Force
-    //! used by the generator \return std::shared_ptr<double> A shared pointer
-    //! to the spatial::Force target
-    std::shared_ptr<spatial::Force> targetPtr() const;
-
     //! \brief Read/write access the control parameters used by the generator
     //! \return double& A reference to the control parameters
     Parameters& parameters();
@@ -155,18 +132,12 @@ public:
     //! \return double The target control parameters
     const Parameters& parameters() const;
 
-    //! \brief Access to the shared pointer holding the control parameters used
-    //! by the generator
-    //! \return std::shared_ptr<double> A shared pointer to the control
-    //! parameters
-    std::shared_ptr<Parameters> parametersPtr() const;
-
 protected:
     virtual void update(spatial::Velocity& velocity) override;
     void applySelection(Eigen::Vector6d& vec) const;
 
-    std::shared_ptr<spatial::Force> target_;
-    std::shared_ptr<Parameters> parameters_;
+    detail::UniversalWrapper<spatial::Force> target_;
+    detail::UniversalWrapper<Parameters> parameters_;
     TargetType type_;
     double filter_coeff_;
     spatial::Force prev_error_;

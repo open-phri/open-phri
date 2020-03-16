@@ -26,7 +26,7 @@
 namespace phri {
 
 std::shared_ptr<SafetyController>
-NewSafetyController(Matrix6dPtr damping_matrix) {
+NewSafetyController(std::shared_ptr<Matrix6d> damping_matrix) {
     return std::make_shared<SafetyController>(damping_matrix);
 }
 

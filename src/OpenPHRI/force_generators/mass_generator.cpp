@@ -22,10 +22,10 @@
 
 using namespace phri;
 
-MassGenerator::MassGenerator(
-    std::shared_ptr<spatial::Mass> mass,
-    std::shared_ptr<spatial::Acceleration> target_acceleration)
-    : mass_(mass), target_acceleration_(target_acceleration) {
+MassGenerator::MassGenerator()
+    : mass_{spatial::Mass::Zero(spatial::Frame::Ref(frame()))},
+      target_acceleration_{
+          spatial::Acceleration::Zero(spatial::Frame::Ref(frame()))} {
 }
 
 void MassGenerator::update(spatial::Force& force) {
@@ -55,4 +55,20 @@ void MassGenerator::update(spatial::Force& force) {
     // }
 
     // force = *mass_ * error;
+}
+
+spatial::Mass& MassGenerator::mass() {
+    return mass_;
+}
+
+const spatial::Mass& MassGenerator::mass() const {
+    return mass_;
+}
+
+spatial::Acceleration& MassGenerator::targetAcceleration() {
+    return target_acceleration_;
+}
+
+const spatial::Acceleration& MassGenerator::targetAcceleration() const {
+    return target_acceleration_;
 }

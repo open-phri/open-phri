@@ -28,6 +28,7 @@
 
 #include <OpenPHRI/definitions.h>
 #include <OpenPHRI/constraints/constraint.h>
+#include <OpenPHRI/detail/universal_wrapper.hpp>
 
 #include <physical_quantities/vector/acceleration.h>
 
@@ -42,36 +43,18 @@ public:
     //! it to the desired value
     JointAccelerationConstraint();
 
-    //! \brief Construct a new JointAccelerationConstraint object using the
-    //! given pointed value
-    //! \param maximum_acceleration A shared pointer to the desired maximum
-    //! acceleration(rad/s², m/s²).Throws if the pointer is empty.
-    explicit JointAccelerationConstraint(
-        std::shared_ptr<vector::dyn::Acceleration> maximum_acceleration);
-
-    //! \brief Construct a new JointAccelerationConstraint object using the
-    //! given referenced value
-    //! \param maximum_acceleration A reference to the desired maximum
-    //! acceleration (rad/s², m/s²). Make sure that \p maximum_acceleration
-    //! outlives the constraint
-    explicit JointAccelerationConstraint(
-        vector::dyn::Acceleration& maximum_acceleration);
-
-    //! \brief Construct a new JointAccelerationConstraint object using the
-    //! given value
-    //! \param maximum_acceleration The value of the desired maximum
-    //! acceleration (rad/s², m/s²). Use
-    //! JointAccelerationConstraint::maximumAcceleration() to update the limit
-    explicit JointAccelerationConstraint(
-        const vector::dyn::Acceleration& maximum_acceleration);
-
-    //! \brief Construct a new JointAccelerationConstraint object using the
-    //! given value
-    //! \param maximum_acceleration The value of the desired maximum
-    //! acceleration (rad/s², m/s²). Use
-    //! JointAccelerationConstraint::maximumAcceleration() to update the limit
-    explicit JointAccelerationConstraint(
-        vector::dyn::Acceleration&& maximum_acceleration);
+    //! \brief Construct a new AccelerationConstraint object using the given
+    //! vector::dyn::Acceleration value, reference or (shared) pointer
+    //!
+    //! If maximum_acceleration is a const reference/pointer, using
+    //! maximumAcceleration() to modify it will result in undefined behavior
+    //!
+    //! \tparam AmaxT The type of the value (automatically deduced)
+    //! \param value The desired maximum acceleration (m/s)
+    template <typename AmaxT>
+    explicit JointAccelerationConstraint(AmaxT&& maximum_acceleration) noexcept
+        : maximum_acceleration_{std::forward<AmaxT>(maximum_acceleration)} {
+    }
 
     //! \brief Compute the acceleration constraint based on the robot state
     //! \return double The constraint value [0,1]
@@ -83,20 +66,13 @@ public:
 
     //! \brief Read access the acceleration limit used by the constraint
     //! \return vector::dyn::Acceleration The acceleration limit value
-    vector::dyn::Acceleration maximumAcceleration() const;
-
-    //! \brief Access to the shared pointer holding the acceleration limit used
-    //! by the constraint
-    //! \return std::shared_ptr<vector::dyn::Acceleration> A shared pointer to
-    //! the acceleration limit
-    std::shared_ptr<vector::dyn::Acceleration> maximumAccelerationPtr() const;
+    const vector::dyn::Acceleration& maximumAcceleration() const;
 
 protected:
     virtual void setRobot(Robot const* robot) override;
 
 private:
-    //! \brief Shared pointer holding the acceleration limit.
-    std::shared_ptr<vector::dyn::Acceleration> maximum_acceleration_;
+    detail::UniversalWrapper<vector::dyn::Acceleration> maximum_acceleration_;
 };
 
 } // namespace phri

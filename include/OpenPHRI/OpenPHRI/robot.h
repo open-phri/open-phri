@@ -487,7 +487,4 @@ private:
     ControlData control_;
 };
 
-using RobotPtr = std::shared_ptr<Robot>;
-using RobotConstPtr = std::shared_ptr<const Robot>;
-
 } // namespace phri

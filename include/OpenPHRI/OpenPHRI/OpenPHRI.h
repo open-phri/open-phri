@@ -42,5 +42,5 @@
 #include <OpenPHRI/velocity_generators.h>
 #include <OpenPHRI/joint_velocity_generators.h>
 #include <OpenPHRI/force_generators.h>
-#include <OpenPHRI/torque_generators.h>
+#include <OpenPHRI/joint_force_generators.h>
 #include <OpenPHRI/utilities.h>

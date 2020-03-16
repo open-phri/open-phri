@@ -115,9 +115,9 @@ public:
      * @return true if the torque generator has successfully been added to the
      * controller, false otherwise.
      */
-    bool addTorqueGenerator(const std::string& name,
-                            std::shared_ptr<TorqueGenerator> generator,
-                            bool force = false);
+    bool addJointForceGenerator(const std::string& name,
+                                std::shared_ptr<JointForceGenerator> generator,
+                                bool force = false);
 
     /**
      * @brief Add a new velocity generator to the controller.
@@ -205,32 +205,32 @@ public:
     }
 
     /**
-     * @brief Shortcut for the SafetyController::addTorqueGenerator method.
+     * @brief Shortcut for the SafetyController::addJointForceGenerator method.
      */
     template <typename T>
-    typename std::enable_if<std::is_base_of<TorqueGenerator, T>::value,
+    typename std::enable_if<std::is_base_of<JointForceGenerator, T>::value,
                             bool>::type
     add(const std::string& name, const std::shared_ptr<T>& obj,
         bool force = false) {
-        return addTorqueGenerator(name, obj, force);
+        return addJointForceGenerator(name, obj, force);
     }
 
     /**
-     * @brief Shortcut for the SafetyController::addTorqueGenerator method.
+     * @brief Shortcut for the SafetyController::addJointForceGenerator method.
      */
     template <typename T>
-    typename std::enable_if<std::is_base_of<TorqueGenerator, T>::value,
+    typename std::enable_if<std::is_base_of<JointForceGenerator, T>::value,
                             bool>::type
     add(const std::string& name, T&& obj, bool force = false) {
-        return addTorqueGenerator(name, std::make_shared<T>(std::move(obj)),
-                                  force);
+        return addJointForceGenerator(name, std::make_shared<T>(std::move(obj)),
+                                      force);
     }
 
     template <typename T, typename... Args>
-    typename std::enable_if<std::is_base_of<TorqueGenerator, T>::value,
+    typename std::enable_if<std::is_base_of<JointForceGenerator, T>::value,
                             bool>::type
     add(const std::string& name, Args&&... args) {
-        return addTorqueGenerator(
+        return addJointForceGenerator(
             name, std::make_shared<T>(std::forward<Args>(args)...), false);
     }
 
@@ -318,7 +318,7 @@ public:
      * @return true if the torque generator has successfully been removed from
      * the controller, false otherwise.
      */
-    bool removeTorqueGenerator(const std::string& name);
+    bool removeJointForceGenerator(const std::string& name);
 
     /**
      * @brief Remove a velocity generator from the controller.
@@ -358,8 +358,8 @@ public:
      * @return A pointer to the torque generator. Store a null pointer if the
      * torque generator doesn't exist.
      */
-    std::shared_ptr<TorqueGenerator>
-    getTorqueGenerator(const std::string& name);
+    std::shared_ptr<JointForceGenerator>
+    getJointForceGenerator(const std::string& name);
 
     /**
      * @brief Retrieve a velocity generator from the controller.
@@ -404,15 +404,15 @@ public:
     }
 
     /**
-     * @brief Shortcut for the SafetyController::getTorqueGenerator method, with
-     * pointer type conversion.
+     * @brief Shortcut for the SafetyController::getJointForceGenerator method,
+     * with pointer type conversion.
      */
     template <typename T>
     std::shared_ptr<T>
     get(const std::string& name,
         typename std::enable_if<
-            std::is_base_of<TorqueGenerator, T>::value>::type* = nullptr) {
-        return getTorqueGenerator(name);
+            std::is_base_of<JointForceGenerator, T>::value>::type* = nullptr) {
+        return getJointForceGenerator(name);
     }
 
     /**
@@ -514,8 +514,8 @@ public:
     storage_const_iterator<ForceGenerator> force_generators_begin() const;
     storage_const_iterator<ForceGenerator> force_generators_end() const;
 
-    storage_const_iterator<TorqueGenerator> torque_generators_begin() const;
-    storage_const_iterator<TorqueGenerator> torque_generators_end() const;
+    storage_const_iterator<JointForceGenerator> torque_generators_begin() const;
+    storage_const_iterator<JointForceGenerator> torque_generators_end() const;
 
     storage_const_iterator<VelocityGenerator> velocity_generators_begin() const;
     storage_const_iterator<VelocityGenerator> velocity_generators_end() const;
@@ -535,7 +535,7 @@ protected:
 
     ObjectCollection<StorageWrapper<Constraint>> constraints_;
     ObjectCollection<StorageWrapper<ForceGenerator>> force_generators_;
-    ObjectCollection<StorageWrapper<TorqueGenerator>> torque_generators_;
+    ObjectCollection<StorageWrapper<JointForceGenerator>> torque_generators_;
     ObjectCollection<StorageWrapper<VelocityGenerator>> velocity_generators_;
     ObjectCollection<StorageWrapper<JointVelocityGenerator>>
         joint_velocity_generators_;
@@ -547,8 +547,5 @@ protected:
     double lambda2_;
     double sigma_min_threshold_;
 };
-
-using SafetyControllerPtr = std::shared_ptr<SafetyController>;
-using SafetyControllerConstPtr = std::shared_ptr<const SafetyController>;
 
 } // namespace phri

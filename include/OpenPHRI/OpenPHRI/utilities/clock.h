@@ -51,7 +51,4 @@ private:
     std::shared_ptr<double> time_;
 };
 
-using ClockPtr = std::shared_ptr<Clock>;
-using ClockConstPtr = std::shared_ptr<const Clock>;
-
 } // namespace phri

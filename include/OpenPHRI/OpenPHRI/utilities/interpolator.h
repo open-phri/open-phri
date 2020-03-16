@@ -77,7 +77,4 @@ protected:
     std::shared_ptr<double> output_;
 };
 
-using InterpolatorPtr = std::shared_ptr<Interpolator>;
-using InterpolatorConstPtr = std::shared_ptr<const Interpolator>;
-
 } // namespace phri

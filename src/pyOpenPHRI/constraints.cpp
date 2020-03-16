@@ -68,14 +68,14 @@ std::shared_ptr<EmergencyStopConstraint> NewEmergencyStopConstraint(
 }
 
 std::shared_ptr<SeparationDistanceConstraint>
-NewSeparationDistanceConstraint(ConstraintPtr constraint,
-                                InterpolatorPtr interpolator) {
+NewSeparationDistanceConstraint(std::shared_ptr<Constraint> constraint,
+                                std::shared_ptr<Interpolator> interpolator) {
     return std::make_shared<SeparationDistanceConstraint>(constraint,
                                                           interpolator);
 }
 
 std::shared_ptr<SeparationDistanceConstraint> NewSeparationDistanceConstraint(
-    ConstraintPtr constraint, InterpolatorPtr interpolator,
+    std::shared_ptr<Constraint> constraint, std::shared_ptr<Interpolator> interpolator,
     std::shared_ptr<const Vector6d> robot_position) {
     return std::make_shared<SeparationDistanceConstraint>(
         constraint, interpolator, robot_position);
@@ -106,7 +106,7 @@ void wrapConstraints() {
         "Create a new instance of a EmergencyStopConstraint shared_ptr");
     def("NewSeparationDistanceConstraint",
         (std::shared_ptr<SeparationDistanceConstraint>(*)(
-            ConstraintPtr, InterpolatorPtr, std::shared_ptr<const Vector6d>))0,
+            std::shared_ptr<Constraint>, std::shared_ptr<Interpolator>, std::shared_ptr<const Vector6d>))0,
         NewSeparationDistanceConstraint_overloads(
             args("constraint", "interpolator", "robot_position"),
             "Create a new instance of a SeparationDistanceConstraint "

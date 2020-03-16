@@ -22,44 +22,28 @@
 
 namespace phri {
 
-VelocityProxy::VelocityProxy(std::shared_ptr<spatial::Velocity> velocity)
-    : external_velocity_(velocity) {
-}
-
-VelocityProxy::VelocityProxy(spatial::Velocity& velocity)
-    : VelocityProxy(
-          std::shared_ptr<spatial::Velocity>(&velocity, [](auto p) {})) {
-}
-
-VelocityProxy::VelocityProxy(const spatial::Velocity& velocity)
-    : VelocityProxy(std::make_shared<spatial::Velocity>(velocity)) {
-}
-
-VelocityProxy::VelocityProxy(spatial::Velocity&& velocity)
-    : VelocityProxy(std::make_shared<spatial::Velocity>(std::move(velocity))) {
+VelocityProxy::VelocityProxy()
+    : external_velocity_(
+          spatial::Velocity::Zero(spatial::Frame::Ref(frame()))) {
 }
 
 VelocityProxy::VelocityProxy(const generator& generator)
     : generator_(generator) {
 }
 
-void VelocityProxy::update(spatial::Velocity& velocity) {
+void VelocityProxy::update(spatial::Velocity& new_velocity) {
     if (generator_) {
-        velocity = generator_();
+        new_velocity = generator_();
     } else {
-        velocity = *external_velocity_;
+        new_velocity = velocity();
     }
 }
 
 spatial::Velocity& VelocityProxy::velocity() {
-    return *external_velocity_;
+    return external_velocity_;
 }
 
 const spatial::Velocity& VelocityProxy::velocity() const {
-    return *external_velocity_;
-}
-
-std::shared_ptr<spatial::Velocity> VelocityProxy::velocityPtr() const {
     return external_velocity_;
 }
 

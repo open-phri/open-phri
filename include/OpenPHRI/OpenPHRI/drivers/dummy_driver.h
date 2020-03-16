@@ -71,7 +71,4 @@ private:
     std::chrono::high_resolution_clock::time_point last_sync_;
 };
 
-using DummyDriverPtr = std::shared_ptr<DummyDriver>;
-using DummyDriverConstPtr = std::shared_ptr<const DummyDriver>;
-
 } // namespace phri

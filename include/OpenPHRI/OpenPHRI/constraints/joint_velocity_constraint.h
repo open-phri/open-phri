@@ -28,6 +28,7 @@
 
 #include <OpenPHRI/definitions.h>
 #include <OpenPHRI/constraints/constraint.h>
+#include <OpenPHRI/detail/universal_wrapper.hpp>
 
 #include <physical_quantities/vector/velocity.h>
 
@@ -43,34 +44,17 @@ public:
     JointVelocityConstraint();
 
     //! \brief Construct a new JointVelocityConstraint object using the given
-    //! pointed value
-    //! \param maximum_velocities A shared pointer to the desired
-    //! maximum velocity (rad/s, m/s). Throws if the pointer is empty.
-    explicit JointVelocityConstraint(
-        std::shared_ptr<vector::dyn::Velocity> maximum_velocities);
-
-    //! \brief Construct a new JointVelocityConstraint object using the given
-    //! referenced value
-    //! \param maximum_velocities A reference to the desired
-    //! maximum velocity (rad/s, m/s). Make sure that \p maximum_velocities
-    //! outlives the constraint
-    explicit JointVelocityConstraint(vector::dyn::Velocity& maximum_velocities);
-
-    //! \brief Construct a new JointVelocityConstraint object using the given
-    //! value
-    //! \param maximum_velocities The value of the desired maximum
-    //! velocity (rad/s, m/s). Use JointVelocityConstraint::maximumvelocity() to
-    //! update the limit
-    explicit JointVelocityConstraint(
-        const vector::dyn::Velocity& maximum_velocities);
-
-    //! \brief Construct a new JointVelocityConstraint object using the given
-    //! value
-    //! \param maximum_velocities The value of the desired maximum
-    //! velocity (rad/s, m/s). Use JointVelocityConstraint::maximumvelocity() to
-    //! update the limit
-    explicit JointVelocityConstraint(
-        vector::dyn::Velocity&& maximum_velocities);
+    //! scalar::Velocity value, reference or (shared) pointer
+    //!
+    //! If maximum_velocity is a const reference/pointer, using
+    //! maximumVelocity() to modify it will result in undefined behavior
+    //!
+    //! \tparam VmaxT The type of the value (automatically deduced)
+    //! \param value The desired maximum velocity (m/s, rad/s)
+    template <typename VmaxT>
+    explicit JointVelocityConstraint(VmaxT&& maximum_velocities) noexcept
+        : maximum_velocities_{std::forward<VmaxT>(maximum_velocities)} {
+    }
 
     virtual double compute() override;
 
@@ -82,17 +66,11 @@ public:
     //! \return double The velocity limit value
     const vector::dyn::Velocity& maximumVelocities() const;
 
-    //! \brief Access to the shared pointer holding the velocity limit used
-    //! by the constraint
-    //! \return std::shared_ptr<double> A shared pointer to the velocity
-    //! limit
-    std::shared_ptr<vector::dyn::Velocity> maximumVelocitiesPtr() const;
-
 protected:
     virtual void setRobot(Robot const* robot) override;
 
 private:
-    std::shared_ptr<vector::dyn::Velocity> maximum_velocities_;
+    detail::UniversalWrapper<vector::dyn::Velocity> maximum_velocities_;
 };
 
 } // namespace phri

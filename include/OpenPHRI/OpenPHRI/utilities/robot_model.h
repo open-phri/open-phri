@@ -32,7 +32,4 @@ private:
     std::unique_ptr<pImpl> impl_;
 };
 
-using RobotModelPtr = std::shared_ptr<RobotModel>;
-using RobotModelConstPtr = std::shared_ptr<const RobotModel>;
-
 } // namespace phri

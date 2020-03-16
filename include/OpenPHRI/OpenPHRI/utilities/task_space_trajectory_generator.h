@@ -203,10 +203,6 @@ private:
 };
 
 using TaskSpaceTrajectoryGenerator = TrajectoryGenerator<spatial::Position>;
-using TaskSpaceTrajectoryGeneratorPtr =
-    std::shared_ptr<TaskSpaceTrajectoryGenerator>;
-using TaskSpaceTrajectoryGeneratorConstPtr =
-    std::shared_ptr<const TaskSpaceTrajectoryGenerator>;
 
 extern template class TrajectoryGenerator<spatial::Position>;
 

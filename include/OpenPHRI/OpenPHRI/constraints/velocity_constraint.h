@@ -28,6 +28,7 @@
 
 #include <OpenPHRI/definitions.h>
 #include <OpenPHRI/constraints/constraint.h>
+#include <OpenPHRI/detail/universal_wrapper.hpp>
 
 #include <physical_quantities/scalar/velocity.h>
 
@@ -43,25 +44,17 @@ public:
     VelocityConstraint();
 
     //! \brief Construct a new VelocityConstraint object using the given
-    //! pointed value
-    //! \param maximum_velocity A shared pointer to the desired
-    //! maximum velocity (m/s). Throws if the pointer is empty.
-    explicit VelocityConstraint(
-        std::shared_ptr<scalar::Velocity> maximum_velocity);
-
-    //! \brief Construct a new VelocityConstraint object using the given
-    //! referenced value
-    //! \param maximum_velocity A reference to the desired
-    //! maximum velocity (m/s). Make sure that \p maximum_velocity
-    //! outlives the constraint
-    explicit VelocityConstraint(scalar::Velocity& maximum_velocity);
-
-    //! \brief Construct a new VelocityConstraint object using the given
-    //! value
-    //! \param maximum_velocity The value of the desired maximum
-    //! velocity (m/s). Use VelocityConstraint::maximumVelocity()
-    //! to update the limit
-    explicit VelocityConstraint(const scalar::Velocity& maximum_velocity);
+    //! scalar::Velocity value, reference or (shared) pointer
+    //!
+    //! If maximum_velocity is a const reference/pointer, using
+    //! maximumVelocity() to modify it will result in undefined behavior
+    //!
+    //! \tparam VmaxT The type of the value (automatically deduced)
+    //! \param value The desired maximum velocity (m/s)
+    template <typename VmaxT>
+    explicit VelocityConstraint(VmaxT&& maximum_velocity) noexcept
+        : maximum_velocity_{std::forward<VmaxT>(maximum_velocity)} {
+    }
 
     //! \brief Compute the velocity constraint based on the robot state
     //! \return double The constraint value [0,1]
@@ -73,16 +66,10 @@ public:
 
     //! \brief Read access the velocity limit used by the constraint
     //! \return double The velocity limit value
-    scalar::Velocity maximumVelocity() const;
-
-    //! \brief Access to the shared pointer holding the velocity limit used
-    //! by the constraint
-    //! \return std::shared_ptr<double> A shared pointer to the velocity
-    //! limit
-    std::shared_ptr<scalar::Velocity> maximumVelocityPtr() const;
+    const scalar::Velocity& maximumVelocity() const;
 
 protected:
-    std::shared_ptr<scalar::Velocity> maximum_velocity_;
+    detail::UniversalWrapper<scalar::Velocity> maximum_velocity_;
 };
 
 } // namespace phri

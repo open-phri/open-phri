@@ -33,15 +33,10 @@ public:
     bool stop();
 
     Robot& robot();
-    RobotPtr robotPtr() const;
     SafetyController& controller();
-    SafetyControllerPtr controllerPtr() const;
     RobotModel& model();
-    RobotModelPtr modelPtr() const;
     Driver& driver();
-    DriverPtr driverPtr() const;
     DataLogger& dataLogger();
-    DataLoggerPtr dataLoggerPtr() const;
 
     template <typename T> T parameter(const std::string& name) const {
         const auto& params = getParameters();
@@ -68,8 +63,5 @@ private:
     struct pImpl;
     std::unique_ptr<pImpl> impl_;
 };
-
-using AppMakerPtr = std::shared_ptr<AppMaker>;
-using AppMakerConstPtr = std::shared_ptr<const AppMaker>;
 
 } // namespace phri

@@ -28,6 +28,7 @@
 
 #include <OpenPHRI/definitions.h>
 #include <OpenPHRI/constraints/constraint.h>
+#include <OpenPHRI/detail/universal_wrapper.hpp>
 
 #include <physical_quantities/scalar/force.h>
 
@@ -47,55 +48,37 @@ public:
     TaskEmergencyStopConstraint();
 
     //! \brief Construct a new TaskEmergencyStopConstraint object using the
-    //! given pointed values
-    //! \param activation_threshold A shared pointer to the activation
-    //! threshold (N). Throws if the pointer is empty.
-    //! \param deactivation_threshold A shared pointer to the deactivation
-    //! threshold (N). Throws if the pointer is empty.
-    TaskEmergencyStopConstraint(
-        std::shared_ptr<scalar::Force> activation_threshold,
-        std::shared_ptr<scalar::Force> deactivation_threshold);
-
-    //! \brief Construct a new TaskEmergencyStopConstraint object using
-    //! the given referenced values
-    //! \param activation_threshold A reference to the activation threshold
-    //! (N). Make sure that \p activation_threshold outlives the constraint
-    //! \param deactivation_threshold A reference to the deactivation
-    //! threshold (N). Make sure that \p deactivation_threshold outlives
-    //! the constraint
-    TaskEmergencyStopConstraint(scalar::Force& activation_threshold,
-                                scalar::Force& deactivation_threshold);
-
-    //! \brief Construct a new TaskEmergencyStopConstraint object using
-    //! the given values
-    //! \param activation_threshold The value of the activation threshold (N)
-    //! \param deactivation_threshold The value of the deactivation threshold
-    //! (N)
-    TaskEmergencyStopConstraint(const scalar::Force& activation_threshold,
-                                const scalar::Force& deactivation_threshold);
-
-    //! \brief Construct a new TaskEmergencyStopConstraint object using
-    //! the given values
-    //! \param activation_threshold The value of the activation threshold (N)
-    //! \param deactivation_threshold The value of the deactivation threshold
-    //! (N)
-    TaskEmergencyStopConstraint(scalar::Force&& activation_threshold,
-                                scalar::Force&& deactivation_threshold);
+    //! given scalar::Force values, references or (shared) pointers
+    //!
+    //! If either activation_threshold/deactivation_threshold are a const
+    //! references/pointers, using activationThreshold()/deactivationThreshold()
+    //! to modify them will result in undefined behavior
+    //!
+    //! \tparam ActThT The type of the value (automatically deduced)
+    //! \tparam DeactThT The type of the value (automatically deduced)
+    //! \param activation_threshold The desired activation threshold (N)
+    //! \param deactivation_threshold The desired deactivation threshold (N)
+    template <typename ActThT, typename DeactThT>
+    explicit TaskEmergencyStopConstraint(
+        ActThT&& activation_threshold,
+        DeactThT&& deactivation_threshold) noexcept
+        : activation_threshold_{std::forward<ActThT>(activation_threshold)},
+          deactivation_threshold_{
+              std::forward<DeactThT>(deactivation_threshold)} {
+    }
 
     /***		Algorithm		***/
     virtual double compute() override;
 
     scalar::Force& activationThreshold();
-    scalar::Force activationThreshold() const;
-    std::shared_ptr<scalar::Force> activationThresholdPtr() const;
+    const scalar::Force& activationThreshold() const;
 
     scalar::Force& deactivationThreshold();
-    scalar::Force deactivationThreshold() const;
-    std::shared_ptr<scalar::Force> deactivationThresholdPtr() const;
+    const scalar::Force& deactivationThreshold() const;
 
 private:
-    std::shared_ptr<scalar::Force> activation_threshold_;
-    std::shared_ptr<scalar::Force> deactivation_threshold_;
+    detail::UniversalWrapper<scalar::Force> activation_threshold_;
+    detail::UniversalWrapper<scalar::Force> deactivation_threshold_;
 
     double previous_constraint_value_;
 };

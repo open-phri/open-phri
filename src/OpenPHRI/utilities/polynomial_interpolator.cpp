@@ -23,14 +23,16 @@
 using namespace phri;
 
 PolynomialInterpolator::PolynomialInterpolator(
-    PolynomialPointConstPtr from, PolynomialPointConstPtr to,
+    std::shared_ptr<const PolynomialPoint> from,
+    std::shared_ptr<const PolynomialPoint> to,
     std::shared_ptr<const double> input)
     : PolynomialInterpolator(from, to) {
     setInput(input);
 }
 
-PolynomialInterpolator::PolynomialInterpolator(PolynomialPointConstPtr from,
-                                               PolynomialPointConstPtr to) {
+PolynomialInterpolator::PolynomialInterpolator(
+    std::shared_ptr<const PolynomialPoint> from,
+    std::shared_ptr<const PolynomialPoint> to) {
     from_ = from;
     to_ = to;
     output_ = std::make_shared<double>(0.);

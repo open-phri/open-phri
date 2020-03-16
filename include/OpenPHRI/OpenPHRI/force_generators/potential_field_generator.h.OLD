@@ -64,8 +64,8 @@ struct PotentialFieldObject {
         object_position; /**< Object position in the chosen frame. */
 };
 
-using PotentialFieldObjectPtr = std::shared_ptr<PotentialFieldObject>;
-using PotentialFieldObjectConstPtr =
+
+
     std::shared_ptr<const PotentialFieldObject>;
 
 /** @brief A potential field generator for basic collision avoidance.
@@ -75,7 +75,7 @@ using PotentialFieldObjectConstPtr =
  */
 class PotentialFieldGenerator
     : public ForceGenerator,
-      public ObjectCollection<PotentialFieldObjectPtr> {
+      public ObjectCollection<std::shared_ptr<PotentialFieldObject>> {
 public:
     /**
      * @brief Construct a potential field generator where objects position are
@@ -103,8 +103,8 @@ protected:
     std::shared_ptr<const Vector3d> offset_;
 };
 
-using PotentialFieldGeneratorPtr = std::shared_ptr<PotentialFieldGenerator>;
-using PotentialFieldGeneratorConstPtr =
+
+
     std::shared_ptr<const PotentialFieldGenerator>;
 
 } // namespace phri

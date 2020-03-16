@@ -169,13 +169,13 @@ void wrapGenerators() {
         init<PotentialFieldType, std::shared_ptr<const double>,
              std::shared_ptr<const double>, std::shared_ptr<const Vector6d>>());
 
-    class_<ObjectCollection<PotentialFieldObjectPtr>>(
+    class_<ObjectCollection<std::shared_ptr<PotentialFieldObject>>>(
         "PotentialFieldObjectCollection", no_init);
 
     void (PotentialFieldGenerator::*PotentialFieldGenerator_setVerbose)(bool) =
         &PotentialFieldGenerator::setVerbose;
     class_<PotentialFieldGenerator, boost::noncopyable,
-           bases<ForceGenerator, ObjectCollection<PotentialFieldObjectPtr>>>(
+           bases<ForceGenerator, ObjectCollection<std::shared_ptr<PotentialFieldObject>>>>(
         "PotentialFieldGenerator", no_init)
         .def("setVerbose", PotentialFieldGenerator_setVerbose)
         .def("compute", &PotentialFieldGenerator::compute)

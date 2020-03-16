@@ -28,6 +28,7 @@
 
 #include <OpenPHRI/force_generators/force_generator.h>
 #include <OpenPHRI/definitions.h>
+#include <OpenPHRI/detail/universal_wrapper.hpp>
 
 #include <physical_quantities/spatial/impedance/mass.h>
 
@@ -36,29 +37,53 @@ namespace phri {
 //! \brief Generates a force as if a virtual mass is attached to the robot.
 class MassGenerator : public ForceGenerator {
 public:
-    /**
-     * @brief Construct a mass generator given a mass and a target acceleration
-     * in the TCP frame.
-     * @param mass The virtual mass value.
-     * @param target_acceleration The acceleration target in the TCP frame.
-     * @param mass_frame The frame in which the mass is expressed.
-     * @param target_acceleration_frame The frame in which the acceleration
-     * target is expressed.
-     */
-    MassGenerator(std::shared_ptr<spatial::Mass> mass,
-                  std::shared_ptr<spatial::Acceleration> target_acceleration);
+    //! \brief Construct a new MassGenerator object with an
+    //! initial mass and target acceleration set to zero.
+    //! \details Use MassGenerator::mass() and
+    //! MassGenerator::targetAcceleration() to set them to
+    //! the desired value
+    MassGenerator();
 
-    ~MassGenerator() = default;
+    //! \brief Construct a new MassGenerator object using the
+    //! given spatial::Mass and spatial::Acceleration values, references or
+    //! (shared) pointers
+    //!
+    //! If either mass/target_acceleration are a const
+    //! references/pointers, using mass()/targetAcceleration()
+    //! to modify them will result in undefined behavior
+    //!
+    //! \tparam MassT The type of the value (automatically deduced)
+    //! \tparam AccT The type of the value (automatically deduced)
+    //! \param mass The desired spatial mass
+    //! \param target_acceleration The desired target acceleration
+    template <typename MassT, typename AccT>
+    explicit MassGenerator(MassT&& mass, AccT&& target_acceleration) noexcept
+        : mass_{std::forward<MassT>(mass)},
+          target_acceleration_{std::forward<AccT>(target_acceleration)} {
+    }
+
+    //! \brief Read/write access the mass used by the generator
+    //! \return double& A reference to the mass
+    spatial::Mass& mass();
+
+    //! \brief Read access the mass used by the generator
+    //! \return double The mass value
+    const spatial::Mass& mass() const;
+
+    //! \brief Read/write access the targetAcceleration used by the generator
+    //! \return double& A reference to the targetAcceleration
+    spatial::Acceleration& targetAcceleration();
+
+    //! \brief Read access the targetAcceleration used by the generator
+    //! \return double The targetAcceleration value
+    const spatial::Acceleration& targetAcceleration() const;
 
 protected:
     virtual void update(spatial::Force& force) override;
 
-    std::shared_ptr<spatial::Mass> mass_;
-    std::shared_ptr<spatial::Acceleration> target_acceleration_;
+    detail::UniversalWrapper<spatial::Mass> mass_;
+    detail::UniversalWrapper<spatial::Acceleration> target_acceleration_;
     // spatial::Frame mass_frame_;
 };
-
-using MassGeneratorPtr = std::shared_ptr<MassGenerator>;
-using MassGeneratorConstPtr = std::shared_ptr<const MassGenerator>;
 
 } // namespace phri

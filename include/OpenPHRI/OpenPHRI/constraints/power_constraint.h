@@ -28,6 +28,7 @@
 
 #include <OpenPHRI/definitions.h>
 #include <OpenPHRI/constraints/constraint.h>
+#include <OpenPHRI/detail/universal_wrapper.hpp>
 
 #include <physical_quantities/scalar/power.h>
 
@@ -47,31 +48,17 @@ public:
     PowerConstraint();
 
     //! \brief Construct a new PowerConstraint object using the given
-    //! pointed value
-    //! \param maximum_power A shared pointer to the desired
-    //! maximum power (W). Throws if the pointer is empty.
-    explicit PowerConstraint(std::shared_ptr<scalar::Power> maximum_power);
-
-    //! \brief Construct a new PowerConstraint object using the given
-    //! referenced value
-    //! \param maximum_power A reference to the desired
-    //! maximum power (W). Make sure that \p maximum_power
-    //! outlives the constraint
-    explicit PowerConstraint(scalar::Power& maximum_power);
-
-    //! \brief Construct a new PowerConstraint object using the given
-    //! value
-    //! \param maximum_power The value of the desired maximum
-    //! power (W). Use PowerConstraint::maximumPower()
-    //! to update the limit
-    explicit PowerConstraint(const scalar::Power& maximum_power);
-
-    //! \brief Construct a new PowerConstraint object using the given
-    //! value
-    //! \param maximum_power The value of the desired maximum
-    //! power (W). Use PowerConstraint::maximumPower()
-    //! to update the limit
-    explicit PowerConstraint(scalar::Power&& maximum_power);
+    //! scalar::Power value, reference or (shared) pointer
+    //!
+    //! If maximum_power is a const reference/pointer, using
+    //! maximumPower() to modify it will result in undefined behavior
+    //!
+    //! \tparam PmaxT The type of the value (automatically deduced)
+    //! \param value The desired maximum power (m/s)
+    template <typename PmaxT>
+    explicit PowerConstraint(PmaxT&& maximum_power) noexcept
+        : maximum_power_{std::forward<PmaxT>(maximum_power)} {
+    }
 
     //! \brief Compute the power constraint based on the robot state
     //! \return double The constraint value [0,1]
@@ -83,28 +70,18 @@ public:
 
     //! \brief Read access the power limit used by the constraint
     //! \return double The power limit value
-    scalar::Power maximumPower() const;
-
-    //! \brief Access to the shared pointer holding the power limit used
-    //! by the constraint
-    //! \return std::shared_ptr<double> A shared pointer to the power
-    //! limit
-    std::shared_ptr<scalar::Power> maximumPowerPtr() const;
+    const scalar::Power& maximumPower() const;
 
     //! \brief Read access the current exchanged power
     //! \return double The exchanged power
-    scalar::Power power() const;
-
-    //! \brief Access to the shared pointer holding the current exchanged power
-    //! \return std::shared_ptr<double> A shared pointer to the exchanged power
-    std::shared_ptr<const scalar::Power> powerPtr() const;
+    const scalar::Power& power() const;
 
 private:
-    //! \brief Shared pointer holding the power limit.
-    std::shared_ptr<scalar::Power> maximum_power_;
+    //! \brief The power limit.
+    detail::UniversalWrapper<scalar::Power> maximum_power_;
 
-    //! \brief Shared pointer the currently exchanged power.
-    std::shared_ptr<scalar::Power> power_;
+    //! \brief Currently exchanged power.
+    scalar::Power power_;
 };
 
 } // namespace phri

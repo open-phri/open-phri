@@ -30,6 +30,7 @@
 
 #include <OpenPHRI/definitions.h>
 #include <OpenPHRI/constraints/constraint.h>
+#include <OpenPHRI/detail/universal_wrapper.hpp>
 
 #include <physical_quantities/vector/force.h>
 
@@ -51,58 +52,39 @@ public:
     JointEmergencyStopConstraint();
 
     //! \brief Construct a new JointEmergencyStopConstraint object using the
-    //! given pointed values
-    //! \param activation_threshold A shared pointer to the activation
-    //! threshold (N,Nm). Throws if the pointer is empty.
-    //! \param deactivation_threshold A shared pointer to the deactivation
-    //! threshold (N,Nm). Throws if the pointer is empty.
-    JointEmergencyStopConstraint(
-        std::shared_ptr<vector::dyn::Force> activation_threshold,
-        std::shared_ptr<vector::dyn::Force> deactivation_threshold);
-
-    //! \brief Construct a new JointEmergencyStopConstraint object using
-    //! the given referenced values
-    //! \param activation_threshold A reference to the activation threshold
-    //! (N,Nm). Make sure that \p activation_threshold outlives the constraint
-    //! \param deactivation_threshold A reference to the deactivation
-    //! threshold (N,Nm). Make sure that \p deactivation_threshold outlives
-    //! the constraint
-    JointEmergencyStopConstraint(vector::dyn::Force& activation_threshold,
-                                 vector::dyn::Force& deactivation_threshold);
-
-    //! \brief Construct a new JointEmergencyStopConstraint object using
-    //! the given values
-    //! \param activation_threshold The value of the activation threshold (N,Nm)
-    //! \param deactivation_threshold The value of the deactivation threshold
-    //! (N,Nm)
-    JointEmergencyStopConstraint(
-        const vector::dyn::Force& activation_threshold,
-        const vector::dyn::Force& deactivation_threshold);
-
-    //! \brief Construct a new JointEmergencyStopConstraint object using
-    //! the given values
-    //! \param activation_threshold The value of the activation threshold (N,Nm)
-    //! \param deactivation_threshold The value of the deactivation threshold
-    //! (N,Nm)
-    JointEmergencyStopConstraint(vector::dyn::Force&& activation_threshold,
-                                 vector::dyn::Force&& deactivation_threshold);
+    //! given vector::dyn::Force values, references or (shared) pointers
+    //!
+    //! If either activation_threshold/deactivation_threshold are a const
+    //! references/pointers, using activationThreshold()/deactivationThreshold()
+    //! to modify them will result in undefined behavior
+    //!
+    //! \tparam ActThT The type of the value (automatically deduced)
+    //! \tparam DeactThT The type of the value (automatically deduced)
+    //! \param activation_threshold The desired activation threshold (N,Nm)
+    //! \param deactivation_threshold The desired deactivation threshold (N,Nm)
+    template <typename ActThT, typename DeactThT>
+    explicit JointEmergencyStopConstraint(
+        ActThT&& activation_threshold,
+        DeactThT&& deactivation_threshold) noexcept
+        : activation_threshold_{std::forward<ActThT>(activation_threshold)},
+          deactivation_threshold_{
+              std::forward<ActThT>(deactivation_threshold)} {
+    }
 
     virtual double compute() override;
 
     vector::dyn::Force& activationThreshold();
     const vector::dyn::Force& activationThreshold() const;
-    std::shared_ptr<vector::dyn::Force> activationThresholdPtr() const;
 
     vector::dyn::Force& deactivationThreshold();
     const vector::dyn::Force& deactivationThreshold() const;
-    std::shared_ptr<vector::dyn::Force> deactivationThresholdPtr() const;
 
 protected:
     virtual void setRobot(Robot const* robot) override;
 
 private:
-    std::shared_ptr<vector::dyn::Force> activation_threshold_;
-    std::shared_ptr<vector::dyn::Force> deactivation_threshold_;
+    detail::UniversalWrapper<vector::dyn::Force> activation_threshold_;
+    detail::UniversalWrapper<vector::dyn::Force> deactivation_threshold_;
 
     double previous_constraint_value_;
 };

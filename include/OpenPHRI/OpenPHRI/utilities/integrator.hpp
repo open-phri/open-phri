@@ -123,10 +123,6 @@ private:
     double sample_time_;
 };
 
-template <typename T> using IntegratorPtr = std::shared_ptr<Integrator<T>>;
-template <typename T>
-using IntegratorConstPtr = std::shared_ptr<const Integrator<T>>;
-
 extern template class Integrator<double>;
 extern template class Integrator<Eigen::Vector2d>;
 extern template class Integrator<Eigen::Vector3d>;

@@ -26,48 +26,26 @@ JointVelocityProxy::JointVelocityProxy()
     : JointVelocityProxy(vector::dyn::Velocity{}) {
 }
 
-JointVelocityProxy::JointVelocityProxy(
-    std::shared_ptr<vector::dyn::Velocity> velocity)
-    : joint_velocity_(velocity) {
-}
-
-JointVelocityProxy::JointVelocityProxy(vector::dyn::Velocity& velocity)
-    : JointVelocityProxy(
-          std::shared_ptr<vector::dyn::Velocity>(&velocity, [](auto p) {})) {
-}
-
-JointVelocityProxy::JointVelocityProxy(const vector::dyn::Velocity& velocity)
-    : JointVelocityProxy(std::make_shared<vector::dyn::Velocity>(velocity)) {
-}
-
-JointVelocityProxy::JointVelocityProxy(vector::dyn::Velocity&& velocity)
-    : JointVelocityProxy(
-          std::make_shared<vector::dyn::Velocity>(std::move(velocity))) {
-}
-
-void JointVelocityProxy::update(vector::dyn::Velocity& velocity) {
+void JointVelocityProxy::update(vector::dyn::Velocity& new_velocity) {
     if (generator_) {
-        velocity = generator_();
+        new_velocity = generator_();
     } else {
-        velocity = *joint_velocity_;
+        new_velocity = velocity();
     }
 }
 
 vector::dyn::Velocity& JointVelocityProxy::velocity() {
-    return *joint_velocity_;
+    return external_velocity_;
 }
 
-vector::dyn::Velocity JointVelocityProxy::velocity() const {
-    return *joint_velocity_;
-}
-
-std::shared_ptr<vector::dyn::Velocity> JointVelocityProxy::velocityPtr() const {
-    return joint_velocity_;
+const vector::dyn::Velocity& JointVelocityProxy::velocity() const {
+    return external_velocity_;
 }
 
 void JointVelocityProxy::setRobot(Robot const* new_robot) {
     JointVelocityGenerator::setRobot(new_robot);
     velocity().resize(robot().jointCount());
+    velocity().setZero();
 }
 
 } // namespace phri

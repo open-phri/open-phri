@@ -28,6 +28,7 @@
 
 #include <OpenPHRI/definitions.h>
 #include <OpenPHRI/constraints/constraint.h>
+#include <OpenPHRI/detail/universal_wrapper.hpp>
 
 #include <physical_quantities/scalar/acceleration.h>
 
@@ -43,34 +44,17 @@ public:
     AccelerationConstraint();
 
     //! \brief Construct a new AccelerationConstraint object using the given
-    //! pointed value
-    //! \param maximum_acceleration A shared pointer to the desired
-    //! maximum acceleration (m/s²). Throws if the pointer is empty.
-    explicit AccelerationConstraint(
-        std::shared_ptr<scalar::Acceleration> maximum_acceleration);
-
-    //! \brief Construct a new AccelerationConstraint object using the given
-    //! referenced value
-    //! \param maximum_acceleration A reference to the desired
-    //! maximum acceleration (m/s²). Make sure that \p maximum_acceleration
-    //! outlives the constraint
-    explicit AccelerationConstraint(scalar::Acceleration& maximum_acceleration);
-
-    //! \brief Construct a new AccelerationConstraint object using the given
-    //! value
-    //! \param maximum_acceleration The value of the desired maximum
-    //! acceleration (m/s²). Use AccelerationConstraint::maximumAcceleration()
-    //! to update the limit
-    explicit AccelerationConstraint(
-        const scalar::Acceleration& maximum_acceleration);
-
-    //! \brief Construct a new AccelerationConstraint object using the given
-    //! value
-    //! \param maximum_acceleration The value of the desired maximum
-    //! acceleration (m/s²). Use AccelerationConstraint::maximumAcceleration()
-    //! to update the limit
-    explicit AccelerationConstraint(
-        scalar::Acceleration&& maximum_acceleration);
+    //! scalar::Acceleration value, reference or (shared) pointer
+    //!
+    //! If maximum_acceleration is a const reference/pointer, using
+    //! maximumAcceleration() to modify it will result in undefined behavior
+    //!
+    //! \tparam AmaxT The type of the value (automatically deduced)
+    //! \param value The desired maximum acceleration (m/s)
+    template <typename AmaxT>
+    explicit AccelerationConstraint(AmaxT&& maximum_acceleration) noexcept
+        : maximum_acceleration_{std::forward<AmaxT>(maximum_acceleration)} {
+    }
 
     //! \brief Compute the acceleration constraint based on the robot state
     //! \return double The constraint value [0,1]
@@ -82,17 +66,11 @@ public:
 
     //! \brief Read access the acceleration limit used by the constraint
     //! \return double The acceleration limit value
-    scalar::Acceleration maximumAcceleration() const;
-
-    //! \brief Access to the shared pointer holding the acceleration limit used
-    //! by the constraint
-    //! \return std::shared_ptr<double> A shared pointer to the acceleration
-    //! limit
-    std::shared_ptr<scalar::Acceleration> maximumAccelerationPtr() const;
+    const scalar::Acceleration& maximumAcceleration() const;
 
 private:
     //! \brief Shared pointer holding the acceleration limit.
-    std::shared_ptr<scalar::Acceleration> maximum_acceleration_;
+    detail::UniversalWrapper<scalar::Acceleration> maximum_acceleration_;
 };
 
 } // namespace phri
