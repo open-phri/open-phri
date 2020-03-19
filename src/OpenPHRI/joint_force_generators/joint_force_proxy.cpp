@@ -33,19 +33,21 @@ void JointForceProxy::update(vector::dyn::Force& joint_force) {
     if (generator_) {
         joint_force = generator_();
     } else {
-        joint_force = force();
+        joint_force = getForce();
     }
 }
 
-vector::dyn::Force& JointForceProxy::force() {
-    return external_force_;
+void JointForceProxy::setForce(const vector::dyn::Force& force) {
+    external_force_.ref() = force;
 }
-const vector::dyn::Force& JointForceProxy::force() const {
+const vector::dyn::Force& JointForceProxy::getForce() const {
     return external_force_;
 }
 
 void JointForceProxy::setRobot(Robot const* new_robot) {
     JointForceGenerator::setRobot(new_robot);
-    force().resize(robot().jointCount());
-    force().setZero();
+    if (getForce().size() == 0) {
+        external_force_.ref().resize(robot().jointCount());
+        external_force_.ref().setZero();
+    }
 }

@@ -29,23 +29,25 @@ NullSpaceMotion::NullSpaceMotion() : NullSpaceMotion(vector::dyn::Velocity{}) {
 void NullSpaceMotion::update(vector::dyn::Velocity& joint_velocity) {
     null_space_projector_ = identity_ - robot().control().jacobianInverse() *
                                             robot().control().jacobian();
-    joint_velocity.value() = null_space_projector_ * velocity();
+    joint_velocity.value() = null_space_projector_ * getVelocity();
 }
 
-vector::dyn::Velocity& NullSpaceMotion::velocity() {
-    return joint_velocity_;
+void NullSpaceMotion::setVelocity(const vector::dyn::Velocity& velocity) {
+    joint_velocity_.ref() = velocity;
 }
 
-const vector::dyn::Velocity& NullSpaceMotion::velocity() const {
-    return joint_velocity_;
+const vector::dyn::Velocity& NullSpaceMotion::getVelocity() const {
+    return joint_velocity_.cref();
 }
 
 void NullSpaceMotion::setRobot(Robot const* new_robot) {
     JointVelocityGenerator::setRobot(new_robot);
     auto dofs = robot().jointCount();
 
-    velocity().resize(dofs);
-    velocity().setZero();
+    if (getVelocity().size() == 0) {
+        joint_velocity_.ref().resize(dofs);
+        joint_velocity_.ref().setZero();
+    }
 
     null_space_projector_.resize(dofs, dofs);
     identity_.resize(dofs, dofs);

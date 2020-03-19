@@ -24,20 +24,20 @@
 namespace phri {
 
 JointVelocityConstraint::JointVelocityConstraint()
-    : maximum_velocities_(vector::dyn::Velocity{}) {
+    : maximum_velocities_{vector::dyn::Velocity{}} {
 }
 
 double JointVelocityConstraint::compute() {
-    if (maximumVelocities().size() != robot_->jointCount()) {
+    if (getMaximumVelocities().size() != robot_->jointCount()) {
         throw std::length_error(OPEN_PHRI_ERROR(
             "The maximum velocity has " +
-            std::to_string(maximumVelocities().size()) +
+            std::to_string(getMaximumVelocities().size()) +
             " dofs but the robot has " + std::to_string(robot_->jointCount())));
     }
 
     double constraint = 1.;
     const auto& joint_vel = robot_->control().joints().totalVelocity();
-    const auto& max_joint_vel = maximumVelocities();
+    const auto& max_joint_vel = getMaximumVelocities();
 
     for (size_t i = 0; i < joint_vel.size(); ++i) {
         constraint =
@@ -47,18 +47,21 @@ double JointVelocityConstraint::compute() {
     return constraint;
 }
 
-vector::dyn::Velocity& JointVelocityConstraint::maximumVelocities() {
-    return maximum_velocities_;
+void JointVelocityConstraint::setMaximumVelocities(
+    const vector::dyn::Velocity& velocities) {
+    maximum_velocities_.ref() = velocities;
 }
 
 const vector::dyn::Velocity&
-JointVelocityConstraint::maximumVelocities() const {
-    return maximum_velocities_;
+JointVelocityConstraint::getMaximumVelocities() const {
+    return maximum_velocities_.cref();
 }
 
 void JointVelocityConstraint::setRobot(Robot const* new_robot) {
     Constraint::setRobot(new_robot);
-    maximumVelocities().resize(robot().jointCount());
+    if (getMaximumVelocities().size() == 0) {
+        maximum_velocities_.ref().resize(robot().jointCount());
+    }
 }
 
 } // namespace phri

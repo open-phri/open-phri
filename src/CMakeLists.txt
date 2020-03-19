@@ -21,13 +21,23 @@ PID_Component(
     ${OPENMP_COMPONENT_OPTIONS}
 )
 
+if(BUILD_AND_RUN_TESTS)
+    PID_Component(
+        test-utils
+        EXPORT open-phri/open-phri
+    )
+endif()
+
 ###         OpenPHRI V-REP DRIVER        ###
-# PID_Component(
-#     SHARED_LIB
-#     NAME vrep-driver
-#     DIRECTORY vrep_driver
-#     EXPORT open-phri/open-phri api-driver-vrep/vrep-driver
-# )
+PID_Component(
+    SHARED_LIB
+    NAME open-phri-vrep-driver
+    DIRECTORY vrep_driver
+    EXPORT 
+        open-phri/open-phri 
+    DEPEND
+        api-driver-vrep/vrep-driver
+)
 
 ###         pyOpenPHRI        ###
 if(GEN_PYTHON_BINDINGS)

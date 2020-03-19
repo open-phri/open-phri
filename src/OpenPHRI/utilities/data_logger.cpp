@@ -199,7 +199,7 @@ void DataLogger::process() {
             if (not file.is_open()) {
                 createLog(data_name, 1);
             }
-            logData(file, &(it->second.last_value), 1);
+            logData(file, &(it->second.cref().last_value), 1);
         }
 
         for (auto it = controller_->force_generators_begin();
@@ -209,7 +209,7 @@ void DataLogger::process() {
             if (not file.is_open()) {
                 createLog(data_name, 6);
             }
-            logData(file, it->second.last_value.data(), 6);
+            logData(file, it->second.cref().last_value.data(), 6);
         }
 
         for (auto it = controller_->torque_generators_begin();
@@ -219,7 +219,7 @@ void DataLogger::process() {
             if (not file.is_open()) {
                 createLog(data_name, 6);
             }
-            logData(file, it->second.last_value.data(), 6);
+            logData(file, it->second.cref().last_value.data(), 6);
         }
 
         for (auto it = controller_->velocity_generators_begin();
@@ -229,7 +229,7 @@ void DataLogger::process() {
             if (not file.is_open()) {
                 createLog(data_name, 6);
             }
-            logData(file, it->second.last_value.data(), 6);
+            logData(file, it->second.cref().last_value.data(), 6);
         }
 
         for (auto it = controller_->joint_velocity_generators_begin();
@@ -239,7 +239,7 @@ void DataLogger::process() {
             if (not file.is_open()) {
                 createLog(data_name, 6);
             }
-            logData(file, it->second.last_value.data(), 6);
+            logData(file, it->second.cref().last_value.data(), 6);
         }
     }
 

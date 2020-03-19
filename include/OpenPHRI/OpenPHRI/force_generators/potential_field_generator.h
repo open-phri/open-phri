@@ -32,6 +32,11 @@
 #include <OpenPHRI/force_generators/force_generator.h>
 #include <OpenPHRI/utilities/object_collection.hpp>
 #include <OpenPHRI/definitions.h>
+#include <OpenPHRI/detail/universal_wrapper.hpp>
+
+#include <physical_quantities/spatial/position.h>
+#include <physical_quantities/spatial/force.h>
+
 #include <map>
 
 namespace phri {
@@ -44,44 +49,48 @@ enum class PotentialFieldType { Attractive, Repulsive };
 /** @brief Hold the required property for any object of the potential field.
  */
 struct PotentialFieldObject {
-    PotentialFieldObject(PotentialFieldType type,
-                         std::shared_ptr<const double> gain,
-                         std::shared_ptr<const double> threshold_distance,
-                         std::shared_ptr<const Pose> object_position)
-        : type(type),
-          gain(gain),
-          threshold_distance(threshold_distance),
-          object_position(object_position) {
+    template <typename GainT, typename ThresT, typename PosT>
+    PotentialFieldObject(PotentialFieldType type, GainT&& gain,
+                         ThresT&& threshold_distance, PosT&& object_position)
+        : type_(type),
+          gain_(std::forward<GainT>(gain)),
+          threshold_distance_(std::forward<ThresT>(threshold_distance)),
+          object_position_(std::forward<PosT>(object_position)) {
     }
 
-    PotentialFieldType type; /**< Type of object. See PotentialFieldType. */
-    std::shared_ptr<const double>
-        gain; /**< Gain applied to get the resulting force. */
-    std::shared_ptr<const double>
-        threshold_distance; /**< Distance at which the object's attractive or
+    PotentialFieldType type() const;
+
+    void setGain(const double& gain);
+    const double& getGain() const;
+
+    void setThresholdDistance(const double& threshold);
+    const double& getThresholdDistance() const;
+
+    void setObjectPosition(const spatial::Position& position);
+    const spatial::Position& getObjectPosition() const;
+
+private:
+    PotentialFieldType type_; /**< Type of object. See PotentialFieldType. */
+    detail::UniversalWrapper<double>
+        gain_; /**< Gain applied to get the resulting force. */
+    detail::UniversalWrapper<double>
+        threshold_distance_; /**< Distance at which the object's attractive or
                                repulsive effect will start. */
-    std::shared_ptr<const Pose>
-        object_position; /**< Object position in the chosen frame. */
+    detail::UniversalWrapper<spatial::Position>
+        object_position_; /**< Object position in the chosen frame. */
 };
-
-
-
-    std::shared_ptr<const PotentialFieldObject>;
 
 /** @brief A potential field generator for basic collision avoidance.
  *  @details Use a set of PotentialFieldObject to determine which force has to
  * be applied to the TCP. "Based on Real-time obstacle avoidance for
  * manipulators and mobile robots" by O. Khatib.
  */
-class PotentialFieldGenerator
-    : public ForceGenerator,
-      public ObjectCollection<std::shared_ptr<PotentialFieldObject>> {
+class PotentialFieldGenerator : public ForceGenerator,
+                                public ObjectCollection<PotentialFieldObject> {
 public:
     /**
      * @brief Construct a potential field generator where objects position are
      * given in the specified frame.
-     * @param objects_frame The frame in which the positons of the objects are
-     * expressed .
      */
     PotentialFieldGenerator();
 
@@ -90,21 +99,22 @@ public:
      * given in the specified frame.
      * @param offset An offset in the TCP frame at which the distances will be
      * computed.
-     * @param objects_frame The frame in which the positons of the objects are
-     * expressed.
      */
-    PotentialFieldGenerator(std::shared_ptr<const Vector3d> offset);
+    template <typename OffsetT>
+    PotentialFieldGenerator(OffsetT&& offset)
+        : offset_{std::forward<OffsetT>(offset)} {
+    }
+
     virtual ~PotentialFieldGenerator() = default;
 
+    void setOffset(const spatial::LinearPosition& offset);
+
+    const spatial::LinearPosition& getOffset() const;
+
 protected:
-    virtual void update(Wrench& force) override;
+    virtual void update(spatial::Force& force) override;
 
-    ReferenceFrame objects_frame_;
-    std::shared_ptr<const Vector3d> offset_;
+    detail::UniversalWrapper<spatial::LinearPosition> offset_;
 };
-
-
-
-    std::shared_ptr<const PotentialFieldGenerator>;
 
 } // namespace phri

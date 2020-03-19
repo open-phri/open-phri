@@ -55,12 +55,15 @@ public:
 
     double getTimeStep() const;
 
+    Robot& robot();
+    const Robot& robot() const;
+
 protected:
     void setTimeStep(double time_step);
     Robot::JointData& jointState();
-    const Robot::JointData& jointCommand() const;
+    Robot::JointData& jointCommand();
     Robot::TaskData& taskState();
-    const Robot::TaskData& taskCommand() const;
+    Robot::TaskData& taskCommand();
 
     Robot& robot_;
 };

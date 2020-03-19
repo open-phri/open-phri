@@ -30,17 +30,17 @@ JointEmergencyStopConstraint::JointEmergencyStopConstraint()
 }
 
 double JointEmergencyStopConstraint::compute() {
-    if (activationThreshold().size() != robot_->jointCount()) {
+    if (getActivationThreshold().size() != robot_->jointCount()) {
         throw std::length_error(OPEN_PHRI_ERROR(
             "The activation threshold has " +
-            std::to_string(activationThreshold().size()) +
+            std::to_string(getActivationThreshold().size()) +
             " dofs but the robot has " + std::to_string(robot_->jointCount())));
     }
 
-    if (deactivationThreshold().size() != robot_->jointCount()) {
+    if (getDeactivationThreshold().size() != robot_->jointCount()) {
         throw std::length_error(OPEN_PHRI_ERROR(
             "The deactivation threshold has " +
-            std::to_string(deactivationThreshold().size()) +
+            std::to_string(getDeactivationThreshold().size()) +
             " dofs but the robot has " + std::to_string(robot_->jointCount())));
     }
 
@@ -48,7 +48,7 @@ double JointEmergencyStopConstraint::compute() {
 
     for (size_t i = 0; i < robot_->jointCount(); i++) {
         auto joint_force{std::abs(robot_->joints().state().force()(i))};
-        if (joint_force >= activationThreshold()(i)) {
+        if (joint_force >= getActivationThreshold()(i)) {
             constraint = 0.;
             break;
         }
@@ -58,7 +58,7 @@ double JointEmergencyStopConstraint::compute() {
         bool all_ok = true;
         for (size_t i = 0; i < robot_->jointCount(); i++) {
             auto joint_force = std::abs(robot_->joints().state().force()(i));
-            if (joint_force > deactivationThreshold()(i)) {
+            if (joint_force > getDeactivationThreshold()(i)) {
                 all_ok = false;
                 break;
             }
@@ -69,28 +69,34 @@ double JointEmergencyStopConstraint::compute() {
     return constraint;
 }
 
-vector::dyn::Force& JointEmergencyStopConstraint::activationThreshold() {
-    return activation_threshold_;
+void JointEmergencyStopConstraint::setActivationThreshold(
+    const vector::dyn::Force& threshold) {
+    activation_threshold_.ref() = threshold;
 }
 
 const vector::dyn::Force&
-JointEmergencyStopConstraint::activationThreshold() const {
+JointEmergencyStopConstraint::getActivationThreshold() const {
     return activation_threshold_;
 }
 
-vector::dyn::Force& JointEmergencyStopConstraint::deactivationThreshold() {
-    return deactivation_threshold_;
+void JointEmergencyStopConstraint::setDeactivationThreshold(
+    const vector::dyn::Force& threshold) {
+    deactivation_threshold_.ref() = threshold;
 }
 
 const vector::dyn::Force&
-JointEmergencyStopConstraint::deactivationThreshold() const {
+JointEmergencyStopConstraint::getDeactivationThreshold() const {
     return deactivation_threshold_;
 }
 
 void JointEmergencyStopConstraint::setRobot(Robot const* new_robot) {
     Constraint::setRobot(new_robot);
-    activationThreshold().resize(robot().jointCount());
-    deactivationThreshold().resize(robot().jointCount());
+    if (getActivationThreshold().size() == 0) {
+        activation_threshold_.ref().resize(robot().jointCount());
+    }
+    if (getDeactivationThreshold().size() == 0) {
+        deactivation_threshold_.ref().resize(robot().jointCount());
+    }
 }
 
 } // namespace phri

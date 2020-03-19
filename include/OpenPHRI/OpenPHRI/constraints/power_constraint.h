@@ -66,15 +66,15 @@ public:
 
     //! \brief Read/write access the power limit used by the constraint
     //! \return double& A reference to the power limit
-    scalar::Power& maximumPower();
+    void setMaximumPower(const scalar::Power& power);
 
     //! \brief Read access the power limit used by the constraint
     //! \return double The power limit value
-    const scalar::Power& maximumPower() const;
+    const scalar::Power& getMaximumPower() const;
 
     //! \brief Read access the current exchanged power
     //! \return double The exchanged power
-    const scalar::Power& power() const;
+    const scalar::Power& getPower() const;
 
 private:
     //! \brief The power limit.

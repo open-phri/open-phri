@@ -34,18 +34,18 @@ double VelocityConstraint::compute() {
     double v_norm = robot_->control().task().totalVelocity().linear().norm();
 
     if (v_norm > 0.) {
-        constraint = std::abs(maximumVelocity().value()) / v_norm;
+        constraint = std::abs(getMaximumVelocity().value()) / v_norm;
     }
 
     return constraint;
 }
 
-scalar::Velocity& VelocityConstraint::maximumVelocity() {
-    return maximum_velocity_.value();
+void VelocityConstraint::setMaximumVelocity(const scalar::Velocity& velocity) {
+    maximum_velocity_.ref() = velocity;
 }
 
-const scalar::Velocity& VelocityConstraint::maximumVelocity() const {
-    return maximum_velocity_.value();
+const scalar::Velocity& VelocityConstraint::getMaximumVelocity() const {
+    return maximum_velocity_.cref();
 }
 
 } // namespace phri

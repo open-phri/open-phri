@@ -66,19 +66,19 @@ public:
 
     //! \brief Read/write access the stiffness used by the generator
     //! \return double& A reference to the stiffness
-    spatial::Stiffness& stiffness();
+    void setStiffness(const spatial::Stiffness& stiffness);
 
     //! \brief Read access the stiffness used by the generator
     //! \return double The stiffness value
-    const spatial::Stiffness& stiffness() const;
+    const spatial::Stiffness& getStiffness() const;
 
     //! \brief Read/write access the target pose used by the generator
     //! \return double& A reference to the target pose
-    spatial::Position& targetPose();
+    void setTargetPose(const spatial::Position& position);
 
     //! \brief Read access the target pose used by the generator
     //! \return double The target pose value
-    const spatial::Position& targetPose() const;
+    const spatial::Position& getTargetPose() const;
 
 protected:
     virtual void update(spatial::Force& force) override;

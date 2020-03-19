@@ -1,15 +1,13 @@
 #include <OpenPHRI/OpenPHRI.h>
 #include <catch2/catch.hpp>
-#include <pid/rpath.h>
+#include "utils.h"
+
+#include <utility>
 
 TEST_CASE("add/remove constraints") {
-    auto robot = phri::Robot{"rob", // Robot's name
-                             7};    // Robot's joint count
+    auto [robot, model, driver] = TestData{};
 
-    auto model = phri::RobotModel(
-        robot, PID_PATH("robot_models/kuka_lwr4.yaml"), "end-effector");
-
-    robot.joints().state.position.setOnes();
+    driver.jointState().position().setOnes();
     model.forwardKinematics();
 
     auto safety_controller = phri::SafetyController(robot);
@@ -19,54 +17,53 @@ TEST_CASE("add/remove constraints") {
         REQUIRE_NOTHROW([&] {
             safety_controller.add("cstr", phri::VelocityConstraint());
             auto cstr = safety_controller.get<phri::VelocityConstraint>("cstr");
-            cstr->maximumVelocity() = 1.;
+            REQUIRE(cstr->getMaximumVelocity() == scalar::Velocity{0.});
         }());
     }
 
     SECTION("construction with shared_ptr") {
         REQUIRE_NOTHROW([&] {
-            auto lim = std::make_shared<double>(1.);
+            auto lim = std::make_shared<scalar::Velocity>(1.);
             safety_controller.add("cstr", phri::VelocityConstraint(lim));
             auto cstr = safety_controller.get<phri::VelocityConstraint>("cstr");
-            REQUIRE(cstr->maximumVelocity() == 1.);
+            REQUIRE(cstr->getMaximumVelocity() == scalar::Velocity{1.});
         }());
-
-        REQUIRE_THROWS(phri::VelocityConstraint(std::shared_ptr<double>()));
     }
 
     SECTION("construction with non-const lvalue reference") {
         REQUIRE_NOTHROW([&] {
-            auto lim{1.};
+            auto lim = scalar::Velocity{1.};
             safety_controller.add("cstr", phri::VelocityConstraint(lim));
             auto cstr = safety_controller.get<phri::VelocityConstraint>("cstr");
-            REQUIRE(cstr->maximumVelocity() == 1.);
-            lim = 2.;
-            REQUIRE(cstr->maximumVelocity() == 2.);
+            REQUIRE(cstr->getMaximumVelocity() == scalar::Velocity{1.});
+            lim = scalar::Velocity{2.};
+            REQUIRE(cstr->getMaximumVelocity() == scalar::Velocity{2.});
         }());
     }
 
     SECTION("construction with const lvalue reference") {
         REQUIRE_NOTHROW([&] {
-            auto lim{1.};
-            safety_controller.add(
-                "cstr", phri::VelocityConstraint(phri::as_const(lim)));
+            auto lim = scalar::Velocity{1.};
+            safety_controller.add("cstr",
+                                  phri::VelocityConstraint(std::as_const(lim)));
             auto cstr = safety_controller.get<phri::VelocityConstraint>("cstr");
-            REQUIRE(cstr->maximumVelocity() == 1.);
-            lim = 2.;
-            REQUIRE(cstr->maximumVelocity() == 1.);
+            REQUIRE(cstr->getMaximumVelocity() == scalar::Velocity{1.});
+            lim = scalar::Velocity{2.};
+            REQUIRE(cstr->getMaximumVelocity() == scalar::Velocity{2.});
         }());
     }
 
     SECTION("construction with rvalue reference") {
         REQUIRE_NOTHROW([&] {
-            safety_controller.add("cstr", phri::VelocityConstraint(1.));
+            safety_controller.add(
+                "cstr", phri::VelocityConstraint(scalar::Velocity{1.}));
             auto cstr = safety_controller.get<phri::VelocityConstraint>("cstr");
-            REQUIRE(cstr->maximumVelocity() == 1.);
+            REQUIRE(cstr->getMaximumVelocity() == scalar::Velocity{1.});
         }());
     }
 
     SECTION("add/get/remove same constraint") {
-        auto maximum_velocity = std::make_shared<double>(0.1);
+        auto maximum_velocity = std::make_shared<scalar::Velocity>(0.1);
         auto velocity_constraint =
             std::make_shared<phri::VelocityConstraint>(maximum_velocity);
 

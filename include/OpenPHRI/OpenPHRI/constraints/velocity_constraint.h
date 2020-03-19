@@ -62,11 +62,11 @@ public:
 
     //! \brief Read/write access the velocity limit used by the constraint
     //! \return double& A reference to the velocity limit
-    scalar::Velocity& maximumVelocity();
+    void setMaximumVelocity(const scalar::Velocity& velocity);
 
     //! \brief Read access the velocity limit used by the constraint
     //! \return double The velocity limit value
-    const scalar::Velocity& maximumVelocity() const;
+    const scalar::Velocity& getMaximumVelocity() const;
 
 protected:
     detail::UniversalWrapper<scalar::Velocity> maximum_velocity_;

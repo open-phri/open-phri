@@ -28,6 +28,8 @@
 
 #pragma once
 
+#include <OpenPHRI/detail/universal_wrapper.hpp>
+
 #include <map>
 #include <iostream>
 #include "demangle.h"
@@ -92,7 +94,8 @@ public:
      * @return true if the item has successfully been added to the collection,
      * false otherwise.
      */
-    virtual bool add(const std::string& name, T&& item, bool force = false) {
+    template <typename ItemT>
+    bool add(const std::string& name, ItemT&& item, bool force = false) {
         if ((items_.find(name) != items_.end()) and not force) {
             if (verbose_) {
                 std::cerr << "In phri::" << class_name_ << "::add"
@@ -102,7 +105,8 @@ public:
             }
             return false;
         }
-        items_.emplace(std::make_pair(name, item));
+        detail::UniversalWrapper<T> wrapper{std::forward<ItemT>(item)};
+        items_.emplace(std::make_pair(name, std::move(wrapper)));
         return true;
     }
 
@@ -138,19 +142,35 @@ public:
      * @return A pointer to the item. Store a null pointer if the item doesn't
      * exist.
      */
-    virtual T get(const std::string& name) {
-        T item;
+    virtual T& get(const std::string& name) {
         auto elem = items_.find(name);
         if (elem != items_.end()) {
-            item = elem->second;
+            return elem->second.ref();
         } else {
             throw std::domain_error(OPEN_PHRI_ERROR("No item called " + name));
         }
-        return item;
     }
 
-    using iterator = typename std::map<std::string, T>::iterator;
-    using const_iterator = typename std::map<std::string, T>::const_iterator;
+    /**
+     * @brief Retrieve a item from the collection.
+     * @param name The name given to the item to retreive.
+     * @return A pointer to the item. Store a null pointer if the item doesn't
+     * exist.
+     */
+    virtual const T& get(const std::string& name) const {
+        auto elem = items_.find(name);
+        if (elem != items_.end()) {
+            return elem->second.cref();
+        } else {
+            throw std::domain_error(OPEN_PHRI_ERROR("No item called " + name));
+        }
+    }
+
+    using iterator =
+        typename std::map<std::string, detail::UniversalWrapper<T>>::iterator;
+    using const_iterator =
+        typename std::map<std::string,
+                          detail::UniversalWrapper<T>>::const_iterator;
 
     /**
      * @brief Provide an iterator to the first element of the collection
@@ -185,7 +205,7 @@ public:
     }
 
 protected:
-    std::map<std::string, T> items_;
+    std::map<std::string, detail::UniversalWrapper<T>> items_;
 
 private:
     bool verbose_;

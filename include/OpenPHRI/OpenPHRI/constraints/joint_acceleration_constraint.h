@@ -62,11 +62,11 @@ public:
 
     //! \brief Read/write access the acceleration limit used by the constraint
     //! \return vector::dyn::Acceleration& A reference to the acceleration limit
-    vector::dyn::Acceleration& maximumAcceleration();
+    void setMaximumAcceleration(const vector::dyn::Acceleration& acceleration);
 
     //! \brief Read access the acceleration limit used by the constraint
     //! \return vector::dyn::Acceleration The acceleration limit value
-    const vector::dyn::Acceleration& maximumAcceleration() const;
+    const vector::dyn::Acceleration& getMaximumAcceleration() const;
 
 protected:
     virtual void setRobot(Robot const* robot) override;

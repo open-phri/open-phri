@@ -189,8 +189,9 @@ public:
      * @brief Shortcut for the SafetyController::addForceGenerator method.
      */
     template <typename T>
-    typename std::enable_if<std::is_base_of<ForceGenerator, T>::value,
-                            bool>::type
+    typename std::enable_if<
+        std::is_base_of<ForceGenerator, std::remove_reference_t<T>>::value,
+        bool>::type
     add(const std::string& name, T&& obj, bool force = false) {
         return addForceGenerator(name, std::make_shared<T>(std::move(obj)),
                                  force);
@@ -506,7 +507,7 @@ public:
 
     template <typename T>
     using storage_const_iterator =
-        typename std::map<std::string, StorageWrapper<T>>::const_iterator;
+        typename ObjectCollection<StorageWrapper<T>>::const_iterator;
 
     storage_const_iterator<Constraint> constraints_begin() const;
     storage_const_iterator<Constraint> constraints_end() const;

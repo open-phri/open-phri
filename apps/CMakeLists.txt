@@ -5,13 +5,13 @@ function(add_application app)
     DIRECTORY ${app}
     RUNTIME_RESOURCES configuration_examples
     DEPEND 
-      open-phri/open-phri 
-      # open-phri/vrep-driver
+      open-phri/open-phri
+      open-phri/open-phri-vrep-driver
       pid-os-utilities/pid-signal-manager
   )
 endfunction()
 
-# add_application(controller_benchmark)
+add_application(controller_benchmark)
 # add_application(demo)
 # add_application(force_control_example)
 # add_application(joint_trajectory_generator_example)

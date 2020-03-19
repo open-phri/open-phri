@@ -29,9 +29,14 @@
 #pragma once
 
 #include <OpenPHRI/definitions.h>
+#include <OpenPHRI/robot.h>
 #include <OpenPHRI/utilities/object_collection.hpp>
+#include <OpenPHRI/detail/universal_wrapper.hpp>
 
 #include <physical_quantities/spatial/type_aliases.h>
+#include <physical_quantities/spatial/position.h>
+#include <physical_quantities/spatial/impedance/mass.h>
+#include <physical_quantities/scalar/mass.h>
 
 namespace phri {
 
@@ -40,62 +45,48 @@ namespace phri {
  * items that can collide with the its TCP.
  *  @tparam joint_count Number of joints of the manipulator.
  */
-class ManipulatorEquivalentMass
-    : public ObjectCollection<std::shared_ptr<const Eigen::Vector6d>> {
+class ManipulatorEquivalentMass : public ObjectCollection<spatial::Position> {
 public:
     /**
      * @brief Construct a manipulator equivalent mass utility given an inertia
      * matrix and a Jacobian. Objects positons must be expressed in the TCP
      * frame.
      * @param inertia_matrix A shared pointer to the inertia matrix.
-     * @param jacobian_matrix A shared pointer to the Jacobian matrix.
      */
-    ManipulatorEquivalentMass(
-        std::shared_ptr<const Eigen::MatrixXd> inertia_matrix,
-        std::shared_ptr<const Eigen::MatrixXd> jacobian_matrix);
+    template <typename InertiaT>
+    ManipulatorEquivalentMass(const Robot& robot, InertiaT&& inertia_matrix)
+        : robot_{robot},
+          inertia_matrix_{std::forward<InertiaT>(inertia_matrix)} {
+    }
 
     /**
-     * @brief Construct a manipulator equivalent mass utility given an inertia
-     * matrix and a Jacobian. Objects positons must be expressed in the same
-     * frame as robot_position.
-     * @param inertia_matrix A shared pointer to the inertia matrix.
-     * @param jacobian_matrix A shared pointer to the Jacobian matrix.
-     * @param robot_position A shared pointer to the robot position in the
-     * chosen frame.
+     * @brief Read only access to the equivalent mass.
+     * @return const double& A reference to the equivalent mass.
      */
-    ManipulatorEquivalentMass(
-        std::shared_ptr<const Eigen::MatrixXd> inertia_matrix,
-        std::shared_ptr<const Eigen::MatrixXd> jacobian_matrix,
-        std::shared_ptr<const Eigen::Vector6d> robot_position);
-
-    ~ManipulatorEquivalentMass() = default;
-
-    /**
-     * @brief Get the pointer to the equivalent mass.
-     * @return A shared pointer to the equivalent mass.
-     */
-    std::shared_ptr<const double> getEquivalentMass() const;
+    const scalar::Mass& getEquivalentMass() const;
 
     /**
      * @brief Compute the equivalent mass based on the inertia, jacobian and the
      * closest item.
      * @return The equivalent mass.
      */
-    double compute();
+    const scalar::Mass& compute();
 
     /**
      * @brief Call operator, shortcut for compute()
      * @return The new output data.
      */
-    double operator()();
+    const scalar::Mass& operator()();
+
+    void setInertia(const spatial::Mass& inertia);
+    const spatial::Mass& getInertia() const;
 
 private:
     Eigen::Vector3d closestObjectDirection();
 
-    std::shared_ptr<const Eigen::MatrixXd> inertia_matrix_;
-    std::shared_ptr<const Eigen::MatrixXd> jacobian_matrix_;
-    std::shared_ptr<const Eigen::Vector6d> robot_position_;
-    std::shared_ptr<double> mass_;
+    const Robot& robot_;
+    detail::UniversalWrapper<spatial::Mass> inertia_matrix_;
+    scalar::Mass mass_;
 };
 
 } // namespace phri

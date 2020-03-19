@@ -1,77 +1,68 @@
 #include <OpenPHRI/OpenPHRI.h>
 #include <catch2/catch.hpp>
-#include <pid/rpath.h>
 
 #include "utils.h"
 
-using namespace phri;
-using namespace std;
-
 TEST_CASE("Power constraint") {
+    auto [robot, model, driver] = TestData{};
 
-    auto robot = phri::Robot{"rob", // Robot's name
-                             7};    // Robot's joint count
-
-    auto model = phri::RobotModel(
-        robot, PID_PATH("robot_models/kuka_lwr4.yaml"), "end-effector");
-
-    FrameAdapter::setTransform(FrameAdapter::world(),
-                               AffineTransform::Identity(),
-                               FrameAdapter::frame("end-effector"));
-
-    robot.joints().state.position.setOnes();
+    driver.jointState().position().setOnes();
     model.forwardKinematics();
+
+    // FrameAdapter::setTransform(FrameAdapter::world(),
+    //                            AffineTransform::Identity(),
+    //                            FrameAdapter::frame("end-effector"));
 
     auto safety_controller = phri::SafetyController(robot);
     safety_controller.setVerbose(true);
 
-    robot.control().task.damping.setConstant(10);
+    robot.control().task().damping().diagonal().setConstant(10);
 
-    auto maximum_power = make_shared<double>(10);
-    auto& external_wrench = robot.task().state.wrench;
-    auto& command_twist = robot.task().command.twist;
-    auto power_constraint = make_shared<PowerConstraint>(maximum_power);
+    auto maximum_power = scalar::Power{10};
+    auto& external_wrench = driver.taskState().force();
+    auto& command_twist = robot.task().command().velocity();
 
-    auto constant_vel =
-        make_shared<spatial::Velocity>(FrameAdapter::frame("end-effector"));
-    auto constant_velocity_generator = make_shared<VelocityProxy>(constant_vel);
+    auto constant_vel = spatial::Velocity{robot.controlPointFrame()};
 
-    safety_controller.add("power constraint", power_constraint);
-    safety_controller.add("vel proxy", constant_velocity_generator);
+    safety_controller.add<phri::PowerConstraint>("power constraint",
+                                                 maximum_power);
+    safety_controller.add<phri::VelocityProxy>("vel proxy", constant_vel);
 
     // Step #1 : no velocity
     safety_controller.compute();
 
-    REQUIRE(isClose(power(command_twist, external_wrench), 0.));
+    REQUIRE(external_wrench.dot(command_twist).value() ==
+            Approx(0.).margin(1e-9));
 
     // Step #2 : velocity 1 axis, no force
-    constant_vel->translation().x() = 0.2;
+    constant_vel.linear().x() = 0.2;
     safety_controller.compute();
 
-    REQUIRE(isClose(power(command_twist, external_wrench), 0.));
+    REQUIRE(external_wrench.dot(command_twist).value() ==
+            Approx(0.).margin(1e-9));
 
     // Step #3 : velocity 1 axis, force same axis with opposite sign < max
-    external_wrench.force().x() = -10.;
+    external_wrench.linear().x() = -10.;
     safety_controller.compute();
 
-    REQUIRE(isClose(power(command_twist, external_wrench), -2.));
+    REQUIRE(external_wrench.dot(command_twist).value() == Approx(-2.));
 
     // Step #4 : velocity 1 axis, force same axis with same sign < max
-    external_wrench.force().x() = 10.;
+    external_wrench.linear().x() = 10.;
     safety_controller.compute();
 
-    REQUIRE(isClose(power(command_twist, external_wrench), 2.));
+    REQUIRE(external_wrench.dot(command_twist).value() == Approx(2.));
 
     // Step #5 : velocity 1 axis, force same axis with opposite sign > max
-    external_wrench.force().x() = -100.;
+    external_wrench.linear().x() = -100.;
     safety_controller.compute();
 
-    REQUIRE(isClose(power(command_twist, external_wrench), -*maximum_power));
+    REQUIRE(external_wrench.dot(command_twist).value() ==
+            Approx(-maximum_power.value()));
 
     // Step #6 : velocity 1 axis, force same axis with same sign > max
-    external_wrench.force().x() = 100.;
+    external_wrench.linear().x() = 100.;
     safety_controller.compute();
 
-    REQUIRE(command_twist.vector().isApprox(
-        robot.control().task.total_twist.vector()));
+    REQUIRE(command_twist.isApprox(robot.control().task().totalVelocity()));
 }

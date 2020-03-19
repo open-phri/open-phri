@@ -41,13 +41,4 @@ template <class T> struct is_shared_ptr : std::false_type {};
 
 template <class T> struct is_shared_ptr<std::shared_ptr<T>> : std::true_type {};
 
-//! \brief Forms lvalue reference to const type of t
-//! \details Same as C++17 std::as_const. Only for C++14 compability.
-//! \tparam T Type to cast
-//! \param t Value to cast
-//! \return constexpr std::add_const_t<T>& a const lvalue reference to \p t
-template <class T> constexpr std::add_const_t<T>& as_const(T& t) noexcept {
-    return t;
-}
-
 } // namespace phri

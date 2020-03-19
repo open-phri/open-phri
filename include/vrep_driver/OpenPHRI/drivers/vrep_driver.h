@@ -149,10 +149,9 @@ public:
     /**
      * @brief Get the TCP pose in the given frame.
      * @param pose [out] The current TCP pose.
-     * @param frame [in] The reference frame.
      * @return True if correctly read, false otherwise.
      */
-    bool readTCPPose(phri::Pose& pose, phri::ReferenceFrame frame) const;
+    bool readTCPPose(spatial::Position& pose) const;
 
     /**
      * @brief Get the TCP velocity in the given frame.
@@ -160,29 +159,14 @@ public:
      * @param frame [in] The reference frame.
      * @return True if correctly read, false otherwise.
      */
-    bool readTCPVelocity(spatial::Velocity& velocity,
-                         phri::ReferenceFrame frame) const;
+    bool readTCPVelocity(spatial::Velocity& velocity) const;
 
     /**
      * @brief Get the TCP wrench in the TCP frame.
      * @param wrench [out] The current TCP wrench.
      * @return True if correctly read, false otherwise.
      */
-    bool readTCPWrench(phri::Wrench& wrench) const;
-
-    /**
-     * @brief Get the Jacobian matrix associated with the TCP.
-     * @param jacobian [out] The current Jacobian matrix.
-     * @return True if correctly read, false otherwise.
-     */
-    bool readJacobian(Eigen::MatrixXd& jacobian) const;
-
-    /**
-     * @brief Get the transformation matrix associated with the TCP.
-     * @param matrix [out] The current transformation matrix.
-     * @return True if correctly read, false otherwise.
-     */
-    bool readTransformationMatrix(Eigen::Matrix4d& matrix) const;
+    bool readTCPWrench(spatial::Force& wrench) const;
 
     /**
      * @brief Start tracking a given object in the specified frame.
@@ -191,8 +175,8 @@ public:
      * @return A shared pointer to the object's postion. Updated on
      * VREPDriver::updateTrackedObjectsPosition.
      */
-    std::shared_ptr<const Pose> trackObjectPosition(const std::string& name,
-                                                    phri::ReferenceFrame frame);
+    std::shared_ptr<const spatial::Position>
+    trackObjectPosition(const std::string& name, spatial::Frame frame);
 
     /**
      * @brief Update all tracked objects' position.
@@ -200,38 +184,42 @@ public:
      */
     bool updateTrackedObjectsPosition();
 
-    std::shared_ptr<const VectorXd> initLaserScanner(const std::string& name);
+    std::shared_ptr<const vector::dyn::Position>
+    initLaserScanner(const std::string& name);
+
     bool updateLaserScanners();
 
-    bool readJointPosition(Eigen::VectorXd& position) const;
-    bool sendJointTargetPosition(const Eigen::VectorXd& position) const;
-    bool sendJointTargetVelocity(const Eigen::VectorXd& velocity) const;
+    bool readJointPosition(vector::dyn::Position& position);
+    bool sendJointTargetPosition(const vector::dyn::Position& position);
+    bool sendJointTargetVelocity(const vector::dyn::Velocity& velocity);
 
     virtual bool read() override;
     virtual bool send() override;
 
     static bool isRegisteredInFactory();
 
+    static constexpr spatial::Frame worldFrame() {
+        return spatial::Frame{"world"};
+    }
+
 private:
     void init(const std::string& ip, int port);
     void init(int client_id);
     bool getObjectHandles();
     void startStreaming() const;
-    int getFrameHandle(phri::ReferenceFrame frame) const;
+    int getFrameHandle(spatial::Frame frame) const;
 
     bool sync_mode_;
     std::string suffix_;
     int client_id_;
 
     std::unordered_map<std::string, int> object_handles_;
-    std::map<std::string, std::shared_ptr<VectorXd>> lasers_data_;
-    std::map<std::pair<int, int>, std::shared_ptr<Pose>> tracked_objects_;
+    std::map<std::string, std::shared_ptr<vector::dyn::Position>> lasers_data_;
+    std::map<std::pair<int, int>, std::shared_ptr<spatial::Position>>
+        tracked_objects_;
 
     static const bool registered_in_factory;
     static std::map<std::string, int> connection_to_client_id;
 };
-
-
-
 
 } // namespace phri

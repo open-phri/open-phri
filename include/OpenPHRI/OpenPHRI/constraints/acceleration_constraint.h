@@ -62,11 +62,11 @@ public:
 
     //! \brief Read/write access the acceleration limit used by the constraint
     //! \return double& A reference to the acceleration limit
-    scalar::Acceleration& maximumAcceleration();
+    void setMaximumAcceleration(const scalar::Acceleration& acceleration);
 
     //! \brief Read access the acceleration limit used by the constraint
     //! \return double The acceleration limit value
-    const scalar::Acceleration& maximumAcceleration() const;
+    const scalar::Acceleration& getMaximumAcceleration() const;
 
 private:
     //! \brief Shared pointer holding the acceleration limit.

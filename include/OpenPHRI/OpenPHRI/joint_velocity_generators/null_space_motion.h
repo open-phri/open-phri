@@ -58,11 +58,11 @@ public:
 
     //! \brief Read/write access the velocity used by the generator
     //! \return double& A reference to the velocity
-    vector::dyn::Velocity& velocity();
+    void setVelocity(const vector::dyn::Velocity& velocity);
 
     //! \brief Read access the velocity used by the generator
     //! \return double The velocity value
-    const vector::dyn::Velocity& velocity() const;
+    const vector::dyn::Velocity& getVelocity() const;
 
 protected:
     virtual void update(vector::dyn::Velocity& velocity) override;

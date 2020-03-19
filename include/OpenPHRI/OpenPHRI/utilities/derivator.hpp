@@ -29,6 +29,7 @@
 #pragma once
 
 #include <OpenPHRI/definitions.h>
+#include <OpenPHRI/detail/universal_wrapper.hpp>
 #include <physical_quantities/spatial/velocity.h>
 #include <physical_quantities/spatial/acceleration.h>
 
@@ -49,9 +50,11 @@ public:
      * @param output A shared pointer to the output data
      * @param sample_time Time step between each call to Derivator::compute().
      */
-    Derivator(const std::shared_ptr<const Input>& input,
-              const std::shared_ptr<Output>& output, double sample_time)
-        : input_(input), output_(output), frequency_(1. / sample_time) {
+    template <typename InputT, typename OutputT>
+    Derivator(InputT&& input, OutputT&& output, double sample_time)
+        : input_{std::forward<InputT>(input)},
+          output_{std::forward<OutputT>(output)},
+          frequency_{1. / sample_time} {
         reset();
     }
 
@@ -60,21 +63,12 @@ public:
      * @param input A shared pointer to the input data
      * @param sample_time Time step between each call to Derivator::compute().
      */
-    Derivator(const std::shared_ptr<const Input>& input, double sample_time)
-        : Derivator(input, std::make_shared<Output>(), sample_time) {
+    template <typename InputT>
+    Derivator(InputT&& input, double sample_time)
+        : Derivator(std::forward<InputT>(input), Output{}, sample_time) {
     }
 
     virtual ~Derivator() = default;
-
-    /***		Configuration		***/
-
-    /**
-     * @brief Get the pointer to the output data
-     * @return A shared pointer to the output data.
-     */
-    std::shared_ptr<const Output> getOutput() const {
-        return output_;
-    }
 
     /**
      * @brief Reset the derivator's internal state to its original state
@@ -88,8 +82,8 @@ public:
                                    TT::MaxColsAtCompileTime>>::value,
         void>::type
     reset() {
-        output_->setZero();
-        previous_input_ = *input_;
+        output().setZero();
+        previous_input_ = input();
     }
 
     /**
@@ -101,7 +95,7 @@ public:
                             void>::type
     reset() {
         output_->vector().setZero();
-        previous_input_ = *input_;
+        previous_input_ = input();
     }
 
     /**
@@ -109,8 +103,8 @@ public:
      */
     template <typename TT = Output>
     typename std::enable_if<std::is_arithmetic<TT>::value, void>::type reset() {
-        *output_ = TT(0);
-        previous_input_ = *input_;
+        output() = TT{0};
+        previous_input_ = input();
     }
 
     /***		Algorithm		***/
@@ -120,9 +114,9 @@ public:
      * @return The new estimation.
      */
     virtual Output compute() {
-        *output_ = (*input_ - previous_input_) * frequency_;
-        previous_input_ = *input_;
-        return *output_;
+        output() = (input() - previous_input_) * frequency_;
+        previous_input_ = input();
+        return output();
     }
 
     /**
@@ -133,9 +127,21 @@ public:
         return compute();
     }
 
+    const Input& input() const {
+        return input_.cref();
+    }
+
+    Output& output() {
+        return output_.ref();
+    }
+
+    const Output& output() const {
+        return output_.cref();
+    }
+
 private:
-    std::shared_ptr<const Input> input_;
-    std::shared_ptr<Output> output_;
+    detail::UniversalWrapper<const Input> input_;
+    detail::UniversalWrapper<Output> output_;
     Input previous_input_;
     double frequency_;
 };

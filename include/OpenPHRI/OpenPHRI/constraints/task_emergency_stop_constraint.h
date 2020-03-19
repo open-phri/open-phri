@@ -70,11 +70,11 @@ public:
     /***		Algorithm		***/
     virtual double compute() override;
 
-    scalar::Force& activationThreshold();
-    const scalar::Force& activationThreshold() const;
+    void setActivationThreshold(const scalar::Force& threshold);
+    const scalar::Force& getActivationThreshold() const;
 
-    scalar::Force& deactivationThreshold();
-    const scalar::Force& deactivationThreshold() const;
+    void setDeactivationThreshold(const scalar::Force& threshold);
+    const scalar::Force& getDeactivationThreshold() const;
 
 private:
     detail::UniversalWrapper<scalar::Force> activation_threshold_;

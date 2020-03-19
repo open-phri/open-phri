@@ -34,7 +34,7 @@ double AccelerationConstraint::compute() {
     if (v_norm > 0.) {
         double prev_v_norm =
             robot_->task().command().velocity().linear().norm();
-        double vmax = prev_v_norm + std::abs(maximumAcceleration().value()) *
+        double vmax = prev_v_norm + std::abs(getMaximumAcceleration().value()) *
                                         robot_->control().timeStep();
         constraint = vmax / v_norm;
     }
@@ -42,13 +42,14 @@ double AccelerationConstraint::compute() {
     return constraint;
 }
 
-scalar::Acceleration& AccelerationConstraint::maximumAcceleration() {
-    return maximum_acceleration_;
+void AccelerationConstraint::setMaximumAcceleration(
+    const scalar::Acceleration& acceleration) {
+    maximum_acceleration_.ref() = acceleration;
 }
 
 const scalar::Acceleration&
-AccelerationConstraint::maximumAcceleration() const {
-    return maximum_acceleration_;
+AccelerationConstraint::getMaximumAcceleration() const {
+    return maximum_acceleration_.cref();
 }
 
 } // namespace phri

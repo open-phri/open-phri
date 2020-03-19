@@ -64,29 +64,29 @@ public:
         : mass_{std::forward<MassT>(mass)},
           maximum_kinetic_energy_{
               std::forward<EnergyT>(maximum_kinetic_energy)} {
-        maximumVelocity() = scalar::Velocity{0.};
+        setMaximumVelocity(scalar::Velocity{0.});
     }
 
     virtual double compute() override;
 
     //! \brief Read/write access the mass used by the constraint
     //! \return double& A reference to the mass
-    scalar::Mass& mass();
+    void setMass(const scalar::Mass& mass);
 
     //! \brief Read access the mass used by the constraint
     //! \return double The mass value
-    const scalar::Mass& mass() const;
+    const scalar::Mass& getMass() const;
 
     //! \brief Read/write access the kinetic energy limit used by the constraint
     //! \return double& A reference to the kinetic energy limit
-    scalar::Energy& maximumKineticEnergy();
+    void setMaximumKineticEnergy(const scalar::Energy& energy);
 
     //! \brief Read access the kinetic energy limit used by the constraint
     //! \return double The kinetic energy limit value
-    const scalar::Energy& maximumKineticEnergy() const;
+    const scalar::Energy& getMaximumKineticEnergy() const;
 
 private:
-    using VelocityConstraint::maximumVelocity;
+    using VelocityConstraint::setMaximumVelocity;
 
     detail::UniversalWrapper<scalar::Mass> mass_;
     detail::UniversalWrapper<scalar::Energy> maximum_kinetic_energy_;

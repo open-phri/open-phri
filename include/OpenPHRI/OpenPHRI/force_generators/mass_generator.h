@@ -64,19 +64,19 @@ public:
 
     //! \brief Read/write access the mass used by the generator
     //! \return double& A reference to the mass
-    spatial::Mass& mass();
+    void setMass(const spatial::Mass& mass);
 
     //! \brief Read access the mass used by the generator
     //! \return double The mass value
-    const spatial::Mass& mass() const;
+    const spatial::Mass& getMass() const;
 
     //! \brief Read/write access the targetAcceleration used by the generator
     //! \return double& A reference to the targetAcceleration
-    spatial::Acceleration& targetAcceleration();
+    void setTargetAcceleration(const spatial::Acceleration& acceleration);
 
     //! \brief Read access the targetAcceleration used by the generator
     //! \return double The targetAcceleration value
-    const spatial::Acceleration& targetAcceleration() const;
+    const spatial::Acceleration& getTargetAcceleration() const;
 
 protected:
     virtual void update(spatial::Force& force) override;

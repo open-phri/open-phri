@@ -82,7 +82,8 @@ bool SafetyController::addConstraint(const std::string& name,
                                      std::shared_ptr<Constraint> constraint,
                                      bool force) {
     constraint->setRobot(&robot_);
-    return constraints_.add(name, {constraint, 0.}, force);
+    return constraints_.add(name, StorageWrapper<Constraint>{constraint, 0.},
+                            force);
 }
 
 bool SafetyController::addForceGenerator(
@@ -91,7 +92,9 @@ bool SafetyController::addForceGenerator(
     generator->setRobot(&robot_);
     generator->setFrame(robot_.controlPointFrame());
     return force_generators_.add(
-        name, {generator, spatial::Force::Zero(robot_.controlPointFrame())},
+        name,
+        StorageWrapper<ForceGenerator>{
+            generator, spatial::Force::Zero(robot_.controlPointFrame())},
         force);
 }
 
@@ -99,7 +102,8 @@ bool SafetyController::addJointForceGenerator(
     const std::string& name, std::shared_ptr<JointForceGenerator> generator,
     bool force) {
     generator->setRobot(&robot_);
-    return torque_generators_.add(name, {generator}, force);
+    return torque_generators_.add(
+        name, StorageWrapper<JointForceGenerator>{generator}, force);
 }
 
 bool SafetyController::addVelocityGenerator(
@@ -108,7 +112,9 @@ bool SafetyController::addVelocityGenerator(
     generator->setRobot(&robot_);
     generator->setFrame(robot_.controlPointFrame());
     return velocity_generators_.add(
-        name, {generator, spatial::Velocity::Zero(robot_.controlPointFrame())},
+        name,
+        StorageWrapper<VelocityGenerator>{
+            generator, spatial::Velocity::Zero(robot_.controlPointFrame())},
         force);
 }
 
@@ -116,7 +122,8 @@ bool SafetyController::addJointVelocityGenerator(
     const std::string& name, std::shared_ptr<JointVelocityGenerator> generator,
     bool force) {
     generator->setRobot(&robot_);
-    return joint_velocity_generators_.add(name, {generator}, force);
+    return joint_velocity_generators_.add(
+        name, StorageWrapper<JointVelocityGenerator>{generator}, force);
 }
 
 bool SafetyController::removeConstraint(const std::string& name) {
@@ -300,32 +307,32 @@ void SafetyController::print() const {
     std::cout << "\tForce generators:\n";
     for (const auto& gen : force_generators_) {
         std::cout << "\t\t- " << gen.first << " ("
-                  << getTypeName(*gen.second.object)
-                  << "): " << gen.second.last_value << "\n";
+                  << getTypeName(*gen.second.cref().object)
+                  << "): " << gen.second.cref().last_value << "\n";
     }
     std::cout << "\tVelocity generators:\n";
     for (const auto& gen : velocity_generators_) {
         std::cout << "\t\t- " << gen.first << " ("
-                  << getTypeName(*gen.second.object)
-                  << "): " << gen.second.last_value << "\n";
+                  << getTypeName(*gen.second.cref().object)
+                  << "): " << gen.second.cref().last_value << "\n";
     }
     std::cout << "\tTorque generators:\n";
     for (const auto& gen : torque_generators_) {
         std::cout << "\t\t- " << gen.first << " ("
-                  << getTypeName(*gen.second.object)
-                  << "): " << gen.second.last_value.transpose() << "\n";
+                  << getTypeName(*gen.second.cref().object)
+                  << "): " << gen.second.cref().last_value.transpose() << "\n";
     }
     std::cout << "\tJoint velocity generators:\n";
     for (const auto& gen : joint_velocity_generators_) {
         std::cout << "\t\t- " << gen.first << " ("
-                  << getTypeName(*gen.second.object)
-                  << "): " << gen.second.last_value.transpose() << "\n";
+                  << getTypeName(*gen.second.cref().object)
+                  << "): " << gen.second.cref().last_value.transpose() << "\n";
     }
     std::cout << "\tConstraints:\n";
     for (const auto& cstr : constraints_) {
         std::cout << "\t\t- " << cstr.first << " ("
-                  << getTypeName(*cstr.second.object)
-                  << "): " << cstr.second.last_value << "\n";
+                  << getTypeName(*cstr.second.cref().object)
+                  << "): " << cstr.second.cref().last_value << "\n";
     }
 }
 
@@ -382,8 +389,9 @@ double SafetyController::computeConstraintValue() {
     double min_value = std::numeric_limits<double>::infinity();
 
     for (auto& constraint : constraints_) {
-        constraint.second.last_value = constraint.second.object->compute();
-        min_value = std::min(min_value, constraint.second.last_value);
+        constraint.second.ref().last_value =
+            constraint.second.ref().object->compute();
+        min_value = std::min(min_value, constraint.second.cref().last_value);
     }
 
     return robot_.control().scaling_factor_ = std::min(1., min_value);
@@ -394,9 +402,9 @@ const spatial::Force& SafetyController::computeForceSum() {
     sum.setZero();
 
     for (auto& force_generator : force_generators_) {
-        force_generator.second.last_value =
-            force_generator.second.object->compute();
-        sum += force_generator.second.last_value;
+        force_generator.second.ref().last_value =
+            force_generator.second.ref().object->compute();
+        sum += force_generator.second.cref().last_value;
     }
 
     return sum;
@@ -407,9 +415,9 @@ const vector::dyn::Force& SafetyController::computeTorqueSum() {
     sum.setZero();
 
     for (auto& torque_generator : torque_generators_) {
-        torque_generator.second.last_value =
-            torque_generator.second.object->compute();
-        sum += torque_generator.second.last_value;
+        torque_generator.second.ref().last_value =
+            torque_generator.second.ref().object->compute();
+        sum += torque_generator.second.cref().last_value;
     }
 
     return sum;
@@ -420,9 +428,9 @@ const spatial::Velocity& SafetyController::computeVelocitySum() {
     sum.setZero();
 
     for (auto& velocity_generator : velocity_generators_) {
-        velocity_generator.second.last_value =
-            velocity_generator.second.object->compute();
-        sum += velocity_generator.second.last_value;
+        velocity_generator.second.ref().last_value =
+            velocity_generator.second.ref().object->compute();
+        sum += velocity_generator.second.cref().last_value;
     }
 
     return sum;
@@ -433,9 +441,9 @@ const vector::dyn::Velocity& SafetyController::computeJointVelocitySum() {
     sum.setZero();
 
     for (auto& joint_velocity_generator : joint_velocity_generators_) {
-        joint_velocity_generator.second.last_value =
-            joint_velocity_generator.second.object->compute();
-        sum += joint_velocity_generator.second.last_value;
+        joint_velocity_generator.second.ref().last_value =
+            joint_velocity_generator.second.ref().object->compute();
+        sum += joint_velocity_generator.second.cref().last_value;
     }
 
     return sum;

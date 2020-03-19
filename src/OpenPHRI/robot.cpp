@@ -29,6 +29,7 @@ namespace phri {
 Robot::JointData::JointData(size_t joint_count) {
     resize(joint_count);
 }
+
 void Robot::JointData::resize(size_t joint_count) {
     position().resize(joint_count);
     velocity().resize(joint_count);
@@ -109,8 +110,6 @@ Robot::Joints::Joints(size_t joint_count) {
     resize(joint_count);
 }
 
-//! \brief Call JointData::resize() on Joints::state, Joints::target and
-//! Joints::command and JointLimits::resize() on limits
 void Robot::Joints::resize(size_t joint_count) {
     state_.resize(joint_count);
     target_.resize(joint_count);
@@ -141,9 +140,9 @@ const Robot::JointLimits& Robot::Joints::limits() const {
 /***        Robot::TaskData      ***/
 Robot::TaskData::TaskData(spatial::Frame frame)
     : position_{spatial::Position::Zero(frame)},
-      velocity_{spatial::Velocity(frame)},
-      acceleration_{spatial::Acceleration(frame)},
-      wrench_{spatial::Force(frame)} {
+      velocity_{spatial::Velocity::Zero(frame)},
+      acceleration_{spatial::Acceleration::Zero(frame)},
+      wrench_{spatial::Force::Zero(frame)} {
 }
 
 spatial::Position& Robot::TaskData::position() {
@@ -182,15 +181,19 @@ const spatial::Force& Robot::TaskData::force() const {
 Robot::TaskLimits::TaskLimits(spatial::Frame frame)
     : min_position_{frame},
       max_position_{frame},
-      max_velocity_{frame},
-      max_acceleration_{frame},
-      max_force_{frame} {
+      max_velocity_{spatial::Velocity::Constant(
+          std::numeric_limits<double>::infinity(), frame)},
+      max_acceleration_{spatial::Acceleration::Constant(
+          std::numeric_limits<double>::infinity(), frame)},
+      max_force_{spatial::Force::Constant(
+          std::numeric_limits<double>::infinity(), frame)} {
     min_position_.linear().setConstant(
         -std::numeric_limits<double>::infinity());
+    min_position_.orientation().fromAngleAxis(Eigen::AngleAxisd{
+        -std::numeric_limits<double>::infinity(), Eigen::Vector3d::UnitX()});
     max_position_.linear().setConstant(std::numeric_limits<double>::infinity());
-    max_velocity_.setConstant(std::numeric_limits<double>::infinity());
-    max_acceleration_.setConstant(std::numeric_limits<double>::infinity());
-    max_force_.setConstant(std::numeric_limits<double>::infinity());
+    max_position_.orientation().fromAngleAxis(Eigen::AngleAxisd{
+        std::numeric_limits<double>::infinity(), Eigen::Vector3d::UnitX()});
 }
 
 spatial::Position& Robot::TaskLimits::minPosition() {
@@ -369,11 +372,6 @@ Robot::ControlData::Task::Task(spatial::Frame frame)
       total_velocity_{spatial::Velocity::Zero(frame)},
       total_force_{spatial::Force::Zero(frame)} {
     damping_.diagonal().setConstant(std::numeric_limits<double>::max());
-    velocity_sum_.setZero();
-    force_sum_.setZero();
-    velocity_command_.setZero();
-    total_velocity_.setZero();
-    total_force_.setZero();
 }
 
 spatial::Damping& Robot::ControlData::Task::damping() {
@@ -450,8 +448,9 @@ void Robot::create(const YAML::Node& configuration) {
         try {
             name = robot["name"].as<std::string>();
         } catch (...) {
-            throw std::runtime_error(OPEN_PHRI_ERROR(
-                "You must provide a 'name' field in the robot configuration."));
+            throw std::runtime_error(
+                OPEN_PHRI_ERROR("You must provide a 'name' field in the "
+                                "robot configuration."));
         }
         try {
             joint_count = robot["joint_count"].as<size_t>();
@@ -487,11 +486,11 @@ size_t Robot::jointCount() const {
     return joint_count_;
 }
 
-spatial::Frame Robot::controlPointFrame() const {
+const spatial::Frame& Robot::controlPointFrame() const {
     return control_point_frame_;
 }
 
-spatial::Frame Robot::controlPointParentFrame() const {
+const spatial::Frame& Robot::controlPointParentFrame() const {
     return control_point_parent_frame_;
 }
 

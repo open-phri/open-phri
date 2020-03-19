@@ -1,20 +1,13 @@
-#undef NDEBUG
-
 #include <OpenPHRI/OpenPHRI.h>
-#include <pid/rpath.h>
-
-using namespace phri;
-using namespace std;
+#include "utils.h"
 
 int main(int argc, char const* argv[]) {
     using namespace spatial::literals;
 
-    auto robot = phri::Robot{"tcp"_frame, "base"_frame, "rob", 7};
+    auto [robot, model, driver] = TestData{};
 
-    auto model = phri::RobotModel(
-        robot, PID_PATH("robot_models/kuka_lwr4.yaml"), "end-effector");
+    driver.jointState().position().setOnes();
 
-    robot.joints().state.position.setOnes();
     model.forwardKinematics();
 
     auto safety_controller = phri::SafetyController(robot);
@@ -22,7 +15,7 @@ int main(int argc, char const* argv[]) {
 
     safety_controller.compute();
 
-    assert(robot.task().command.twist.vector().isZero());
+    assert(robot.task().command().velocity().isZero());
 
     return 0;
 }

@@ -28,26 +28,27 @@ KineticEnergyConstraint::KineticEnergyConstraint()
 }
 
 double KineticEnergyConstraint::compute() {
-    maximumVelocity().value() =
-        std::sqrt(2. * maximumKineticEnergy().value() / mass().value());
+    setMaximumVelocity(scalar::Velocity{
+        std::sqrt(2. * getMaximumKineticEnergy().value() / getMass().value())});
 
     return VelocityConstraint::compute();
 }
 
-scalar::Mass& KineticEnergyConstraint::mass() {
-    return mass_;
+void KineticEnergyConstraint::setMass(const scalar::Mass& mass) {
+    mass_.ref() = mass;
 }
 
-const scalar::Mass& KineticEnergyConstraint::mass() const {
-    return mass_;
+const scalar::Mass& KineticEnergyConstraint::getMass() const {
+    return mass_.cref();
 }
 
-scalar::Energy& KineticEnergyConstraint::maximumKineticEnergy() {
-    return maximum_kinetic_energy_;
+void KineticEnergyConstraint::setMaximumKineticEnergy(
+    const scalar::Energy& energy) {
+    maximum_kinetic_energy_.ref() = energy;
 }
 
-const scalar::Energy& KineticEnergyConstraint::maximumKineticEnergy() const {
-    return maximum_kinetic_energy_;
+const scalar::Energy& KineticEnergyConstraint::getMaximumKineticEnergy() const {
+    return maximum_kinetic_energy_.cref();
 }
 
 } // namespace phri

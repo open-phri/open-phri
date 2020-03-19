@@ -453,11 +453,11 @@ public:
 
     //! \brief Frame associated with the control point
     //! \return The frame.
-    spatial::Frame controlPointFrame() const;
+    const spatial::Frame& controlPointFrame() const;
 
     //! \brief Parent frame of the one associated with the control point
     //! \return The frame.
-    spatial::Frame controlPointParentFrame() const;
+    const spatial::Frame& controlPointParentFrame() const;
 
     //! \brief The robot's joints data
     Joints& joints();

@@ -118,19 +118,19 @@ public:
 
     //! \brief Read/write access the target spatial::Force used by the generator
     //! \return double& A reference to the target spatial::Force
-    spatial::Force& target();
+    void setTarget(const spatial::Force& force);
 
     //! \brief Read access the target spatial::Force used by the generator
     //! \return double The target spatial::Force value
-    const spatial::Force& target() const;
+    const spatial::Force& getTarget() const;
 
     //! \brief Read/write access the control parameters used by the generator
     //! \return double& A reference to the control parameters
-    Parameters& parameters();
+    void setParameters(const Parameters& parameters);
 
     //! \brief Read access the control parameters used by the generator
     //! \return double The target control parameters
-    const Parameters& parameters() const;
+    const Parameters& getParameters() const;
 
 protected:
     virtual void update(spatial::Velocity& velocity) override;

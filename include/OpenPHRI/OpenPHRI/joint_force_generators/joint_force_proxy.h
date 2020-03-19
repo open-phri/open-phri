@@ -70,11 +70,11 @@ public:
 
     //! \brief Read/write access the force used by the generator
     //! \return double& A reference to the force
-    vector::dyn::Force& force();
+    void setForce(const vector::dyn::Force& force);
 
     //! \brief Read access the force used by the generator
     //! \return double The force value
-    const vector::dyn::Force& force() const;
+    const vector::dyn::Force& getForce() const;
 
 protected:
     virtual void update(vector::dyn::Force& force) override;

@@ -47,7 +47,7 @@ namespace phri {
  */
 class SeparationDistanceConstraint
     : public Constraint,
-      public ObjectCollection<std::shared_ptr<spatial::Position>> {
+      public ObjectCollection<spatial::Position> {
 public:
     /**
      * @brief Construct a separaration distance constraint with a given

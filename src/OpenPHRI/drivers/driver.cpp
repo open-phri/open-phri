@@ -36,6 +36,14 @@ double Driver::getTimeStep() const {
     return robot_.control().timeStep();
 }
 
+Robot& Driver::robot() {
+    return robot_;
+}
+
+const Robot& Driver::robot() const {
+    return robot_;
+}
+
 void Driver::setTimeStep(double time_step) {
     robot_.control().time_step_ = time_step;
 }
@@ -44,7 +52,7 @@ Robot::JointData& Driver::jointState() {
     return robot_.joints().state_;
 }
 
-const Robot::JointData& Driver::jointCommand() const {
+Robot::JointData& Driver::jointCommand() {
     return robot_.joints().command_;
 }
 
@@ -52,6 +60,6 @@ Robot::TaskData& Driver::taskState() {
     return robot_.task().state_;
 }
 
-const Robot::TaskData& Driver::taskCommand() const {
+Robot::TaskData& Driver::taskCommand() {
     return robot_.task().command_;
 }

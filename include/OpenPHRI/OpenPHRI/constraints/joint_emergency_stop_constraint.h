@@ -73,11 +73,11 @@ public:
 
     virtual double compute() override;
 
-    vector::dyn::Force& activationThreshold();
-    const vector::dyn::Force& activationThreshold() const;
+    void setActivationThreshold(const vector::dyn::Force& threshold);
+    const vector::dyn::Force& getActivationThreshold() const;
 
-    vector::dyn::Force& deactivationThreshold();
-    const vector::dyn::Force& deactivationThreshold() const;
+    void setDeactivationThreshold(const vector::dyn::Force& threshold);
+    const vector::dyn::Force& getDeactivationThreshold() const;
 
 protected:
     virtual void setRobot(Robot const* robot) override;

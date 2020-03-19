@@ -60,11 +60,11 @@ public:
 
     //! \brief Read/write access the velocity limit used by the constraint
     //! \return double& A reference to the velocity limit
-    vector::dyn::Velocity& maximumVelocities();
+    void setMaximumVelocities(const vector::dyn::Velocity& velocities);
 
     //! \brief Read access the velocity limit used by the constraint
     //! \return double The velocity limit value
-    const vector::dyn::Velocity& maximumVelocities() const;
+    const vector::dyn::Velocity& getMaximumVelocities() const;
 
 protected:
     virtual void setRobot(Robot const* robot) override;

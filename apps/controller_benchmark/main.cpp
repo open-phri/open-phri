@@ -23,18 +23,17 @@
 using namespace phri;
 using namespace std;
 
-constexpr bool USE_LOOP = false;
+constexpr bool USE_LOOP = true;
 
 int main(int argc, char const* argv[]) {
+    using namespace spatial::literals;
 
-    auto robot = make_shared<Robot>("rob", // Robot's name
-                                    7);    // Robot's joint count
-
-    auto safety_controller = SafetyController(robot);
+    auto robot = Robot{"tcp"_frame, "base"_frame, "test_rob", 7};
+    auto safety_controller = SafetyController{robot};
     safety_controller.skipJacobianInverseComputation(true);
 
     Clock clock;
-    DataLogger logger("/mnt/tmpfs/open-phri_logs", clock.getTime(),
+    DataLogger logger("/tmp", clock.getTime(),
                       true,  // create gnuplot files
                       true); // delay disk write
 
@@ -84,28 +83,26 @@ int main(int argc, char const* argv[]) {
     // Velocity constraint
     logger.reset();
     logger.logExternalData("tavg_controller_1cstr", &t_avg, 1);
-    auto vmax = make_shared<double>(0.1);
+    auto vmax = scalar::Velocity{0.1};
     safety_controller.add("vel cstr", VelocityConstraint(vmax));
     run_benchmark();
 
     // Velocity + power constraint
     logger.reset();
     logger.logExternalData("tavg_controller_2cstr", &t_avg, 1);
-    auto pmax = make_shared<double>(0.1);
+    auto pmax = scalar::Power{0.1};
     safety_controller.add("pow cstr", PowerConstraint(pmax));
     run_benchmark();
 
     // Velocity + power + kinetic energy constraint
     logger.reset();
     logger.logExternalData("tavg_controller_3cstr", &t_avg, 1);
-    auto emax = make_shared<double>(0.1);
-    auto inertia = make_shared<MatrixXd>();
-    inertia->resize(7, 7);
-    inertia->setIdentity();
-    ManipulatorEquivalentMass mass_eq(inertia, robot->jacobian());
-    mass_eq.add("operator", std::make_shared<Vector6d>(Vector6d::Ones()));
-    safety_controller.add(
-        "ec cstr", KineticEnergyConstraint(emax, mass_eq.getEquivalentMass()));
+    auto emax = scalar::Energy{0.1};
+    auto inertia = spatial::Mass::Identity(robot.controlPointFrame());
+    ManipulatorEquivalentMass mass_eq(robot, inertia);
+    mass_eq.add("operator", spatial::Position::Ones(robot.controlPointFrame()));
+    safety_controller.add<KineticEnergyConstraint>(
+        "ec cstr", mass_eq.getEquivalentMass(), emax);
     runner = [&safety_controller, &mass_eq]() {
         mass_eq.compute();
         safety_controller.compute();
@@ -116,32 +113,41 @@ int main(int argc, char const* argv[]) {
     // control
     logger.reset();
     logger.logExternalData("tavg_controller_3cstr_3gen", &t_avg, 1);
-    auto potential_field_generator = make_shared<PotentialFieldGenerator>();
-    auto obstacle = make_shared<PotentialFieldObject>(
-        PotentialFieldType::Repulsive, make_shared<double>(10.),
-        make_shared<double>(0.2),
-        make_shared<Pose>(Vector3d::Ones(), Eigen::Quaterniond::Identity()));
-    auto target = make_shared<PotentialFieldObject>(
-        PotentialFieldType::Attractive, make_shared<double>(10.),
-        make_shared<double>(std::numeric_limits<double>::infinity()),
-        make_shared<Pose>(Vector3d::Ones() * 2.,
-                          Eigen::Quaterniond::Identity()));
+    auto potential_field_generator =
+        std::make_shared<PotentialFieldGenerator>();
+    auto obstacle = PotentialFieldObject{
+        PotentialFieldType::Repulsive, 10., 0.2,
+        spatial::Position{
+            spatial::LinearPosition::Ones(robot.controlPointFrame()),
+            spatial::AngularPosition::Zero(robot.controlPointFrame())}};
+
+    auto target = PotentialFieldObject{
+        PotentialFieldType::Attractive, 10.,
+        std::numeric_limits<double>::infinity(),
+        spatial::Position{
+            spatial::LinearPosition::Constant(2., robot.controlPointFrame()),
+            spatial::AngularPosition::Zero(robot.controlPointFrame())}};
+
     potential_field_generator->add("obstacle", obstacle);
     potential_field_generator->add("target", target);
     safety_controller.add("pfm", potential_field_generator);
-    safety_controller.add("stiffness",
-                          std::make_shared<StiffnessGenerator>(
-                              make_shared<Matrix6d>(Matrix6d::Identity()),
-                              robot->controlPointTargetPose()));
-    auto target_force = std::make_shared<Vector6d>(Vector6d::Zero());
-    auto p_gain = std::make_shared<Vector6d>(Vector6d::Ones() * 0.005);
-    auto d_gain = std::make_shared<Vector6d>(Vector6d::Ones() * 0.00005);
-    auto selection = std::make_shared<Vector6d>(Vector6d::Zero());
-    target_force->z() = 10.;
-    selection->z() = 1.;
-    safety_controller.add(
-        "force control",
-        ForceControl(target_force, 0.001, p_gain, d_gain, selection));
+
+    safety_controller.add<StiffnessGenerator>(
+        "stiffness", spatial::Stiffness::Identity(robot.controlPointFrame()),
+        spatial::Position::Zero(robot.controlPointFrame()));
+
+    auto target_force = spatial::Force::Zero(robot.controlPointFrame());
+    Eigen::Vector6d p_gain = Eigen::Vector6d::Ones() * 0.005;
+    Eigen::Vector6d d_gain = Eigen::Vector6d::Ones() * 0.00005;
+    std::array<bool, 6> selection;
+    selection.fill(false);
+
+    target_force.z() = 10.;
+    selection[2] = true;
+    safety_controller.add<ForceControl>(
+        "force control", target_force,
+        ForceControl::Parameters{p_gain, d_gain, selection},
+        ForceControl::TargetType::Environment);
     run_benchmark();
 
     return 0;

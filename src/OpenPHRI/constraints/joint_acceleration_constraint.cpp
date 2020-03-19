@@ -24,13 +24,13 @@
 namespace phri {
 
 JointAccelerationConstraint::JointAccelerationConstraint()
-    : JointAccelerationConstraint(vector::dyn::Acceleration{}) {
+    : JointAccelerationConstraint{vector::dyn::Acceleration{}} {
 }
 
 double JointAccelerationConstraint::compute() {
     double constraint = 1.;
     const auto& joint_vel = robot_->control().joints().totalVelocity();
-    const auto& max_joint_acc = maximumAcceleration().value();
+    const auto& max_joint_acc = getMaximumAcceleration().value();
     const auto& prev_joint_vel = robot_->joints().command().velocity();
 
     for (size_t i = 0; i < joint_vel.size(); ++i) {
@@ -46,18 +46,21 @@ double JointAccelerationConstraint::compute() {
     return constraint;
 }
 
-vector::dyn::Acceleration& JointAccelerationConstraint::maximumAcceleration() {
-    return maximum_acceleration_;
+void JointAccelerationConstraint::setMaximumAcceleration(
+    const vector::dyn::Acceleration& acceleration) {
+    maximum_acceleration_.ref() = acceleration;
 }
 
 const vector::dyn::Acceleration&
-JointAccelerationConstraint::maximumAcceleration() const {
-    return maximum_acceleration_;
+JointAccelerationConstraint::getMaximumAcceleration() const {
+    return maximum_acceleration_.cref();
 }
 
 void JointAccelerationConstraint::setRobot(Robot const* new_robot) {
     Constraint::setRobot(new_robot);
-    maximumAcceleration().resize(robot().jointCount());
+    if (getMaximumAcceleration().size() == 0) {
+        maximum_acceleration_.ref().resize(robot().jointCount());
+    }
 }
 
 } // namespace phri

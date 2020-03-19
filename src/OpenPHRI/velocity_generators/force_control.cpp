@@ -65,7 +65,7 @@ void ForceControl::configureFilter(scalar::CutoffFrequency cutoff_frequency) {
 }
 
 void ForceControl::update(spatial::Velocity& velocity) {
-    auto error = target() - robot().task().state().force();
+    auto error = getTarget() - robot().task().state().force();
 
     // Zero the error on unused components
     applySelection(error);
@@ -75,19 +75,19 @@ void ForceControl::update(spatial::Velocity& velocity) {
 
     // Proportional action
     Eigen::Vector6d command =
-        parameters().proportional_gain.cwiseProduct(error);
+        getParameters().proportional_gain.cwiseProduct(error);
 
     // Derivative action
-    command += parameters().derivative_gain.cwiseProduct(
+    command += getParameters().derivative_gain.cwiseProduct(
         (error - prev_error_) / robot().control().timeStep());
 
     prev_error_ = error;
 
-    velocity = spatial::Velocity(command, target().frame());
+    velocity = spatial::Velocity(command, getTarget().frame());
 }
 
 void ForceControl::applySelection(Eigen::Vector6d& vec) const {
-    const auto& sel = parameters().selection_vector;
+    const auto& sel = getParameters().selection_vector;
     for (size_t i = 0; i < 6; ++i) {
         if (not sel[i]) {
             vec(i) = 0.;
@@ -95,20 +95,20 @@ void ForceControl::applySelection(Eigen::Vector6d& vec) const {
     }
 }
 
-spatial::Force& ForceControl::target() {
-    return target_;
+void ForceControl::setTarget(const spatial::Force& force) {
+    target_.ref() = force;
 }
 
-const spatial::Force& ForceControl::target() const {
-    return target_;
+const spatial::Force& ForceControl::getTarget() const {
+    return target_.cref();
 }
 
-ForceControl::Parameters& ForceControl::parameters() {
-    return parameters_;
+void ForceControl::setParameters(const Parameters& parameters) {
+    parameters_.ref() = parameters;
 }
 
-const ForceControl::Parameters& ForceControl::parameters() const {
-    return parameters_;
+const ForceControl::Parameters& ForceControl::getParameters() const {
+    return parameters_.cref();
 }
 
 } // namespace phri

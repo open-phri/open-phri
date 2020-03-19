@@ -69,11 +69,11 @@ public:
 
     //! \brief Read/write access the velocity used by the generator
     //! \return double& A reference to the velocity
-    spatial::Velocity& velocity();
+    void setVelocity(const spatial::Velocity& velocity);
 
     //! \brief Read access the velocity used by the generator
     //! \return double The velocity value
-    const spatial::Velocity& velocity() const;
+    const spatial::Velocity& getVelocity() const;
 
 protected:
     virtual void update(spatial::Velocity& velocity) override;

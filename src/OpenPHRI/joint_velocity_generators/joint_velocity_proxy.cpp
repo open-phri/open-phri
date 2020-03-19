@@ -23,29 +23,31 @@
 namespace phri {
 
 JointVelocityProxy::JointVelocityProxy()
-    : JointVelocityProxy(vector::dyn::Velocity{}) {
+    : JointVelocityProxy{vector::dyn::Velocity{}} {
 }
 
 void JointVelocityProxy::update(vector::dyn::Velocity& new_velocity) {
     if (generator_) {
         new_velocity = generator_();
     } else {
-        new_velocity = velocity();
+        new_velocity = getVelocity();
     }
 }
 
-vector::dyn::Velocity& JointVelocityProxy::velocity() {
-    return external_velocity_;
+void JointVelocityProxy::setVelocity(const vector::dyn::Velocity& velocity) {
+    external_velocity_.ref() = velocity;
 }
 
-const vector::dyn::Velocity& JointVelocityProxy::velocity() const {
-    return external_velocity_;
+const vector::dyn::Velocity& JointVelocityProxy::getVelocity() const {
+    return external_velocity_.cref();
 }
 
 void JointVelocityProxy::setRobot(Robot const* new_robot) {
     JointVelocityGenerator::setRobot(new_robot);
-    velocity().resize(robot().jointCount());
-    velocity().setZero();
+    if (getVelocity().size() == 0) {
+        external_velocity_.ref().resize(robot().jointCount());
+        external_velocity_.ref().setZero();
+    }
 }
 
 } // namespace phri

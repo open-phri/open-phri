@@ -35,21 +35,21 @@ double PowerConstraint::compute() {
     power_ = power;
 
     if (power < scalar::Power{0.}) {
-        constraint = std::abs(maximumPower().value() / power.value());
+        constraint = std::abs(getMaximumPower().value() / power.value());
     }
 
     return constraint;
 }
 
-scalar::Power& PowerConstraint::maximumPower() {
-    return maximum_power_;
+void PowerConstraint::setMaximumPower(const scalar::Power& power) {
+    maximum_power_.ref() = power;
 }
 
-const scalar::Power& PowerConstraint::maximumPower() const {
-    return maximum_power_;
+const scalar::Power& PowerConstraint::getMaximumPower() const {
+    return maximum_power_.cref();
 }
 
-const scalar::Power& PowerConstraint::power() const {
+const scalar::Power& PowerConstraint::getPower() const {
     return power_;
 }
 

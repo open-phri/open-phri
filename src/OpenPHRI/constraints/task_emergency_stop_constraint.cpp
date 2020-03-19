@@ -34,9 +34,9 @@ double TaskEmergencyStopConstraint::compute() {
 
     scalar::Force norm{robot_->task().state().force().linear().norm()};
 
-    if (norm >= activationThreshold()) {
+    if (norm >= getActivationThreshold()) {
         constraint = 0.;
-    } else if (norm <= deactivationThreshold()) {
+    } else if (norm <= getDeactivationThreshold()) {
         constraint = 1.;
     } else {
         constraint = previous_constraint_value_;
@@ -47,21 +47,24 @@ double TaskEmergencyStopConstraint::compute() {
     return constraint;
 }
 
-scalar::Force& TaskEmergencyStopConstraint::activationThreshold() {
-    return activation_threshold_;
-}
-
-const scalar::Force& TaskEmergencyStopConstraint::activationThreshold() const {
-    return activation_threshold_;
-}
-
-scalar::Force& TaskEmergencyStopConstraint::deactivationThreshold() {
-    return deactivation_threshold_;
+void TaskEmergencyStopConstraint::setActivationThreshold(
+    const scalar::Force& threshold) {
+    activation_threshold_.ref() = threshold;
 }
 
 const scalar::Force&
-TaskEmergencyStopConstraint::deactivationThreshold() const {
-    return deactivation_threshold_;
+TaskEmergencyStopConstraint::getActivationThreshold() const {
+    return activation_threshold_.cref();
+}
+
+void TaskEmergencyStopConstraint::setDeactivationThreshold(
+    const scalar::Force& threshold) {
+    deactivation_threshold_.ref() = threshold;
+}
+
+const scalar::Force&
+TaskEmergencyStopConstraint::getDeactivationThreshold() const {
+    return deactivation_threshold_.cref();
 }
 
 } // namespace phri

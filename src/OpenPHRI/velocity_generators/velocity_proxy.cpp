@@ -35,16 +35,16 @@ void VelocityProxy::update(spatial::Velocity& new_velocity) {
     if (generator_) {
         new_velocity = generator_();
     } else {
-        new_velocity = velocity();
+        new_velocity = getVelocity();
     }
 }
 
-spatial::Velocity& VelocityProxy::velocity() {
-    return external_velocity_;
+void VelocityProxy::setVelocity(const spatial::Velocity& velocity) {
+    external_velocity_.ref() = velocity;
 }
 
-const spatial::Velocity& VelocityProxy::velocity() const {
-    return external_velocity_;
+const spatial::Velocity& VelocityProxy::getVelocity() const {
+    return external_velocity_.cref();
 }
 
 } // namespace phri

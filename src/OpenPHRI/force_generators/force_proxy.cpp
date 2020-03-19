@@ -34,16 +34,16 @@ void ForceProxy::update(spatial::Force& wrench) {
     if (generator_) {
         wrench = generator_();
     } else {
-        wrench = force();
+        wrench = getForce();
     }
 }
 
-spatial::Force& ForceProxy::force() {
-    return external_force_;
+void ForceProxy::setForce(const spatial::Force& force) {
+    external_force_.ref() = force;
 }
 
-const spatial::Force& ForceProxy::force() const {
-    return external_force_;
+const spatial::Force& ForceProxy::getForce() const {
+    return external_force_.cref();
 }
 
 } // namespace phri

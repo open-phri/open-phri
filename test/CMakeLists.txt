@@ -4,7 +4,11 @@ function(create_test test)
         NAME  ${test}
         DIRECTORY ${test}
         RUNTIME_RESOURCES robot_models
-        DEPEND open-phri/open-phri pid-rpath/rpathlib catch2/catch2
+        DEPEND 
+            open-phri/open-phri
+            open-phri/test-utils
+            pid-rpath/rpathlib
+            catch2/catch2
     )
 
     run_PID_Test(
@@ -20,8 +24,9 @@ endfunction()
 
 create_test(default_controller)
 create_test(interpolators)
-# create_test(potential_field_generator)
+create_test(potential_field_generator)
 create_test(task_space)
-# create_test(proxy_generators)
+create_test(proxy_generators)
+create_test(universal_wrapper)
 
 create_test(constraints)

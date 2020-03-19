@@ -57,18 +57,19 @@ void MassGenerator::update(spatial::Force& force) {
     // force = *mass_ * error;
 }
 
-spatial::Mass& MassGenerator::mass() {
-    return mass_;
+void MassGenerator::setMass(const spatial::Mass& mass) {
+    mass_.ref() = mass;
 }
 
-const spatial::Mass& MassGenerator::mass() const {
-    return mass_;
+const spatial::Mass& MassGenerator::getMass() const {
+    return mass_.cref();
 }
 
-spatial::Acceleration& MassGenerator::targetAcceleration() {
-    return target_acceleration_;
+void MassGenerator::setTargetAcceleration(
+    const spatial::Acceleration& acceleration) {
+    target_acceleration_.ref() = acceleration;
 }
 
-const spatial::Acceleration& MassGenerator::targetAcceleration() const {
-    return target_acceleration_;
+const spatial::Acceleration& MassGenerator::getTargetAcceleration() const {
+    return target_acceleration_.cref();
 }

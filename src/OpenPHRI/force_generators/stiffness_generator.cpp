@@ -42,21 +42,19 @@ void StiffnessGenerator::update(spatial::Force& force) {
     // error.segment<3>(0) *= -1.;
     // force = stiffness_->cwiseProduct(error);
 }
-
-spatial::Stiffness& StiffnessGenerator::stiffness() {
-    return stiffness_;
+void StiffnessGenerator::setStiffness(const spatial::Stiffness& stiffness) {
+    stiffness_.ref() = stiffness;
 }
 
-const spatial::Stiffness& StiffnessGenerator::stiffness() const {
-    return stiffness_;
+const spatial::Stiffness& StiffnessGenerator::getStiffness() const {
+    return stiffness_.cref();
+}
+void StiffnessGenerator::setTargetPose(const spatial::Position& position) {
+    target_pose_.ref() = position;
 }
 
-spatial::Position& StiffnessGenerator::targetPose() {
-    return target_pose_;
-}
-
-const spatial::Position& StiffnessGenerator::targetPose() const {
-    return target_pose_;
+const spatial::Position& StiffnessGenerator::getTargetPose() const {
+    return target_pose_.cref();
 }
 
 } // namespace phri

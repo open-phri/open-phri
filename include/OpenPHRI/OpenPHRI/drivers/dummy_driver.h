@@ -66,6 +66,11 @@ public:
     virtual bool read() override;
     virtual bool send() override;
 
+    using Driver::jointCommand;
+    using Driver::jointState;
+    using Driver::taskCommand;
+    using Driver::taskState;
+
 private:
     static bool registered_in_factory;
     std::chrono::high_resolution_clock::time_point last_sync_;

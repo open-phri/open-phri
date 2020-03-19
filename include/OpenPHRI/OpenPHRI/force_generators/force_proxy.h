@@ -69,11 +69,11 @@ public:
 
     //! \brief Read/write access the force used by the generator
     //! \return double& A reference to the force
-    spatial::Force& force();
+    void setForce(const spatial::Force& force);
 
     //! \brief Read access the force used by the generator
     //! \return double The force value
-    const spatial::Force& force() const;
+    const spatial::Force& getForce() const;
 
 protected:
     virtual void update(spatial::Force& force) override;
