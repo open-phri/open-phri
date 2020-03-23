@@ -48,6 +48,75 @@ namespace phri {
  */
 class Robot {
 public:
+    class Joints;
+    class Task;
+    class ControlData;
+
+    Robot(spatial::Frame control_point_frame,
+          spatial::Frame control_point_parent_frame);
+
+    //! \brief Construct a new Robot object with a name and a number of joints
+    //! \param name The name of the robot
+    //! \param joint_count The number of joints
+    Robot(spatial::Frame control_point_frame,
+          spatial::Frame control_point_parent_frame, const std::string& name,
+          size_t joint_count);
+
+    //! \brief Construct a new Robot object with the given configuration
+    //! \details The \p configuration node must contain a \a name field and a \a
+    //! joint_count field
+    //! \param configuration A YAML::Node describing the robot
+    Robot(const YAML::Node& configuration);
+
+    //! \brief Change the name and number of joints of the robot
+    //! \param name The name of the robot
+    //! \param joint_count The number of joints
+    void create(const std::string& name, size_t joint_count);
+
+    //! \brief Change the name, number of joints and controlled frame of the
+    //! robot
+    //! \param name The name of the robot
+    //! \param joint_count The number of joints
+    //! \param frame The controlled frame
+    void create(const std::string& name, size_t joint_count,
+                spatial::Frame control_point_frame,
+                spatial::Frame control_point_parent_frame);
+
+    //! \brief Change the name and number of joints of the robot according to
+    //! the given configuration
+    //! \details The \p configuration node must contain
+    //! a \a name field (string) and a \a joint_count (unsigned int) field
+    //! \param configuration A YAML::Node describing the robot
+    void create(const YAML::Node& configuration);
+
+    //! \brief The name given to the robot.
+    //! \return A const ref to the name.
+    const std::string& name() const;
+
+    //! \brief Number of joints of the robot.
+    //! \return The number of joints.
+    size_t jointCount() const;
+
+    //! \brief Frame associated with the control point
+    //! \return The frame.
+    const spatial::Frame& controlPointFrame() const;
+
+    //! \brief Parent frame of the one associated with the control point
+    //! \return The frame.
+    const spatial::Frame& controlPointParentFrame() const;
+
+    //! \brief The robot's joints data
+    Joints& joints();
+    const Joints& joints() const;
+
+    //! \brief The robot's task data
+    Task& task();
+    const Task& task() const;
+
+    //! \brief Control related data
+    ControlData& control();
+    const ControlData& control() const;
+
     //! \brief Holds a joint state (either current, target or command)
     class JointData {
     public:
@@ -405,71 +474,6 @@ public:
         //! \brief Task transformation matrix (R T;0 1)
         spatial::Transformation transformation_;
     };
-
-    Robot(spatial::Frame control_point_frame,
-          spatial::Frame control_point_parent_frame);
-
-    //! \brief Construct a new Robot object with a name and a number of joints
-    //! \param name The name of the robot
-    //! \param joint_count The number of joints
-    Robot(spatial::Frame control_point_frame,
-          spatial::Frame control_point_parent_frame, const std::string& name,
-          size_t joint_count);
-
-    //! \brief Construct a new Robot object with the given configuration
-    //! \details The \p configuration node must contain a \a name field and a \a
-    //! joint_count field
-    //! \param configuration A YAML::Node describing the robot
-    Robot(const YAML::Node& configuration);
-
-    //! \brief Change the name and number of joints of the robot
-    //! \param name The name of the robot
-    //! \param joint_count The number of joints
-    void create(const std::string& name, size_t joint_count);
-
-    //! \brief Change the name, number of joints and controlled frame of the
-    //! robot
-    //! \param name The name of the robot
-    //! \param joint_count The number of joints
-    //! \param frame The controlled frame
-    void create(const std::string& name, size_t joint_count,
-                spatial::Frame control_point_frame,
-                spatial::Frame control_point_parent_frame);
-
-    //! \brief Change the name and number of joints of the robot according to
-    //! the given configuration
-    //! \details The \p configuration node must contain
-    //! a \a name field (string) and a \a joint_count (unsigned int) field
-    //! \param configuration A YAML::Node describing the robot
-    void create(const YAML::Node& configuration);
-
-    //! \brief The name given to the robot.
-    //! \return A const ref to the name.
-    const std::string& name() const;
-
-    //! \brief Number of joints of the robot.
-    //! \return The number of joints.
-    size_t jointCount() const;
-
-    //! \brief Frame associated with the control point
-    //! \return The frame.
-    const spatial::Frame& controlPointFrame() const;
-
-    //! \brief Parent frame of the one associated with the control point
-    //! \return The frame.
-    const spatial::Frame& controlPointParentFrame() const;
-
-    //! \brief The robot's joints data
-    Joints& joints();
-    const Joints& joints() const;
-
-    //! \brief The robot's task data
-    Task& task();
-    const Task& task() const;
-
-    //! \brief Control related data
-    ControlData& control();
-    const ControlData& control() const;
 
 private:
     spatial::Frame control_point_frame_;
