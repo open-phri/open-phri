@@ -21,6 +21,7 @@
 #include <OpenPHRI/drivers/vrep_driver.h>
 #include <OpenPHRI/utilities/exceptions.h>
 
+#include <pid/rpath.h>
 #include <yaml-cpp/yaml.h>
 
 #include <stdexcept>
@@ -42,13 +43,14 @@ VREPDriver::VREPDriver(phri::Robot& robot, double sample_time,
                        const std::string& suffix, const std::string& ip,
                        int port)
     : phri::Driver(robot, sample_time), sync_mode_(true), suffix_(suffix) {
-    init(ip, port);
+    start_parameters_.ip = ip;
+    start_parameters_.port = port;
 }
 
 VREPDriver::VREPDriver(phri::Robot& robot, double sample_time, int client_id,
                        const std::string& suffix)
     : phri::Driver(robot, sample_time), sync_mode_(true), suffix_(suffix) {
-    init(client_id);
+    start_parameters_.client_id = client_id_;
 }
 
 VREPDriver::VREPDriver(phri::Robot& robot, const YAML::Node& configuration)
@@ -67,16 +69,18 @@ VREPDriver::VREPDriver(phri::Robot& robot, const YAML::Node& configuration)
         sync_mode_ = vrep["synchronous"].as<bool>(true);
         auto mode = vrep["mode"].as<std::string>("TCP");
         if (mode == "TCP") {
-            std::string ip = vrep["ip"].as<std::string>("127.0.0.1");
-            int port = vrep["port"].as<int>(19997);
-            init(ip, port);
+            start_parameters_.ip = vrep["ip"].as<std::string>("127.0.0.1");
+            start_parameters_.port = vrep["port"].as<int>(19997);
         } else if (mode == "shared_memory") {
-            int port = vrep["port"].as<int>(-1000);
-            init("", port);
+            start_parameters_.port = vrep["port"].as<int>(-1000);
         } else {
             throw std::runtime_error(OPEN_PHRI_ERROR(
                 "Invalid 'mode' field in the V-REP configuration. Value can be "
                 "'TCP' or 'shared_memory'."));
+        }
+        auto scene = vrep["scene"].as<std::string>("");
+        if (not scene.empty()) {
+            setScene(scene);
         }
     } else {
         throw std::runtime_error(OPEN_PHRI_ERROR(
@@ -90,36 +94,47 @@ VREPDriver::~VREPDriver() {
 
 bool VREPDriver::init(double timeout) {
     spatial::Frame::save("world");
+
+    bool ok = simxStartSimulation(client_id_, simx_opmode_oneshot_wait) ==
+              simx_return_ok;
+
     enableSynchonous(sync_mode_);
-    return Driver::init(timeout);
-}
-
-void VREPDriver::init(const std::string& ip, int port) {
-    auto connection_name = ip + ":" + std::to_string(port);
-    try {
-        client_id_ = VREPDriver::connection_to_client_id.at(connection_name);
-    } catch (...) {
-        client_id_ = simxStart((simxChar*)ip.c_str(), port, 0, 1, 10000,
-                               int(getTimeStep() * 1000));
-        VREPDriver::connection_to_client_id[connection_name] = client_id_;
+    if (sync_mode_) {
+        ok &= nextStep();
+        ok &= nextStep();
     }
 
-    if (client_id_ != -1) {
-        return init(client_id_);
-    } else {
-        simxFinish(client_id_);
-        throw std::runtime_error(
-            "VREPDriver::init: can't initialize the connection with V-REP");
-    }
+    ok &= Driver::init(timeout);
+
+    return ok;
 }
 
-void VREPDriver::init(int client_id) {
-    assert_msg("In VREPDriver::init: invalid client id", client_id >= 0);
-    client_id_ = client_id;
+// void VREPDriver::init(const std::string& ip, int port) {
+//     auto connection_name = ip + ":" + std::to_string(port);
+//     try {
+//         client_id_ = VREPDriver::connection_to_client_id.at(connection_name);
+//     } catch (...) {
+//         client_id_ = simxStart((simxChar*)ip.c_str(), port, 0, 1, 10000,
+//                                int(getTimeStep() * 1000));
+//         VREPDriver::connection_to_client_id[connection_name] = client_id_;
+//     }
 
-    getObjectHandles();
-    startStreaming();
-}
+//     if (client_id_ != -1) {
+//         return init(client_id_);
+//     } else {
+//         simxFinish(client_id_);
+//         throw std::runtime_error(
+//             "VREPDriver::init: can't initialize the connection with V-REP");
+//     }
+// }
+
+// void VREPDriver::init(int client_id) {
+//     assert_msg("In VREPDriver::init: invalid client id", client_id >= 0);
+//     client_id_ = client_id;
+
+//     getObjectHandles();
+//     startStreaming();
+// }
 
 int VREPDriver::getClientID() const {
     return client_id_;
@@ -146,14 +161,38 @@ bool VREPDriver::sync() {
 }
 
 bool VREPDriver::start(double timeout) {
-    bool ok = simxStartSimulation(client_id_, simx_opmode_oneshot_wait) ==
-              simx_return_ok;
-    if (sync_mode_) {
-        ok &= nextStep();
-        ok &= nextStep();
+    if (start_parameters_.client_id >= 0) {
+        client_id_ = start_parameters_.client_id;
+    } else {
+        auto connection_name =
+            start_parameters_.ip + ":" + std::to_string(start_parameters_.port);
+        if (auto connection_it =
+                VREPDriver::connection_to_client_id.find(connection_name);
+            connection_it != std::end(VREPDriver::connection_to_client_id)) {
+            client_id_ = connection_it->second;
+        } else {
+            client_id_ = simxStart((simxChar*)start_parameters_.ip.c_str(),
+                                   start_parameters_.port, 0, 1, 10000,
+                                   int(getTimeStep() * 1000));
+            VREPDriver::connection_to_client_id[connection_name] = client_id_;
+        }
     }
-    return ok;
-}
+
+    if (client_id_ >= 0) {
+        if (not start_parameters_.scene_to_load.empty()) {
+            loadScene(start_parameters_.scene_to_load);
+        }
+
+        getObjectHandles();
+        startStreaming();
+    } else {
+        simxFinish(client_id_);
+        throw std::runtime_error(
+            "VREPDriver::init: failed to create a connection with V-REP");
+    }
+
+    return true;
+} // namespace phri
 
 bool VREPDriver::stop() {
     if (sync_mode_) {
@@ -491,6 +530,14 @@ bool VREPDriver::send() {
 
 bool VREPDriver::isRegisteredInFactory() {
     return registered_in_factory;
+}
+
+void VREPDriver::setScene(const std::string& path) {
+    start_parameters_.scene_to_load = PID_PATH(path);
+}
+
+void VREPDriver::loadScene(const std::string& path) const {
+    simxLoadScene(client_id_, path.c_str(), 1, simx_opmode_blocking);
 }
 
 } // namespace phri

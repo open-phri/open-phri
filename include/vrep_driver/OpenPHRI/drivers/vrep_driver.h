@@ -202,16 +202,27 @@ public:
         return spatial::Frame{"world"};
     }
 
+    void setScene(const std::string& path);
+
 private:
-    void init(const std::string& ip, int port);
-    void init(int client_id);
+    // void init(const std::string& ip, int port);
+    // void init(int client_id);
     bool getObjectHandles();
     void startStreaming() const;
     int getFrameHandle(spatial::Frame frame) const;
+    void loadScene(const std::string& path) const;
+
+    struct StartParameters {
+        int client_id = -1;
+        std::string ip;
+        int port;
+        std::string scene_to_load;
+    };
 
     bool sync_mode_;
     std::string suffix_;
     int client_id_;
+    StartParameters start_parameters_;
 
     std::unordered_map<std::string, int> object_handles_;
     std::map<std::string, std::shared_ptr<vector::dyn::Position>> lasers_data_;

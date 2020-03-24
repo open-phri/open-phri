@@ -37,6 +37,8 @@ PID_Component(
         open-phri/open-phri 
     DEPEND
         api-driver-vrep/vrep-driver
+    RUNTIME_RESOURCES 
+        vrep_scenes
 )
 
 ###         pyOpenPHRI        ###
