@@ -5,13 +5,7 @@
 #include <utility>
 
 struct TestData {
-    TestData(double time_step = 0.001)
-        : robot{phri::Robot{spatial::Frame::getAndSave("tcp"),
-                            spatial::Frame::getAndSave("base"), "rob", 7}},
-          model{phri::RobotModel{robot, "robot_models/kuka_lwr4.yaml",
-                                 "end-effector"}},
-          driver{phri::DummyDriver{robot, time_step}} {
-    }
+    TestData(double time_step = 0.001);
 
     phri::Robot robot;
     phri::RobotModel model;

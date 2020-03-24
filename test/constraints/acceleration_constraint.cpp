@@ -19,7 +19,7 @@ TEST_CASE("Acceleration constraint") {
     scalar::Acceleration maximum_acceleration{0.5};
     scalar::Velocity dv_max =
         maximum_acceleration * scalar::Duration{robot.control().timeStep()};
-    auto constant_vel = spatial::Velocity(robot.controlPointFrame());
+    auto constant_vel = spatial::Velocity::Zero(robot.controlPointFrame());
 
     safety_controller.add<phri::AccelerationConstraint>(
         "acceleration constraint", maximum_acceleration);
@@ -35,10 +35,14 @@ TEST_CASE("Acceleration constraint") {
 
     derivator.reset();
 
+    std::cout << derivator.input() << " - " << derivator.output() << std::endl;
+
     // Step #1 : no acceleration
     safety_controller();
     vnorm = cp_velocity.norm();
+    std::cout << derivator.input() << " - " << derivator.output() << std::endl;
     derivator();
+    std::cout << derivator.input() << " - " << derivator.output() << std::endl;
 
     REQUIRE(std::abs(anorm) == Approx(0.));
 
