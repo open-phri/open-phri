@@ -94,7 +94,7 @@ public:
                                 std::is_same<TT, spatial::Acceleration>::value,
                             void>::type
     reset() {
-        output_->vector().setZero();
+        output_().setZero();
         previous_input_ = input();
     }
 
