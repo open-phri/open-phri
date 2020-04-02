@@ -31,7 +31,7 @@ double PowerConstraint::compute() {
     double constraint = 1.;
     const auto& velocity = robot_->control().task().totalVelocity().linear();
     const auto& force = robot_->task().state().force().linear();
-    scalar::Power power = spatial::dot(force, velocity);
+    scalar::Power power = force.dot(velocity);
     power_ = power;
 
     if (power < scalar::Power{0.}) {
