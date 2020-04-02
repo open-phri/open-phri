@@ -31,10 +31,18 @@ ForceProxy::ForceProxy(const ForceProxy::generator& generator)
 }
 
 void ForceProxy::update(spatial::Force& wrench) {
+    auto transform = [this](const spatial::Force& force) -> spatial::Force {
+        if (force.frame() != robot().controlPointFrame()) {
+            return robot().control().transformation().inverse() * force;
+        } else {
+            return force;
+        }
+    };
+
     if (generator_) {
-        wrench = generator_();
+        wrench = transform(generator_());
     } else {
-        wrench = getForce();
+        wrench = transform(getForce());
     }
 }
 

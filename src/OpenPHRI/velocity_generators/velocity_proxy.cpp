@@ -32,10 +32,19 @@ VelocityProxy::VelocityProxy(const generator& generator)
 }
 
 void VelocityProxy::update(spatial::Velocity& new_velocity) {
+    auto transform =
+        [this](const spatial::Velocity& velocity) -> spatial::Velocity {
+        if (velocity.frame() != robot().controlPointFrame()) {
+            return robot().control().transformation().inverse() * velocity;
+        } else {
+            return velocity;
+        }
+    };
+
     if (generator_) {
-        new_velocity = generator_();
+        new_velocity = transform(generator_());
     } else {
-        new_velocity = getVelocity();
+        new_velocity = transform(getVelocity());
     }
 }
 
