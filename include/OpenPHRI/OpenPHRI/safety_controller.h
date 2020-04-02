@@ -60,6 +60,7 @@ public:
      */
     explicit SafetyController(Robot& robot, YAML::Node& configuration);
 
+    SafetyController(const SafetyController&) = delete;
     SafetyController(SafetyController&&) = default;
     ~SafetyController() = default;
 
@@ -77,308 +78,95 @@ public:
      */
     void skipJacobianInverseComputation(bool on);
 
-    /**
-     * @brief Add a new constraint to the controller.
-     * @param name The name given to the constraint. Must be unique. Used to
-     * latter get/remove the constraint.
-     * @param constraint A shared pointer to the constraint to add.
-     * @param force [optional] If true, any constraint with the same name will
-     * be overriden.
-     * @return true if the constraint has successfully been added to the
-     * controller, false otherwise.
-     */
-    bool addConstraint(const std::string& name,
-                       std::shared_ptr<Constraint> constraint,
-                       bool force = false);
-
-    /**
-     * @brief Add a new force generator to the controller.
-     * @param name The name given to the force generator. Must be unique. Used
-     * to latter get/remove the force generator.
-     * @param generator A shared pointer to the force generator to add.
-     * @param force [optional] If true, any force generator with the same name
-     * will be overriden.
-     * @return true if the force generator has successfully been added to the
-     * controller, false otherwise.
-     */
-    bool addForceGenerator(const std::string& name,
-                           std::shared_ptr<ForceGenerator> generator,
-                           bool force = false);
-
-    /**
-     * @brief Add a new torque generator to the controller.
-     * @param name The name given to the torque generator. Must be unique. Used
-     * to latter get/remove the torque generator.
-     * @param generator A shared pointer to the torque generator to add.
-     * @param force [optional] If true, any force generator with the same name
-     * will be overriden.
-     * @return true if the torque generator has successfully been added to the
-     * controller, false otherwise.
-     */
-    bool addJointForceGenerator(const std::string& name,
-                                std::shared_ptr<JointForceGenerator> generator,
-                                bool force = false);
-
-    /**
-     * @brief Add a new velocity generator to the controller.
-     * @param name The name given to the velocity generator. Must be unique.
-     * Used to latter get/remove the velocity generator.
-     * @param generator A shared pointer to the velocity generator to add.
-     * @param force [optional] If true, any velocity generator with the same
-     * name will be overriden.
-     * @return true if the velocity generator has successfully been added to the
-     * controller, false otherwise.
-     */
-    bool addVelocityGenerator(const std::string& name,
-                              std::shared_ptr<VelocityGenerator> generator,
-                              bool force = false);
-
-    /**
-     * @brief Add a new joint velocity generator to the controller.
-     * @param name The name given to the joint velocity generator. Must be
-     * unique. Used to latter get/remove the joint velocity generator.
-     * @param generator A shared pointer to the joint velocity generator to add.
-     * @param force [optional] If true, any joint velocity generator with the
-     * same name will be overriden.
-     * @return true if the joint velocity generator has successfully been added
-     * to the controller, false otherwise.
-     */
-    bool
-    addJointVelocityGenerator(const std::string& name,
-                              std::shared_ptr<JointVelocityGenerator> generator,
-                              bool force = false);
-
-    /**
-     * @brief Shortcut for the SafetyController::addConstraint method.
-     */
-    template <typename T>
-    typename std::enable_if<std::is_base_of<Constraint, T>::value, bool>::type
-    add(const std::string& name, const std::shared_ptr<T>& obj,
-        bool force = false) {
-        return addConstraint(name, obj, force);
-    }
-
-    /**
-     * @brief Shortcut for the SafetyController::addConstraint method.
-     */
-    template <typename T>
-    typename std::enable_if<std::is_base_of<Constraint, T>::value, bool>::type
-    add(const std::string& name, T&& obj, bool force = false) {
-        return addConstraint(name, std::make_shared<T>(std::move(obj)), force);
+    template <typename T, typename... Args>
+    typename std::enable_if_t<std::is_base_of_v<Constraint, T>,
+                              std::shared_ptr<T>>
+    add(const std::string& name, Args&&... args) {
+        auto constraint = std::make_shared<T>(std::forward<Args>(args)...);
+        addConstraint(name, constraint, false);
+        return constraint;
     }
 
     template <typename T, typename... Args>
-    typename std::enable_if<std::is_base_of<Constraint, T>::value, bool>::type
+    typename std::enable_if_t<std::is_base_of_v<ForceGenerator, T>,
+                              std::shared_ptr<T>>
     add(const std::string& name, Args&&... args) {
-        return addConstraint(
-            name, std::make_shared<T>(std::forward<Args>(args)...), false);
-    }
-
-    /**
-     * @brief Shortcut for the SafetyController::addForceGenerator method.
-     */
-    template <typename T>
-    typename std::enable_if<std::is_base_of<ForceGenerator, T>::value,
-                            bool>::type
-    add(const std::string& name, const std::shared_ptr<T>& obj,
-        bool force = false) {
-        return addForceGenerator(name, obj, force);
-    }
-
-    /**
-     * @brief Shortcut for the SafetyController::addForceGenerator method.
-     */
-    template <typename T>
-    typename std::enable_if<
-        std::is_base_of<ForceGenerator, std::remove_reference_t<T>>::value,
-        bool>::type
-    add(const std::string& name, T&& obj, bool force = false) {
-        return addForceGenerator(name, std::make_shared<T>(std::move(obj)),
-                                 force);
+        auto generator = std::make_shared<T>(std::forward<Args>(args)...);
+        addForceGenerator(name, generator, false);
+        return generator;
     }
 
     template <typename T, typename... Args>
-    typename std::enable_if<std::is_base_of<ForceGenerator, T>::value,
-                            bool>::type
+    typename std::enable_if_t<std::is_base_of_v<JointForceGenerator, T>,
+                              std::shared_ptr<T>>
     add(const std::string& name, Args&&... args) {
-        return addForceGenerator(
-            name, std::make_shared<T>(std::forward<Args>(args)...), false);
-    }
-
-    /**
-     * @brief Shortcut for the SafetyController::addJointForceGenerator method.
-     */
-    template <typename T>
-    typename std::enable_if<std::is_base_of<JointForceGenerator, T>::value,
-                            bool>::type
-    add(const std::string& name, const std::shared_ptr<T>& obj,
-        bool force = false) {
-        return addJointForceGenerator(name, obj, force);
-    }
-
-    /**
-     * @brief Shortcut for the SafetyController::addJointForceGenerator method.
-     */
-    template <typename T>
-    typename std::enable_if<std::is_base_of<JointForceGenerator, T>::value,
-                            bool>::type
-    add(const std::string& name, T&& obj, bool force = false) {
-        return addJointForceGenerator(name, std::make_shared<T>(std::move(obj)),
-                                      force);
+        auto generator = std::make_shared<T>(std::forward<Args>(args)...);
+        addJointForceGenerator(name, generator, false);
+        return generator;
     }
 
     template <typename T, typename... Args>
-    typename std::enable_if<std::is_base_of<JointForceGenerator, T>::value,
-                            bool>::type
+    typename std::enable_if_t<std::is_base_of_v<VelocityGenerator, T>,
+                              std::shared_ptr<T>>
     add(const std::string& name, Args&&... args) {
-        return addJointForceGenerator(
-            name, std::make_shared<T>(std::forward<Args>(args)...), false);
-    }
-
-    /**
-     * @brief Shortcut for the SafetyController::addVelocityGenerator method.
-     */
-    template <typename T>
-    typename std::enable_if<std::is_base_of<VelocityGenerator, T>::value,
-                            bool>::type
-    add(const std::string& name, const std::shared_ptr<T>& obj,
-        bool force = false) {
-        return addVelocityGenerator(name, obj, force);
-    }
-
-    /**
-     * @brief Shortcut for the SafetyController::addVelocityGenerator method.
-     */
-    template <typename T>
-    typename std::enable_if<std::is_base_of<VelocityGenerator, T>::value,
-                            bool>::type
-    add(const std::string& name, T&& obj, bool force = false) {
-        return addVelocityGenerator(name, std::make_shared<T>(std::move(obj)),
-                                    force);
+        auto generator = std::make_shared<T>(std::forward<Args>(args)...);
+        addVelocityGenerator(name, generator, false);
+        return generator;
     }
 
     template <typename T, typename... Args>
-    typename std::enable_if<std::is_base_of<VelocityGenerator, T>::value,
-                            bool>::type
+    typename std::enable_if_t<std::is_base_of_v<JointVelocityGenerator, T>,
+                              std::shared_ptr<T>>
     add(const std::string& name, Args&&... args) {
-        return addVelocityGenerator(
-            name, std::make_shared<T>(std::forward<Args>(args)...), false);
-    }
-
-    /**
-     * @brief Shortcut for the SafetyController::addJointVelocityGenerator
-     * method.
-     */
-    template <typename T>
-    typename std::enable_if<std::is_base_of<JointVelocityGenerator, T>::value,
-                            bool>::type
-    add(const std::string& name, const std::shared_ptr<T>& obj,
-        bool force = false) {
-        return addJointVelocityGenerator(name, obj, force);
-    }
-
-    /**
-     * @brief Shortcut for the SafetyController::addJointVelocityGenerator
-     * method.
-     */
-    template <typename T>
-    typename std::enable_if<std::is_base_of<JointVelocityGenerator, T>::value,
-                            bool>::type
-    add(const std::string& name, T&& obj, bool force = false) {
-        return addJointVelocityGenerator(
-            name, std::make_shared<T>(std::move(obj)), force);
+        auto generator = std::make_shared<T>(std::forward<Args>(args)...);
+        addJointVelocityGenerator(name, generator, false);
+        return generator;
     }
 
     template <typename T, typename... Args>
-    typename std::enable_if<std::is_base_of<JointVelocityGenerator, T>::value,
-                            bool>::type
-    add(const std::string& name, Args&&... args) {
-        return addJointVelocityGenerator(
-            name, std::make_shared<T>(std::forward<Args>(args)...), false);
+    typename std::enable_if_t<std::is_base_of_v<Constraint, T>,
+                              std::shared_ptr<T>>
+    forceAdd(const std::string& name, Args&&... args) {
+        auto constraint = std::make_shared<T>(std::forward<Args>(args)...);
+        addConstraint(name, constraint, true);
+        return constraint;
     }
 
-    /**
-     * @brief Remove a constraint from the controller.
-     * @param name The name given to the constraint to remove.
-     * @return true if the constraint has successfully been removed from the
-     * controller, false otherwise.
-     */
-    bool removeConstraint(const std::string& name);
+    template <typename T, typename... Args>
+    typename std::enable_if_t<std::is_base_of_v<ForceGenerator, T>,
+                              std::shared_ptr<T>>
+    forceAdd(const std::string& name, Args&&... args) {
+        auto generator = std::make_shared<T>(std::forward<Args>(args)...);
+        addForceGenerator(name, generator, true);
+        return generator;
+    }
 
-    /**
-     * @brief Remove a force generator from the controller.
-     * @param name The name given to the force generator to remove.
-     * @return true if the force generator has successfully been removed from
-     * the controller, false otherwise.
-     */
-    bool removeForceGenerator(const std::string& name);
+    template <typename T, typename... Args>
+    typename std::enable_if_t<std::is_base_of_v<JointForceGenerator, T>,
+                              std::shared_ptr<T>>
+    forceAdd(const std::string& name, Args&&... args) {
+        auto generator = std::make_shared<T>(std::forward<Args>(args)...);
+        addJointForceGenerator(name, generator, true);
+        return generator;
+    }
 
-    /**
-     * @brief Remove a torque generator from the controller.
-     * @param name The name given to the torque generator to remove.
-     * @return true if the torque generator has successfully been removed from
-     * the controller, false otherwise.
-     */
-    bool removeJointForceGenerator(const std::string& name);
+    template <typename T, typename... Args>
+    typename std::enable_if_t<std::is_base_of_v<VelocityGenerator, T>,
+                              std::shared_ptr<T>>
+    forceAdd(const std::string& name, Args&&... args) {
+        auto generator = std::make_shared<T>(std::forward<Args>(args)...);
+        addVelocityGenerator(name, generator, true);
+        return generator;
+    }
 
-    /**
-     * @brief Remove a velocity generator from the controller.
-     * @param name The name given to the velocity generator to remove.
-     * @return true if the velocity generator has successfully been removed from
-     * the controller, false otherwise.
-     */
-    bool removeVelocityGenerator(const std::string& name);
-
-    /**
-     * @brief Remove a joint velocity generator from the controller.
-     * @param name The name given to the joint velocity generator to remove.
-     * @return true if the joint velocity generator has successfully been
-     * removed from the controller, false otherwise.
-     */
-    bool removeJointVelocityGenerator(const std::string& name);
-
-    /**
-     * @brief Retrieve a constraint from the controller.
-     * @param name The name given to the constraint to retreive.
-     * @return A pointer to the constraint. Store a null pointer if the
-     * constraint doesn't exist.
-     */
-    std::shared_ptr<Constraint> getConstraint(const std::string& name);
-
-    /**
-     * @brief Retrieve a force generator from the controller.
-     * @param name The name given to the force generator to retreive.
-     * @return A pointer to the force generator. Store a null pointer if the
-     * force generator doesn't exist.
-     */
-    std::shared_ptr<ForceGenerator> getForceGenerator(const std::string& name);
-
-    /**
-     * @brief Retrieve a torque generator from the controller.
-     * @param name The name given to the torque generator to retreive.
-     * @return A pointer to the torque generator. Store a null pointer if the
-     * torque generator doesn't exist.
-     */
-    std::shared_ptr<JointForceGenerator>
-    getJointForceGenerator(const std::string& name);
-
-    /**
-     * @brief Retrieve a velocity generator from the controller.
-     * @param name The name given to the velocity generator to retreive.
-     * @return A pointer to the velocity generator. Store a null pointer if the
-     * velocity generator doesn't exist.
-     */
-    std::shared_ptr<VelocityGenerator>
-    getVelocityGenerator(const std::string& name);
-
-    /**
-     * @brief Retrieve a joint velocity generator from the controller.
-     * @param name The name given to the joint velocity generator to retreive.
-     * @return A pointer to the joint velocity generator. Store a null pointer
-     * if the joint velocity generator doesn't exist.
-     */
-    std::shared_ptr<JointVelocityGenerator>
-    getJointVelocityGenerator(const std::string& name);
+    template <typename T, typename... Args>
+    typename std::enable_if_t<std::is_base_of_v<JointVelocityGenerator, T>,
+                              std::shared_ptr<T>>
+    forceAdd(const std::string& name, Args&&... args) {
+        auto generator = std::make_shared<T>(std::forward<Args>(args)...);
+        addJointVelocityGenerator(name, generator, true);
+        return generator;
+    }
 
     /**
      * @brief Shortcut for the SafetyController::getConstraint method, with
@@ -387,7 +175,7 @@ public:
     template <typename T>
     std::shared_ptr<T>
     get(const std::string& name,
-        typename std::enable_if<std::is_base_of<Constraint, T>::value>::type* =
+        typename std::enable_if_t<std::is_base_of_v<Constraint, T>>* =
             nullptr) {
         return std::dynamic_pointer_cast<T>(getConstraint(name));
     }
@@ -399,8 +187,8 @@ public:
     template <typename T>
     std::shared_ptr<T>
     get(const std::string& name,
-        typename std::enable_if<
-            std::is_base_of<ForceGenerator, T>::value>::type* = nullptr) {
+        typename std::enable_if_t<std::is_base_of_v<ForceGenerator, T>>* =
+            nullptr) {
         return std::dynamic_pointer_cast<T>(getForceGenerator(name));
     }
 
@@ -411,9 +199,9 @@ public:
     template <typename T>
     std::shared_ptr<T>
     get(const std::string& name,
-        typename std::enable_if<
-            std::is_base_of<JointForceGenerator, T>::value>::type* = nullptr) {
-        return getJointForceGenerator(name);
+        typename std::enable_if_t<std::is_base_of_v<JointForceGenerator, T>>* =
+            nullptr) {
+        return std::dynamic_pointer_cast<T>(getJointForceGenerator(name));
     }
 
     /**
@@ -423,9 +211,9 @@ public:
     template <typename T>
     std::shared_ptr<T>
     get(const std::string& name,
-        typename std::enable_if<
-            std::is_base_of<VelocityGenerator, T>::value>::type* = nullptr) {
-        return getVelocityGenerator(name);
+        typename std::enable_if_t<std::is_base_of_v<VelocityGenerator, T>>* =
+            nullptr) {
+        return std::dynamic_pointer_cast<T>(getVelocityGenerator(name));
     }
 
     /**
@@ -435,16 +223,74 @@ public:
     template <typename T>
     std::shared_ptr<T>
     get(const std::string& name,
-        typename std::enable_if<std::is_base_of<JointVelocityGenerator,
-                                                T>::value>::type* = nullptr) {
-        return getJointVelocityGenerator(name);
+        typename std::enable_if_t<
+            std::is_base_of_v<JointVelocityGenerator, T>>* = nullptr) {
+        return std::dynamic_pointer_cast<T>(getJointVelocityGenerator(name));
+    }
+
+    /**
+     * @brief Shortcut for the SafetyController::getConstraint method, with
+     * pointer type conversion.
+     */
+    template <typename T>
+    void remove(const std::string& name,
+                typename std::enable_if_t<std::is_base_of_v<Constraint, T>>* =
+                    nullptr) {
+        removeConstraint(name);
+    }
+
+    /**
+     * @brief Shortcut for the SafetyController::getForceGenerator method, with
+     * pointer type conversion.
+     */
+    template <typename T>
+    void
+    remove(const std::string& name,
+           typename std::enable_if_t<std::is_base_of_v<ForceGenerator, T>>* =
+               nullptr) {
+        removeForceGenerator(name);
+    }
+
+    /**
+     * @brief Shortcut for the SafetyController::getJointForceGenerator method,
+     * with pointer type conversion.
+     */
+    template <typename T>
+    void remove(
+        const std::string& name,
+        typename std::enable_if_t<std::is_base_of_v<JointForceGenerator, T>>* =
+            nullptr) {
+        removeJointForceGenerator(name);
+    }
+
+    /**
+     * @brief Shortcut for the SafetyController::getVelocityGenerator method,
+     * with pointer type conversion.
+     */
+    template <typename T>
+    void
+    remove(const std::string& name,
+           typename std::enable_if_t<std::is_base_of_v<VelocityGenerator, T>>* =
+               nullptr) {
+        removeVelocityGenerator(name);
+    }
+
+    /**
+     * @brief Shortcut for the SafetyController::getJointVelocityGenerator
+     * method, with pointer type conversion.
+     */
+    template <typename T>
+    void remove(const std::string& name,
+                typename std::enable_if_t<
+                    std::is_base_of_v<JointVelocityGenerator, T>>* = nullptr) {
+        removeJointVelocityGenerator(name);
     }
 
     void removeAll();
-    void removeAllVelocityInputs();
-    void removeAllJointVelocityInputs();
-    void removeAllForceInputs();
-    void removeAllTorqueInputs();
+    void removeAllVelocityGenerators();
+    void removeAllJointVelocityGenerators();
+    void removeAllForceGenerators();
+    void removeAllJointForceGenerators();
     void removeAllConstraints();
 
     void enableDampedLeastSquares(double lambda);
@@ -526,7 +372,160 @@ public:
     storage_const_iterator<JointVelocityGenerator>
     joint_velocity_generators_end() const;
 
-protected:
+private:
+    /**
+     * @brief Add a new constraint to the controller.
+     * @param name The name given to the constraint. Must be unique. Used to
+     * latter get/remove the constraint.
+     * @param constraint A shared pointer to the constraint to add.
+     * @param force [optional] If true, any constraint with the same name will
+     * be overriden.
+     * @return true if the constraint has successfully been added to the
+     * controller, false otherwise.
+     */
+    void addConstraint(const std::string& name,
+                       std::shared_ptr<Constraint> constraint, bool force);
+
+    /**
+     * @brief Add a new force generator to the controller.
+     * @param name The name given to the force generator. Must be unique. Used
+     * to latter get/remove the force generator.
+     * @param generator A shared pointer to the force generator to add.
+     * @param force [optional] If true, any force generator with the same name
+     * will be overriden.
+     * @return true if the force generator has successfully been added to the
+     * controller, false otherwise.
+     */
+    void addForceGenerator(const std::string& name,
+                           std::shared_ptr<ForceGenerator> generator,
+                           bool force);
+
+    /**
+     * @brief Add a new torque generator to the controller.
+     * @param name The name given to the torque generator. Must be unique. Used
+     * to latter get/remove the torque generator.
+     * @param generator A shared pointer to the torque generator to add.
+     * @param force [optional] If true, any force generator with the same name
+     * will be overriden.
+     * @return true if the torque generator has successfully been added to the
+     * controller, false otherwise.
+     */
+    void addJointForceGenerator(const std::string& name,
+                                std::shared_ptr<JointForceGenerator> generator,
+                                bool force);
+
+    /**
+     * @brief Add a new velocity generator to the controller.
+     * @param name The name given to the velocity generator. Must be unique.
+     * Used to latter get/remove the velocity generator.
+     * @param generator A shared pointer to the velocity generator to add.
+     * @param force [optional] If true, any velocity generator with the same
+     * name will be overriden.
+     * @return true if the velocity generator has successfully been added to the
+     * controller, false otherwise.
+     */
+    void addVelocityGenerator(const std::string& name,
+                              std::shared_ptr<VelocityGenerator> generator,
+                              bool force);
+
+    /**
+     * @brief Add a new joint velocity generator to the controller.
+     * @param name The name given to the joint velocity generator. Must be
+     * unique. Used to latter get/remove the joint velocity generator.
+     * @param generator A shared pointer to the joint velocity generator to add.
+     * @param force [optional] If true, any joint velocity generator with the
+     * same name will be overriden.
+     * @return true if the joint velocity generator has successfully been added
+     * to the controller, false otherwise.
+     */
+    void
+    addJointVelocityGenerator(const std::string& name,
+                              std::shared_ptr<JointVelocityGenerator> generator,
+                              bool force);
+
+    /**
+     * @brief Retrieve a constraint from the controller.
+     * @param name The name given to the constraint to retreive.
+     * @return A pointer to the constraint. Store a null pointer if the
+     * constraint doesn't exist.
+     */
+    std::shared_ptr<Constraint> getConstraint(const std::string& name);
+
+    /**
+     * @brief Retrieve a force generator from the controller.
+     * @param name The name given to the force generator to retreive.
+     * @return A pointer to the force generator. Store a null pointer if the
+     * force generator doesn't exist.
+     */
+    std::shared_ptr<ForceGenerator> getForceGenerator(const std::string& name);
+
+    /**
+     * @brief Retrieve a torque generator from the controller.
+     * @param name The name given to the torque generator to retreive.
+     * @return A pointer to the torque generator. Store a null pointer if the
+     * torque generator doesn't exist.
+     */
+    std::shared_ptr<JointForceGenerator>
+    getJointForceGenerator(const std::string& name);
+
+    /**
+     * @brief Retrieve a velocity generator from the controller.
+     * @param name The name given to the velocity generator to retreive.
+     * @return A pointer to the velocity generator. Store a null pointer if the
+     * velocity generator doesn't exist.
+     */
+    std::shared_ptr<VelocityGenerator>
+    getVelocityGenerator(const std::string& name);
+
+    /**
+     * @brief Retrieve a joint velocity generator from the controller.
+     * @param name The name given to the joint velocity generator to retreive.
+     * @return A pointer to the joint velocity generator. Store a null pointer
+     * if the joint velocity generator doesn't exist.
+     */
+    std::shared_ptr<JointVelocityGenerator>
+    getJointVelocityGenerator(const std::string& name);
+
+    /**
+     * @brief Remove a constraint from the controller.
+     * @param name The name given to the constraint to remove.
+     * @return true if the constraint has successfully been removed from the
+     * controller, false otherwise.
+     */
+    bool removeConstraint(const std::string& name);
+
+    /**
+     * @brief Remove a force generator from the controller.
+     * @param name The name given to the force generator to remove.
+     * @return true if the force generator has successfully been removed from
+     * the controller, false otherwise.
+     */
+    bool removeForceGenerator(const std::string& name);
+
+    /**
+     * @brief Remove a torque generator from the controller.
+     * @param name The name given to the torque generator to remove.
+     * @return true if the torque generator has successfully been removed from
+     * the controller, false otherwise.
+     */
+    bool removeJointForceGenerator(const std::string& name);
+
+    /**
+     * @brief Remove a velocity generator from the controller.
+     * @param name The name given to the velocity generator to remove.
+     * @return true if the velocity generator has successfully been removed from
+     * the controller, false otherwise.
+     */
+    bool removeVelocityGenerator(const std::string& name);
+
+    /**
+     * @brief Remove a joint velocity generator from the controller.
+     * @param name The name given to the joint velocity generator to remove.
+     * @return true if the joint velocity generator has successfully been
+     * removed from the controller, false otherwise.
+     */
+    bool removeJointVelocityGenerator(const std::string& name);
+
     double computeConstraintValue();
     const spatial::Force& computeForceSum();
     const vector::dyn::Force& computeTorqueSum();

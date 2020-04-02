@@ -39,7 +39,8 @@ using namespace phri;
 
 SafetyController::SafetyController(Robot& robot)
     : robot_(robot), skip_jacobian_inverse_computation_(false) {
-    addConstraint("default constraint", std::make_shared<DefaultConstraint>());
+    addConstraint("default constraint", std::make_shared<DefaultConstraint>(),
+                  true);
     dynamic_dls_ = false;
     lambda2_ = -1.;
     sigma_min_threshold_ = -1.;
@@ -78,52 +79,82 @@ void SafetyController::skipJacobianInverseComputation(bool on) {
     skip_jacobian_inverse_computation_ = on;
 }
 
-bool SafetyController::addConstraint(const std::string& name,
+void SafetyController::addConstraint(const std::string& name,
                                      std::shared_ptr<Constraint> constraint,
                                      bool force) {
     constraint->setRobot(&robot_);
-    return constraints_.add(name, StorageWrapper<Constraint>{constraint, 0.},
-                            force);
+    if (not constraints_.add(name, StorageWrapper<Constraint>{constraint, 0.},
+                             force)) {
+        throw std::runtime_error(
+            OPEN_PHRI_ERROR("Failed to add constraint " + name +
+                            ". Use a different name or call "
+                            "SafetyController::forceAdd instead to "
+                            "replace the existing one."));
+    }
 }
 
-bool SafetyController::addForceGenerator(
+void SafetyController::addForceGenerator(
     const std::string& name, std::shared_ptr<ForceGenerator> generator,
     bool force) {
     generator->setRobot(&robot_);
     generator->setFrame(robot_.controlPointFrame());
-    return force_generators_.add(
-        name,
-        StorageWrapper<ForceGenerator>{
-            generator, spatial::Force::Zero(robot_.controlPointFrame())},
-        force);
+    if (not force_generators_.add(
+            name,
+            StorageWrapper<ForceGenerator>{
+                generator, spatial::Force::Zero(robot_.controlPointFrame())},
+            force)) {
+        throw std::runtime_error(
+            OPEN_PHRI_ERROR("Failed to add generator " + name +
+                            ". Use a different name or call "
+                            "SafetyController::forceAdd instead to "
+                            "replace the existing one."));
+    }
 }
 
-bool SafetyController::addJointForceGenerator(
+void SafetyController::addJointForceGenerator(
     const std::string& name, std::shared_ptr<JointForceGenerator> generator,
     bool force) {
     generator->setRobot(&robot_);
-    return torque_generators_.add(
-        name, StorageWrapper<JointForceGenerator>{generator}, force);
+    if (not torque_generators_.add(
+            name, StorageWrapper<JointForceGenerator>{generator}, force)) {
+        throw std::runtime_error(
+            OPEN_PHRI_ERROR("Failed to add generator " + name +
+                            ". Use a different name or call "
+                            "SafetyController::forceAdd instead to "
+                            "replace the existing one."));
+    }
 }
 
-bool SafetyController::addVelocityGenerator(
+void SafetyController::addVelocityGenerator(
     const std::string& name, std::shared_ptr<VelocityGenerator> generator,
     bool force) {
     generator->setRobot(&robot_);
     generator->setFrame(robot_.controlPointFrame());
-    return velocity_generators_.add(
-        name,
-        StorageWrapper<VelocityGenerator>{
-            generator, spatial::Velocity::Zero(robot_.controlPointFrame())},
-        force);
+    if (not velocity_generators_.add(
+            name,
+            StorageWrapper<VelocityGenerator>{
+                generator, spatial::Velocity::Zero(robot_.controlPointFrame())},
+            force)) {
+        throw std::runtime_error(
+            OPEN_PHRI_ERROR("Failed to add generator " + name +
+                            ". Use a different name or call "
+                            "SafetyController::forceAdd instead to "
+                            "replace the existing one."));
+    }
 }
 
-bool SafetyController::addJointVelocityGenerator(
+void SafetyController::addJointVelocityGenerator(
     const std::string& name, std::shared_ptr<JointVelocityGenerator> generator,
     bool force) {
     generator->setRobot(&robot_);
-    return joint_velocity_generators_.add(
-        name, StorageWrapper<JointVelocityGenerator>{generator}, force);
+    if (not joint_velocity_generators_.add(
+            name, StorageWrapper<JointVelocityGenerator>{generator}, force)) {
+        throw std::runtime_error(
+            OPEN_PHRI_ERROR("Failed to add generator " + name +
+                            ". Use a different name or call "
+                            "SafetyController::forceAdd instead to "
+                            "replace the existing one."));
+    }
 }
 
 bool SafetyController::removeConstraint(const std::string& name) {
@@ -156,6 +187,11 @@ SafetyController::getForceGenerator(const std::string& name) {
     return force_generators_.get(name).object;
 }
 
+std::shared_ptr<VelocityGenerator>
+SafetyController::getVelocityGenerator(const std::string& name) {
+    return velocity_generators_.get(name).object;
+}
+
 std::shared_ptr<JointForceGenerator>
 SafetyController::getJointForceGenerator(const std::string& name) {
     return torque_generators_.get(name).object;
@@ -167,26 +203,26 @@ SafetyController::getJointVelocityGenerator(const std::string& name) {
 }
 
 void SafetyController::removeAll() {
-    removeAllVelocityInputs();
-    removeAllJointVelocityInputs();
-    removeAllForceInputs();
-    removeAllTorqueInputs();
+    removeAllVelocityGenerators();
+    removeAllJointVelocityGenerators();
+    removeAllForceGenerators();
+    removeAllJointForceGenerators();
     removeAllConstraints();
 }
 
-void SafetyController::removeAllVelocityInputs() {
+void SafetyController::removeAllVelocityGenerators() {
     velocity_generators_.removeAll();
 }
 
-void SafetyController::removeAllJointVelocityInputs() {
+void SafetyController::removeAllJointVelocityGenerators() {
     joint_velocity_generators_.removeAll();
 }
 
-void SafetyController::removeAllForceInputs() {
+void SafetyController::removeAllForceGenerators() {
     force_generators_.removeAll();
 }
 
-void SafetyController::removeAllTorqueInputs() {
+void SafetyController::removeAllJointForceGenerators() {
     torque_generators_.removeAll();
 }
 
