@@ -34,36 +34,48 @@
 #include <functional>
 #include <tuple>
 
+#include <physical_quantities/vector/position.h>
+#include <physical_quantities/vector/velocity.h>
+#include <physical_quantities/vector/acceleration.h>
 #include <physical_quantities/spatial/position.h>
 #include <physical_quantities/spatial/velocity.h>
 #include <physical_quantities/spatial/acceleration.h>
 
 namespace phri {
 
-template <typename T> class TrajectoryGenerator;
+template <typename ValueT, typename FirstDerivative = ValueT,
+          typename SecondDerivative = ValueT>
+class TrajectoryGenerator;
+using JointTrajectoryGenerator =
+    TrajectoryGenerator<vector::dyn::Position, vector::dyn::Velocity,
+                        vector::dyn::Acceleration>;
 
 /** @brief Description of a point used by the TrajectoryGenerator.
  *  @details A TrajectoryPoint is described by a 2D point (x,y) and its first
  * and second derivatives
  */
-template <typename T> struct TrajectoryPoint {
-    TrajectoryPoint(const std::shared_ptr<T>& y, const std::shared_ptr<T>& dy,
-                    const std::shared_ptr<T>& d2y)
+template <typename ValueT, typename FirstDerivative = ValueT,
+          typename SecondDerivative = ValueT>
+struct TrajectoryPoint {
+    TrajectoryPoint(const std::shared_ptr<ValueT>& y,
+                    const std::shared_ptr<FirstDerivative>& dy,
+                    const std::shared_ptr<SecondDerivative>& d2y)
         : y(y), dy(dy), d2y(d2y) {
         createRefs();
     }
 
-    TrajectoryPoint(const T& y, const T& dy, const T& d2y)
-        : y(std::make_shared<T>(y)),
-          dy(std::make_shared<T>(dy)),
-          d2y(std::make_shared<T>(d2y)) {
+    TrajectoryPoint(const ValueT& y, const FirstDerivative& dy,
+                    const SecondDerivative& d2y)
+        : y(std::make_shared<ValueT>(y)),
+          dy(std::make_shared<FirstDerivative>(dy)),
+          d2y(std::make_shared<SecondDerivative>(d2y)) {
         createRefs();
     }
 
     TrajectoryPoint()
-        : y(std::make_shared<T>()),
-          dy(std::make_shared<T>()),
-          d2y(std::make_shared<T>()) {
+        : y(std::make_shared<ValueT>()),
+          dy(std::make_shared<FirstDerivative>()),
+          d2y(std::make_shared<SecondDerivative>()) {
         createRefs();
 
         for (size_t i = 0; i < size(); ++i) {
@@ -76,20 +88,24 @@ template <typename T> struct TrajectoryPoint {
         }
     }
 
-    template <typename U = T>
-    TrajectoryPoint(size_t size,
-                    typename std::enable_if<
-                        std::is_same<U, std::vector<double>>::value or
-                        std::is_same<U, Eigen::VectorXd>::value>::type* = 0)
+    TrajectoryPoint(size_t size) : TrajectoryPoint{} {
+        resize(size);
+    }
+
+    template <typename U = ValueT>
+    TrajectoryPoint(
+        size_t size,
+        typename std::enable_if_t<std::is_same_v<U, std::vector<double>> or
+                                  std::is_base_of_v<Eigen::VectorXd, U>>* = 0)
         : TrajectoryPoint() {
         resize(size);
     }
 
-    template <typename U = T>
-    void resize(size_t size,
-                typename std::enable_if<
-                    std::is_same<U, std::vector<double>>::value or
-                    std::is_same<U, Eigen::VectorXd>::value>::type* = 0) {
+    template <typename U = ValueT>
+    void resize(
+        size_t size,
+        typename std::enable_if_t<std::is_same_v<U, std::vector<double>> or
+                                  std::is_base_of_v<Eigen::VectorXd, U>>* = 0) {
         y->resize(size);
         dy->resize(size);
         d2y->resize(size);
@@ -135,20 +151,19 @@ template <typename T> struct TrajectoryPoint {
         return std::make_tuple(yrefs_[n], dyrefs_[n], d2yrefs_[n]);
     }
 
-    std::shared_ptr<T> y;   // value
-    std::shared_ptr<T> dy;  // first derivative
-    std::shared_ptr<T> d2y; // second derivative
+    std::shared_ptr<ValueT> y;             // value
+    std::shared_ptr<FirstDerivative> dy;   // first derivative
+    std::shared_ptr<SecondDerivative> d2y; // second derivative
 private:
-    friend class TrajectoryGenerator<T>;
+    friend class TrajectoryGenerator<ValueT, FirstDerivative, SecondDerivative>;
 
     size_t size_;
     std::vector<std::reference_wrapper<double>> yrefs_;
     std::vector<std::reference_wrapper<double>> dyrefs_;
     std::vector<std::reference_wrapper<double>> d2yrefs_;
 
-    template <typename U = T>
-    void createRefs(
-        typename std::enable_if<std::is_same<U, double>::value>::type* = 0) {
+    template <typename U = ValueT>
+    void createRefs(typename std::enable_if_t<std::is_same_v<U, double>>* = 0) {
         size_ = 1;
         yrefs_.clear();
         dyrefs_.clear();
@@ -158,10 +173,9 @@ private:
         d2yrefs_.push_back(std::ref(*d2y));
     }
 
-    template <typename U = T>
-    void createRefs(
-        typename std::enable_if<not std::is_same<U, double>::value>::type* =
-            0) {
+    template <typename U = ValueT>
+    void
+    createRefs(typename std::enable_if_t<not std::is_same_v<U, double>>* = 0) {
         assert(y->size() == dy->size() and y->size() == d2y->size());
         size_ = y->size();
         yrefs_.clear();
@@ -178,7 +192,9 @@ private:
     }
 };
 
-template <> struct TrajectoryPoint<spatial::Position> {
+template <>
+struct TrajectoryPoint<spatial::Position, spatial::Velocity,
+                       spatial::Acceleration> {
     TrajectoryPoint(const std::shared_ptr<spatial::Position>& y,
                     const std::shared_ptr<spatial::Velocity>& dy,
                     const std::shared_ptr<spatial::Acceleration>& d2y)

@@ -35,13 +35,17 @@
 namespace phri {
 
 template <>
-class TrajectoryGenerator<spatial::Position>
+class TrajectoryGenerator<spatial::Position, spatial::Velocity,
+                          spatial::Acceleration>
     : public TrajectoryGenerator<Eigen::Vector6d> {
     using super = TrajectoryGenerator<Eigen::Vector6d>;
 
 public:
+    using Point = TrajectoryPoint<spatial::Position, spatial::Velocity,
+                                  spatial::Acceleration>;
+
     TrajectoryGenerator(
-        const TrajectoryPoint<spatial::Position>& start, double sample_time,
+        const Point& start, double sample_time,
         TrajectorySynchronization sync =
             TrajectorySynchronization::NoSynchronization,
         TrajectoryOutputType output_type = TrajectoryOutputType::All)
@@ -54,8 +58,7 @@ public:
             std::make_shared<spatial::Acceleration>(*start.d2y);
     }
 
-    void addPathTo(const TrajectoryPoint<spatial::Position>& to,
-                   const spatial::Velocity& max_velocity,
+    void addPathTo(const Point& to, const spatial::Velocity& max_velocity,
                    const spatial::Acceleration& max_acceleration) {
         waypoints_.emplace_back(to, max_velocity, max_acceleration);
     }
@@ -147,15 +150,14 @@ public:
     }
 
 private:
-    struct Point {
-        Point(TrajectoryPoint<spatial::Position> pose,
-              spatial::Velocity max_velocity,
-              spatial::Acceleration max_acceleration)
+    struct Waypoint {
+        Waypoint(Point pose, spatial::Velocity max_velocity,
+                 spatial::Acceleration max_acceleration)
             : pose(pose),
               max_velocity(max_velocity),
               max_acceleration(max_acceleration) {
         }
-        TrajectoryPoint<spatial::Position> pose;
+        Point pose;
         spatial::Velocity max_velocity;
         spatial::Acceleration max_acceleration;
     };
@@ -174,8 +176,9 @@ private:
             *start_vec_.dy = static_cast<Eigen::Vector6d>(*start_pose_.dy);
             *start_vec_.d2y = static_cast<Eigen::Vector6d>(*start_pose_.d2y);
 
-            Point prev(start_pose_, spatial::Velocity(start_pose_.y->frame()),
-                       spatial::Acceleration(start_pose_.y->frame()));
+            Waypoint prev(start_pose_,
+                          spatial::Velocity(start_pose_.y->frame()),
+                          spatial::Acceleration(start_pose_.y->frame()));
             while (wp != waypoints_.end()) {
                 TrajectoryPoint<Eigen::Vector6d> to;
                 to.y->block<3, 1>(0, 0) = wp->pose.y->linear();
@@ -193,17 +196,20 @@ private:
     }
 
     TrajectoryPoint<Eigen::Vector6d> start_vec_;
-    TrajectoryPoint<spatial::Position> start_pose_;
+    Point start_pose_;
     std::shared_ptr<const spatial::Position> reference_pose_;
     std::shared_ptr<Eigen::Vector6d> reference_pose_vec_;
-    std::list<Point> waypoints_;
+    std::list<Waypoint> waypoints_;
     std::shared_ptr<spatial::Position> pose_output_;
     std::shared_ptr<spatial::Velocity> twist_output_;
     std::shared_ptr<spatial::Acceleration> task_space_acceleration_output_;
 };
 
-using TaskSpaceTrajectoryGenerator = TrajectoryGenerator<spatial::Position>;
+using TaskSpaceTrajectoryGenerator =
+    TrajectoryGenerator<spatial::Position, spatial::Velocity,
+                        spatial::Acceleration>;
 
-extern template class TrajectoryGenerator<spatial::Position>;
+extern template class TrajectoryGenerator<spatial::Position, spatial::Velocity,
+                                          spatial::Acceleration>;
 
 } // namespace phri

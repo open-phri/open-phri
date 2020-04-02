@@ -24,4 +24,6 @@ namespace phri {
 template class TrajectoryGenerator<double>;
 template class TrajectoryGenerator<Eigen::VectorXd>;
 template class TrajectoryGenerator<Eigen::Vector6d>;
+template class TrajectoryGenerator<vector::dyn::Position, vector::dyn::Velocity,
+                                   vector::dyn::Acceleration>;
 } // namespace phri

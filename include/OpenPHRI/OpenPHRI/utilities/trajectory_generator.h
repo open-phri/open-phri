@@ -44,10 +44,13 @@ enum class TrajectorySynchronization {
     SynchronizeTrajectory
 };
 
-template <typename T> class TrajectoryGenerator {
+template <typename ValueT, typename FirstDerivative, typename SecondDerivative>
+class TrajectoryGenerator {
 public:
+    using Point = TrajectoryPoint<ValueT, FirstDerivative, SecondDerivative>;
+
     TrajectoryGenerator(
-        const TrajectoryPoint<T>& start, double sample_time,
+        const Point& start, double sample_time,
         TrajectorySynchronization sync =
             TrajectorySynchronization::NoSynchronization,
         TrajectoryOutputType output_type = TrajectoryOutputType::All)
@@ -55,8 +58,8 @@ public:
         create(start);
     }
 
-    void addPathTo(const TrajectoryPoint<T>& to, const T& max_velocity,
-                   const T& max_acceleration) {
+    void addPathTo(const Point& to, const FirstDerivative& max_velocity,
+                   const SecondDerivative& max_acceleration) {
         assert(getComponentCount() == to.size());
         points_.push_back(to);
         SegmentParams params;
@@ -72,11 +75,11 @@ public:
         segment_params_.push_back(params);
     }
 
-    void addPathTo(const TrajectoryPoint<T>& to, double duration) {
+    void addPathTo(const Point& to, scalar::Duration duration) {
         assert(getComponentCount() == to.size());
         points_.push_back(to);
         SegmentParams params;
-        params.minimum_time.resize(to.size(), duration);
+        params.minimum_time.resize(to.size(), duration.value());
         params.padding_time.resize(to.size(), 0.);
         params.current_time.resize(to.size(), 0.);
         params.isFixedTime = true;
@@ -84,15 +87,15 @@ public:
         segment_params_.push_back(params);
     }
 
-    std::shared_ptr<const T> getPositionOutput() const {
+    std::shared_ptr<const ValueT> getPositionOutput() const {
         return position_output_;
     }
 
-    std::shared_ptr<const T> getVelocityOutput() const {
+    std::shared_ptr<const FirstDerivative> getVelocityOutput() const {
         return velocity_output_;
     }
 
-    std::shared_ptr<const T> getAccelerationOutput() const {
+    std::shared_ptr<const SecondDerivative> getAccelerationOutput() const {
         return acceleration_output_;
     }
 
@@ -175,8 +178,8 @@ public:
         }
 
         for (size_t segment = 0; segment < segments; ++segment) {
-            TrajectoryPoint<T>& from = points_[segment];
-            TrajectoryPoint<T>& to = points_[segment + 1];
+            Point& from = points_[segment];
+            Point& to = points_[segment + 1];
 
             auto& params = segment_params_[segment];
 
@@ -226,7 +229,8 @@ public:
         return true;
     }
 
-    bool updateLimits(const T& max_velocity, const T& max_acceleration,
+    bool updateLimits(const FirstDerivative& max_velocity,
+                      const SecondDerivative& max_acceleration,
                       double v_eps = 1e-6, double a_eps = 1e-6) {
         if (getSegmentCount() < 1) {
             return false;
@@ -237,7 +241,7 @@ public:
              ++component) {
             size_t segment = current_segement_[component];
 
-            auto from = TrajectoryPoint<T>();
+            auto from = Point();
             auto& to = points_[segment + 1];
             auto params = segment_params_[segment];
             params.max_velocity[component] =
@@ -456,11 +460,11 @@ public:
         return compute();
     }
 
-    const TrajectoryPoint<T>& operator[](size_t point) const {
+    const Point& operator[](size_t point) const {
         return points_.at(point);
     }
 
-    TrajectoryPoint<T>& operator[](size_t point) {
+    Point& operator[](size_t point) {
         return points_.at(point);
     }
 
@@ -468,8 +472,9 @@ public:
         sync_ = sync;
     }
 
-    void enableErrorTracking(const std::shared_ptr<const T>& reference,
-                             const T& threshold, bool recompute_when_resumed,
+    void enableErrorTracking(const std::shared_ptr<const ValueT>& reference,
+                             const ValueT& threshold,
+                             bool recompute_when_resumed,
                              double hysteresis_threshold = 0.1) {
         error_tracking_params_.reference = reference;
         error_tracking_params_.hysteresis_threshold =
@@ -484,12 +489,12 @@ public:
         }
     }
 
-    void enableErrorTracking(const T* reference, const T& threshold,
+    void enableErrorTracking(const ValueT* reference, const ValueT& threshold,
                              bool recompute_when_resumed,
                              double hysteresis_threshold = 0.1) {
         enableErrorTracking(
-            std::shared_ptr<const T>(reference, [](const T* p) {}), threshold,
-            recompute_when_resumed);
+            std::shared_ptr<const ValueT>(reference, [](const ValueT* p) {}),
+            threshold, recompute_when_resumed);
     }
 
     void disableErrorTracking() {
@@ -552,8 +557,8 @@ protected:
             return static_cast<bool>(reference);
         }
 
-        std::shared_ptr<const T> reference;
-        T threshold;
+        std::shared_ptr<const ValueT> reference;
+        ValueT threshold;
         double hysteresis_threshold;
         std::vector<ErrorTrackingState> state;
         std::vector<ErrorTrackingState> previous_state;
@@ -570,12 +575,13 @@ protected:
         : sample_time_(sample_time), output_type_(output_type), sync_(sync) {
     }
 
-    void create(const TrajectoryPoint<T>& start) {
+    void create(const TrajectoryPoint<ValueT, FirstDerivative,
+                                      SecondDerivative>& start) {
         current_segement_.resize(start.size(), 0);
         points_.push_back(start);
-        position_output_ = std::make_shared<T>();
-        velocity_output_ = std::make_shared<T>();
-        acceleration_output_ = std::make_shared<T>();
+        position_output_ = std::make_shared<ValueT>();
+        velocity_output_ = std::make_shared<FirstDerivative>();
+        acceleration_output_ = std::make_shared<SecondDerivative>();
         createRefs();
         disableErrorTracking();
     }
@@ -603,8 +609,7 @@ protected:
         }
     }
 
-    static void computeTimings(const TrajectoryPoint<T>& from,
-                               const TrajectoryPoint<T>& to,
+    static void computeTimings(const Point& from, const Point& to,
                                SegmentParams& params, size_t segment,
                                size_t component, double v_eps, double a_eps) {
         if (params.isFixedTime) {
@@ -707,14 +712,14 @@ protected:
         }
     }
 
-    template <typename U = T>
-    auto& getElement(
-        U& value, size_t idx,
-        typename std::enable_if_t<std::is_arithmetic<U>::value>* = 0) const {
+    template <typename U = ValueT>
+    auto&
+    getElement(U& value, size_t idx,
+               typename std::enable_if_t<std::is_arithmetic_v<U>>* = 0) const {
         return value;
     }
 
-    template <typename U = T>
+    template <typename U = ValueT>
     auto&
     getElement(U& value, size_t idx,
                typename std::enable_if_t<not std::is_arithmetic<U>::value>* =
@@ -722,43 +727,41 @@ protected:
         return value[idx];
     }
 
-    template <typename U = T>
-    size_t getSize(
-        const U& value,
-        typename std::enable_if_t<std::is_arithmetic<U>::value>* = 0) const {
+    template <typename U = ValueT>
+    size_t
+    getSize(const U& value,
+            typename std::enable_if_t<std::is_arithmetic_v<U>>* = 0) const {
         return 1;
     }
 
-    template <typename U = T>
+    template <typename U = ValueT>
     size_t
     getSize(const U& value,
-            typename std::enable_if_t<not std::is_arithmetic<U>::value>* =
-                0) const {
+            typename std::enable_if_t<not std::is_arithmetic_v<U>>* = 0) const {
         return value.size();
     }
 
-    template <typename U = T>
-    void
-    resize(U& value, size_t size,
-           typename std::enable_if_t<std::is_arithmetic<U>::value>* = 0) const {
+    template <typename U = ValueT>
+    void resize(U& value, size_t size,
+                typename std::enable_if_t<std::is_arithmetic_v<U>>* = 0) const {
         return;
     }
 
-    template <typename U = T>
-    void resize(U& value, size_t size,
-                typename std::enable_if_t<not std::is_arithmetic<U>::value>* =
-                    0) const {
+    template <typename U = ValueT>
+    void
+    resize(U& value, size_t size,
+           typename std::enable_if_t<not std::is_arithmetic_v<U>>* = 0) const {
         value.resize(size);
     }
 
-    std::vector<TrajectoryPoint<T>> points_;
+    std::vector<Point> points_;
     std::vector<SegmentParams> segment_params_;
     std::vector<size_t> current_segement_;
     ErrorTracking error_tracking_params_;
     double sample_time_;
-    std::shared_ptr<T> position_output_;
-    std::shared_ptr<T> velocity_output_;
-    std::shared_ptr<T> acceleration_output_;
+    std::shared_ptr<ValueT> position_output_;
+    std::shared_ptr<FirstDerivative> velocity_output_;
+    std::shared_ptr<SecondDerivative> acceleration_output_;
     std::vector<std::reference_wrapper<double>> position_output_refs_;
     std::vector<std::reference_wrapper<double>> velocity_output_refs_;
     std::vector<std::reference_wrapper<double>> acceleration_output_refs_;
@@ -769,5 +772,7 @@ protected:
 extern template class TrajectoryGenerator<double>;
 extern template class TrajectoryGenerator<Eigen::VectorXd>;
 extern template class TrajectoryGenerator<Eigen::Vector6d>;
+extern template class TrajectoryGenerator<
+    vector::dyn::Position, vector::dyn::Velocity, vector::dyn::Acceleration>;
 
 } // namespace phri

@@ -21,5 +21,6 @@
 #include <OpenPHRI/utilities/task_space_trajectory_generator.h>
 
 namespace phri {
-template class TrajectoryGenerator<spatial::Position>;
+template class TrajectoryGenerator<spatial::Position, spatial::Velocity,
+                                   spatial::Acceleration>;
 }
