@@ -51,8 +51,6 @@ const spatial::Position& PotentialFieldObject::getObjectPosition() const {
 PotentialFieldGenerator::PotentialFieldGenerator()
     : PotentialFieldGenerator{
           spatial::LinearPosition::Zero(spatial::Frame::Unknown())} {
-    std::cout << "1) this: " << this
-              << ", Offset frame: " << getOffset().frame() << std::endl;
 }
 
 void PotentialFieldGenerator::update(spatial::Force& force) {
@@ -62,16 +60,12 @@ void PotentialFieldGenerator::update(spatial::Force& force) {
     if (getOffset().frame() == spatial::Frame::Unknown()) {
         offset_.ref().changeFrame(
             spatial::Frame::Ref(robot().controlPointFrame()));
-        std::cout << "2) this: " << this
-                  << ", Offset frame: " << getOffset().frame() << std::endl;
     }
 
     for (const auto& item : items_) {
         const PotentialFieldObject& obj = item.second;
         if (obj.getObjectPosition().frame() == robot().controlPointFrame()) {
             rob_pos.changeFrame(robot().controlPointFrame());
-            std::cout << "3) this: " << this
-                      << ", Offset frame: " << getOffset().frame() << std::endl;
             rob_pos = getOffset();
         } else if (obj.getObjectPosition().frame() ==
                    robot().controlPointParentFrame()) {

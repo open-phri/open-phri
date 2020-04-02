@@ -27,47 +27,44 @@
 
 int main() {
     // Create an application using a configuration file
-    phri::AppMaker app{"velocity_constraint_example/app_config.yaml"};
+    phri::AppMaker app{"obstacle_avoidance_example/app_config.yaml"};
 
     // Set the task space damping matrix
     app.robot().control().task().damping().diagonal().setConstant(100.);
+
+    auto& driver = dynamic_cast<phri::VREPDriver&>(app.driver());
 
     // Configure the controller
     scalar::Velocity vmax{0.1};
     app.controller().add<phri::VelocityConstraint>("vmax", vmax);
 
-    // Objects are tracked in the TCP frame so there is no need to provide the
-    // robot position
-    auto potential_field_generator = phri::PotentialFieldGenerator();
+    auto potential_field_generator =
+        app.controller().add<phri::PotentialFieldGenerator>("potential field");
     potential_field_generator->setVerbose(true);
 
-    auto obstacle1 = make_shared<PotentialFieldObject>(
-        PotentialFieldType::Repulsive,
-        make_shared<double>(10.), // gain
-        make_shared<double>(0.2), // threshold distance
-        driver.trackObjectPosition("obstacle1", ReferenceFrame::TCP));
+    auto obstacle1 = phri::PotentialFieldObject(
+        phri::PotentialFieldType::Repulsive,
+        10., // gain
+        0.2, // threshold distance
+        driver.trackObjectPosition("obstacle1",
+                                   app.robot().controlPointFrame()));
 
-    auto obstacle2 = make_shared<PotentialFieldObject>(
-        PotentialFieldType::Repulsive,
-        make_shared<double>(10.), // gain
-        make_shared<double>(0.2), // threshold distance
-        driver.trackObjectPosition("obstacle2", ReferenceFrame::TCP));
+    auto obstacle2 = phri::PotentialFieldObject(
+        phri::PotentialFieldType::Repulsive,
+        10., // gain
+        0.2, // threshold distance
+        driver.trackObjectPosition("obstacle2",
+                                   app.robot().controlPointFrame()));
 
-    auto target = make_shared<PotentialFieldObject>(
-        PotentialFieldType::Attractive,
-        make_shared<double>(10.), // gain
-        make_shared<double>(
-            std::numeric_limits<double>::infinity()), // threshold distance
-        driver.trackObjectPosition("target", ReferenceFrame::TCP));
+    auto target = phri::PotentialFieldObject(
+        phri::PotentialFieldType::Attractive,
+        10.,                                     // gain
+        std::numeric_limits<double>::infinity(), // threshold distance
+        driver.trackObjectPosition("target", app.robot().controlPointFrame()));
 
     potential_field_generator->add("obstacle1", obstacle1);
     potential_field_generator->add("obstacle2", obstacle2);
     potential_field_generator->add("target", target);
-
-    safety_controller.addConstraint("velocity constraint", velocity_constraint);
-
-    safety_controller.addForceGenerator("potential field",
-                                        potential_field_generator);
 
     // Initialize the application. Exit on failure.
     if (app.init()) {

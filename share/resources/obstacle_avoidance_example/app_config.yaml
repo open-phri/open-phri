@@ -13,7 +13,7 @@ driver:
     type: vrep
     sample_time: 0.01
     synchronous: true
-    scene: vrep_scenes/KukaLWR4.ttt
+    scene: vrep_scenes/KukaLWR4_obstacles.ttt
 
 controller:
     use_dynamic_dls: true
