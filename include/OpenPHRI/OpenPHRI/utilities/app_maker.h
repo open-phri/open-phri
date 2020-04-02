@@ -38,6 +38,12 @@ public:
     Driver& driver();
     DataLogger& dataLogger();
 
+    const Robot& robot() const;
+    const SafetyController& controller() const;
+    const RobotModel& model() const;
+    const Driver& driver() const;
+    const DataLogger& dataLogger() const;
+
     template <typename T> T parameter(const std::string& name) const {
         const auto& params = getParameters();
         if (params) {

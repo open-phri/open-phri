@@ -186,6 +186,26 @@ DataLogger& AppMaker::dataLogger() {
     return *impl_->data_logger;
 }
 
+const Robot& AppMaker::robot() const {
+    return *impl_->robot;
+}
+
+const SafetyController& AppMaker::controller() const {
+    return *impl_->controller;
+}
+
+const RobotModel& AppMaker::model() const {
+    return *impl_->model;
+}
+
+const Driver& AppMaker::driver() const {
+    return *impl_->driver;
+}
+
+const DataLogger& AppMaker::dataLogger() const {
+    return *impl_->data_logger;
+}
+
 const YAML::Node& AppMaker::getParameters() const {
     return impl_->app_configuration;
 }
