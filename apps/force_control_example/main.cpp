@@ -18,91 +18,59 @@
  * program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <unistd.h>
-#include <signal.h>
-
 #include <OpenPHRI/OpenPHRI.h>
 #include <OpenPHRI/drivers/vrep_driver.h>
 
-using namespace std;
-using namespace phri;
+#include <pid/signal_manager.h>
 
-constexpr double SAMPLE_TIME = 0.010;
+int main() {
+    // Create an application using a configuration file
+    phri::AppMaker app{"force_control_example/app_config.yaml"};
 
-bool _stop = false;
+    // Set the task space damping matrix
+    app.robot().control().task().damping().diagonal().setConstant(100.);
 
-void sigint_handler(int sig) {
-    _stop = true;
-}
+    // Configure the controller
+    scalar::Velocity vmax{0.1};
+    scalar::Acceleration amax{0.5};
+    app.controller().add<phri::VelocityConstraint>("vmax", vmax);
+    app.controller().add<phri::AccelerationConstraint>("amax", amax);
 
-int main(int argc, char const* argv[]) {
+    phri::ForceControl::Parameters parameters;
+    auto target_force = spatial::Force::Zero(app.robot().controlPointFrame());
+    parameters.proportional_gain.setConstant(0.01);
+    parameters.derivative_gain.setConstant(0.005);
+    parameters.selection_vector.fill(false);
 
-    /***				Robot				***/
-    auto robot = make_shared<Robot>(
-        "LBR4p", // Robot's name, must match V-REP model's name
-        7);      // Robot's joint count
+    target_force.linear().z() = 10.;
+    parameters.selection_vector[2] = true;
 
-    /***				V-REP driver				***/
-    VREPDriver driver(robot, SAMPLE_TIME);
+    app.controller().add<phri::ForceControl>(
+        "force control", target_force, parameters,
+        phri::ForceControl::TargetType::Environment);
 
-    driver.start();
-
-    /***			Controller configuration			***/
-    *robot->controlPointDampingMatrix() *= 100.;
-    auto safety_controller = SafetyController(robot);
-
-    auto maximum_velocity = make_shared<double>(0.1);
-    auto velocity_constraint =
-        make_shared<VelocityConstraint>(maximum_velocity);
-
-    auto target_force = make_shared<Vector6d>(Vector6d::Zero());
-    auto p_gain = make_shared<Vector6d>(Vector6d::Ones() * 0.001);
-    auto d_gain = make_shared<Vector6d>(Vector6d::Ones() * 0.0003);
-    auto selection = make_shared<Vector6d>(Vector6d::Zero());
-
-    target_force->z() = 10.;
-    selection->z() = 1.;
-
-    auto force_control = make_shared<ForceControl>(target_force, SAMPLE_TIME,
-                                                   p_gain, d_gain, selection);
-
-    safety_controller.add("velocity constraint", velocity_constraint);
-
-    safety_controller.add("force control", force_control);
-
-    signal(SIGINT, sigint_handler);
-
-    while (not driver.read() and not _stop) {
-        usleep(SAMPLE_TIME * 1e6);
+    // Initialize the application. Exit on failure.
+    if (app.init()) {
+        std::cout << "Starting main loop" << std::endl;
+    } else {
+        std::cerr << "Initialization failed" << std::endl;
+        std::exit(-1);
     }
-    driver.enableSynchonous(true);
 
-    if (not _stop)
-        std::cout << "Starting main loop\n";
-    while (not _stop) {
-        if (driver.read()) {
-            safety_controller.compute();
-            if (not driver.send()) {
-                std::cerr << "Can'send robot data to V-REP" << std::endl;
-            }
-        } else {
-            std::cerr << "Can't get robot data from V-REP" << std::endl;
+    // Catch CTRL-C signal
+    bool stop = false;
+    pid::SignalManager::registerCallback(pid::SignalManager::Interrupt, "stop",
+                                         [&stop](int) { stop = true; });
+
+    // Run the main loop
+    while (not stop) {
+        if (not app()) {
+            // Communication error
+            break;
         }
-
-        // std::cout <<
-        // "**********************************************************************\n";
-        // std::cout << "vel    : " << robot->jointVelocity()->transpose() <<
-        // "\n"; std::cout << "pos msr: " <<
-        // robot->jointCurrentPosition()->transpose() << "\n"; std::cout << "pos
-        // tgt: " << robot->jointTargetPosition()->transpose() << "\n";
-
-        // usleep(SAMPLE_TIME*1e6);
-        driver.nextStep();
     }
 
-    driver.enableSynchonous(false);
-    driver.stop();
-
-    return 0;
+    // Stop catching CTRL-C
+    pid::SignalManager::unregisterCallback(pid::SignalManager::Interrupt,
+                                           "stop");
 }

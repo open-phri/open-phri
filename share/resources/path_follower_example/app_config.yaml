@@ -13,12 +13,7 @@ driver:
     type: vrep
     sample_time: 0.01
     synchronous: true
-
-# driver:
-#     type: dummy
-#     sample_time: 0.01
-#     # init_joint_positions: [1, 1, 1, 1, 1, 1, 1]
-#     init_joint_positions: [0, 1, 0, 1, 0, 0, 0]
+    scene: vrep_scenes/KukaLWR4.ttt
 
 controller:
     use_dynamic_dls: true
@@ -26,5 +21,6 @@ controller:
     sigma_min_threshold: 0.1
 
 data_logger:
+    folder: path_follower_example/logs
     log_control_data: true
     log_robot_data: true

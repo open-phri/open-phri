@@ -18,75 +18,85 @@
  * program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <unistd.h>
-#include <signal.h>
-#include <cstdlib>
-
 #include <OpenPHRI/OpenPHRI.h>
 #include <OpenPHRI/drivers/vrep_driver.h>
-#include <pid/rpath.h>
-#include <yaml-cpp/yaml.h>
 
-using namespace std;
-using namespace phri;
+#include <pid/signal_manager.h>
 
-bool _stop = false;
+#include <iostream>
+#include <random>
 
-void sigint_handler(int sig) {
-    _stop = true;
-}
+int main() {
+    // Create an application using a configuration file
+    phri::AppMaker app{"joint_trajectory_generator_example/app_config.yaml"};
 
-int main(int argc, char const* argv[]) {
-    PID_EXE(argv[0]);
+    // Set the task space damping matrix
+    app.robot().control().task().damping().diagonal().setConstant(100.);
+    const auto dofs = app.robot().jointCount();
 
-    AppMaker app("configuration_examples/kuka_lwr4.yaml");
+    // Configure the trajectory generator
+    phri::JointTrajectoryGenerator::Point joint_start_point{dofs};
+    phri::JointTrajectoryGenerator::Point joint_end_point{dofs};
 
-    phri::TrajectoryPoint<Eigen::VectorXd> joint_start_point;
-    phri::TrajectoryPoint<Eigen::VectorXd> joint_end_point;
+    auto joint_trajectory_generator = phri::JointTrajectoryGenerator{
+        joint_start_point, app.robot().control().timeStep(),
+        phri::TrajectorySynchronization::SynchronizeWaypoints};
 
-    joint_start_point.resize(app.getRobot()->jointCount());
-    joint_end_point.resize(app.getRobot()->jointCount());
+    auto max_velocity = vector::dyn::Velocity::Constant(dofs, 0.5);
+    auto max_acceleration = vector::dyn::Acceleration::Constant(dofs, 1.);
 
-    auto joint_trajectory_generator =
-        phri::TrajectoryGenerator<Eigen::VectorXd>(
-            joint_start_point, app.getDriver()->getSampleTime(),
-            phri::TrajectorySynchronization::SynchronizeTrajectory);
+    // Go to waypoint with given maximum velocity and acceleration
+    joint_trajectory_generator.addPathTo(joint_end_point, max_velocity,
+                                         max_acceleration);
 
-    Eigen::VectorXd dqmax(app.getRobot()->jointCount()),
-        d2qmax(app.getRobot()->jointCount());
-    dqmax.setConstant(1.5);
-    d2qmax.setConstant(0.5);
-    joint_trajectory_generator.addPathTo(joint_end_point, dqmax, d2qmax);
+    // Go back in 2 seconds
+    joint_trajectory_generator.addPathTo(joint_start_point,
+                                         scalar::Duration{2.});
 
-    app.getController()->add(
-        "joint traj vel", phri::JointVelocityProxy(
-                              joint_trajectory_generator.getVelocityOutput()));
+    // Configure the controller
+    vector::dyn::Velocity reference_velocity{dofs};
+    app.controller().add<phri::JointVelocityProxy>(
+        "joint trajectory", joint_trajectory_generator.getVelocityOutput());
 
-    bool init_ok = app.init();
-
-    if (init_ok)
-        std::cout << "Starting main loop\n";
-    else
-        std::cout << "Initialization failed\n";
-
-    signal(SIGINT, sigint_handler);
-
-    *joint_start_point.y = *app.getRobot()->jointCurrentPosition();
-    for (size_t i = 0; i < joint_start_point.y->size(); ++i) {
-        (*joint_end_point.y)[i] =
-            (*joint_start_point.y)[i] + (0.5 * std::rand()) / RAND_MAX;
+    // Initialize the application. Exit on failure.
+    if (app.init()) {
+        std::cout << "Starting main loop" << std::endl;
+    } else {
+        std::cerr << "Initialization failed" << std::endl;
+        std::exit(-1);
     }
 
+    // Generate random target positions
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dis(-0.5, 0.5);
+
+    *joint_start_point.y = app.robot().joints().state().position();
+    for (size_t i = 0; i < dofs; ++i) {
+        (*joint_end_point.y)[i] = (*joint_start_point.y)[i] + dis(gen);
+    }
+
+    // Generate the trajectory with the given targets and settings
     joint_trajectory_generator.computeTimings();
 
-    while (init_ok and not _stop) {
-        _stop |= not app.run([&joint_trajectory_generator]() {
-            return not joint_trajectory_generator.compute();
-        });
+    // Update lambda function to be passed to the app in the control loop
+    auto update_trajectory = [&]() {
+        return not joint_trajectory_generator.compute();
+    };
+
+    // Catch CTRL-C signal
+    bool stop = false;
+    pid::SignalManager::registerCallback(pid::SignalManager::Interrupt, "stop",
+                                         [&stop](int) { stop = true; });
+    // Run the main loop
+    while (not stop) {
+        if (not app(update_trajectory)) {
+            // Communication error
+            break;
+        }
     }
 
-    app.stop();
-
-    return 0;
+    // Stop catching CTRL-C
+    pid::SignalManager::unregisterCallback(pid::SignalManager::Interrupt,
+                                           "stop");
 }

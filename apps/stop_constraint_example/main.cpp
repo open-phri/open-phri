@@ -18,82 +18,62 @@
  * program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <unistd.h>
-#include <signal.h>
-
 #include <OpenPHRI/OpenPHRI.h>
 #include <OpenPHRI/drivers/vrep_driver.h>
 
-using namespace std;
-using namespace phri;
+#include <pid/signal_manager.h>
 
-constexpr double SAMPLE_TIME = 0.010;
+#include <iostream>
 
-bool _stop = false;
+int main() {
+    // Create an application using a configuration file
+    phri::AppMaker app{"stop_constraint_example/app_config.yaml"};
 
-void sigint_handler(int sig) {
-    _stop = true;
-}
+    // Set the task space damping matrix
+    app.robot().control().task().damping().diagonal().setConstant(100.);
 
-int main(int argc, char const* argv[]) {
+    // Configure the controller
+    app.controller().add<phri::ExternalForce>("ext force");
+    app.controller().add<phri::TaskEmergencyStopConstraint>(
+        "Emergency stop", scalar::Force{25.}, scalar::Force{5.});
 
-    /***				Robot				***/
-    auto robot = make_shared<Robot>(
-        "LBR4p", // Robot's name, must match V-REP model's name
-        7);      // Robot's joint count
+    auto reference_velocity =
+        spatial::Velocity::Zero(app.robot().controlPointFrame());
+    app.controller().add<phri::VelocityProxy>("ref velocity",
+                                              reference_velocity);
 
-    /***				V-REP driver				***/
-    VREPDriver driver(robot, SAMPLE_TIME);
-
-    driver.start();
-
-    /***			Controller configuration			***/
-    *robot->controlPointDampingMatrix() *= 500.;
-    auto safety_controller = SafetyController(robot);
-
-    auto ext_force = robot->controlPointExternalForce();
-    auto activation_force_threshold = make_shared<double>(25.);
-    auto deactivation_force_threshold = make_shared<double>(5.);
-
-    auto stop_constraint = make_shared<EmergencyStopConstraint>(
-        activation_force_threshold, deactivation_force_threshold);
-
-    auto constant_vel = make_shared<spatial::Velocity>();
-    auto constant_velocity_generator = make_shared<VelocityProxy>(constant_vel);
-    auto external_force_generator = make_shared<ForceProxy>(ext_force);
-
-    safety_controller.addConstraint("stop constraint", stop_constraint);
-    safety_controller.addVelocityGenerator("vel proxy",
-                                           constant_velocity_generator);
-    safety_controller.addForceGenerator("force proxy",
-                                        external_force_generator);
-
-    signal(SIGINT, sigint_handler);
-
-    usleep(10. * SAMPLE_TIME * 1e6);
-
-    double t = 0.;
-    while (not _stop) {
-        if (driver.read()) {
-            safety_controller.compute();
-            driver.send();
-        }
-
-        if (t < 5.) {
-            constant_vel->translation().x() = 0.05;
-        } else if (t < 10.) {
-            constant_vel->translation().x() = -0.05;
-        } else {
-            t = 0.;
-        }
-
-        t += SAMPLE_TIME;
-
-        usleep(SAMPLE_TIME * 1e6);
+    // Initialize the application. Exit on failure.
+    if (app.init()) {
+        std::cout << "Starting main loop" << std::endl;
+    } else {
+        std::cerr << "Initialization failed" << std::endl;
+        std::exit(-1);
     }
 
-    driver.stop();
+    // Catch CTRL-C signal
+    bool stop = false;
+    pid::SignalManager::registerCallback(pid::SignalManager::Interrupt, "stop",
+                                         [&stop](int) { stop = true; });
+    // Run the main loop
+    double time = 0.;
+    while (not stop) {
+        if (time < 5.) {
+            reference_velocity.linear().x() = 0.05;
+        } else if (time < 10.) {
+            reference_velocity.linear().x() = -0.05;
+        } else {
+            time = 0.;
+        }
 
-    return 0;
+        time += app.robot().control().timeStep();
+
+        if (not app()) {
+            // Communication error
+            break;
+        }
+    }
+
+    // Stop catching CTRL-C
+    pid::SignalManager::unregisterCallback(pid::SignalManager::Interrupt,
+                                           "stop");
 }

@@ -18,47 +18,27 @@
  * program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <unistd.h>
-#include <signal.h>
-
 #include <OpenPHRI/OpenPHRI.h>
 #include <OpenPHRI/drivers/vrep_driver.h>
 
-using namespace std;
-using namespace phri;
+#include <pid/signal_manager.h>
 
-constexpr double SAMPLE_TIME = 0.010;
+#include <iostream>
 
-bool _stop = false;
+int main() {
+    // Create an application using a configuration file
+    phri::AppMaker app{"velocity_constraint_example/app_config.yaml"};
 
-void sigint_handler(int sig) {
-    _stop = true;
-}
+    // Set the task space damping matrix
+    app.robot().control().task().damping().diagonal().setConstant(100.);
 
-int main(int argc, char const* argv[]) {
-
-    /***				Robot				***/
-    auto robot = make_shared<Robot>(
-        "LBR4p", // Robot's name, must match V-REP model's name
-        7);      // Robot's joint count
-
-    /***				V-REP driver				***/
-    VREPDriver driver(robot, SAMPLE_TIME);
-
-    driver.start();
-
-    /***			Controller configuration			***/
-    *robot->controlPointDampingMatrix() *= 100.;
-    auto safety_controller = SafetyController(robot);
-
-    auto maximum_velocity = make_shared<double>(0.1);
-    auto velocity_constraint =
-        make_shared<VelocityConstraint>(maximum_velocity);
+    // Configure the controller
+    scalar::Velocity vmax{0.1};
+    app.controller().add<phri::VelocityConstraint>("vmax", vmax);
 
     // Objects are tracked in the TCP frame so there is no need to provide the
     // robot position
-    auto potential_field_generator = make_shared<PotentialFieldGenerator>();
+    auto potential_field_generator = phri::PotentialFieldGenerator();
     potential_field_generator->setVerbose(true);
 
     auto obstacle1 = make_shared<PotentialFieldObject>(
@@ -89,23 +69,27 @@ int main(int argc, char const* argv[]) {
     safety_controller.addForceGenerator("potential field",
                                         potential_field_generator);
 
-    signal(SIGINT, sigint_handler);
-
-    usleep(10. * SAMPLE_TIME * 1e6);
-
-    cout << "Starting main loop" << endl;
-    while (not _stop) {
-        if (driver.read()) {
-            safety_controller.compute();
-            driver.send();
-        } else {
-            std::cerr << "Can't get robot data from V-REP" << std::endl;
-        }
-
-        usleep(SAMPLE_TIME * 1e6);
+    // Initialize the application. Exit on failure.
+    if (app.init()) {
+        std::cout << "Starting main loop" << std::endl;
+    } else {
+        std::cerr << "Initialization failed" << std::endl;
+        std::exit(-1);
     }
 
-    driver.stop();
+    // Catch CTRL-C signal
+    bool stop = false;
+    pid::SignalManager::registerCallback(pid::SignalManager::Interrupt, "stop",
+                                         [&stop](int) { stop = true; });
+    // Run the main loop
+    while (not stop) {
+        if (not app()) {
+            // Communication error
+            break;
+        }
+    }
 
-    return 0;
+    // Stop catching CTRL-C
+    pid::SignalManager::unregisterCallback(pid::SignalManager::Interrupt,
+                                           "stop");
 }

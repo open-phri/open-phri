@@ -1,0 +1,26 @@
+robot:
+    name: LBR4p
+    joint_count: 7
+    control_point: 
+        frame: end-effector
+        parent: link1
+
+model:
+    path: robot_models/kuka_lwr4.yaml
+    control_point: end-effector
+
+driver:
+    type: vrep
+    sample_time: 0.01
+    synchronous: true
+    scene: vrep_scenes/KukaLWR4.ttt
+
+controller:
+    use_dynamic_dls: true
+    lambda_max: 0.1
+    sigma_min_threshold: 0.1
+
+data_logger:
+    folder: trajectory_generator_example/logs
+    log_control_data: true
+    log_robot_data: true

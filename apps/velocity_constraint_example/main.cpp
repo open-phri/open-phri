@@ -22,46 +22,15 @@
 #include <OpenPHRI/drivers/vrep_driver.h>
 
 #include <pid/signal_manager.h>
-#include <yaml-cpp/yaml.h>
 
 #include <iostream>
 
-class VirtualForce : public phri::Driver {
-public:
-    VirtualForce(phri::Robot& robot)
-        : phri::Driver{robot, robot.control().timeStep()} {
-    }
-
-    virtual bool start(double timeout = 30.) override {
-        taskState().force().setZero();
-        return true;
-    }
-
-    virtual bool stop() override {
-        return true;
-    }
-
-    virtual bool read() override {
-        taskState().force().x() += 0.05;
-        return true;
-    }
-
-    virtual bool send() override {
-        return true;
-    }
-};
-
 int main() {
     // Create an application using a configuration file
-    phri::AppMaker app("configuration_examples/kuka_lwr4.yaml");
+    phri::AppMaker app{"velocity_constraint_example/app_config.yaml"};
 
     // Set the task space damping matrix
     app.robot().control().task().damping().diagonal().setConstant(100.);
-
-    std::cout << "Controlled frame: " << app.robot().controlPointFrame()
-              << std::endl;
-
-    // auto virtual_force = VirtualForce{app.robot()};
 
     // Configure the controller
     scalar::Velocity vmax{0.1};
@@ -76,15 +45,12 @@ int main() {
         std::exit(-1);
     }
 
-    // virtual_force.init();
-
     // Catch CTRL-C signal
     bool stop = false;
     pid::SignalManager::registerCallback(pid::SignalManager::Interrupt, "stop",
                                          [&stop](int) { stop = true; });
     // Run the main loop
     while (not stop) {
-        // virtual_force.read();
         if (not app()) {
             // Communication error
             break;
