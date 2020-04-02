@@ -26,7 +26,7 @@ TEST_CASE("Kinetic energy constraint") {
     const auto& cp_total_velocity = robot.control().task().totalVelocity();
 
     auto current_kinetic_energy = [&]() -> scalar::Energy {
-        return scalar::Energy::kinetic(
+        return scalar::Energy::Kinetic(
             mass, scalar::Velocity{cp_velocity.linear().norm()});
     };
 
