@@ -96,7 +96,7 @@ public:
      */
     template <typename ItemT>
     bool add(const std::string& name, ItemT&& item, bool force = false) {
-        if ((items_.find(name) != items_.end()) and not force) {
+        if (not force and (items_.find(name) != items_.end())) {
             if (verbose_) {
                 std::cerr << "In phri::" << class_name_ << "::add"
                           << collection_name_ << ": an item called \"" << name
