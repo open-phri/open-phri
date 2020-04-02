@@ -176,7 +176,7 @@ public:
      * VREPDriver::updateTrackedObjectsPosition.
      */
     std::shared_ptr<const spatial::Position>
-    trackObjectPosition(const std::string& name, spatial::Frame frame);
+    trackObjectPosition(const std::string& name, const spatial::Frame& frame);
 
     /**
      * @brief Update all tracked objects' position.
@@ -209,7 +209,7 @@ private:
     // void init(int client_id);
     bool getObjectHandles();
     void startStreaming() const;
-    int getFrameHandle(spatial::Frame frame) const;
+    int getFrameHandle(const spatial::Frame& frame) const;
     void loadScene(const std::string& path) const;
 
     struct StartParameters {

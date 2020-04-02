@@ -283,7 +283,8 @@ bool VREPDriver::readTCPWrench(spatial::Force& wrench) const {
 }
 
 std::shared_ptr<const spatial::Position>
-VREPDriver::trackObjectPosition(const std::string& name, spatial::Frame frame) {
+VREPDriver::trackObjectPosition(const std::string& name,
+                                const spatial::Frame& frame) {
     int handle = -1;
     int ref_frame = getFrameHandle(frame);
     float data[3];
@@ -297,7 +298,7 @@ VREPDriver::trackObjectPosition(const std::string& name, spatial::Frame frame) {
     simxGetObjectPosition(client_id_, handle, ref_frame, data,
                           simx_opmode_streaming);
 
-    auto ptr = std::make_shared<spatial::Position>();
+    auto ptr = std::make_shared<spatial::Position>(frame);
 
     tracked_objects_[std::make_pair(handle, ref_frame)] = ptr;
 
@@ -486,7 +487,7 @@ void VREPDriver::startStreaming() const {
                          &jacobian_str, &sLength, simx_opmode_streaming);
 }
 
-int VREPDriver::getFrameHandle(spatial::Frame frame) const {
+int VREPDriver::getFrameHandle(const spatial::Frame& frame) const {
     if (frame == robot().controlPointFrame()) {
         return object_handles_.at(robot().name() + "_tcp" + suffix_);
     } else if (frame == robot().controlPointParentFrame()) {
