@@ -70,12 +70,12 @@ void ForceControl::update(spatial::Velocity& velocity) {
     // Zero the error on unused components
     applySelection(error);
 
-    // Filter the error
-    error = error * filter_coeff_ + prev_error_ * (1. - filter_coeff_);
-
     // Proportional action
     Eigen::Vector6d command =
         getParameters().proportional_gain.cwiseProduct(error);
+
+    // Filter the error
+    error = error * filter_coeff_ + prev_error_ * (1. - filter_coeff_);
 
     // Derivative action
     command += getParameters().derivative_gain.cwiseProduct(

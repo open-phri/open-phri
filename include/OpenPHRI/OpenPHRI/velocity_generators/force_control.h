@@ -99,7 +99,7 @@ public:
           parameters_{std::forward<ParamT>(parameters)},
           type_{type},
           filter_coeff_(1.),
-          prev_error_{spatial::Force::Zero(spatial::Frame::Ref(frame()))} {
+          prev_error_{spatial::Force::Zero(frame().ref())} {
     }
 
     //! \brief Configure the filter acting on the error
