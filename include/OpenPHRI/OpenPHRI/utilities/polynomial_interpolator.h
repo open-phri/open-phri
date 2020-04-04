@@ -66,8 +66,8 @@ public:
 
     ~PolynomialInterpolator() = default;
 
-    virtual void computeParameters() override;
-    virtual double compute() override;
+    void computeParameters() override;
+    double compute() override;
 
 private:
     FifthOrderPolynomial::Parameters params_;

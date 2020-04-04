@@ -138,7 +138,7 @@ private:
             this->size = size;
         }
 
-        virtual void write(std::ostream& stream) const override {
+        void write(std::ostream& stream) const override {
             auto ptr = static_cast<const T*>(data);
             for (size_t i = 0; i < size - 1; ++i) {
                 stream << ptr[i] << '\t';

@@ -76,7 +76,7 @@ public:
     const spatial::Velocity& getVelocity() const;
 
 protected:
-    virtual void update(spatial::Velocity& velocity) override;
+    void update(spatial::Velocity& velocity) override;
 
     detail::UniversalWrapper<spatial::Velocity> external_velocity_;
     generator generator_;

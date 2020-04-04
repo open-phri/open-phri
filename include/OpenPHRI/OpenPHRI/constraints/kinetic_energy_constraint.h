@@ -67,7 +67,7 @@ public:
         setMaximumVelocity(scalar::Velocity{0.});
     }
 
-    virtual double compute() override;
+    double compute() override;
 
     //! \brief Read/write access the mass used by the constraint
     //! \return double& A reference to the mass

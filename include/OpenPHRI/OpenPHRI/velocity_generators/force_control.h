@@ -133,7 +133,7 @@ public:
     const Parameters& getParameters() const;
 
 protected:
-    virtual void update(spatial::Velocity& velocity) override;
+    void update(spatial::Velocity& velocity) override;
     void applySelection(Eigen::Vector6d& vec) const;
 
     detail::UniversalWrapper<spatial::Force> target_;

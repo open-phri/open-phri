@@ -59,12 +59,12 @@ public:
 
     virtual ~DummyDriver();
 
-    virtual bool start(double timeout = 0.) override;
-    virtual bool stop() override;
+    bool start(double timeout = 0.) override;
+    bool stop() override;
 
-    virtual bool sync() override;
-    virtual bool read() override;
-    virtual bool send() override;
+    bool sync() override;
+    bool read() override;
+    bool send() override;
 
     using Driver::jointCommand;
     using Driver::jointState;

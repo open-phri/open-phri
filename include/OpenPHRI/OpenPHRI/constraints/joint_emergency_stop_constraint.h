@@ -71,7 +71,7 @@ public:
               std::forward<ActThT>(deactivation_threshold)} {
     }
 
-    virtual double compute() override;
+    double compute() override;
 
     void setActivationThreshold(const vector::dyn::Force& threshold);
     const vector::dyn::Force& getActivationThreshold() const;
@@ -80,7 +80,7 @@ public:
     const vector::dyn::Force& getDeactivationThreshold() const;
 
 protected:
-    virtual void setRobot(Robot const* robot) override;
+    void setRobot(Robot const* robot) override;
 
 private:
     detail::UniversalWrapper<vector::dyn::Force> activation_threshold_;

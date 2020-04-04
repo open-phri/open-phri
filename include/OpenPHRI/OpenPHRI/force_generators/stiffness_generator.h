@@ -81,7 +81,7 @@ public:
     const spatial::Position& getTargetPose() const;
 
 protected:
-    virtual void update(spatial::Force& force) override;
+    void update(spatial::Force& force) override;
 
     detail::UniversalWrapper<spatial::Stiffness> stiffness_;
     detail::UniversalWrapper<spatial::Position> target_pose_;

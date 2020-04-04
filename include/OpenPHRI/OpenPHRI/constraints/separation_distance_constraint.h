@@ -73,7 +73,7 @@ public:
         std::shared_ptr<Interpolator> interpolator,
         std::shared_ptr<const spatial::Position> robot_position);
 
-    virtual double compute() override;
+    double compute() override;
 
     /**
      * @brief Retrieve the separation shared pointer.
@@ -82,7 +82,7 @@ public:
     std::shared_ptr<const double> getSeparationDistance() const;
 
 protected:
-    virtual void setRobot(Robot const* robot) override;
+    void setRobot(Robot const* robot) override;
 
 private:
     double closestObjectDistance();

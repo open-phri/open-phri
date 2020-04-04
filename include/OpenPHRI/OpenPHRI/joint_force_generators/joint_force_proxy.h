@@ -77,9 +77,9 @@ public:
     const vector::dyn::Force& getForce() const;
 
 protected:
-    virtual void update(vector::dyn::Force& force) override;
+    void update(vector::dyn::Force& force) override;
 
-    virtual void setRobot(Robot const* robot) override;
+    void setRobot(Robot const* robot) override;
 
     detail::UniversalWrapper<vector::dyn::Force> external_force_;
     generator generator_;

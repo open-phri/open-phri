@@ -68,7 +68,7 @@ public:
     }
 
     /***		Algorithm		***/
-    virtual double compute() override;
+    double compute() override;
 
     void setActivationThreshold(const scalar::Force& threshold);
     const scalar::Force& getActivationThreshold() const;

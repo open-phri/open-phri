@@ -97,7 +97,7 @@ public:
     std::shared_ptr<VelocityGenerator> getVelocityGenerator() const;
 
     /***		Algorithm		***/
-    virtual double compute() override;
+     double compute() override;
 
 private:
     std::shared_ptr<VelocityConstraint> constraint_;

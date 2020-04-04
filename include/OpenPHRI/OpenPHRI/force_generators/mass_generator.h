@@ -79,7 +79,7 @@ public:
     const spatial::Acceleration& getTargetAcceleration() const;
 
 protected:
-    virtual void update(spatial::Force& force) override;
+    void update(spatial::Force& force) override;
 
     detail::UniversalWrapper<spatial::Mass> mass_;
     detail::UniversalWrapper<spatial::Acceleration> target_acceleration_;

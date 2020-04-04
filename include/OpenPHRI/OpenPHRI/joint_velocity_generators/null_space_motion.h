@@ -65,9 +65,9 @@ public:
     const vector::dyn::Velocity& getVelocity() const;
 
 protected:
-    virtual void update(vector::dyn::Velocity& velocity) override;
+    void update(vector::dyn::Velocity& velocity) override;
 
-    virtual void setRobot(Robot const* robot) override;
+    void setRobot(Robot const* robot) override;
 
     detail::UniversalWrapper<vector::dyn::Velocity> joint_velocity_;
     Eigen::MatrixXd null_space_projector_;

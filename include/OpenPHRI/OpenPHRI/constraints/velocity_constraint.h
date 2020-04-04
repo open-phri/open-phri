@@ -58,7 +58,7 @@ public:
 
     //! \brief Compute the velocity constraint based on the robot state
     //! \return double The constraint value [0,1]
-    virtual double compute() override;
+    double compute() override;
 
     //! \brief Read/write access the velocity limit used by the constraint
     //! \return double& A reference to the velocity limit

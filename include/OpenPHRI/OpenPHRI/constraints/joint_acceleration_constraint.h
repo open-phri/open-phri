@@ -58,7 +58,7 @@ public:
 
     //! \brief Compute the acceleration constraint based on the robot state
     //! \return double The constraint value [0,1]
-    virtual double compute() override;
+    double compute() override;
 
     //! \brief Read/write access the acceleration limit used by the constraint
     //! \return vector::dyn::Acceleration& A reference to the acceleration limit
@@ -69,7 +69,7 @@ public:
     const vector::dyn::Acceleration& getMaximumAcceleration() const;
 
 protected:
-    virtual void setRobot(Robot const* robot) override;
+    void setRobot(Robot const* robot) override;
 
 private:
     detail::UniversalWrapper<vector::dyn::Acceleration> maximum_acceleration_;

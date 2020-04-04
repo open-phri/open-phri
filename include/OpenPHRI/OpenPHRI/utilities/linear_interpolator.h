@@ -68,9 +68,9 @@ public:
      */
     void enableSaturation(bool on);
 
-    virtual void computeParameters() override;
+    void computeParameters() override;
 
-    virtual double compute() override;
+    double compute() override;
 
 private:
     struct LinearParameters {

@@ -62,7 +62,7 @@ public:
 
     //! \brief Compute the power constraint based on the robot state
     //! \return double The constraint value [0,1]
-    virtual double compute() override;
+    double compute() override;
 
     //! \brief Read/write access the power limit used by the constraint
     //! \return double& A reference to the power limit

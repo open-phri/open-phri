@@ -76,7 +76,7 @@ public:
     const spatial::Force& getForce() const;
 
 protected:
-    virtual void update(spatial::Force& force) override;
+    void update(spatial::Force& force) override;
 
     detail::UniversalWrapper<spatial::Force> external_force_;
     generator generator_;

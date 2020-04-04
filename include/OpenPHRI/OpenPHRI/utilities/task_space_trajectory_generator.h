@@ -89,7 +89,7 @@ public:
         return super::computeTimings(v_eps, a_eps);
     }
 
-    virtual bool compute() override {
+    bool compute() override {
         if (error_tracking_params_) {
             reference_pose_vec_->block<3, 1>(0, 0) = reference_pose_->linear();
             reference_pose_vec_->block<3, 1>(3, 0) =
@@ -117,7 +117,7 @@ public:
         return ret;
     }
 
-    virtual void removeAllPoints() override {
+    void removeAllPoints() override {
         waypoints_.clear();
         super::removeAllPoints();
     }

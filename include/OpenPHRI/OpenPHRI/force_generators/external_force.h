@@ -42,7 +42,7 @@ public:
     ExternalForce() = default;
 
 protected:
-    virtual void update(spatial::Force& force) override;
+    void update(spatial::Force& force) override;
 };
 
 } // namespace phri

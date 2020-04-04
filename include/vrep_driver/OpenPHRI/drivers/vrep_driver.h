@@ -97,7 +97,7 @@ public:
      * @param timeout The maximum time to wait to establish the connection.
      * @return true on success, false otherwise
      */
-    virtual bool init(double timeout = 5.) override;
+    bool init(double timeout = 5.) override;
 
     /**
      * @brief Retrieve the client ID of the current connection.
@@ -134,12 +134,12 @@ public:
     /**
      * @brief Start the simulation.
      */
-    virtual bool start(double timeout = 0.) override;
+    bool start(double timeout = 0.) override;
 
     /**
      * @brief Stop the simulation.
      */
-    virtual bool stop() override;
+    bool stop() override;
 
     /**
      * @brief Pause the simulation.
@@ -193,8 +193,8 @@ public:
     bool sendJointTargetPosition(const vector::dyn::Position& position);
     bool sendJointTargetVelocity(const vector::dyn::Velocity& velocity);
 
-    virtual bool read() override;
-    virtual bool send() override;
+    bool read() override;
+    bool send() override;
 
     static bool isRegisteredInFactory();
 

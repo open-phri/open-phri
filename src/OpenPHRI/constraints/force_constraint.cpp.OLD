@@ -34,7 +34,7 @@ public:
           maximum_force_(maximum_force) {
     }
 
-    virtual void update(spatial::Velocity& velocity) override {
+     void update(spatial::Velocity& velocity) override {
         double f_norm = external_force_.norm();
 
         if (f_norm > *maximum_force_) {

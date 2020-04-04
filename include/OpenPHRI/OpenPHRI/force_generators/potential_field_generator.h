@@ -112,7 +112,7 @@ public:
     const spatial::LinearPosition& getOffset() const;
 
 protected:
-    virtual void update(spatial::Force& force) override;
+    void update(spatial::Force& force) override;
 
     detail::UniversalWrapper<spatial::LinearPosition> offset_;
 };
