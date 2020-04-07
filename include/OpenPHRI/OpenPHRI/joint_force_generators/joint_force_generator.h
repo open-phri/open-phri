@@ -83,7 +83,7 @@ protected:
     //! \return double& A reference to the controlled robot
     const Robot& robot() const;
 
-    Robot const* robot_;
+    Robot const* robot_{nullptr};
 
     vector::dyn::Force force_;
 };

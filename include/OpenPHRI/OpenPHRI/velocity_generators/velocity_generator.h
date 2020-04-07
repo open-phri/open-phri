@@ -92,7 +92,7 @@ protected:
     virtual const spatial::Velocity& internalVelocity() const;
 
 private:
-    Robot const* robot_;
+    Robot const* robot_{nullptr};
     spatial::Velocity velocity_;
 };
 

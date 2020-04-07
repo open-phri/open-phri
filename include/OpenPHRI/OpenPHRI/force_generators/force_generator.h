@@ -91,7 +91,7 @@ protected:
     const spatial::Force& internalWrench() const;
 
 private:
-    Robot const* robot_;
+    Robot const* robot_{nullptr};
     spatial::Force wrench_;
 };
 

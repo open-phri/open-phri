@@ -84,7 +84,7 @@ protected:
     const Robot& robot() const;
 
 private:
-    Robot const* robot_;
+    Robot const* robot_{nullptr};
 
     vector::dyn::Velocity velocity_;
 };

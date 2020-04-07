@@ -82,7 +82,7 @@ protected:
     //! \brief The robot on which the constraint is applied.
     //! \details This will automatically set by the SafetyController or a
     //! SeparationDistanceConstraint
-    Robot const* robot_;
+    Robot const* robot_{nullptr};
 };
 
 } // namespace phri
