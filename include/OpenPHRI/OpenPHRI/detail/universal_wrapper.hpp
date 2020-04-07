@@ -49,7 +49,7 @@ public:
     }
 
     template <typename T = ValueT>
-    typename std::enable_if_t<not std::is_const_v<T>, T&> ref() {
+    [[nodiscard]] typename std::enable_if_t<not std::is_const_v<T>, T&> ref() {
         if (std::holds_alternative<ValueT>(value_)) {
             return std::get<ValueT>(value_);
         } else if (std::holds_alternative<ValueT*>(value_)) {
@@ -62,7 +62,7 @@ public:
         }
     }
 
-    std::add_const_t<ValueT>& cref() const noexcept {
+    [[nodiscard]] std::add_const_t<ValueT>& cref() const noexcept {
         using NonConstValueT = std::remove_const_t<ValueT>;
         using ConstValueT = std::add_const_t<NonConstValueT>;
         if (std::holds_alternative<NonConstValueT>(value_)) {
@@ -82,35 +82,36 @@ public:
     }
 
     template <typename T = ValueT>
+    [[nodiscard]]
     operator typename std::enable_if_t<not std::is_const_v<T>, T&>() noexcept {
         return ref();
     }
 
-    operator const ValueT&() const noexcept {
+    [[nodiscard]] operator const ValueT&() const noexcept {
         return cref();
     }
 
-    bool operator==(const UniversalWrapper<ValueT>& other) {
+    [[nodiscard]] bool operator==(const UniversalWrapper<ValueT>& other) {
         return cref() == other.cref();
     }
 
-    bool operator!=(const UniversalWrapper<ValueT>& other) {
+    [[nodiscard]] bool operator!=(const UniversalWrapper<ValueT>& other) {
         return not(*this == other);
     }
 
-    bool operator>(const UniversalWrapper<ValueT>& other) {
+    [[nodiscard]] bool operator>(const UniversalWrapper<ValueT>& other) {
         return cref() > other.cref();
     }
 
-    bool operator>=(const UniversalWrapper<ValueT>& other) {
+    [[nodiscard]] bool operator>=(const UniversalWrapper<ValueT>& other) {
         return cref() >= other.cref();
     }
 
-    bool operator<(const UniversalWrapper<ValueT>& other) {
+    [[nodiscard]] bool operator<(const UniversalWrapper<ValueT>& other) {
         return cref() < other.cref();
     }
 
-    bool operator<=(const UniversalWrapper<ValueT>& other) {
+    [[nodiscard]] bool operator<=(const UniversalWrapper<ValueT>& other) {
         return cref() <= other.cref();
     }
 

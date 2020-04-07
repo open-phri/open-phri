@@ -56,7 +56,7 @@ public:
         : maximum_velocities_{std::forward<VmaxT>(maximum_velocities)} {
     }
 
-    double compute() override;
+    [[nodiscard]] double compute() override;
 
     //! \brief Read/write access the velocity limit used by the constraint
     //! \return double& A reference to the velocity limit
@@ -64,7 +64,7 @@ public:
 
     //! \brief Read access the velocity limit used by the constraint
     //! \return double The velocity limit value
-    const vector::dyn::Velocity& getMaximumVelocities() const;
+    [[nodiscard]] const vector::dyn::Velocity& getMaximumVelocities() const;
 
 protected:
     void setRobot(Robot const* robot) override;

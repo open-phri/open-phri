@@ -32,19 +32,20 @@ public:
 
     bool stop();
 
-    Robot& robot();
-    SafetyController& controller();
-    RobotModel& model();
-    Driver& driver();
-    DataLogger& dataLogger();
+    [[nodiscard]] Robot& robot();
+    [[nodiscard]] SafetyController& controller();
+    [[nodiscard]] RobotModel& model();
+    [[nodiscard]] Driver& driver();
+    [[nodiscard]] DataLogger& dataLogger();
 
-    const Robot& robot() const;
-    const SafetyController& controller() const;
-    const RobotModel& model() const;
-    const Driver& driver() const;
-    const DataLogger& dataLogger() const;
+    [[nodiscard]] const Robot& robot() const;
+    [[nodiscard]] const SafetyController& controller() const;
+    [[nodiscard]] const RobotModel& model() const;
+    [[nodiscard]] const Driver& driver() const;
+    [[nodiscard]] const DataLogger& dataLogger() const;
 
-    template <typename T> T parameter(const std::string& name) const {
+    template <typename T>
+    [[nodiscard]] T parameter(const std::string& name) const {
         const auto& params = getParameters();
         if (params) {
             return getParameters()[name].as<T>();
@@ -55,7 +56,8 @@ public:
     }
 
     template <typename T>
-    T parameter(const std::string& name, const T& default_value) const {
+    [[nodiscard]] T parameter(const std::string& name,
+                              const T& default_value) const {
         try {
             return getParameters()[name].as<T>(default_value);
         } catch (...) {
@@ -64,7 +66,7 @@ public:
     }
 
 private:
-    const YAML::Node& getParameters() const;
+    [[nodiscard]] const YAML::Node& getParameters() const;
 
     struct pImpl;
     std::unique_ptr<pImpl> impl_;

@@ -58,7 +58,7 @@ public:
 
     //! \brief Compute the acceleration constraint based on the robot state
     //! \return double The constraint value [0,1]
-    double compute() override;
+    [[nodiscard]] double compute() override;
 
     //! \brief Read/write access the acceleration limit used by the constraint
     //! \return double& A reference to the acceleration limit
@@ -66,7 +66,7 @@ public:
 
     //! \brief Read access the acceleration limit used by the constraint
     //! \return double The acceleration limit value
-    const scalar::Acceleration& getMaximumAcceleration() const;
+    [[nodiscard]] const scalar::Acceleration& getMaximumAcceleration() const;
 
 private:
     //! \brief Shared pointer holding the acceleration limit.

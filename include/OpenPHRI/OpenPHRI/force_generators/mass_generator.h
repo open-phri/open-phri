@@ -68,7 +68,7 @@ public:
 
     //! \brief Read access the mass used by the generator
     //! \return double The mass value
-    const spatial::Mass& getMass() const;
+    [[nodiscard]] const spatial::Mass& getMass() const;
 
     //! \brief Read/write access the targetAcceleration used by the generator
     //! \return double& A reference to the targetAcceleration
@@ -76,7 +76,7 @@ public:
 
     //! \brief Read access the targetAcceleration used by the generator
     //! \return double The targetAcceleration value
-    const spatial::Acceleration& getTargetAcceleration() const;
+    [[nodiscard]] const spatial::Acceleration& getTargetAcceleration() const;
 
 protected:
     void update(spatial::Force& force) override;

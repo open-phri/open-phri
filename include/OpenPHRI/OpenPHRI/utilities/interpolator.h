@@ -46,7 +46,7 @@ public:
      * @brief Get the pointer to the output data.
      * @return A shared pointer to the output data.
      */
-    std::shared_ptr<const Y> outputPtr() const {
+    [[nodiscard]] std::shared_ptr<const Y> outputPtr() const {
         return output_;
     }
 
@@ -54,7 +54,7 @@ public:
      * @brief Get the pointer to the output data.
      * @return A shared pointer to the output data.
      */
-    const Y& output() const {
+    [[nodiscard]] const Y& output() const {
         return *output_;
     }
 

@@ -19,13 +19,14 @@ public:
 
     void forwardKinematics() const;
 
-    std::shared_ptr<const Eigen::VectorXd> getLowerLimits() const;
-    std::shared_ptr<const Eigen::VectorXd> getUpperLimits() const;
-    std::shared_ptr<const Eigen::VectorXd> getVelocityLimits() const;
-    std::shared_ptr<const Eigen::VectorXd> getForceLimits() const;
+    [[nodiscard]] std::shared_ptr<const Eigen::VectorXd> getLowerLimits() const;
+    [[nodiscard]] std::shared_ptr<const Eigen::VectorXd> getUpperLimits() const;
+    [[nodiscard]] std::shared_ptr<const Eigen::VectorXd>
+    getVelocityLimits() const;
+    [[nodiscard]] std::shared_ptr<const Eigen::VectorXd> getForceLimits() const;
 
-    size_t jointCount() const;
-    const std::string& name() const;
+    [[nodiscard]] size_t jointCount() const;
+    [[nodiscard]] const std::string& name() const;
 
 private:
     struct pImpl;

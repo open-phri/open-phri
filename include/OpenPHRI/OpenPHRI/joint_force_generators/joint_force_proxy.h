@@ -74,7 +74,7 @@ public:
 
     //! \brief Read access the force used by the generator
     //! \return double The force value
-    const vector::dyn::Force& getForce() const;
+    [[nodiscard]] const vector::dyn::Force& getForce() const;
 
 protected:
     void update(vector::dyn::Force& force) override;

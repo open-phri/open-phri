@@ -67,7 +67,7 @@ public:
         setMaximumVelocity(scalar::Velocity{0.});
     }
 
-    double compute() override;
+    [[nodiscard]] double compute() override;
 
     //! \brief Read/write access the mass used by the constraint
     //! \return double& A reference to the mass
@@ -75,7 +75,7 @@ public:
 
     //! \brief Read access the mass used by the constraint
     //! \return double The mass value
-    const scalar::Mass& getMass() const;
+    [[nodiscard]] const scalar::Mass& getMass() const;
 
     //! \brief Read/write access the kinetic energy limit used by the constraint
     //! \return double& A reference to the kinetic energy limit
@@ -83,7 +83,7 @@ public:
 
     //! \brief Read access the kinetic energy limit used by the constraint
     //! \return double The kinetic energy limit value
-    const scalar::Energy& getMaximumKineticEnergy() const;
+    [[nodiscard]] const scalar::Energy& getMaximumKineticEnergy() const;
 
 private:
     using VelocityConstraint::setMaximumVelocity;

@@ -40,7 +40,7 @@ public:
     ~Clock() = default;
 
     void reset();
-    std::shared_ptr<double> getTime() const;
+    [[nodiscard]] std::shared_ptr<double> getTime() const;
 
     double update();
     double operator()();

@@ -142,7 +142,7 @@ public:
      * @return A pointer to the item. Store a null pointer if the item doesn't
      * exist.
      */
-    virtual T& get(const std::string& name) {
+    [[nodiscard]] virtual T& get(const std::string& name) {
         auto elem = items_.find(name);
         if (elem != items_.end()) {
             return elem->second.ref();
@@ -157,7 +157,7 @@ public:
      * @return A pointer to the item. Store a null pointer if the item doesn't
      * exist.
      */
-    virtual const T& get(const std::string& name) const {
+    [[nodiscard]] virtual const T& get(const std::string& name) const {
         auto elem = items_.find(name);
         if (elem != items_.end()) {
             return elem->second.cref();
@@ -176,7 +176,7 @@ public:
      * @brief Provide an iterator to the first element of the collection
      * @return The iterator
      */
-    iterator begin() {
+    [[nodiscard]] iterator begin() {
         return items_.begin();
     }
 
@@ -184,7 +184,7 @@ public:
      * @brief Provide a const iterator to the first element of the collection
      * @return The iterator
      */
-    const_iterator begin() const {
+    [[nodiscard]] const_iterator begin() const {
         return items_.begin();
     }
 
@@ -192,7 +192,7 @@ public:
      * @brief Provide an iterator to the last element of the collection
      * @return The iterator
      */
-    iterator end() {
+    [[nodiscard]] iterator end() {
         return items_.end();
     }
 
@@ -200,7 +200,7 @@ public:
      * @brief Provide a const iterator to the last element of the collection
      * @return The iterator
      */
-    const_iterator end() const {
+    [[nodiscard]] const_iterator end() const {
         return items_.end();
     }
 

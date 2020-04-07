@@ -58,7 +58,7 @@ public:
 
     //! \brief Compute the acceleration constraint based on the robot state
     //! \return double The constraint value [0,1]
-    double compute() override;
+    [[nodiscard]] double compute() override;
 
     //! \brief Read/write access the acceleration limit used by the constraint
     //! \return vector::dyn::Acceleration& A reference to the acceleration limit
@@ -66,7 +66,8 @@ public:
 
     //! \brief Read access the acceleration limit used by the constraint
     //! \return vector::dyn::Acceleration The acceleration limit value
-    const vector::dyn::Acceleration& getMaximumAcceleration() const;
+    [[nodiscard]] const vector::dyn::Acceleration&
+    getMaximumAcceleration() const;
 
 protected:
     void setRobot(Robot const* robot) override;

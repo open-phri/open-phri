@@ -87,24 +87,26 @@ public:
         segment_params_.push_back(params);
     }
 
-    std::shared_ptr<const ValueT> getPositionOutput() const {
+    [[nodiscard]] std::shared_ptr<const ValueT> getPositionOutput() const {
         return position_output_;
     }
 
-    std::shared_ptr<const FirstDerivative> getVelocityOutput() const {
+    [[nodiscard]] std::shared_ptr<const FirstDerivative>
+    getVelocityOutput() const {
         return velocity_output_;
     }
 
-    std::shared_ptr<const SecondDerivative> getAccelerationOutput() const {
+    [[nodiscard]] std::shared_ptr<const SecondDerivative>
+    getAccelerationOutput() const {
         return acceleration_output_;
     }
 
-    double getCurrentSegmentMinimumTime(size_t component) {
+    [[nodiscard]] double getCurrentSegmentMinimumTime(size_t component) {
         return segment_params_[current_segement_.at(component)].minimum_time.at(
             component);
     }
 
-    double getTrajectoryMinimumTime(size_t starting_segment = 0) {
+    [[nodiscard]] double getTrajectoryMinimumTime(size_t starting_segment = 0) {
         double total_minimum_time = 0;
         for (size_t segment = starting_segment; segment < getSegmentCount();
              ++segment) {
@@ -115,8 +117,9 @@ public:
         return total_minimum_time;
     }
 
-    double getComponentMinimumTime(size_t component,
-                                   size_t starting_segment = 0) const {
+    [[nodiscard]] double
+    getComponentMinimumTime(size_t component,
+                            size_t starting_segment = 0) const {
         double min_time = 0.;
         for (size_t segment = starting_segment; segment < getSegmentCount();
              ++segment) {
@@ -125,7 +128,7 @@ public:
         return min_time;
     }
 
-    double getTrajectoryDuration() const {
+    [[nodiscard]] double getTrajectoryDuration() const {
         double total = 0.;
         for (size_t i = 0; i < getSegmentCount(); ++i) {
             total += getSegmentDuration(i);
@@ -133,7 +136,8 @@ public:
         return total;
     }
 
-    double getSegmentMinimumTime(size_t segment, size_t component) const {
+    [[nodiscard]] double getSegmentMinimumTime(size_t segment,
+                                               size_t component) const {
         if (segment < getSegmentCount()) {
             return segment_params_[segment].minimum_time[component];
         } else {
@@ -141,12 +145,13 @@ public:
         }
     }
 
-    double getSegmentDuration(size_t segment, size_t component) const {
+    [[nodiscard]] double getSegmentDuration(size_t segment,
+                                            size_t component) const {
         return segment_params_[segment].minimum_time[component] +
                segment_params_[segment].padding_time[component];
     }
 
-    double getSegmentDuration(size_t segment) const {
+    [[nodiscard]] double getSegmentDuration(size_t segment) const {
         double max = 0.;
         for (size_t component = 0; component < getComponentCount();
              ++component) {
@@ -155,11 +160,11 @@ public:
         return max;
     }
 
-    size_t getSegmentCount() const {
+    [[nodiscard]] size_t getSegmentCount() const {
         return points_.size() - 1;
     }
 
-    size_t getComponentCount() const {
+    [[nodiscard]] size_t getComponentCount() const {
         return points_[0].size();
     }
 
@@ -365,9 +370,18 @@ public:
                         poly_params.xf = params.minimum_time[component];
                         FifthOrderPolynomial::computeParameters(poly_params);
                     } else {
-                        FifthOrderPolynomial::computeParametersWithConstraints(
-                            poly_params, params.max_velocity[component],
-                            params.max_acceleration[component], 1e-6, 1e-6);
+                        auto error = FifthOrderPolynomial::
+                            computeParametersWithConstraints(
+                                poly_params, params.max_velocity[component],
+                                params.max_acceleration[component], 1e-6, 1e-6);
+                        if (error !=
+                            FifthOrderPolynomial::ConstraintError::NoError) {
+                            std::cerr
+                                << OPEN_PHRI_WARNING(
+                                       "Failed to compute the trajectory "
+                                       "parameters under the given constraints")
+                                << std::endl;
+                        }
                         params.minimum_time[component] = poly_params.xf;
                     }
                     params.current_time[component] = 0.;
@@ -460,11 +474,11 @@ public:
         return compute();
     }
 
-    const Point& operator[](size_t point) const {
+    [[nodiscard]] const Point& operator[](size_t point) const {
         return points_.at(point);
     }
 
-    Point& operator[](size_t point) {
+    [[nodiscard]] Point& operator[](size_t point) {
         return points_.at(point);
     }
 
@@ -531,7 +545,7 @@ public:
         segment_params_.clear();
     }
 
-    static size_t getComputeTimingsIterations() {
+    [[nodiscard]] static size_t getComputeTimingsIterations() {
         return FifthOrderPolynomial::compute_timings_total_iter;
     }
 
@@ -713,14 +727,14 @@ protected:
     }
 
     template <typename U = ValueT>
-    auto&
+    [[nodiscard]] auto&
     getElement(U& value, size_t idx,
                typename std::enable_if_t<std::is_arithmetic_v<U>>* = 0) const {
         return value;
     }
 
     template <typename U = ValueT>
-    auto&
+    [[nodiscard]] auto&
     getElement(U& value, size_t idx,
                typename std::enable_if_t<not std::is_arithmetic<U>::value>* =
                    0) const {
@@ -728,14 +742,14 @@ protected:
     }
 
     template <typename U = ValueT>
-    size_t
+    [[nodiscard]] size_t
     getSize(const U& value,
             typename std::enable_if_t<std::is_arithmetic_v<U>>* = 0) const {
         return 1;
     }
 
     template <typename U = ValueT>
-    size_t
+    [[nodiscard]] size_t
     getSize(const U& value,
             typename std::enable_if_t<not std::is_arithmetic_v<U>>* = 0) const {
         return value.size();

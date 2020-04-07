@@ -104,13 +104,13 @@ public:
      * @return The client ID. A negative value means that the connection has
      * failed to open.
      */
-    int getClientID() const;
+    [[nodiscard]] int getClientID() const;
 
     /**
      * @brief Check the state of the connection.
      * @return True if the connection is still open, false otherwise.
      */
-    bool checkConnection() const;
+    [[nodiscard]] bool checkConnection() const;
 
     /**
      * @brief Turn synchronous operation on or off. When on,
@@ -175,7 +175,7 @@ public:
      * @return A shared pointer to the object's postion. Updated on
      * VREPDriver::updateTrackedObjectsPosition.
      */
-    std::shared_ptr<const spatial::Position>
+    [[nodiscard]] std::shared_ptr<const spatial::Position>
     trackObjectPosition(const std::string& name, const spatial::Frame& frame);
 
     /**
@@ -184,7 +184,7 @@ public:
      */
     bool updateTrackedObjectsPosition();
 
-    std::shared_ptr<const vector::dyn::Position>
+    [[nodiscard]] std::shared_ptr<const vector::dyn::Position>
     initLaserScanner(const std::string& name);
 
     bool updateLaserScanners();
@@ -196,9 +196,9 @@ public:
     bool read() override;
     bool send() override;
 
-    static bool isRegisteredInFactory();
+    [[nodiscard]] static bool isRegisteredInFactory();
 
-    static constexpr spatial::Frame worldFrame() {
+    [[nodiscard]] static constexpr spatial::Frame worldFrame() {
         return spatial::Frame{"world"};
     }
 
@@ -209,7 +209,7 @@ private:
     // void init(int client_id);
     bool getObjectHandles();
     void startStreaming() const;
-    int getFrameHandle(const spatial::Frame& frame) const;
+    [[nodiscard]] int getFrameHandle(const spatial::Frame& frame) const;
     void loadScene(const std::string& path) const;
 
     struct StartParameters {

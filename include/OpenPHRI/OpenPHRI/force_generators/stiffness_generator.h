@@ -70,7 +70,7 @@ public:
 
     //! \brief Read access the stiffness used by the generator
     //! \return double The stiffness value
-    const spatial::Stiffness& getStiffness() const;
+    [[nodiscard]] const spatial::Stiffness& getStiffness() const;
 
     //! \brief Read/write access the target pose used by the generator
     //! \return double& A reference to the target pose
@@ -78,7 +78,7 @@ public:
 
     //! \brief Read access the target pose used by the generator
     //! \return double The target pose value
-    const spatial::Position& getTargetPose() const;
+    [[nodiscard]] const spatial::Position& getTargetPose() const;
 
 protected:
     void update(spatial::Force& force) override;

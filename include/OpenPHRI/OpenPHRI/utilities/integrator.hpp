@@ -71,7 +71,7 @@ public:
      * @brief Get the pointer to the output data
      * @return A shared pointer to the output data.
      */
-    std::shared_ptr<const T> getOutput() const {
+    [[nodiscard]] std::shared_ptr<const T> getOutput() const {
         return output_;
     }
 

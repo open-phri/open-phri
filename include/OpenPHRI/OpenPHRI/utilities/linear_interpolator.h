@@ -103,19 +103,19 @@ public:
         return *this->output_;
     }
 
-    const Point& from() const {
+    [[nodiscard]] const Point& from() const {
         return from_;
     }
 
-    Point& from() {
+    [[nodiscard]] Point& from() {
         return from_;
     }
 
-    const Point& to() const {
+    [[nodiscard]] const Point& to() const {
         return to_;
     }
 
-    Point& to() {
+    [[nodiscard]] Point& to() {
         return to_;
     }
 

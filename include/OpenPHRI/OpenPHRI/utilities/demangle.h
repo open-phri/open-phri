@@ -33,9 +33,9 @@
 
 namespace phri {
 
-std::string demangle(const char* name);
+[[nodiscard]] std::string demangle(const char* name);
 
-template <typename TT> std::string getTypeName(const TT& t) {
+template <typename TT>[[nodiscard]] std::string getTypeName(const TT& t) {
     return demangle(typeid(t).name());
 }
 

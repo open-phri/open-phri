@@ -127,15 +127,15 @@ public:
         return compute();
     }
 
-    const Input& input() const {
+    [[nodiscard]] const Input& input() const {
         return input_.cref();
     }
 
-    Output& output() {
+    [[nodiscard]] Output& output() {
         return output_.ref();
     }
 
-    const Output& output() const {
+    [[nodiscard]] const Output& output() const {
         return output_.cref();
     }
 

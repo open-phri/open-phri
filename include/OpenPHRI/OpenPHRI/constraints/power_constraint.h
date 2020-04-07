@@ -62,7 +62,7 @@ public:
 
     //! \brief Compute the power constraint based on the robot state
     //! \return double The constraint value [0,1]
-    double compute() override;
+    [[nodiscard]] double compute() override;
 
     //! \brief Read/write access the power limit used by the constraint
     //! \return double& A reference to the power limit
@@ -70,11 +70,11 @@ public:
 
     //! \brief Read access the power limit used by the constraint
     //! \return double The power limit value
-    const scalar::Power& getMaximumPower() const;
+    [[nodiscard]] const scalar::Power& getMaximumPower() const;
 
     //! \brief Read access the current exchanged power
     //! \return double The exchanged power
-    const scalar::Power& getPower() const;
+    [[nodiscard]] const scalar::Power& getPower() const;
 
 private:
     //! \brief The power limit.

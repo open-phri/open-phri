@@ -19,7 +19,7 @@ public:
      * @details Must be called by derived classes when the robot state is ready
      * to be read
      * @param timeout The maximum time to wait to get the initial state
-     * @return true on success, false otherwise
+     * @return true on success, false otherwise[[nodiscard]]
      */
     virtual bool init(double timeout = 30.);
 
@@ -54,17 +54,17 @@ public:
     //! \return bool True if both calls succeded, false otherwise
     bool syncThenRead();
 
-    double getTimeStep() const;
+    [[nodiscard]] double getTimeStep() const;
 
-    Robot& robot();
-    const Robot& robot() const;
+    [[nodiscard]] Robot& robot();
+    [[nodiscard]] const Robot& robot() const;
 
 protected:
     void setTimeStep(double time_step);
-    Robot::JointData& jointState();
-    Robot::JointData& jointCommand();
-    Robot::TaskData& taskState();
-    Robot::TaskData& taskCommand();
+    [[nodiscard]] Robot::JointData& jointState();
+    [[nodiscard]] Robot::JointData& jointCommand();
+    [[nodiscard]] Robot::TaskData& taskState();
+    [[nodiscard]] Robot::TaskData& taskCommand();
 
     Robot& robot_;
 };

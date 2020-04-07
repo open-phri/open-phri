@@ -122,7 +122,7 @@ public:
 
     //! \brief Read access the target spatial::Force used by the generator
     //! \return double The target spatial::Force value
-    const spatial::Force& getTarget() const;
+    [[nodiscard]] const spatial::Force& getTarget() const;
 
     //! \brief Read/write access the control parameters used by the generator
     //! \return double& A reference to the control parameters
@@ -130,7 +130,7 @@ public:
 
     //! \brief Read access the control parameters used by the generator
     //! \return double The target control parameters
-    const Parameters& getParameters() const;
+    [[nodiscard]] const Parameters& getParameters() const;
 
 protected:
     void update(spatial::Velocity& velocity) override;

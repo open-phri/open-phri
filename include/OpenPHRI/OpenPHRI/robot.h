@@ -91,31 +91,31 @@ public:
 
     //! \brief The name given to the robot.
     //! \return A const ref to the name.
-    const std::string& name() const;
+    [[nodiscard]] const std::string& name() const;
 
     //! \brief Number of joints of the robot.
     //! \return The number of joints.
-    size_t jointCount() const;
+    [[nodiscard]] size_t jointCount() const;
 
     //! \brief Frame associated with the control point
     //! \return The frame.
-    const spatial::Frame& controlPointFrame() const;
+    [[nodiscard]] const spatial::Frame& controlPointFrame() const;
 
     //! \brief Parent frame of the one associated with the control point
     //! \return The frame.
-    const spatial::Frame& controlPointParentFrame() const;
+    [[nodiscard]] const spatial::Frame& controlPointParentFrame() const;
 
     //! \brief The robot's joints data
-    Joints& joints();
-    const Joints& joints() const;
+    [[nodiscard]] Joints& joints();
+    [[nodiscard]] const Joints& joints() const;
 
     //! \brief The robot's task data
-    Task& task();
-    const Task& task() const;
+    [[nodiscard]] Task& task();
+    [[nodiscard]] const Task& task() const;
 
     //! \brief Control related data
-    ControlData& control();
-    const ControlData& control() const;
+    [[nodiscard]] ControlData& control();
+    [[nodiscard]] const ControlData& control() const;
 
     //! \brief Holds a joint state (either current, target or command)
     class JointData {
@@ -132,20 +132,20 @@ public:
         void resize(size_t joint_count);
 
         //! \brief Joints position (rad or m)
-        vector::dyn::Position& position();
-        const vector::dyn::Position& position() const;
+        [[nodiscard]] vector::dyn::Position& position();
+        [[nodiscard]] const vector::dyn::Position& position() const;
 
         //! \brief Joints velocity (rad/s or m/s)
-        vector::dyn::Velocity& velocity();
-        const vector::dyn::Velocity& velocity() const;
+        [[nodiscard]] vector::dyn::Velocity& velocity();
+        [[nodiscard]] const vector::dyn::Velocity& velocity() const;
 
         //! \brief Joints acceleration (rad/s² or m/s²)
-        vector::dyn::Acceleration& acceleration();
-        const vector::dyn::Acceleration& acceleration() const;
+        [[nodiscard]] vector::dyn::Acceleration& acceleration();
+        [[nodiscard]] const vector::dyn::Acceleration& acceleration() const;
 
         //! \brief Joints force (Nm or N)
-        vector::dyn::Force& force();
-        const vector::dyn::Force& force() const;
+        [[nodiscard]] vector::dyn::Force& force();
+        [[nodiscard]] const vector::dyn::Force& force() const;
 
     private:
         vector::dyn::Position position_;
@@ -169,19 +169,19 @@ public:
         void resize(size_t joint_count);
 
         //! \brief Joints minimum position (rad or m)
-        vector::dyn::Position minPosition() const;
+        [[nodiscard]] vector::dyn::Position minPosition() const;
 
         //! \brief Joints maximum position (rad or m)
-        vector::dyn::Position maxPosition() const;
+        [[nodiscard]] vector::dyn::Position maxPosition() const;
 
         //! \brief Joints minimum velocity (rad/s or m/s)
-        vector::dyn::Velocity maxVelocity() const;
+        [[nodiscard]] vector::dyn::Velocity maxVelocity() const;
 
         //! \brief Joints minimum acceleration (rad/s² or m/s²)
-        vector::dyn::Acceleration maxAcceleration() const;
+        [[nodiscard]] vector::dyn::Acceleration maxAcceleration() const;
 
         //! \brief Joints minimum force (Nm or N)
-        vector::dyn::Force maxForce() const;
+        [[nodiscard]] vector::dyn::Force maxForce() const;
 
         mutable double safety_factor;
 
@@ -210,17 +210,17 @@ public:
         void resize(size_t joint_count);
 
         //! \brief Joints current state (read from the robot)
-        const JointData& state() const;
+        [[nodiscard]] const JointData& state() const;
 
         //! \brief Joints targets (desired state)
-        JointData& target();
-        const JointData& target() const;
+        [[nodiscard]] JointData& target();
+        [[nodiscard]] const JointData& target() const;
 
         //! \brief Joints commands (sent to the robot)
-        const JointData& command() const;
+        [[nodiscard]] const JointData& command() const;
 
         //! \brief Joints mechanical limits
-        const JointLimits& limits() const;
+        [[nodiscard]] const JointLimits& limits() const;
 
     private:
         friend class SafetyController;
@@ -239,20 +239,20 @@ public:
         TaskData(spatial::Frame frame);
 
         //! \brief Task pose (m, rad)
-        spatial::Position& position();
-        const spatial::Position& position() const;
+        [[nodiscard]] spatial::Position& position();
+        [[nodiscard]] const spatial::Position& position() const;
 
         //! \brief Task velocity (m/s, rad/s)
-        spatial::Velocity& velocity();
-        const spatial::Velocity& velocity() const;
+        [[nodiscard]] spatial::Velocity& velocity();
+        [[nodiscard]] const spatial::Velocity& velocity() const;
 
         //! \brief Task acceleration (m/s², rad/s²)
-        spatial::Acceleration& acceleration();
-        const spatial::Acceleration& acceleration() const;
+        [[nodiscard]] spatial::Acceleration& acceleration();
+        [[nodiscard]] const spatial::Acceleration& acceleration() const;
 
         //! \brief Task force (N, Nm)
-        spatial::Force& force();
-        const spatial::Force& force() const;
+        [[nodiscard]] spatial::Force& force();
+        [[nodiscard]] const spatial::Force& force() const;
 
     private:
         spatial::Position position_;
@@ -267,24 +267,24 @@ public:
         TaskLimits(spatial::Frame frame);
 
         //! \brief Task minimum pose (m, rad)
-        spatial::Position& minPosition();
-        const spatial::Position& minPosition() const;
+        [[nodiscard]] spatial::Position& minPosition();
+        [[nodiscard]] const spatial::Position& minPosition() const;
 
         //! \brief Task maximum pose (m, rad)
-        spatial::Position& maxPosition();
-        const spatial::Position& maxPosition() const;
+        [[nodiscard]] spatial::Position& maxPosition();
+        [[nodiscard]] const spatial::Position& maxPosition() const;
 
         //! \brief Task maximum velocity (m/s, rad/s)
-        spatial::Velocity& maxVelocity();
-        const spatial::Velocity& maxVelocity() const;
+        [[nodiscard]] spatial::Velocity& maxVelocity();
+        [[nodiscard]] const spatial::Velocity& maxVelocity() const;
 
         //! \brief Task maximum acceleration (m/s², rad/s²)
-        spatial::Acceleration& maxAcceleration();
-        const spatial::Acceleration& maxAcceleration() const;
+        [[nodiscard]] spatial::Acceleration& maxAcceleration();
+        [[nodiscard]] const spatial::Acceleration& maxAcceleration() const;
 
         //! \brief Task maximum force (N, Nm)
-        spatial::Force& maxForce();
-        const spatial::Force& maxForce() const;
+        [[nodiscard]] spatial::Force& maxForce();
+        [[nodiscard]] const spatial::Force& maxForce() const;
 
     private:
         spatial::Position min_position_;
@@ -301,18 +301,18 @@ public:
 
         //! \brief Task current state (read from the robot or set from the
         //! kinematic)
-        const TaskData& state() const;
+        [[nodiscard]] const TaskData& state() const;
 
         //! \brief Task targets (desired state)
-        const TaskData& target() const;
-        TaskData& target();
+        [[nodiscard]] const TaskData& target() const;
+        [[nodiscard]] TaskData& target();
 
         //! \brief Task commands (sent to the robot, directly or after
         //! transformation to joint space)
-        const TaskData& command() const;
+        [[nodiscard]] const TaskData& command() const;
 
         //! \brief Task physical limits
-        const TaskLimits& limits() const;
+        [[nodiscard]] const TaskLimits& limits() const;
 
     private:
         friend class SafetyController;
@@ -356,25 +356,25 @@ public:
 
             //! \brief Damping matrix used by the joint-level damping
             //! control
-            vector::dyn::Damping& damping();
-            const vector::dyn::Damping& damping() const;
+            [[nodiscard]] vector::dyn::Damping& damping();
+            [[nodiscard]] const vector::dyn::Damping& damping() const;
             //! \brief Sum of all joint velocity inputs
-            const vector::dyn::Velocity& velocitySum() const;
+            [[nodiscard]] const vector::dyn::Velocity& velocitySum() const;
 
             //! \brief Sum of all joint force inputs
-            const vector::dyn::Force& forceSum() const;
+            [[nodiscard]] const vector::dyn::Force& forceSum() const;
 
             //! \brief Output of the joint-level admittance controller
-            const vector::dyn::Velocity& velocityCommand() const;
+            [[nodiscard]] const vector::dyn::Velocity& velocityCommand() const;
 
             //! \brief Cumulative effect on the joint velocity of all inputs.
             //! \details Same as joints.command.velocity but without the scaling
             //! factor.
-            const vector::dyn::Velocity& totalVelocity() const;
+            [[nodiscard]] const vector::dyn::Velocity& totalVelocity() const;
 
             //! \brief Cumulative effect of both joint torque and control point
             //! force inputs.
-            const vector::dyn::Force& totalForce() const;
+            [[nodiscard]] const vector::dyn::Force& totalForce() const;
 
         private:
             friend class SafetyController;
@@ -392,26 +392,26 @@ public:
             Task(spatial::Frame frame);
 
             //! \brief Damping matrix used by the task-level damping control
-            spatial::Damping& damping();
-            const spatial::Damping& damping() const;
+            [[nodiscard]] spatial::Damping& damping();
+            [[nodiscard]] const spatial::Damping& damping() const;
 
             //! \brief Sum of all task velocity inputs
-            const spatial::Velocity& velocitySum() const;
+            [[nodiscard]] const spatial::Velocity& velocitySum() const;
 
             //! \brief Sum of all task force inputs
-            const spatial::Force& forceSum() const;
+            [[nodiscard]] const spatial::Force& forceSum() const;
 
             //! \brief Output of the task-level admittance controller
-            const spatial::Velocity& velocityCommand() const;
+            [[nodiscard]] const spatial::Velocity& velocityCommand() const;
 
             //! \brief Cumulative effect on the task velocity of all inputs.
             //! \details Same as task.command.velocity but without the scaling
             //! factor.
-            const spatial::Velocity& totalVelocity() const;
+            [[nodiscard]] const spatial::Velocity& totalVelocity() const;
 
             //! \brief Cumulative effect of both joint torque and control point
             //! force inputs.
-            const spatial::Force& totalForce() const;
+            [[nodiscard]] const spatial::Force& totalForce() const;
 
         private:
             friend class SafetyController;
@@ -424,28 +424,28 @@ public:
         };
 
         //! \brief Joint control related data
-        Joints& joints();
-        const Joints& joints() const;
+        [[nodiscard]] Joints& joints();
+        [[nodiscard]] const Joints& joints() const;
 
         //! \brief task control related data
-        Task& task();
-        const Task& task() const;
+        [[nodiscard]] Task& task();
+        [[nodiscard]] const Task& task() const;
 
         //! \brief Velocity scaling factor. Computed by the SafetyController to
         //! ensure the constraints
-        const double& scalingFactor() const;
+        [[nodiscard]] const double& scalingFactor() const;
 
         //! \brief The time step, in seconds, used to control the robot
-        const double& timeStep() const;
+        [[nodiscard]] const double& timeStep() const;
 
         //! \brief Task Jacobian matrix
-        const Eigen::MatrixXd& jacobian() const;
+        [[nodiscard]] const Eigen::MatrixXd& jacobian() const;
 
         //! \brief Task Jacobian (pseudo-)matrix
-        const Eigen::MatrixXd& jacobianInverse() const;
+        [[nodiscard]] const Eigen::MatrixXd& jacobianInverse() const;
 
         //! \brief Task transformation matrix (R T;0 1)
-        const spatial::Transformation& transformation() const;
+        [[nodiscard]] const spatial::Transformation& transformation() const;
 
     private:
         friend class SafetyController;

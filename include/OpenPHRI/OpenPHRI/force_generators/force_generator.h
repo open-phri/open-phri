@@ -60,13 +60,13 @@ public:
 
     //! \brief Compute the value associated with the force generator.
     //! \return The force generator's evaluated value.
-    const spatial::Force& compute();
+    [[nodiscard]] const spatial::Force& compute();
 
     //! \brief Call operator, shortcut for compute().
     //! \return The force generator's evaluated value.
-    const spatial::Force& operator()();
+    [[nodiscard]] const spatial::Force& operator()();
 
-    const spatial::Frame& frame() const;
+    [[nodiscard]] const spatial::Frame& frame() const;
 
 protected:
     friend class SafetyController;
@@ -82,13 +82,13 @@ protected:
 
     //! \brief Read only access the controlled robot
     //! \return double& A reference to the controlled robot
-    const Robot& robot() const;
+    [[nodiscard]] const Robot& robot() const;
 
     void setFrame(const spatial::Frame& frame);
 
     //! \brief Read access to the internal wrench
     //! \return ReferenceFrame The internal wrench
-    const spatial::Force& internalWrench() const;
+    [[nodiscard]] const spatial::Force& internalWrench() const;
 
 private:
     Robot const* robot_{nullptr};

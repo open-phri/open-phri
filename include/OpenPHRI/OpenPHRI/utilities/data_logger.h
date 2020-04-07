@@ -112,7 +112,7 @@ public:
 
 private:
     std::ofstream& createLog(const std::string& data_name, size_t data_count);
-    std::ostream& getStream(std::ofstream& file);
+    [[nodiscard]] std::ostream& getStream(std::ofstream& file);
     void logData(std::ofstream& file, const double* data, size_t data_count);
     void logData(std::ofstream& file, const external_data& data);
 

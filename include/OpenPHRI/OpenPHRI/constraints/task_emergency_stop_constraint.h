@@ -68,13 +68,13 @@ public:
     }
 
     /***		Algorithm		***/
-    double compute() override;
+    [[nodiscard]] double compute() override;
 
     void setActivationThreshold(const scalar::Force& threshold);
-    const scalar::Force& getActivationThreshold() const;
+    [[nodiscard]] const scalar::Force& getActivationThreshold() const;
 
     void setDeactivationThreshold(const scalar::Force& threshold);
-    const scalar::Force& getDeactivationThreshold() const;
+    [[nodiscard]] const scalar::Force& getDeactivationThreshold() const;
 
 private:
     detail::UniversalWrapper<scalar::Force> activation_threshold_;

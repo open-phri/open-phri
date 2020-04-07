@@ -44,13 +44,13 @@ namespace phri {
  * (can be done at any time) and to get the velocity command as well as
  * intermediate computation values (mainly used by constraints).
  */
-class SafetyController {
+class [[nodiscard]] SafetyController {
 public:
     /**
      * @brief Construct a safety controller with a given robot.
      * @param robot The robot to work with.
      */
-    explicit SafetyController(Robot& robot);
+    explicit SafetyController(Robot & robot);
     /**
      * @brief Construct a safety controller with a given robot and a specific
      * configuration.
@@ -58,10 +58,10 @@ public:
      * @param configuration The YAML node containing the controller's
      * configuration.
      */
-    explicit SafetyController(Robot& robot, YAML::Node& configuration);
+    explicit SafetyController(Robot & robot, YAML::Node & configuration);
 
     SafetyController(const SafetyController&) = delete;
-    SafetyController(SafetyController&&) = default;
+    SafetyController(SafetyController &&) = default;
     ~SafetyController() = default;
 
     /**
@@ -173,8 +173,8 @@ public:
      * pointer type conversion.
      */
     template <typename T>
-    std::shared_ptr<T>
-    get(const std::string& name,
+    [[nodiscard]] std::shared_ptr<T> get(
+        const std::string& name,
         typename std::enable_if_t<std::is_base_of_v<Constraint, T>>* =
             nullptr) {
         return std::dynamic_pointer_cast<T>(getConstraint(name));
@@ -185,8 +185,8 @@ public:
      * pointer type conversion.
      */
     template <typename T>
-    std::shared_ptr<T>
-    get(const std::string& name,
+    [[nodiscard]] std::shared_ptr<T> get(
+        const std::string& name,
         typename std::enable_if_t<std::is_base_of_v<ForceGenerator, T>>* =
             nullptr) {
         return std::dynamic_pointer_cast<T>(getForceGenerator(name));
@@ -197,8 +197,8 @@ public:
      * with pointer type conversion.
      */
     template <typename T>
-    std::shared_ptr<T>
-    get(const std::string& name,
+    [[nodiscard]] std::shared_ptr<T> get(
+        const std::string& name,
         typename std::enable_if_t<std::is_base_of_v<JointForceGenerator, T>>* =
             nullptr) {
         return std::dynamic_pointer_cast<T>(getJointForceGenerator(name));
@@ -209,8 +209,8 @@ public:
      * with pointer type conversion.
      */
     template <typename T>
-    std::shared_ptr<T>
-    get(const std::string& name,
+    [[nodiscard]] std::shared_ptr<T> get(
+        const std::string& name,
         typename std::enable_if_t<std::is_base_of_v<VelocityGenerator, T>>* =
             nullptr) {
         return std::dynamic_pointer_cast<T>(getVelocityGenerator(name));
@@ -221,8 +221,8 @@ public:
      * method, with pointer type conversion.
      */
     template <typename T>
-    std::shared_ptr<T>
-    get(const std::string& name,
+    [[nodiscard]] std::shared_ptr<T> get(
+        const std::string& name,
         typename std::enable_if_t<
             std::is_base_of_v<JointVelocityGenerator, T>>* = nullptr) {
         return std::dynamic_pointer_cast<T>(getJointVelocityGenerator(name));
@@ -244,10 +244,10 @@ public:
      * pointer type conversion.
      */
     template <typename T>
-    void
-    remove(const std::string& name,
-           typename std::enable_if_t<std::is_base_of_v<ForceGenerator, T>>* =
-               nullptr) {
+    void remove(
+        const std::string& name,
+        typename std::enable_if_t<std::is_base_of_v<ForceGenerator, T>>* =
+            nullptr) {
         removeForceGenerator(name);
     }
 
@@ -268,10 +268,10 @@ public:
      * with pointer type conversion.
      */
     template <typename T>
-    void
-    remove(const std::string& name,
-           typename std::enable_if_t<std::is_base_of_v<VelocityGenerator, T>>* =
-               nullptr) {
+    void remove(
+        const std::string& name,
+        typename std::enable_if_t<std::is_base_of_v<VelocityGenerator, T>>* =
+            nullptr) {
         removeVelocityGenerator(name);
     }
 
@@ -355,21 +355,27 @@ public:
     using storage_const_iterator =
         typename ObjectCollection<StorageWrapper<T>>::const_iterator;
 
-    storage_const_iterator<Constraint> constraints_begin() const;
-    storage_const_iterator<Constraint> constraints_end() const;
+    [[nodiscard]] storage_const_iterator<Constraint> constraints_begin() const;
+    [[nodiscard]] storage_const_iterator<Constraint> constraints_end() const;
 
-    storage_const_iterator<ForceGenerator> force_generators_begin() const;
-    storage_const_iterator<ForceGenerator> force_generators_end() const;
+    [[nodiscard]] storage_const_iterator<ForceGenerator>
+    force_generators_begin() const;
+    [[nodiscard]] storage_const_iterator<ForceGenerator> force_generators_end()
+        const;
 
-    storage_const_iterator<JointForceGenerator> torque_generators_begin() const;
-    storage_const_iterator<JointForceGenerator> torque_generators_end() const;
+    [[nodiscard]] storage_const_iterator<JointForceGenerator>
+    torque_generators_begin() const;
+    [[nodiscard]] storage_const_iterator<JointForceGenerator>
+    torque_generators_end() const;
 
-    storage_const_iterator<VelocityGenerator> velocity_generators_begin() const;
-    storage_const_iterator<VelocityGenerator> velocity_generators_end() const;
+    [[nodiscard]] storage_const_iterator<VelocityGenerator>
+    velocity_generators_begin() const;
+    [[nodiscard]] storage_const_iterator<VelocityGenerator>
+    velocity_generators_end() const;
 
-    storage_const_iterator<JointVelocityGenerator>
+    [[nodiscard]] storage_const_iterator<JointVelocityGenerator>
     joint_velocity_generators_begin() const;
-    storage_const_iterator<JointVelocityGenerator>
+    [[nodiscard]] storage_const_iterator<JointVelocityGenerator>
     joint_velocity_generators_end() const;
 
 private:
@@ -438,10 +444,9 @@ private:
      * @return true if the joint velocity generator has successfully been added
      * to the controller, false otherwise.
      */
-    void
-    addJointVelocityGenerator(const std::string& name,
-                              std::shared_ptr<JointVelocityGenerator> generator,
-                              bool force);
+    void addJointVelocityGenerator(
+        const std::string& name,
+        std::shared_ptr<JointVelocityGenerator> generator, bool force);
 
     /**
      * @brief Retrieve a constraint from the controller.
@@ -465,8 +470,8 @@ private:
      * @return A pointer to the torque generator. Store a null pointer if the
      * torque generator doesn't exist.
      */
-    std::shared_ptr<JointForceGenerator>
-    getJointForceGenerator(const std::string& name);
+    std::shared_ptr<JointForceGenerator> getJointForceGenerator(
+        const std::string& name);
 
     /**
      * @brief Retrieve a velocity generator from the controller.
@@ -474,8 +479,8 @@ private:
      * @return A pointer to the velocity generator. Store a null pointer if the
      * velocity generator doesn't exist.
      */
-    std::shared_ptr<VelocityGenerator>
-    getVelocityGenerator(const std::string& name);
+    std::shared_ptr<VelocityGenerator> getVelocityGenerator(
+        const std::string& name);
 
     /**
      * @brief Retrieve a joint velocity generator from the controller.
@@ -483,8 +488,8 @@ private:
      * @return A pointer to the joint velocity generator. Store a null pointer
      * if the joint velocity generator doesn't exist.
      */
-    std::shared_ptr<JointVelocityGenerator>
-    getJointVelocityGenerator(const std::string& name);
+    std::shared_ptr<JointVelocityGenerator> getJointVelocityGenerator(
+        const std::string& name);
 
     /**
      * @brief Remove a constraint from the controller.

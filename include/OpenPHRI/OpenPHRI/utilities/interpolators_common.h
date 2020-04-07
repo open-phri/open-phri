@@ -142,11 +142,11 @@ struct TrajectoryPoint {
         std::cout << "]";
     }
 
-    size_t size() const {
+    [[nodiscard]] size_t size() const {
         return size_;
     }
 
-    std::tuple<double&, double&, double&> operator[](size_t n) {
+    [[nodiscard]] std::tuple<double&, double&, double&> operator[](size_t n) {
         assert(n < size_);
         return std::make_tuple(yrefs_[n], dyrefs_[n], d2yrefs_[n]);
     }

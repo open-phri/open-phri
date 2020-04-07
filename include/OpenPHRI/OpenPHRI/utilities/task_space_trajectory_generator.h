@@ -63,23 +63,24 @@ public:
         waypoints_.emplace_back(to, max_velocity, max_acceleration);
     }
 
-    std::shared_ptr<const spatial::Position> getPoseOutput() {
+    [[nodiscard]] std::shared_ptr<const spatial::Position> getPoseOutput() {
         return pose_output_;
     }
 
-    std::shared_ptr<const spatial::Position> getPositionOutput() {
+    [[nodiscard]] std::shared_ptr<const spatial::Position> getPositionOutput() {
         return getPoseOutput();
     }
 
-    std::shared_ptr<const spatial::Velocity> getTwistOutput() {
+    [[nodiscard]] std::shared_ptr<const spatial::Velocity> getTwistOutput() {
         return twist_output_;
     }
 
-    std::shared_ptr<const spatial::Velocity> getVelocityOutput() {
+    [[nodiscard]] std::shared_ptr<const spatial::Velocity> getVelocityOutput() {
         return getTwistOutput();
     }
 
-    std::shared_ptr<const spatial::Acceleration> getAccelerationOutput() {
+    [[nodiscard]] std::shared_ptr<const spatial::Acceleration>
+    getAccelerationOutput() {
         return task_space_acceleration_output_;
     }
 

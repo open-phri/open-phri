@@ -60,13 +60,13 @@ public:
      * @brief Compute the value associated with the force generator.
      * @return The force generator's evaluated value.
      */
-    const vector::dyn::Force& compute();
+    [[nodiscard]] const vector::dyn::Force& compute();
 
     /**
      * @brief Call operator, shortcut for compute().
      * @return The force generator's evaluated value.
      */
-    const vector::dyn::Force& operator()();
+    [[nodiscard]] const vector::dyn::Force& operator()();
 
 protected:
     friend class SafetyController;
@@ -81,7 +81,7 @@ protected:
 
     //! \brief Read/write access the controlled robot
     //! \return double& A reference to the controlled robot
-    const Robot& robot() const;
+    [[nodiscard]] const Robot& robot() const;
 
     Robot const* robot_{nullptr};
 

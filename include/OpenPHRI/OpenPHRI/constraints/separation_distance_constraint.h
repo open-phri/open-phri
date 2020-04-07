@@ -71,29 +71,29 @@ public:
 
     virtual ~SeparationDistanceConstraint() = default;
 
-    double compute() override {
+    [[nodiscard]] double compute() override {
         separation_distance_ = closestObjectDistance();
         interpolator().compute();
         return constraint().compute();
     }
 
-    const scalar::Position& separationDistance() const {
+    [[nodiscard]] const scalar::Position& separationDistance() const {
         return separation_distance_;
     }
 
-    ConstraintT& constraint() {
+    [[nodiscard]] ConstraintT& constraint() {
         return constraint_;
     }
 
-    const ConstraintT& constraint() const {
+    [[nodiscard]] const ConstraintT& constraint() const {
         return constraint_;
     }
 
-    InterpolatorT& interpolator() {
+    [[nodiscard]] InterpolatorT& interpolator() {
         return interpolator_;
     }
 
-    const InterpolatorT& interpolator() const {
+    [[nodiscard]] const InterpolatorT& interpolator() const {
         return interpolator_;
     }
 
@@ -106,12 +106,12 @@ public:
         }
     }
 
-    const spatial::Position& robotPosition() const {
+    [[nodiscard]] const spatial::Position& robotPosition() const {
         return *robot_position_;
     }
 
 private:
-    scalar::Position closestObjectDistance() {
+    [[nodiscard]] scalar::Position closestObjectDistance() {
         Eigen::Vector3d rob_pos = Eigen::Vector3d::Zero();
         if (robotPosition().frame()) {
             rob_pos = robotPosition().linear();

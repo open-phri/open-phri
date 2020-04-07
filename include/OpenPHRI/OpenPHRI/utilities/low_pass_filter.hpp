@@ -63,7 +63,7 @@ public:
         setCoefficient(sample_time / (time_constant + sample_time));
     }
 
-    double getCoefficient() const {
+    [[nodiscard]] double getCoefficient() const {
         return coefficient_;
     }
 

@@ -40,8 +40,8 @@ public:
 
     ~LaserScannerDetector() = default;
 
-    std::shared_ptr<const Eigen::Vector2d> getPosition() const;
-    std::shared_ptr<const double> getDistance() const;
+    [[nodiscard]] std::shared_ptr<const Eigen::Vector2d> getPosition() const;
+    [[nodiscard]] std::shared_ptr<const double> getDistance() const;
 
     void init();
     double compute();

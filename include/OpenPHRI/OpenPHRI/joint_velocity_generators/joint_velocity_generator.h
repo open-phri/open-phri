@@ -61,11 +61,11 @@ public:
 
     //! \brief Compute the value associated with the joint_velocity generator.
     //! \return The joint_velocity generator's evaluated value.
-    const vector::dyn::Velocity& compute();
+    [[nodiscard]] const vector::dyn::Velocity& compute();
 
     //! \brief Call operator, shortcut for compute().
     //! \return The joint_velocity generator's evaluated value.
-    const vector::dyn::Velocity& operator()();
+    [[nodiscard]] const vector::dyn::Velocity& operator()();
 
 protected:
     friend class SafetyController;
@@ -81,7 +81,7 @@ protected:
 
     //! \brief Read/write access the controlled robot
     //! \return double& A reference to the controlled robot
-    const Robot& robot() const;
+    [[nodiscard]] const Robot& robot() const;
 
 private:
     Robot const* robot_{nullptr};

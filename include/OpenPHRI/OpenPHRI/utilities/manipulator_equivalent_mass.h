@@ -63,7 +63,7 @@ public:
      * @brief Read only access to the equivalent mass.
      * @return const double& A reference to the equivalent mass.
      */
-    const scalar::Mass& getEquivalentMass() const;
+    [[nodiscard]] const scalar::Mass& getEquivalentMass() const;
 
     /**
      * @brief Compute the equivalent mass based on the inertia, jacobian and the
@@ -79,7 +79,7 @@ public:
     const scalar::Mass& operator()();
 
     void setInertia(const spatial::Mass& inertia);
-    const spatial::Mass& getInertia() const;
+    [[nodiscard]] const spatial::Mass& getInertia() const;
 
 private:
     Eigen::Vector3d closestObjectDirection();

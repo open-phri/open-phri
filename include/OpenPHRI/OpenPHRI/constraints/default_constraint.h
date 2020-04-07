@@ -35,7 +35,7 @@ class DefaultConstraint : public Constraint {
 public:
     //! \brief Evaluate the constraint to one
     //! \return double one
-    double compute() override;
+    [[nodiscard]] double compute() override;
 };
 
 } // namespace phri

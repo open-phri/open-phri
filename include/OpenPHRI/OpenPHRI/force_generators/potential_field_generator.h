@@ -58,16 +58,16 @@ struct PotentialFieldObject {
           object_position_(std::forward<PosT>(object_position)) {
     }
 
-    PotentialFieldType type() const;
+    [[nodiscard]] PotentialFieldType type() const;
 
     void setGain(const double& gain);
-    const double& getGain() const;
+    [[nodiscard]] const double& getGain() const;
 
     void setThresholdDistance(const double& threshold);
-    const double& getThresholdDistance() const;
+    [[nodiscard]] const double& getThresholdDistance() const;
 
     void setObjectPosition(const spatial::Position& position);
-    const spatial::Position& getObjectPosition() const;
+    [[nodiscard]] const spatial::Position& getObjectPosition() const;
 
 private:
     PotentialFieldType type_; /**< Type of object. See PotentialFieldType. */
@@ -109,7 +109,7 @@ public:
 
     void setOffset(const spatial::LinearPosition& offset);
 
-    const spatial::LinearPosition& getOffset() const;
+    [[nodiscard]] const spatial::LinearPosition& getOffset() const;
 
 protected:
     void update(spatial::Force& force) override;

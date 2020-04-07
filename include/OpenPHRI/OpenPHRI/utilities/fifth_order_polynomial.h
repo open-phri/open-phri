@@ -105,14 +105,18 @@ public:
     };
 
     static void computeParameters(FifthOrderPolynomial::Parameters& params);
-    static ConstraintError computeParametersWithConstraints(
+    [[nodiscard]] static ConstraintError computeParametersWithConstraints(
         FifthOrderPolynomial::Parameters& parameters, double dymax,
         double d2ymax, double dyeps, double d2yeps, double initial_guess = 1);
-    static double compute(double x, const Parameters& params);
-    static double computeFirstDerivative(double x, const Parameters& params);
-    static double computeSecondDerivative(double x, const Parameters& params);
-    static double getFirstDerivativeMaximum(const Parameters& params);
-    static double getSecondDerivativeMaximum(const Parameters& params);
+    [[nodiscard]] static double compute(double x, const Parameters& params);
+    [[nodiscard]] static double
+    computeFirstDerivative(double x, const Parameters& params);
+    [[nodiscard]] static double
+    computeSecondDerivative(double x, const Parameters& params);
+    [[nodiscard]] static double
+    getFirstDerivativeMaximum(const Parameters& params);
+    [[nodiscard]] static double
+    getSecondDerivativeMaximum(const Parameters& params);
 
     static size_t compute_timings_total_iter;
 

@@ -60,11 +60,11 @@ public:
 
     //! \brief Compute the value associated with the constraint
     //! \return double The constraint's evaluated value.
-    virtual double compute() = 0;
+    [[nodiscard]] virtual double compute() = 0;
 
     //! \brief Call operator, shortcut for Constraint::compute()
     //! \return double \see Constraint::compute()
-    double operator()();
+    [[nodiscard]] double operator()();
 
 protected:
     friend class SafetyController;
@@ -77,7 +77,7 @@ protected:
 
     //! \brief Read/write access the controlled robot
     //! \return double& A reference to the controlled robot
-    const Robot& robot() const;
+    [[nodiscard]] const Robot& robot() const;
 
     //! \brief The robot on which the constraint is applied.
     //! \details This will automatically set by the SafetyController or a

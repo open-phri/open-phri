@@ -73,7 +73,7 @@ public:
 
     //! \brief Read access the velocity used by the generator
     //! \return double The velocity value
-    const spatial::Velocity& getVelocity() const;
+    [[nodiscard]] const spatial::Velocity& getVelocity() const;
 
 protected:
     void update(spatial::Velocity& velocity) override;

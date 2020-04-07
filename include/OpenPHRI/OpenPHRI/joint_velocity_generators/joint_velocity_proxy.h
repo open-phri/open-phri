@@ -71,7 +71,7 @@ public:
 
     //! \brief Read access the velocity used by the generator
     //! \return double The velocity value
-    const vector::dyn::Velocity& getVelocity() const;
+    [[nodiscard]] const vector::dyn::Velocity& getVelocity() const;
 
 protected:
     void update(vector::dyn::Velocity& velocity) override;

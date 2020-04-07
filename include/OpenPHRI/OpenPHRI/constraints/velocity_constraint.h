@@ -58,7 +58,7 @@ public:
 
     //! \brief Compute the velocity constraint based on the robot state
     //! \return double The constraint value [0,1]
-    double compute() override;
+    [[nodiscard]] double compute() override;
 
     //! \brief Read/write access the velocity limit used by the constraint
     //! \return double& A reference to the velocity limit
@@ -66,7 +66,7 @@ public:
 
     //! \brief Read access the velocity limit used by the constraint
     //! \return double The velocity limit value
-    const scalar::Velocity& getMaximumVelocity() const;
+    [[nodiscard]] const scalar::Velocity& getMaximumVelocity() const;
 
 protected:
     detail::UniversalWrapper<scalar::Velocity> maximum_velocity_;
