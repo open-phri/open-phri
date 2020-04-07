@@ -206,40 +206,44 @@ void DataLogger::process() {
              it != controller_->force_generators_end(); ++it) {
             const std::string& data_name = it->first;
             auto& file = log_files_[data_name];
+            auto size = it->second.cref().last_value.size();
             if (not file.is_open()) {
-                createLog(data_name, 6);
+                createLog(data_name, size);
             }
-            logData(file, it->second.cref().last_value.data(), 6);
+            logData(file, it->second.cref().last_value.data(), size);
         }
 
         for (auto it = controller_->torque_generators_begin();
              it != controller_->torque_generators_end(); ++it) {
             const std::string& data_name = it->first;
             auto& file = log_files_[data_name];
+            auto size = it->second.cref().last_value.size();
             if (not file.is_open()) {
-                createLog(data_name, 6);
+                createLog(data_name, size);
             }
-            logData(file, it->second.cref().last_value.data(), 6);
+            logData(file, it->second.cref().last_value.data(), size);
         }
 
         for (auto it = controller_->velocity_generators_begin();
              it != controller_->velocity_generators_end(); ++it) {
             const std::string& data_name = it->first;
             auto& file = log_files_[data_name];
+            auto size = it->second.cref().last_value.size();
             if (not file.is_open()) {
-                createLog(data_name, 6);
+                createLog(data_name, size);
             }
-            logData(file, it->second.cref().last_value.data(), 6);
+            logData(file, it->second.cref().last_value.data(), size);
         }
 
         for (auto it = controller_->joint_velocity_generators_begin();
              it != controller_->joint_velocity_generators_end(); ++it) {
             const std::string& data_name = it->first;
             auto& file = log_files_[data_name];
+            auto size = it->second.cref().last_value.size();
             if (not file.is_open()) {
-                createLog(data_name, 6);
+                createLog(data_name, size);
             }
-            logData(file, it->second.cref().last_value.data(), 6);
+            logData(file, it->second.cref().last_value.data(), size);
         }
     }
 
