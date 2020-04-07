@@ -18,78 +18,53 @@
  * program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <unistd.h>
-#include <signal.h>
-
 #include <OpenPHRI/OpenPHRI.h>
 #include <OpenPHRI/drivers/vrep_driver.h>
 
-using namespace std;
-using namespace phri;
+#include <pid/signal_manager.h>
 
-constexpr double SAMPLE_TIME = 0.010;
+#include <iostream>
 
-bool _stop = false;
+int main() {
+    // Create an application using a configuration file
+    phri::AppMaker app{"null_space_motion_example/app_config.yaml"};
 
-void sigint_handler(int sig) {
-    _stop = true;
-}
+    // Set the task space damping matrix
+    app.robot().control().task().damping().diagonal().setConstant(100.);
 
-int main(int argc, char const* argv[]) {
+    // Configure the controller
+    scalar::Velocity vmax{0.1};
+    app.controller().add<phri::VelocityConstraint>("vmax", vmax);
+    app.controller().add<phri::ExternalForce>("ext force");
 
-    /***				Robot				***/
-    auto robot = make_shared<Robot>(
-        "LBR4p", // Robot's name, must match V-REP model's name
-        7);      // Robot's joint count
+    auto null_space_velocity = vector::dyn::Velocity{app.robot().jointCount()};
+    null_space_velocity.setZero();
+    null_space_velocity(4) = 1.;
 
-    /***				V-REP driver				***/
-    VREPDriver driver(robot, SAMPLE_TIME, "", "", -1000);
+    app.controller().add<phri::NullSpaceMotion>("null space motion",
+                                                null_space_velocity);
 
-    driver.start();
-
-    /***			Controller configuration			***/
-    auto safety_controller = SafetyController(robot);
-
-    auto null_space_velocity = make_shared<VectorXd>(robot->jointCount());
-    null_space_velocity->setZero();
-    (*null_space_velocity)(4) = 1.;
-
-    safety_controller.add("null space motion",
-                          NullSpaceMotion(null_space_velocity));
-
-    Clock clock(SAMPLE_TIME);
-    DataLogger logger("/tmp", clock.getTime(), true);
-
-    logger.logSafetyControllerData(&safety_controller);
-    logger.logRobotData(robot);
-
-    driver.enableSynchonous(true);
-    bool init_ok = driver.init();
-
-    if (init_ok) {
-        std::cout << "Starting main loop\n";
+    // Initialize the application. Exit on failure.
+    if (app.init()) {
+        std::cout << "Starting main loop" << std::endl;
+    } else {
+        std::cerr << "Initialization failed" << std::endl;
+        std::exit(-1);
     }
 
-    signal(SIGINT, sigint_handler);
-
-    while (init_ok and not _stop) {
-        if (driver.read()) {
-            safety_controller();
-            clock();
-            logger();
-            if (not driver.send()) {
-                std::cerr << "Can'send simulation data to V-REP" << std::endl;
-            }
-        } else {
-            std::cerr << "Can't get simulation data from V-REP" << std::endl;
+    // Catch CTRL-C signal
+    bool stop = false;
+    pid::SignalManager::registerCallback(pid::SignalManager::Interrupt, "stop",
+                                         [&stop](int) { stop = true; });
+    // Run the main loop
+    while (not stop) {
+        if (not app()) {
+            // Communication error
+            break;
         }
-
-        driver.nextStep();
     }
 
-    driver.enableSynchonous(false);
-    driver.stop();
-
-    return 0;
+    // Stop catching CTRL-C
+    pid::SignalManager::unregisterCallback(pid::SignalManager::Interrupt,
+                                           "stop");
 }
