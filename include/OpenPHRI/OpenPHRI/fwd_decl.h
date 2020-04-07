@@ -35,12 +35,15 @@ class SafetyController;
 class RobotModel;
 class Driver;
 class Constraint;
+template <typename ConstraintT, typename Interpolator>
 class SeparationDistanceConstraint;
 class VelocityGenerator;
 class JointVelocityGenerator;
 class ForceGenerator;
 class JointForceGenerator;
-class LinearInterpolator;
+template <typename X, typename Y> class LinearInterpolator;
+template <typename X, typename ValueT, typename FirstDerivative,
+          typename SecondDerivative>
 class PolynomialInterpolator;
 
 } // namespace phri

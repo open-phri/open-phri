@@ -68,6 +68,7 @@ public:
 
 protected:
     friend class SafetyController;
+    template <typename ConstraintT, typename InterpolatorT>
     friend class SeparationDistanceConstraint;
 
     //! \brief Set the robot to work with.

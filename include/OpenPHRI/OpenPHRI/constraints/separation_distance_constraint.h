@@ -45,52 +45,94 @@ namespace phri {
  *  @details You have to provide preconfigured constraint and interpolator.
  *  The interpolator input is set to the serapration distance.
  */
+template <typename ConstraintT, typename InterpolatorT>
 class SeparationDistanceConstraint
     : public Constraint,
       public ObjectCollection<spatial::Position> {
 public:
-    /**
-     * @brief Construct a separaration distance constraint with a given
-     * constraint and interpolator. Objects position must be expressed in the
-     * TCP frame.
-     * @param constraint The constraint to wrap.
-     * @param interpolator The interpolator used to tune the constraint.
-     */
-    SeparationDistanceConstraint(std::shared_ptr<Constraint> constraint,
-                                 std::shared_ptr<Interpolator> interpolator);
+    SeparationDistanceConstraint() : constraint_{}, interpolator_{} {
+        interpolator().setInput(&separation_distance_);
+    }
 
-    /**
-     * @brief Construct a separaration distance constraint with a given
-     * constraint, interpolator and robot positon. Objects position must be
-     * expressed in the same frame as robot_position.
-     * @param constraint The constraint to wrap.
-     * @param interpolator The interpolator used to tune the constraint.
-     * @param robot_position The positon of the robot in the same frame as the
-     * objects.
-     */
+    SeparationDistanceConstraint(ConstraintT&& constraint,
+                                 InterpolatorT&& interpolator)
+        : constraint_{std::move(constraint)},
+          interpolator_{std::move(interpolator)} {
+        this->interpolator().setInput(&separation_distance_);
+    }
+
     SeparationDistanceConstraint(
-        std::shared_ptr<Constraint> constraint,
-        std::shared_ptr<Interpolator> interpolator,
-        std::shared_ptr<const spatial::Position> robot_position);
+        ConstraintT&& constraint, InterpolatorT&& interpolator,
+        std::shared_ptr<const spatial::Position> robot_position)
+        : SeparationDistanceConstraint(std::forward(constraint),
+                                       std::forward(interpolator)) {
+        robot_position_ = robot_position;
+    }
 
-    double compute() override;
+    virtual ~SeparationDistanceConstraint() = default;
 
-    /**
-     * @brief Retrieve the separation shared pointer.
-     * @return The shared pointer to the separation power.
-     */
-    std::shared_ptr<const double> getSeparationDistance() const;
+    double compute() override {
+        separation_distance_ = closestObjectDistance();
+        interpolator().compute();
+        return constraint().compute();
+    }
 
-protected:
-    void setRobot(Robot const* robot) override;
+    const scalar::Position& separationDistance() const {
+        return separation_distance_;
+    }
+
+    ConstraintT& constraint() {
+        return constraint_;
+    }
+
+    const ConstraintT& constraint() const {
+        return constraint_;
+    }
+
+    InterpolatorT& interpolator() {
+        return interpolator_;
+    }
+
+    const InterpolatorT& interpolator() const {
+        return interpolator_;
+    }
+
+    void setRobot(Robot const* robot) override {
+        constraint().setRobot(robot);
+        Constraint::setRobot(robot);
+        if (not robot_position_) {
+            robot_position_ = std::make_shared<spatial::Position>(
+                spatial::Position::Zero(robot->controlPointParentFrame()));
+        }
+    }
+
+    const spatial::Position& robotPosition() const {
+        return *robot_position_;
+    }
 
 private:
-    double closestObjectDistance();
+    scalar::Position closestObjectDistance() {
+        Eigen::Vector3d rob_pos = Eigen::Vector3d::Zero();
+        if (robotPosition().frame()) {
+            rob_pos = robotPosition().linear();
+        }
 
-    std::shared_ptr<Constraint> constraint_;
-    std::shared_ptr<Interpolator> interpolator_;
+        auto min_dist =
+            scalar::Position{std::numeric_limits<double>::infinity()};
+        for (const auto& item : items_) {
+            const auto& obj = item.second.cref();
+            Eigen::Vector3d obj_rob_vec = obj.linear() - rob_pos;
+
+            min_dist.value() = std::min(min_dist.value(), obj_rob_vec.norm());
+        }
+
+        return min_dist;
+    }
+
+    ConstraintT constraint_;
+    InterpolatorT interpolator_;
     std::shared_ptr<const spatial::Position> robot_position_;
-    std::shared_ptr<double> separation_distance_;
+    scalar::Position separation_distance_;
 };
 
 } // namespace phri

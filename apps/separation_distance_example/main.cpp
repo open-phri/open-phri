@@ -18,86 +18,77 @@
  * program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <unistd.h>
-#include <signal.h>
-
 #include <OpenPHRI/OpenPHRI.h>
 #include <OpenPHRI/drivers/vrep_driver.h>
 
-using namespace std;
-using namespace phri;
+#include <physical_quantities/units/units.h>
+#include <pid/signal_manager.h>
 
-constexpr double SAMPLE_TIME = 0.010;
-
-bool _stop = false;
-
-void sigint_handler(int sig) {
-    _stop = true;
-}
+#include <iostream>
 
 int main(int argc, char const* argv[]) {
+    using namespace units::literals;
+    // Create an application using a configuration file
+    phri::AppMaker app{"separation_distance_example/app_config.yaml"};
 
-    /***				Robot				***/
-    auto robot = make_shared<Robot>(
-        "LBR4p", // Robot's name, must match V-REP model's name
-        7);      // Robot's joint count
+    // Set the task space damping matrix
+    app.robot().control().task().damping().diagonal().setConstant(100.);
 
-    /***				V-REP driver				***/
-    VREPDriver driver(robot, SAMPLE_TIME);
+    auto& driver = dynamic_cast<phri::VREPDriver&>(app.driver());
 
-    driver.start();
+    // Create an interpolator providing the maximum velocity for a given
+    // distance
+    using Interpolator =
+        phri::LinearInterpolator<scalar::Position, scalar::Velocity>;
+    auto max_vel_interpolator = Interpolator{
+        {scalar::Position{10_cm}, scalar::Velocity{0_m / units::second()}},
+        {scalar::Position{50_cm}, scalar::Velocity{20_cm / units::second()}}};
 
-    /***			Controller configuration			***/
-    *robot->controlPointDampingMatrix() *= 100.;
-    auto safety_controller = SafetyController(robot);
+    max_vel_interpolator.enableSaturation(true);
 
-    auto max_vel_interpolator = make_shared<LinearInterpolator>(
-        make_shared<LinearPoint>(0.1, 0.),   // 0m/s at 0.1m
-        make_shared<LinearPoint>(0.5, 0.2)); // 0.2m/s at 0.5m
+    // Configure the controller
 
-    max_vel_interpolator->enableSaturation(true);
+    // Objects are tracked in the TCP frame so there is no need to
+    // provide the robot position
+    auto separation_distance =
+        app.controller()
+            .add<phri::SeparationDistanceConstraint<phri::VelocityConstraint,
+                                                    Interpolator>>(
+                "adpative vmax",
+                phri::VelocityConstraint{max_vel_interpolator.output()},
+                std::move(max_vel_interpolator));
 
-    auto maximum_velocity = max_vel_interpolator->getOutput();
-    auto velocity_constraint =
-        make_shared<VelocityConstraint>(maximum_velocity);
+    separation_distance->setVerbose(true);
+    separation_distance->add("obstacle1",
+                             driver.trackObjectPosition(
+                                 "obstacle1", app.robot().controlPointFrame()));
+    separation_distance->add("obstacle2",
+                             driver.trackObjectPosition(
+                                 "obstacle2", app.robot().controlPointFrame()));
 
-    // Objects are tracked in the TCP frame so there is no need to provide the
-    // robot position
-    auto separation_dist_vel_cstr = make_shared<SeparationDistanceConstraint>(
-        velocity_constraint, max_vel_interpolator);
+    app.controller().add<phri::ExternalForce>("external force");
 
-    separation_dist_vel_cstr->setVerbose(true);
-    separation_dist_vel_cstr->add(
-        "obstacle1",
-        driver.trackObjectPosition("obstacle1", ReferenceFrame::TCP));
-    separation_dist_vel_cstr->add(
-        "obstacle2",
-        driver.trackObjectPosition("obstacle2", ReferenceFrame::TCP));
-
-    auto ext_force_generator =
-        make_shared<ForceProxy>(robot->controlPointExternalForce());
-
-    safety_controller.addConstraint("velocity constraint",
-                                    separation_dist_vel_cstr);
-
-    safety_controller.addForceGenerator("ext force proxy", ext_force_generator);
-
-    signal(SIGINT, sigint_handler);
-
-    usleep(10. * SAMPLE_TIME * 1e6);
-
-    cout << "Starting main loop" << endl;
-    while (not _stop) {
-        if (driver.read()) {
-            safety_controller.compute();
-            driver.send();
-        }
-
-        usleep(SAMPLE_TIME * 1e6);
+    // Initialize the application. Exit on failure.
+    if (app.init()) {
+        std::cout << "Starting main loop" << std::endl;
+    } else {
+        std::cerr << "Initialization failed" << std::endl;
+        std::exit(-1);
     }
 
-    driver.stop();
+    // Catch CTRL-C signal
+    bool stop = false;
+    pid::SignalManager::registerCallback(pid::SignalManager::Interrupt, "stop",
+                                         [&stop](int) { stop = true; });
+    // Run the main loop
+    while (not stop) {
+        if (not app()) {
+            // Communication error
+            break;
+        }
+    }
 
-    return 0;
+    // Stop catching CTRL-C
+    pid::SignalManager::unregisterCallback(pid::SignalManager::Interrupt,
+                                           "stop");
 }

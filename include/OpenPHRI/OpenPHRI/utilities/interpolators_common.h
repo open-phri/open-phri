@@ -243,37 +243,4 @@ struct TrajectoryPoint<spatial::Position, spatial::Velocity,
     std::shared_ptr<spatial::Acceleration> d2y; // second derivative
 };
 
-/** @brief Description of a point used by the PolynomialInterpolator.
- *  @details A PolynomialPoint is described by a 2D point (x,y) and its first
- * and second derivatives
- */
-struct PolynomialPoint : public TrajectoryPoint<double> {
-    PolynomialPoint(std::shared_ptr<double> x, std::shared_ptr<double> y,
-                    std::shared_ptr<double> dy, std::shared_ptr<double> d2y)
-        : TrajectoryPoint<double>(y, dy, d2y), x(x) {
-    }
-
-    PolynomialPoint(double x, double y, double dy, double d2y)
-        : TrajectoryPoint<double>(y, dy, d2y), x(std::make_shared<double>(x)) {
-    }
-
-    std::shared_ptr<double> x; // x value
-};
-
-/** @brief Description of a point used by the LinearInterpolator.
- *  @details A LinearPoint is described by a 2D point (x,y)
- */
-struct LinearPoint {
-    LinearPoint(std::shared_ptr<double> x, std::shared_ptr<double> y)
-        : x(x), y(y) {
-    }
-
-    LinearPoint(double x, double y)
-        : x(std::make_shared<double>(x)), y(std::make_shared<double>(y)) {
-    }
-
-    std::shared_ptr<double> x; // x value
-    std::shared_ptr<double> y; // y value
-};
-
 } // namespace phri

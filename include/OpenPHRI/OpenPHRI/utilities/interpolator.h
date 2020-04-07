@@ -36,45 +36,56 @@ namespace phri {
  *  @details Provides two pure virtual method to update the internal parameters
  * and to compute a new value.
  */
-class Interpolator {
+template <typename X, typename Y, typename ParentT> class Interpolator {
 public:
-    Interpolator() = default;
-    virtual ~Interpolator() = default;
+    Interpolator()
+        : input_{std::make_shared<X>(0.)}, output_{std::make_shared<Y>(0.)} {
+    }
 
     /**
      * @brief Get the pointer to the output data.
      * @return A shared pointer to the output data.
      */
-    std::shared_ptr<const double> getOutput() const;
+    std::shared_ptr<const Y> outputPtr() const {
+        return output_;
+    }
+
+    /**
+     * @brief Get the pointer to the output data.
+     * @return A shared pointer to the output data.
+     */
+    const Y& output() const {
+        return *output_;
+    }
 
     /**
      * @brief Set the pointer to the input data.
      * @return A shared pointer to the input data.
      */
-    void setInput(std::shared_ptr<const double> input);
+    void setInput(std::shared_ptr<const X> input) {
+        input_ = input;
+    }
 
     /**
-     * @brief Compute the interpolator's parameters .
+     * @brief Set the pointer to the input data.
+     * @return A shared pointer to the input data.
      */
-    virtual void computeParameters() = 0;
-
-    /**
-     * @brief Compute the new interpolator output.
-     * @return The new output data.
-     */
-    virtual double compute() = 0;
+    void setInput(const X* input) {
+        input_ = std::shared_ptr<const X>(input, [](auto p) {});
+    }
 
     /**
      * @brief Call operator, shortcut for compute()
      * @return The new output data.
      */
-    double operator()() {
-        return compute();
+    const Y& operator()() {
+        auto& self = static_cast<ParentT&>(*this);
+        self.compute();
     }
 
 protected:
-    std::shared_ptr<const double> input_;
-    std::shared_ptr<double> output_;
+    std::shared_ptr<const X> input_;
+    std::shared_ptr<Y> output_;
 };
 
 } // namespace phri
