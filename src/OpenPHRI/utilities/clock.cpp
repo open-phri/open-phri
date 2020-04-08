@@ -20,7 +20,7 @@
 
 #include <OpenPHRI/utilities/clock.h>
 
-using namespace phri;
+namespace phri {
 
 Clock::Clock() : sample_time_(-1.) {
     reset();
@@ -59,3 +59,5 @@ double Clock::update() {
 double Clock::operator()() {
     return update();
 }
+
+} // namespace phri

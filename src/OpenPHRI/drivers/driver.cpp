@@ -1,6 +1,6 @@
 #include <OpenPHRI/drivers/driver.h>
 
-using namespace phri;
+namespace phri {
 
 Driver::Driver(Robot& robot, double sample_time) : robot_(robot) {
     robot_.control().time_step_ = sample_time;
@@ -63,3 +63,5 @@ Robot::TaskData& Driver::taskState() {
 Robot::TaskData& Driver::taskCommand() {
     return robot_.task().command_;
 }
+
+} // namespace phri

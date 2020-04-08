@@ -20,7 +20,7 @@
 
 #include <OpenPHRI/joint_force_generators/joint_force_proxy.h>
 
-using namespace phri;
+namespace phri {
 
 JointForceProxy::JointForceProxy() : external_force_(vector::dyn::Force{}) {
 }
@@ -51,3 +51,5 @@ void JointForceProxy::setRobot(Robot const* new_robot) {
         external_force_.ref().setZero();
     }
 }
+
+} // namespace phri

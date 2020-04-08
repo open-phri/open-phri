@@ -20,7 +20,7 @@
 
 #include <OpenPHRI/utilities/manipulator_equivalent_mass.h>
 
-using namespace phri;
+namespace phri {
 
 const scalar::Mass& ManipulatorEquivalentMass::getEquivalentMass() const {
     return mass_;
@@ -67,3 +67,5 @@ void ManipulatorEquivalentMass::setInertia(const spatial::Mass& inertia) {
 const spatial::Mass& ManipulatorEquivalentMass::getInertia() const {
     return inertia_matrix_.cref();
 }
+
+} // namespace phri

@@ -33,7 +33,7 @@
 #include <limits>
 #include <iostream>
 
-using namespace phri;
+namespace phri {
 
 #define HEAVY_PRINTING 0
 
@@ -523,3 +523,5 @@ const Eigen::MatrixXd& SafetyController::computeJacobianInverse() const {
 
     return jac_inv;
 }
+
+} // namespace phri

@@ -18,7 +18,7 @@
 
 #include <iostream>
 
-using namespace phri;
+namespace phri {
 
 struct RobotModel::pImpl {
     pImpl(Robot& robot, const std::string& model_path,
@@ -221,3 +221,5 @@ size_t RobotModel::jointCount() const {
 const std::string& RobotModel::name() const {
     return impl_->name;
 }
+
+} // namespace phri

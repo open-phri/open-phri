@@ -26,7 +26,7 @@
 #include <limits>
 #include <stdexcept>
 
-using namespace phri;
+namespace phri {
 
 size_t FifthOrderPolynomial::compute_timings_total_iter = 0;
 
@@ -262,3 +262,5 @@ FifthOrderPolynomial::getSecondDerivativeMaximum(const Parameters& params) {
 
     return max;
 }
+
+} // namespace phri

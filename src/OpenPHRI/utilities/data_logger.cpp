@@ -27,7 +27,7 @@
 #include <OpenPHRI/joint_velocity_generators/joint_velocity_generator.h>
 #include <iomanip>
 
-using namespace phri;
+namespace phri {
 
 DataLogger::DataLogger(const std::string& directory,
                        std::shared_ptr<const double> time,
@@ -267,3 +267,5 @@ void DataLogger::closeFiles() {
         file.second.close();
     }
 }
+
+} // namespace phri

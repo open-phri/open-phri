@@ -21,7 +21,7 @@
 #include <OpenPHRI/utilities/laser_scanner_detector.h>
 #include <iostream>
 
-using namespace phri;
+namespace phri {
 
 LaserScannerDetector::LaserScannerDetector(
     std::shared_ptr<const Eigen::VectorXd> laser_data, double scanning_angle,
@@ -89,3 +89,5 @@ double LaserScannerDetector::compute() {
 double LaserScannerDetector::operator()() {
     return compute();
 }
+
+} // namespace phri
