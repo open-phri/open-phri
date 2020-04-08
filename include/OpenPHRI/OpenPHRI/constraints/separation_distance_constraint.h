@@ -36,8 +36,6 @@
 
 #include <physical_quantities/spatial/position.h>
 
-// TODO check and possibly improve the separation distance constraint
-
 namespace phri {
 
 /** @brief A meta-constraint to adapt a given constraint depending on the
