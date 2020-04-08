@@ -20,7 +20,9 @@
 
 #include <OpenPHRI/force_generators/mass_generator.h>
 
-using namespace phri;
+#include <physical_quantities/spatial/impedance/mass.hpp>
+
+namespace phri {
 
 MassGenerator::MassGenerator()
     : mass_{spatial::Mass::Zero(spatial::Frame::Ref(frame()))},
@@ -29,32 +31,19 @@ MassGenerator::MassGenerator()
 }
 
 void MassGenerator::update(spatial::Force& force) {
-    // TODO rewrite
-    // Vector6d error;
+    auto to_cp_frame = [this](const auto& value) {
+        if (value.frame() != robot().controlPointFrame()) {
+            return robot().control().transformation().inverse() * value;
+        } else {
+            return value;
+        }
+    };
 
-    // if (mass_frame_ == ReferenceFrame::TCP) {
-    //     if (target_acceleration_frame_ == ReferenceFrame::TCP) {
-    //         error = *target_acceleration_;
-    //     } else {
-    //         error =
-    //             robot().control().spatial_transformation_matrix.transpose() *
-    //             (static_cast<const Vector6d&>(*target_acceleration_) -
-    //              static_cast<const
-    //              Vector6d&>(robot().task().state.acceleration));
-    //     }
-    // } else {
-    //     if (target_acceleration_frame_ == ReferenceFrame::TCP) {
-    //         error = robot().control().spatial_transformation_matrix *
-    //                 static_cast<const Vector6d&>(*target_acceleration_);
-    //     } else {
-    //         error =
-    //             static_cast<const Vector6d&>(*target_acceleration_) -
-    //             static_cast<const
-    //             Vector6d&>(robot().task().state.acceleration);
-    //     }
-    // }
+    auto current_accel_cp = to_cp_frame(robot().task().state().acceleration());
+    auto target_accel_cp = to_cp_frame(getTargetAcceleration());
+    auto mass_cp = to_cp_frame(getMass());
 
-    // force = *mass_ * error;
+    force = mass_cp * (target_accel_cp - current_accel_cp);
 }
 
 void MassGenerator::setMass(const spatial::Mass& mass) {
@@ -73,3 +62,5 @@ void MassGenerator::setTargetAcceleration(
 const spatial::Acceleration& MassGenerator::getTargetAcceleration() const {
     return target_acceleration_.cref();
 }
+
+} // namespace phri

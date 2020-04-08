@@ -63,19 +63,22 @@ FifthOrderPolynomial::ConstraintError
 FifthOrderPolynomial::computeParametersWithConstraints(
     FifthOrderPolynomial::Parameters& parameters, double dymax, double d2ymax,
     double dyeps, double d2yeps, double initial_guess) {
-    FifthOrderPolynomial::ConstraintError error =
-        FifthOrderPolynomial::ConstraintError::NoError;
+    ConstraintError error = FifthOrderPolynomial::ConstraintError::NoError;
     if (dymax < std::abs(parameters.dyi)) {
-        error = FifthOrderPolynomial::ConstraintError::InitialVelocity;
+        error = static_cast<ConstraintError>(error |
+                                             ConstraintError::InitialVelocity);
     }
     if (dymax < std::abs(parameters.dyf)) {
-        error = FifthOrderPolynomial::ConstraintError::FinalVelocity;
+        error = static_cast<ConstraintError>(error |
+                                             ConstraintError::FinalVelocity);
     }
     if (d2ymax < std::abs(parameters.d2yi)) {
-        error = FifthOrderPolynomial::ConstraintError::InitialAcceleration;
+        error = static_cast<ConstraintError>(
+            error | ConstraintError::InitialAcceleration);
     }
     if (d2ymax < std::abs(parameters.d2yf)) {
-        error = FifthOrderPolynomial::ConstraintError::FinalAcceleration;
+        error = static_cast<ConstraintError>(
+            error | ConstraintError::FinalAcceleration);
     }
 
     if (error != FifthOrderPolynomial::ConstraintError::NoError) {

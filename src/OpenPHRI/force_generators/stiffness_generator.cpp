@@ -21,6 +21,8 @@
 #include <OpenPHRI/force_generators/stiffness_generator.h>
 #include <OpenPHRI/utilities/exceptions.h>
 
+#include <physical_quantities/spatial/impedance/stiffness.hpp>
+
 namespace phri {
 
 StiffnessGenerator::StiffnessGenerator()
@@ -29,19 +31,21 @@ StiffnessGenerator::StiffnessGenerator()
 }
 
 void StiffnessGenerator::update(spatial::Force& force) {
-    // TODO rewrite
-    // spatial::Stiffness error;
+    auto to_cp_frame = [this](const auto& value) {
+        if (value.frame() != robot().controlPointFrame()) {
+            return robot().control().transformation().inverse() * value;
+        } else {
+            return value;
+        }
+    };
 
-    // if (stiffness_frame_ == spatial::Frame::TCP) {
-    //     error = robot().control().spatial_transformation_matrix.transpose() *
-    //             (robot().task().state.pose.getErrorWith(*target_pose_));
-    // } else {
-    //     error = robot().task().state.pose.getErrorWith(*target_pose_);
-    // }
+    auto current_pose_cp = to_cp_frame(robot().task().state().position());
+    auto target_pose_cp = to_cp_frame(getTargetPose());
+    auto stiffness_cp = to_cp_frame(getStiffness());
 
-    // error.segment<3>(0) *= -1.;
-    // force = stiffness_->cwiseProduct(error);
+    force = stiffness_cp * (target_pose_cp - current_pose_cp);
 }
+
 void StiffnessGenerator::setStiffness(const spatial::Stiffness& stiffness) {
     stiffness_.ref() = stiffness;
 }

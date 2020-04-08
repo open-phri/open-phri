@@ -293,18 +293,20 @@ public:
             double threshold = error_tracking_params_.threshold_refs[component];
             double hysteresis =
                 threshold * error_tracking_params_.hysteresis_threshold;
+            bool stop;
             if (error > (threshold + hysteresis)) {
-                error_tracking_params_.previous_state[component] =
+                error_tracking_params_.state[component] =
                     ErrorTrackingState::Paused;
-                return true;
+                stop = true;
             } else if (error < (threshold - hysteresis)) {
-                error_tracking_params_.previous_state[component] =
+                error_tracking_params_.state[component] =
                     ErrorTrackingState::Running;
-                return false;
+                stop = false;
             } else {
-                return error_tracking_params_.previous_state[component] ==
+                stop = error_tracking_params_.state[component] ==
                        ErrorTrackingState::Paused;
             }
+            return stop;
         };
 
         if (error_tracking_params_) {
@@ -321,11 +323,11 @@ public:
                         dy = 0.;
                         d2y = 0.;
                     } else {
-                        for_each(error_tracking_params_.state.begin(),
-                                 error_tracking_params_.state.end(),
-                                 [](ErrorTrackingState state) {
-                                     state = ErrorTrackingState::Paused;
-                                 });
+                        std::for_each(error_tracking_params_.state.begin(),
+                                      error_tracking_params_.state.end(),
+                                      [](ErrorTrackingState& state) {
+                                          state = ErrorTrackingState::Paused;
+                                      });
                         for (double& dy : velocity_output_refs_) {
                             dy = 0.;
                         }
@@ -514,17 +516,11 @@ public:
     void disableErrorTracking() {
         error_tracking_params_.reference.reset();
         error_tracking_params_.state.resize(getComponentCount());
-        error_tracking_params_.previous_state.resize(getComponentCount());
-        for_each(error_tracking_params_.state.begin(),
-                 error_tracking_params_.state.end(),
-                 [](ErrorTrackingState& state) {
-                     state = ErrorTrackingState::Running;
-                 });
-        for_each(error_tracking_params_.previous_state.begin(),
-                 error_tracking_params_.previous_state.end(),
-                 [](ErrorTrackingState& state) {
-                     state = ErrorTrackingState::Running;
-                 });
+        std::for_each(error_tracking_params_.state.begin(),
+                      error_tracking_params_.state.end(),
+                      [](ErrorTrackingState& state) {
+                          state = ErrorTrackingState::Running;
+                      });
     }
 
     void reset() {
@@ -575,7 +571,6 @@ protected:
         ValueT threshold;
         double hysteresis_threshold;
         std::vector<ErrorTrackingState> state;
-        std::vector<ErrorTrackingState> previous_state;
         bool recompute_when_resumed;
         std::vector<std::reference_wrapper<const double>> reference_refs;
         std::vector<std::reference_wrapper<const double>> threshold_refs;
@@ -655,12 +650,6 @@ protected:
                                                   to.dyrefs_[component],
                                                   from.d2yrefs_[component],
                                                   to.d2yrefs_[component]};
-            // std::cout << "Segment " << segment+1 << ", component " <<
-            // component+1 << "\n"; std::cout << "\tfrom (" <<
-            // from.yrefs_[component] << "," << from.dyrefs_[component] << ","
-            // << from.d2yrefs_[component] << ")\n"; std::cout << "\tto (" <<
-            // to.yrefs_[component] << "," << to.dyrefs_[component] << "," <<
-            // to.d2yrefs_[component] << ")\n";
             auto error = FifthOrderPolynomial::computeParametersWithConstraints(
                 poly_params, params.max_velocity[component],
                 params.max_acceleration[component], v_eps, a_eps);

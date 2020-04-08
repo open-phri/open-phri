@@ -84,27 +84,27 @@ public:
         return task_space_acceleration_output_;
     }
 
-    virtual bool computeTimings(double v_eps = 1e-6,
-                                double a_eps = 1e-6) override {
+    bool computeTimings(double v_eps = 1e-6, double a_eps = 1e-6) override {
         updatePoints();
         return super::computeTimings(v_eps, a_eps);
     }
 
     bool compute() override {
         if (error_tracking_params_) {
-            reference_pose_vec_->block<3, 1>(0, 0) = reference_pose_->linear();
-            reference_pose_vec_->block<3, 1>(3, 0) =
-                start_pose_.y->getErrorWith(*reference_pose_).tail<3>();
+            reference_pose_vec_->head<3>() = reference_pose_->linear();
+            reference_pose_vec_->tail<3>() =
+                reference_pose_->angular().getErrorWith(
+                    start_pose_.y->angular());
         }
 
         bool ret = super::compute();
 
         if (output_type_ == TrajectoryOutputType::Position or
             output_type_ == TrajectoryOutputType::All) {
-            pose_output_->linear() = position_output_->block<3, 1>(0, 0);
+            pose_output_->linear() = position_output_->head<3>();
             pose_output_->orientation() =
                 start_pose_.y->orientation().asQuaternion().integrate(
-                    position_output_->block<3, 1>(3, 0));
+                    position_output_->tail<3>());
         }
         if (output_type_ == TrajectoryOutputType::Velocity or
             output_type_ == TrajectoryOutputType::All) {

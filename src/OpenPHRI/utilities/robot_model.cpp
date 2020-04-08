@@ -119,7 +119,7 @@ struct RobotModel::pImpl {
         const auto& tcp_pose = mbc.bodyPosW[control_point_body_index];
         robot.task().state_.position() = spatial::Position(
             tcp_pose.translation(), tcp_pose.rotation().transpose(),
-            robot.controlPointFrame());
+            robot.controlPointParentFrame());
         robot.control().transformation_.setIdentity();
         robot.control().transformation_.translation() = tcp_pose.translation();
         robot.control().transformation_.linear() =

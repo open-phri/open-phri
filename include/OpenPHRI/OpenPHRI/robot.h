@@ -236,7 +236,7 @@ public:
     //! \brief Holds a task state (either current, target or command)
     class TaskData {
     public:
-        TaskData(spatial::Frame frame);
+        TaskData(spatial::Frame frame, spatial::Frame parent_frame);
 
         //! \brief Task pose (m, rad)
         [[nodiscard]] spatial::Position& position();
@@ -264,7 +264,7 @@ public:
     //! \brief Holds task physical limits
     class TaskLimits {
     public:
-        TaskLimits(spatial::Frame frame);
+        TaskLimits(spatial::Frame frame, spatial::Frame parent_frame);
 
         //! \brief Task minimum pose (m, rad)
         [[nodiscard]] spatial::Position& minPosition();
@@ -297,7 +297,7 @@ public:
     //! \brief Pack all task related data (state, target, command, limits)
     class Task {
     public:
-        explicit Task(spatial::Frame frame);
+        Task(spatial::Frame frame, spatial::Frame parent_frame);
 
         //! \brief Task current state (read from the robot or set from the
         //! kinematic)

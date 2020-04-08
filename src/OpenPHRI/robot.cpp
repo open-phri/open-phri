@@ -138,10 +138,10 @@ const Robot::JointLimits& Robot::Joints::limits() const {
 }
 
 /***        Robot::TaskData      ***/
-Robot::TaskData::TaskData(spatial::Frame frame)
-    : position_{spatial::Position::Zero(frame)},
-      velocity_{spatial::Velocity::Zero(frame)},
-      acceleration_{spatial::Acceleration::Zero(frame)},
+Robot::TaskData::TaskData(spatial::Frame frame, spatial::Frame parent_frame)
+    : position_{spatial::Position::Zero(parent_frame)},
+      velocity_{spatial::Velocity::Zero(parent_frame)},
+      acceleration_{spatial::Acceleration::Zero(parent_frame)},
       wrench_{spatial::Force::Zero(frame)} {
 }
 
@@ -178,7 +178,7 @@ const spatial::Force& Robot::TaskData::force() const {
 }
 
 /***        Robot::TaskLimits      ***/
-Robot::TaskLimits::TaskLimits(spatial::Frame frame)
+Robot::TaskLimits::TaskLimits(spatial::Frame frame, spatial::Frame parent_frame)
     : min_position_{frame},
       max_position_{frame},
       max_velocity_{spatial::Velocity::Constant(
@@ -186,7 +186,7 @@ Robot::TaskLimits::TaskLimits(spatial::Frame frame)
       max_acceleration_{spatial::Acceleration::Constant(
           std::numeric_limits<double>::infinity(), frame)},
       max_force_{spatial::Force::Constant(
-          std::numeric_limits<double>::infinity(), frame)} {
+          std::numeric_limits<double>::infinity(), parent_frame)} {
     min_position_.linear().setConstant(
         -std::numeric_limits<double>::infinity());
     min_position_.orientation().fromAngleAxis(Eigen::AngleAxisd{
@@ -237,8 +237,11 @@ const spatial::Force& Robot::TaskLimits::maxForce() const {
 }
 
 /***        Robot::Task     ***/
-Robot::Task::Task(spatial::Frame frame)
-    : state_{frame}, target_{frame}, command_{frame}, limits_{frame} {
+Robot::Task::Task(spatial::Frame frame, spatial::Frame parent_frame)
+    : state_{frame, parent_frame},
+      target_{frame, parent_frame},
+      command_{frame, parent_frame},
+      limits_{frame, parent_frame} {
 }
 
 const Robot::TaskData& Robot::Task::state() const {
@@ -406,7 +409,8 @@ Robot::Robot(spatial::Frame control_point_frame,
              spatial::Frame control_point_parent_frame)
     : control_point_frame_{control_point_frame},
       control_point_parent_frame_{control_point_parent_frame},
-      task_{spatial::Frame::Ref(control_point_frame_)},
+      task_{spatial::Frame::Ref(control_point_frame_),
+            spatial::Frame::Ref(control_point_parent_frame_)},
       control_{spatial::Frame::Ref(control_point_frame_),
                spatial::Frame::Ref(control_point_parent_frame_)} {
 }
