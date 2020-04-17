@@ -378,7 +378,7 @@ public:
     [[nodiscard]] storage_const_iterator<JointVelocityGenerator>
     joint_velocity_generators_end() const;
 
-private:
+protected:
     /**
      * @brief Add a new constraint to the controller.
      * @param name The name given to the constraint. Must be unique. Used to
@@ -531,6 +531,7 @@ private:
      */
     bool removeJointVelocityGenerator(const std::string& name);
 
+private:
     double computeConstraintValue();
     const spatial::Force& computeForceSum();
     const vector::dyn::Force& computeTorqueSum();
