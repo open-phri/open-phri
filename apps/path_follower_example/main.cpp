@@ -20,6 +20,8 @@
 #include <OpenPHRI/OpenPHRI.h>
 #include <OpenPHRI/drivers/vrep_driver.h>
 
+#include <physical_quantities/spatial/impedance.h>
+
 #include <pid/signal_manager.h>
 
 #include <iostream>
