@@ -21,6 +21,13 @@
 
 #include <typeinfo>
 #include <memory>
+
+#ifdef _MSC_VER
+std::string phri::demangle(const char* name) {
+    return name; // TODO implement demangling for MSVC
+}
+#else
+
 #include <cxxabi.h>
 
 std::string phri::demangle(const char* name) {
@@ -33,3 +40,5 @@ std::string phri::demangle(const char* name) {
 
 	return (status==0) ? res.get() : name;
 }
+
+#endif

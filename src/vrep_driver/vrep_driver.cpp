@@ -29,8 +29,7 @@
 #include <thread>
 #include <chrono>
 
-#include <extApi.h>
-#include <v_repConst.h>
+#include <vrep_driver.h>
 
 using namespace phri;
 using namespace std;
@@ -387,11 +386,11 @@ bool VREPDriver::updateLaserScanners() {
 bool VREPDriver::readJointPosition(phri::VectorXdPtr position) const {
 	bool all_ok = true;
 
-	float positions[robot_->jointCount()];
+    std::vector<float> positions(robot_->jointCount());
 
 	for (size_t i = 0; i < robot_->jointCount(); ++i) {
 		int joint_handle = object_handles_.at(robot_->name() + "_joint" + std::to_string(i+1) + suffix_);
-		all_ok &= (simxGetJointPosition(client_id_, joint_handle, positions+i, simx_opmode_buffer) != -1);
+		all_ok &= (simxGetJointPosition(client_id_, joint_handle, positions.data()+i, simx_opmode_buffer) != -1);
 	}
 	double* position_data = position->data();
 	for (size_t i = 0; all_ok and i < robot_->jointCount(); ++i) {

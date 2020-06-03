@@ -24,6 +24,7 @@
 #include <cmath>
 #include <limits>
 #include <stdexcept>
+#include <algorithm>
 
 using namespace phri;
 

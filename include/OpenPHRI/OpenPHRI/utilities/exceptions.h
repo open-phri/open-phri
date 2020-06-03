@@ -14,6 +14,13 @@ inline std::string make_open_phri_error(const std::string& msg,
 	return std::string{"OpenPHRI error in "} +file + ":" + std::to_string(line) + " [" +
 	       function + "]: " + msg;
 }
-#define OPEN_PHRI_ERROR(...) phri::make_open_phri_error(__VA_ARGS__, __FILE__, __PRETTY_FUNCTION__, __LINE__ )
+
+#ifdef _MSC_VER
+    #define OPEN_PHRI_PRETTY_FUNCTION __FUNCTION__ 
+#else
+    #define OPEN_PHRI_PRETTY_FUNCTION __PRETTY_FUNCTION__
+#endif
+
+#define OPEN_PHRI_ERROR(...) phri::make_open_phri_error(__VA_ARGS__, __FILE__, OPEN_PHRI_PRETTY_FUNCTION, __LINE__ )
 
 } // namespace phri
