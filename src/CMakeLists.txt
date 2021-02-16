@@ -9,7 +9,7 @@ PID_Component(
     DIRECTORY OpenPHRI
     CXX_STANDARD 14
     EXPORT eigen-extensions rpathlib libyaml
-    DEPEND rbdyn rbdyn-parsers
+    DEPEND rbdyn
     RUNTIME_RESOURCES robot_models
     ${OPENMP_COMPONENT_OPTIONS}
 )

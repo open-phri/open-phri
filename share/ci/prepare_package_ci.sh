@@ -20,11 +20,22 @@ fi
 
 #initializing the pid-workspace
 if [ ! -d "./binaries/pid-workspace" ]; then
-  cd binaries && git clone git@gite.lirmm.fr:pid/pid-workspace.git && cd pid-workspace/pid && git checkout master && cmake .. && cd ../../..
+  cd binaries && git clone git@gite.lirmm.fr:pid/pid-workspace.git && cd ..
 else
-  cd binaries/pid-workspace/pid && git pull -f official master && cmake .. && cd ../../..
+  cd binaries/pid-workspace && git pull -f official master && cd ../..
 fi
 
+# symlinking all CI scripts from the workspace
+chmod 700 binaries/pid-workspace/cmake/patterns/packages/ci/configure_workspace.sh
+ln -s binaries/pid-workspace/cmake/patterns/packages/ci/configure_workspace.sh ./configure_workspace.sh
+chmod 700 binaries/pid-workspace/cmake/patterns/packages/ci/build_package_release.sh
+ln -s binaries/pid-workspace/cmake/patterns/packages/ci/build_package_release.sh ./build_package_release.sh
+chmod 700 binaries/pid-workspace/cmake/patterns/packages/ci/build_package_integration.sh
+ln -s binaries/pid-workspace/cmake/patterns/packages/ci/build_package_integration.sh ./build_package_integration.sh
+chmod 700 binaries/pid-workspace/cmake/patterns/packages/ci/publish_package_release.sh
+ln -s binaries/pid-workspace/cmake/patterns/packages/ci/publish_package_release.sh ./publish_package_release.sh
+chmod 700 binaries/pid-workspace/cmake/patterns/packages/ci/publish_package_integration.sh
+ln -s binaries/pid-workspace/cmake/patterns/packages/ci/publish_package_integration.sh ./publish_package_integration.sh
+
 # previous to an execution we need to set a link into the workspace that point to the current package
-echo "creating link into binaries/pid-workspace/packages/$dir_name"
 cd binaries/pid-workspace/packages && ln -s $dir_path $dir_name && cd ../../..

@@ -19,7 +19,7 @@ PID_Package(
 			LICENSE 	    GNULGPL
 			DESCRIPTION     "OpenPHRI: a generic framework to easily and safely control robots in interactions with humans"
 			README			instructions.md
-			VERSION			1.0.0
+			VERSION			1.0.1
 )
 
 check_PID_Platform(CONFIGURATION posix)
@@ -27,7 +27,7 @@ check_PID_Platform(CONFIGURATION posix)
 PID_Dependency(api-driver-vrep VERSION 1.0)
 PID_Dependency(eigen-extensions VERSION 0.6)
 PID_Dependency(pid-rpath VERSION 2.0)
-PID_Dependency(rbdyn VERSION 1.3)
+PID_Dependency(rbdyn VERSION 1.4.1)
 PID_Dependency(yaml-cpp)
 
 if(GEN_PYTHON_BINDINGS)
