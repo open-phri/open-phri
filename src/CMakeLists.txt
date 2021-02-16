@@ -15,7 +15,6 @@ PID_Component(
         physical-quantities/physical-quantities
     DEPEND 
         rbdyn/rbdyn 
-        rbdyn/rbdyn-parsers
     RUNTIME_RESOURCES 
         robot_models
     ${OPENMP_COMPONENT_OPTIONS}

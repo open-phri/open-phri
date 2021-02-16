@@ -10,8 +10,8 @@
 #include <RBDyn/MultiBody.h>
 #include <RBDyn/MultiBodyGraph.h>
 #include <RBDyn/MultiBodyConfig.h>
-#include <rbdyn-parsers/yaml.h>
-#include <rbdyn-parsers/urdf.h>
+#include <RBDyn/parsers/yaml.h>
+#include <RBDyn/parsers/urdf.h>
 
 #include <yaml-cpp/yaml.h>
 #include <pid/rpath.h>
@@ -27,20 +27,8 @@ struct RobotModel::pImpl {
         auto file = PID_PATH(model_path);
         auto extension_pos = file.rfind('.');
         auto extension = file.substr(extension_pos + 1);
-        rbd::ParserResult parser_result;
-        if (extension == "yaml" or extension == "yml") {
-            parser_result =
-                rbd::RBDynFromYAML(file, rbd::ParserInput::File, true)
-                    .result(); // fixed base robot
-        } else if (extension == "urdf") {
-            parser_result =
-                rbd::RBDynFromURDF(file, rbd::ParserInput::File, true)
-                    .result(); // fixed base robot
-        } else {
-            throw std::runtime_error(
-                OPEN_PHRI_ERROR("Unkown robot model extension '" + extension +
-                                "'. Please provide a yaml, yml or urdf file."));
-        }
+        auto parser_result = rbd::parsers::from_file(file, true);
+        
         mb = parser_result.mb;
         mbc = parser_result.mbc;
         mbg = parser_result.mbg;

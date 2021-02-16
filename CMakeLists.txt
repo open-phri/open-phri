@@ -28,7 +28,7 @@ PID_Package(
 PID_Dependency(api-driver-vrep 		VERSION 2.0)
 PID_Dependency(eigen-extensions 	VERSION 0.6)
 PID_Dependency(pid-rpath 			VERSION 2.0)
-PID_Dependency(rbdyn 				VERSION 1.3)
+PID_Dependency(rbdyn 				VERSION 1.4.1)
 PID_Dependency(yaml-cpp 			VERSION 0.6.2)
 PID_Dependency(physical-quantities	VERSION 0.1.0)
 

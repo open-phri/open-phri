@@ -1,29 +1,20 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-#################################################################
-#  --     managing the arguments and call site              --  #
-#################################################################
+##################################################################################
+#  --  get a workspace and defer this call to its standalone install script  --  #
+##################################################################################
 call_site_path=`pwd` #memorizing the call site
 
-# finding the folder that contains the script
-prg=$0
-if [ ! -e "$prg" ]; then
-  case $prg in
-    (*/*) exit 1;;
-    (*) prg=$(command -v -- "$prg") || exit;;
-  esac
-fi
-script_dir_path=$(
-  cd -P -- "$(dirname -- "$prg")" && pwd -P
-) || exit
-
 #going to the root folder of the package (simply finding the build folder)
+script_dir_path_rel=`dirname "$0"`
+script_dir_path=`(cd $script_dir_path_rel && pwd)`
 cd $script_dir_path
 while [ ! -d "./build" ] || [ ! -e "./CMakeLists.txt" ]
 do
   cd ..
 done
 package_root_path=`pwd`
+workspace_root_path=$package_root_path/binaries/pid-workspace
 package_name=`basename $package_root_path`
 
 #manage user arguments
@@ -50,25 +41,16 @@ done
 echo "Preparing the build of $package_name ..."
 
 #creating the folder for binaries if it does not exist
-if [ ! -d "./binaries" ]; then
-  mkdir binaries
+if [ ! -d "$package_root_path/binaries" ]; then
+  mkdir $package_root_path/binaries
 fi
 
 #initializing the pid-workspace
-if [ ! -d "./binaries/pid-workspace" ]; then
+if [ ! -d "$package_root_path/binaries/pid-workspace" ]; then
   # clone the workspace into the binaries folder
-  cd binaries && git clone https://gite.lirmm.fr/pid/pid-workspace.git
-  # ensure to work on master branch
-  cd pid-workspace && git checkout master
+  (cd $package_root_path/binaries && git clone https://gite.lirmm.fr/pid/pid-workspace.git --branch master)
   # previous to an execution of cmake we need to set a link into the workspace that point to the current package
-  cd packages && ln -s $package_root_path $package_name && cd ..
-else
-  # update the workspace into the binaries folder
-  cd binaries/pid-workspace && git pull -f official master && git checkout master
-  # previous to an execution of cmake we need to set a link into the workspace that point to the current package
-  if [ ! -e "./packages/$package_name" ]; then
-     cd packages && ln -s $package_root_path $package_name && cd ..
-  fi
+  (cd $workspace_root_path/packages && ln -s $package_root_path $package_name)
 fi
 
 # launch workspace configuration using the pkg-config plugin to generate adequate
