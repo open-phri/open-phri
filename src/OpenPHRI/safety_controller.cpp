@@ -299,13 +299,13 @@ void SafetyController::compute() {
 
     // Cumulative effect on torques of both joint torque and control point
     // force inputs
-    robot_.control().joints().total_force_ =
-        torque_sum + jacobian.transpose() * force_sum;
+    robot_.control().joints().total_force_.value() =
+        torque_sum.value() + jacobian.transpose() * force_sum.value();
 
     // Cumulative effect on forces of both joint torque and control point
     // force inputs
-    robot_.control().task().total_force_ =
-        force_sum + jacobian_inverse.transpose() * torque_sum;
+    robot_.control().task().total_force_.value() =
+        force_sum.value() + jacobian_inverse.transpose() * torque_sum.value();
 
     // Compute the velocity scaling factor
     double constraint_value = computeConstraintValue();

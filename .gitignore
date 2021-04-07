@@ -5,6 +5,8 @@ cmake_install.cmake
 Makefile
 CMakeCache.txt
 binaries/
+/pid
+/pid.bat
 pid
 pid.bat
 .clang_complete
@@ -14,4 +16,4 @@ compile_commands.json
 .ccls-cache
 .vscode
 /compile_commands.json
-.cache
+.cache/

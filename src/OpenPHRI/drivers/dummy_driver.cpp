@@ -78,7 +78,8 @@ bool DummyDriver::read() {
 }
 
 bool DummyDriver::send() {
-    jointState().position() += jointCommand().velocity() * getTimeStep();
+    jointState().position().value() +=
+        jointCommand().velocity().value() * getTimeStep();
     return true;
 }
 

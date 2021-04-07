@@ -25,6 +25,6 @@ namespace phri {
 template class Derivator<double>;
 template class Derivator<Eigen::Vector2d>;
 template class Derivator<Eigen::Vector3d>;
-template class Derivator<Eigen::Vector6d>;
+template class Derivator<Eigen::Matrix<double, 6, 1>>;
 
 } // namespace phri

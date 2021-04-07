@@ -10,4 +10,5 @@ SortIncludes:    false
 IndentWidth:     4
 AccessModifierOffset: -4
 TabWidth:        4
+AlwaysBreakTemplateDeclarations: true
 ...

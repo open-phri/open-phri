@@ -86,7 +86,8 @@ public:
         return false;
     }
 
-    template <typename T> static bool add(const std::string name) {
+    template <typename T>
+    static bool add(const std::string name) {
         auto it = createMethods().find(name);
         if (it == createMethods().end()) {
             createMethods()[name] =

@@ -40,7 +40,8 @@ namespace phri {
  *  @tparam Input The input type to work on
  *  @tparam Output The output type to produce
  */
-template <typename Input, typename Output = Input> class Derivator {
+template <typename Input, typename Output = Input>
+class Derivator {
 public:
     /***		Constructor & destructor		***/
 
@@ -149,6 +150,6 @@ private:
 extern template class Derivator<double>;
 extern template class Derivator<Eigen::Vector2d>;
 extern template class Derivator<Eigen::Vector3d>;
-extern template class Derivator<Eigen::Vector6d>;
+extern template class Derivator<Eigen::Matrix<double, 6, 1>>;
 
 } // namespace phri

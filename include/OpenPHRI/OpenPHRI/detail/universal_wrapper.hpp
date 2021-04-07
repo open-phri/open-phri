@@ -6,19 +6,24 @@
 namespace phri {
 namespace detail {
 
-template <typename T> struct FinalTypeImpl {
+template <typename T>
+struct FinalTypeImpl {
     using type = std::decay_t<std::remove_pointer_t<std::decay_t<T>>>;
 };
 
-template <typename T> struct FinalTypeImpl<std::shared_ptr<T>> {
+template <typename T>
+struct FinalTypeImpl<std::shared_ptr<T>> {
     using type = std::remove_const_t<typename T::element_type>;
 };
 
-template <class T> using FinalType = typename FinalTypeImpl<T>::type;
+template <class T>
+using FinalType = typename FinalTypeImpl<T>::type;
 
-template <typename ValueT> class UniversalWrapper {
+template <typename ValueT>
+class UniversalWrapper {
 public:
-    template <typename T> explicit UniversalWrapper(T&& value) noexcept {
+    template <typename T>
+    explicit UniversalWrapper(T&& value) noexcept {
         using OtherT = decltype(value);
         using NonConstValueT = std::remove_const_t<ValueT>;
         using ConstValueT = std::add_const_t<NonConstValueT>;
@@ -39,13 +44,14 @@ public:
             value_ = std::addressof(value);
         } else if constexpr (std::is_move_assignable_v<OtherT> and
                              not is_valid_shared_pointer) {
-            value_ = std::move(value);
+            value_.template emplace<std::remove_reference_t<OtherT>>(
+                std::move(value));
         } else {
             value_ = value;
         }
     }
 
-    UniversalWrapper() noexcept : value_{ValueT{}} {
+    UniversalWrapper() noexcept : value_{std::in_place_type<ValueT>, ValueT{}} {
     }
 
     template <typename T = ValueT>
