@@ -3,7 +3,7 @@ Software license for the software named : open-phri
 
 Software description : OpenPHRI: a generic framework to easily and safely control robots in interactions with humans
 
-Copyright (C) 2018  Benjamin Navarro (LIRMM)
+Copyright (C) 2018-2021  Benjamin Navarro (LIRMM)
 
 This software is free software: you can redistribute it and/or modify it under the terms of the LGPL license as published by
  the Free Software Foundation, either version 3 of the License, or (at your option) any later version. This software

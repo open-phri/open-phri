@@ -1,0 +1,72 @@
+variables:
+  PACKAGE_HAS_LIBRARIES: "true"
+  PACKAGE_HAS_TESTS: "true"
+  PACKAGE_HAS_EXAMPLES: "true"
+  PACKAGE_HAS_SITE: "true"
+  PACKAGE_BINARIES_PUBLISHED: "true"
+  PACKAGE_DEV_INFO_PUBLISHED: "false"
+  PACKAGE_MAIN_PLATFORM: "x86_64_linux_stdc++11"
+  PACKAGE_CONTRIBUTION_SPACES: ""
+
+stages:
+ - build
+
+ ############ generic jobs patterns #############
+
+ ### configure (cmake configuration), build (compile/test/install), deploy (make interesting part of the result available wiki+doc, binaries)
+
+.build_integration_: &build_integration
+   stage: build
+   script:
+     - chmod 700 ./share/ci/prepare_package_ci.sh
+     - ./share/ci/prepare_package_ci.sh
+     - ./configure_workspace.sh "$CI_RUNNER_TAGS"
+     - ./build_package_integration.sh
+     - ./publish_package_integration.sh
+   except:
+     - master
+     - /^v.*$/
+   artifacts:
+     name: "artefacts_integration_${CI_RUNNER_ID}"
+     paths:
+       - developper_info.tgz
+     when: on_success
+
+.build_release_: &build_release
+   stage: build
+   script:
+     - chmod 700 ./share/ci/prepare_package_ci.sh
+     - ./share/ci/prepare_package_ci.sh
+     - ./configure_workspace.sh "$CI_RUNNER_TAGS"
+     - ./build_package_release.sh
+     - ./publish_package_release.sh "$CI_RUNNER_TAGS"
+   only:
+        - /^v.*$/
+   artifacts:
+     name: "artefacts_${CI_COMMIT_TAG}_${CI_RUNNER_ID}"
+     paths:
+       - dependencies.txt
+
+############ patterns for platforms selection #############
+# here the project generates patterns for runner selection according for all platforms defined in the workspace
+#platform x86_64_linux_stdc++11
+
+.selection_platform_x86_64_linux_stdcplusplus11_: &selection_platform_x86_64_linux_stdcplusplus11
+    tags:
+        - pid
+        - x86_64_linux_stdc++11
+
+
+
+############ jobs definition, by platform #############
+
+#pipeline generated for platform: x86_64_linux_stdc++11
+
+build_integration_x86_64_linux_stdcplusplus11:
+  <<: *build_integration
+  <<: *selection_platform_x86_64_linux_stdcplusplus11
+
+build_release_x86_64_linux_stdcplusplus11:
+  <<: *build_release
+  <<: *selection_platform_x86_64_linux_stdcplusplus11
+

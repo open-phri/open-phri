@@ -10,17 +10,18 @@ option(USE_OPENMP 			"Make use of OpenMP to parallize certain parts of the libra
 PROJECT(open-phri)
 
 PID_Package(
-	AUTHOR 		    Benjamin Navarro
-	INSTITUTION	    LIRMM
-	MAIL		    navarro@lirmm.fr
-	ADDRESS 	    git@github.com:open-phri/open-phri.git
-	PUBLIC_ADDRESS  https://github.com/open-phri/open-phri.git
-	YEAR 		    2018
-	LICENSE 	    GNULGPL
-	DESCRIPTION     "OpenPHRI: a generic framework to easily and safely control robots in interactions with humans"
-	README			instructions.md
-	CODE_STYLE		pid11
-	VERSION			2.0.0
+	AUTHOR 		       Benjamin Navarro
+	INSTITUTION	       LIRMM
+	MAIL		       navarro@lirmm.fr
+	ADDRESS 	       git@gite.lirmm.fr:rpc/control/open-phri.git
+	PUBLIC_ADDRESS     https://gite.lirmm.fr/rpc/control/open-phri.git
+	CONTRIBUTION_SPACE pid
+	YEAR 		       2018-2021
+	LICENSE 	       GNULGPL
+	DESCRIPTION        "OpenPHRI: a generic framework to easily and safely control robots in interactions with humans"
+	README			   instructions.md
+	CODE_STYLE		   pid11
+	VERSION			   2.0.0
 )
 
 # check_PID_Platform(CONFIGURATION posix) TODO OpenMP
@@ -49,5 +50,14 @@ endif()
 if(RUN_PYTHON_TESTS)
     find_package(PythonInterp REQUIRED)
 endif()
+
+PID_Publishing(
+    PROJECT https://gite.lirmm.fr/rpc/control/open-phri
+    FRAMEWORK rpc
+    CATEGORIES algorithm/control 
+    DESCRIPTION OpenPHRI: a generic framework to easily and safely control robots in interactions with humans
+    PUBLISH_BINARIES
+    ALLOWED_PLATFORMS x86_64_linux_stdc++11
+)
 
 build_PID_Package()

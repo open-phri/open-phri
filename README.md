@@ -114,7 +114,7 @@ This method allows to build the package without having to create a PID workspace
 
 All you need to do is to first clone the package locally and then run the installation script:
  ```
-git clone https://github.com/open-phri/open-phri.git
+git clone https://gite.lirmm.fr/rpc/control/open-phri.git
 cd open-phri
 ./share/install/standalone_install.sh
 ```
@@ -159,6 +159,9 @@ Where `<component>` is one of:
  * `open-phri-vrep-driver`
 
 
+# Online Documentaion
+**open-phri** documentation is available [online](https://rpc.lirmm.net/rpc-framework/packages/open-phri).
+You can find:
 
 
 Offline API Documentation
